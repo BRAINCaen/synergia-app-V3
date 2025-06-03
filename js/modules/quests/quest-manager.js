@@ -1,1005 +1,1188 @@
 // js/modules/quests/quest-manager.js
-// Gestionnaire de quêtes pour SYNERGIA v3.0
+// Système de missions gamifié complet pour SYNERGIA v3.0
 
 class QuestManager {
     constructor() {
-        this.quests = [];
-        this.userQuests = [];
-        this.currentFilter = 'daily';
-        this.isLoading = false;
-        this.listeners = [];
+        this.quests = new Map();
+        this.userQuests = new Map();
+        this.dailyQuests = [];
+        this.weeklyQuests = [];
+        this.specialQuests = [];
+        this.completedQuests = new Set();
         
-        this.init();
+        // Configuration XP et niveaux
+        this.xpConfig = {
+            baseXP: 100,        // XP pour niveau 1
+            multiplier: 1.2,    // Multiplicateur par niveau
+            maxLevel: 50,       // Niveau maximum
+            bonusStreak: 1.5    // Bonus pour les streaks
+        };
+        
+        // Types de missions avec configuration
+        this.questTypes = {
+            daily: {
+                name: 'Quotidienne',
+                icon: 'calendar-day',
+                color: '#3b82f6',
+                baseXP: 50,
+                duration: 24 * 60 * 60 * 1000, // 24h
+                recurring: true
+            },
+            weekly: {
+                name: 'Hebdomadaire', 
+                icon: 'calendar-week',
+                color: '#8b5cf6',
+                baseXP: 200,
+                duration: 7 * 24 * 60 * 60 * 1000, // 7 jours
+                recurring: true
+            },
+            special: {
+                name: 'Spéciale',
+                icon: 'star',
+                color: '#f59e0b',
+                baseXP: 300,
+                duration: null,
+                recurring: false
+            },
+            training: {
+                name: 'Formation',
+                icon: 'graduation-cap',
+                color: '#10b981',
+                baseXP: 150,
+                duration: null,
+                recurring: false
+            },
+            team: {
+                name: 'Équipe',
+                icon: 'users',
+                color: '#ef4444',
+                baseXP: 100,
+                duration: null,
+                recurring: false
+            }
+        };
+        
+        // Badges et achievements
+        this.badges = new Map();
+        this.achievements = new Map();
+        
+        this.isInitialized = false;
+        this.listeners = new Map();
     }
-    
-    init() {
-        this.setupEventListeners();
-        
-        // Attendre Firebase
-        document.addEventListener('firebase:ready', () => {
-            this.loadQuests();
-            this.loadUserQuests();
-        });
-        
-        console.log('✅ Quest Manager initialisé');
-    }
-    
-    setupEventListeners() {
-        // Formulaire de création de quête
-        document.addEventListener('submit', (e) => {
-            if (e.target.id === 'create-quest-form') {
-                e.preventDefault();
-                this.handleCreateQuest(e.target);
-            }
-        });
-        
-        // Actions sur les quêtes
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-action="complete-quest"]')) {
-                const questId = e.target.dataset.questId;
-                this.completeQuest(questId);
-            }
-            
-            if (e.target.matches('[data-action="start-quest"]')) {
-                const questId = e.target.dataset.questId;
-                this.startQuest(questId);
-            }
-            
-            if (e.target.matches('[data-action="edit-quest"]')) {
-                const questId = e.target.dataset.questId;
-                this.editQuest(questId);
-            }
-            
-            if (e.target.matches('[data-action="delete-quest"]')) {
-                const questId = e.target.dataset.questId;
-                this.deleteQuest(questId);
-            }
-        });
-        
-        // Onglets quêtes
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('.quest-tab')) {
-                const tab = e.target.dataset.tab;
-                this.switchTab(tab);
-            }
-        });
-        
-        // Data Manager subscriptions
-        if (window.dataManager) {
-            this.listeners.push(
-                window.dataManager.subscribe('quests', (quests) => {
-                    this.quests = quests || [];
-                    this.renderQuests();
-                })
-            );
-            
-            this.listeners.push(
-                window.dataManager.subscribe('userQuests', (userQuests) => {
-                    this.userQuests = userQuests || [];
-                    this.renderQuests();
-                })
-            );
-        }
-    }
-    
-    async loadQuests() {
-        if (this.isLoading) return;
-        
-        this.isLoading = true;
-        this.showQuestsLoading();
-        
+
+    async init() {
         try {
-            if (window.dataManager) {
-                this.quests = await window.dataManager.getQuests();
-            } else {
-                // Fallback localStorage
-                this.loadFromLocalStorage();
-            }
+            console.log('🎯 Initialisation Quest Manager...');
             
-            this.renderQuests();
-            this.generateDailyQuests();
+            // Charger les quêtes prédéfinies
+            await this.loadDefaultQuests();
             
+            // Charger les quêtes utilisateur
+            await this.loadUserQuests();
+            
+            // Charger les badges et achievements
+            await this.loadBadges();
+            
+            // Générer les quêtes quotidiennes/hebdomadaires
+            await this.generateRecurringQuests();
+            
+            // Configurer les événements
+            this.setupEventListeners();
+            
+            // Démarrer les vérifications automatiques
+            this.startAutoChecks();
+            
+            this.isInitialized = true;
+            console.log('✅ Quest Manager initialisé');
+            
+            return true;
         } catch (error) {
-            console.error('❌ Erreur chargement quêtes:', error);
-            window.uiManager?.showToast('Erreur lors du chargement des quêtes', 'error');
-        } finally {
-            this.isLoading = false;
+            console.error('❌ Erreur initialisation Quest Manager:', error);
+            throw error;
         }
     }
-    
-    async loadUserQuests() {
-        try {
-            if (window.dataManager) {
-                this.userQuests = await window.dataManager.getUserQuests?.() || [];
+
+    async loadDefaultQuests() {
+        const defaultQuests = [
+            // Quêtes quotidiennes
+            {
+                id: 'daily_checkin',
+                type: 'daily',
+                title: 'Pointer son arrivée',
+                description: 'Effectuer le pointage d\'arrivée avant 9h',
+                category: 'attendance',
+                xp: 25,
+                requirements: {
+                    type: 'badging',
+                    action: 'checkin',
+                    timeLimit: '09:00'
+                },
+                recurring: {
+                    type: 'daily',
+                    daysOfWeek: [1, 2, 3, 4, 5] // Lun-Ven
+                }
+            },
+            {
+                id: 'daily_team_message',
+                type: 'daily',
+                title: 'Message d\'équipe',
+                description: 'Envoyer au moins 3 messages dans le chat d\'équipe',
+                category: 'communication',
+                xp: 15,
+                requirements: {
+                    type: 'chat',
+                    action: 'send_message',
+                    count: 3
+                },
+                recurring: {
+                    type: 'daily',
+                    daysOfWeek: [1, 2, 3, 4, 5, 6, 7]
+                }
+            },
+            {
+                id: 'daily_perfect_attendance',
+                type: 'daily',
+                title: 'Présence parfaite',
+                description: 'Être présent toute la journée sans retard',
+                category: 'attendance',
+                xp: 50,
+                requirements: {
+                    type: 'attendance',
+                    action: 'perfect_day',
+                    conditions: ['no_late', 'full_day', 'proper_breaks']
+                },
+                recurring: {
+                    type: 'daily',
+                    daysOfWeek: [1, 2, 3, 4, 5]
+                }
+            },
+
+            // Quêtes hebdomadaires
+            {
+                id: 'weekly_early_bird',
+                type: 'weekly',
+                title: 'Lève-tôt de la semaine',
+                description: 'Arriver avant 8h30 pendant 4 jours',
+                category: 'attendance',
+                xp: 100,
+                requirements: {
+                    type: 'badging',
+                    action: 'early_arrival',
+                    count: 4,
+                    timeLimit: '08:30'
+                },
+                recurring: {
+                    type: 'weekly',
+                    startDay: 1 // Lundi
+                }
+            },
+            {
+                id: 'weekly_team_player',
+                type: 'weekly',
+                title: 'Joueur d\'équipe',
+                description: 'Compléter 3 missions d\'équipe',
+                category: 'teamwork',
+                xp: 150,
+                requirements: {
+                    type: 'quest',
+                    action: 'complete_team_quests',
+                    count: 3
+                },
+                recurring: {
+                    type: 'weekly',
+                    startDay: 1
+                }
+            },
+
+            // Quêtes spéciales (événementielles)
+            {
+                id: 'special_new_member',
+                type: 'special',
+                title: 'Bienvenue dans l\'équipe !',
+                description: 'Compléter votre première semaine chez SYNERGIA',
+                category: 'onboarding',
+                xp: 200,
+                requirements: {
+                    type: 'milestone',
+                    action: 'first_week_complete'
+                },
+                conditions: {
+                    newMember: true,
+                    maxDaysWorked: 7
+                }
+            },
+            {
+                id: 'special_streak_master',
+                type: 'special',
+                title: 'Maître de la régularité',
+                description: 'Maintenir un streak de 30 jours',
+                category: 'achievement',
+                xp: 500,
+                requirements: {
+                    type: 'streak',
+                    action: 'maintain_streak',
+                    count: 30
+                }
+            },
+
+            // Quêtes de formation
+            {
+                id: 'training_safety_course',
+                type: 'training',
+                title: 'Formation sécurité',
+                description: 'Compléter le module de formation sécurité',
+                category: 'training',
+                xp: 100,
+                requirements: {
+                    type: 'training',
+                    action: 'complete_module',
+                    moduleId: 'safety_basics'
+                }
+            },
+            {
+                id: 'training_customer_service',
+                type: 'training',
+                title: 'Excellence client',
+                description: 'Suivre la formation service client',
+                category: 'training',
+                xp: 120,
+                requirements: {
+                    type: 'training',
+                    action: 'complete_module',
+                    moduleId: 'customer_service'
+                }
+            },
+
+            // Quêtes spécifiques par rôle
+            {
+                id: 'role_manager_review',
+                type: 'weekly',
+                title: 'Évaluation équipe',
+                description: 'Effectuer l\'évaluation hebdomadaire de l\'équipe',
+                category: 'management',
+                xp: 80,
+                requirements: {
+                    type: 'management',
+                    action: 'team_review'
+                },
+                roleRestriction: ['manager', 'admin'],
+                recurring: {
+                    type: 'weekly',
+                    startDay: 1
+                }
+            },
+            {
+                id: 'role_security_patrol',
+                type: 'daily',
+                title: 'Ronde de sécurité',
+                description: 'Effectuer la ronde de sécurité complète',
+                category: 'security',
+                xp: 40,
+                requirements: {
+                    type: 'security',
+                    action: 'complete_patrol'
+                },
+                roleRestriction: ['securite'],
+                recurring: {
+                    type: 'daily',
+                    daysOfWeek: [1, 2, 3, 4, 5, 6, 7]
+                }
             }
+        ];
+
+        // Charger les quêtes dans le système
+        for (const questData of defaultQuests) {
+            const quest = this.createQuest(questData);
+            this.quests.set(quest.id, quest);
+            
+            // Trier par type
+            switch (quest.type) {
+                case 'daily':
+                    this.dailyQuests.push(quest);
+                    break;
+                case 'weekly':
+                    this.weeklyQuests.push(quest);
+                    break;
+                case 'special':
+                    this.specialQuests.push(quest);
+                    break;
+            }
+        }
+
+        console.log(`📜 ${defaultQuests.length} quêtes par défaut chargées`);
+    }
+
+    createQuest(questData) {
+        const quest = {
+            id: questData.id,
+            type: questData.type,
+            title: questData.title,
+            description: questData.description,
+            category: questData.category || 'general',
+            xp: questData.xp || this.questTypes[questData.type]?.baseXP || 50,
+            requirements: questData.requirements || {},
+            conditions: questData.conditions || {},
+            roleRestriction: questData.roleRestriction || null,
+            recurring: questData.recurring || null,
+            createdAt: new Date(),
+            isActive: true,
+            priority: questData.priority || 'normal',
+            difficulty: this.calculateDifficulty(questData),
+            estimatedTime: questData.estimatedTime || this.estimateTime(questData),
+            rewards: {
+                xp: questData.xp || this.questTypes[questData.type]?.baseXP || 50,
+                badges: questData.badges || [],
+                achievements: questData.achievements || []
+            }
+        };
+
+        return quest;
+    }
+
+    calculateDifficulty(questData) {
+        let difficulty = 1;
+        
+        // Basé sur l'XP
+        if (questData.xp > 200) difficulty += 2;
+        else if (questData.xp > 100) difficulty += 1;
+        
+        // Basé sur les requirements
+        if (questData.requirements.count > 5) difficulty += 1;
+        if (questData.requirements.timeLimit) difficulty += 1;
+        if (questData.requirements.conditions?.length > 2) difficulty += 1;
+        
+        return Math.min(difficulty, 5); // Max 5
+    }
+
+    estimateTime(questData) {
+        const baseTime = {
+            daily: 15,      // 15 minutes
+            weekly: 60,     // 1 heure
+            special: 30,    // 30 minutes
+            training: 45    // 45 minutes
+        };
+        
+        return questData.estimatedTime || baseTime[questData.type] || 20;
+    }
+
+    async loadUserQuests() {
+        const userId = window.firebaseManager?.currentUser?.uid;
+        if (!userId) {
+            console.log('👤 Pas d\'utilisateur connecté - mode démo');
+            return;
+        }
+
+        try {
+            const userQuests = await window.dataManager?.getUserQuests(userId) || [];
+            
+            for (const userQuest of userQuests) {
+                this.userQuests.set(userQuest.questId, userQuest);
+                
+                if (userQuest.status === 'completed') {
+                    this.completedQuests.add(userQuest.questId);
+                }
+            }
+            
+            console.log(`👤 ${userQuests.length} quêtes utilisateur chargées`);
         } catch (error) {
             console.error('❌ Erreur chargement quêtes utilisateur:', error);
         }
     }
-    
-    async createQuest(questData) {
-        try {
-            // Validation
-            if (!this.validateQuestData(questData)) {
-                return false;
-            }
-            
-            // Ajouter données par défaut
-            const newQuest = {
-                ...questData,
-                id: this.generateId(),
-                completed: false,
-                recurring: questData.type === 'daily' || questData.type === 'weekly',
-                createdAt: new Date().toISOString(),
-                createdBy: window.firebaseManager?.getUserId() || 'system'
-            };
-            
-            // Calculer deadline
-            if (questData.type === 'daily') {
-                const tomorrow = new Date();
-                tomorrow.setHours(23, 59, 59, 999);
-                newQuest.deadline = tomorrow.toISOString();
-            } else if (questData.type === 'weekly') {
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                nextWeek.setHours(23, 59, 59, 999);
-                newQuest.deadline = nextWeek.toISOString();
-            }
-            
-            // Sauvegarder
-            if (window.dataManager) {
-                await window.dataManager.addQuest(newQuest);
-            } else {
-                this.quests.unshift(newQuest);
-                this.saveToLocalStorage();
-                this.renderQuests();
-            }
-            
-            window.uiManager?.showToast('Quête créée avec succès!', 'success');
-            window.uiManager?.closeModal();
-            
-            // Analytics
-            if (window.firebaseManager) {
-                window.firebaseManager.logEvent('quest_created', {
-                    quest_type: newQuest.type,
-                    quest_xp: newQuest.xp,
-                    total_quests: this.quests.length
-                });
-            }
-            
-            return newQuest;
-            
-        } catch (error) {
-            console.error('❌ Erreur création quête:', error);
-            window.uiManager?.showToast('Erreur lors de la création de la quête', 'error');
-            return false;
-        }
-    }
-    
-    async startQuest(questId) {
-        const quest = this.quests.find(q => q.id === questId);
-        if (!quest) return;
-        
-        const user = window.firebaseManager?.getCurrentUser();
-        if (!user) return;
-        
-        try {
-            // Vérifier si déjà démarrée
-            const existingUserQuest = this.userQuests.find(uq => 
-                uq.questId === questId && uq.userId === user.uid && uq.status === 'active'
-            );
-            
-            if (existingUserQuest) {
-                window.uiManager?.showToast('Quête déjà démarrée', 'warning');
-                return;
-            }
-            
-            // Créer userQuest
-            const userQuest = {
-                userId: user.uid,
-                questId: questId,
-                status: 'active',
-                progress: 0,
-                startedAt: new Date().toISOString()
-            };
-            
-            if (window.firebaseManager) {
-                await window.firebaseManager.addDocument('userQuests', userQuest);
-            }
-            
-            this.userQuests.push(userQuest);
-            this.renderQuests();
-            
-            window.uiManager?.showToast('Quête démarrée!', 'success');
-            
-            // Analytics
-            if (window.firebaseManager) {
-                window.firebaseManager.logEvent('quest_started', {
-                    quest_id: questId,
-                    quest_type: quest.type
-                });
-            }
-            
-        } catch (error) {
-            console.error('❌ Erreur démarrage quête:', error);
-            window.uiManager?.showToast('Erreur lors du démarrage', 'error');
-        }
-    }
-    
-    async completeQuest(questId) {
-        const quest = this.quests.find(q => q.id === questId);
-        if (!quest) return;
-        
-        const user = window.firebaseManager?.getCurrentUser();
-        if (!user) return;
-        
-        try {
-            // Trouver la userQuest active
-            const userQuest = this.userQuests.find(uq => 
-                uq.questId === questId && 
-                uq.userId === user.uid && 
-                uq.status === 'active'
-            );
-            
-            if (!userQuest) {
-                // Démarrer automatiquement si pas encore démarrée
-                await this.startQuest(questId);
-                const newUserQuest = this.userQuests.find(uq => 
-                    uq.questId === questId && 
-                    uq.userId === user.uid && 
-                    uq.status === 'active'
-                );
-                if (newUserQuest) {
-                    await this.completeUserQuest(newUserQuest, quest);
+
+    async loadBadges() {
+        const defaultBadges = [
+            {
+                id: 'first_quest',
+                name: 'Premier pas',
+                description: 'Première mission complétée',
+                icon: 'trophy',
+                color: '#f59e0b',
+                rarity: 'common',
+                requirements: {
+                    type: 'quest_count',
+                    count: 1
                 }
-            } else {
-                await this.completeUserQuest(userQuest, quest);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erreur completion quête:', error);
-            window.uiManager?.showToast('Erreur lors de la completion', 'error');
-        }
-    }
-    
-    async completeUserQuest(userQuest, quest) {
-        try {
-            // Mettre à jour userQuest
-            const completionData = {
-                status: 'completed',
-                progress: 100,
-                completedAt: new Date().toISOString(),
-                xpGained: quest.xp || 10
-            };
-            
-            if (window.firebaseManager) {
-                await window.firebaseManager.updateDocument('userQuests', userQuest.id, completionData);
-            }
-            
-            // Mettre à jour le cache local
-            const index = this.userQuests.findIndex(uq => uq.id === userQuest.id);
-            if (index !== -1) {
-                this.userQuests[index] = { ...this.userQuests[index], ...completionData };
-            }
-            
-            // Ajouter XP à l'utilisateur
-            await this.addXPToUser(quest.xp || 10);
-            
-            this.renderQuests();
-            
-            // Notifications
-            window.uiManager?.showToast(`Quête terminée! +${quest.xp || 10} XP`, 'success');
-            this.showQuestCompletionEffect(quest);
-            
-            // Analytics
-            if (window.firebaseManager) {
-                window.firebaseManager.logEvent('quest_completed', {
-                    quest_id: quest.id,
-                    quest_type: quest.type,
-                    xp_gained: quest.xp || 10
-                });
-            }
-            
-            // Vérifier les achievements
-            this.checkAchievements();
-            
-        } catch (error) {
-            console.error('❌ Erreur completion userQuest:', error);
-            throw error;
-        }
-    }
-    
-    async addXPToUser(xp) {
-        try {
-            const user = window.firebaseManager?.getCurrentUser();
-            if (!user) return;
-            
-            const userData = await window.firebaseManager.getCurrentUserData();
-            if (!userData) return;
-            
-            const currentXP = userData.xp || 0;
-            const currentLevel = userData.level || 1;
-            const newXP = currentXP + xp;
-            const newLevel = this.calculateLevel(newXP);
-            
-            const updateData = {
-                xp: newXP,
-                level: newLevel
-            };
-            
-            // Mettre à jour les stats
-            if (!userData.stats) userData.stats = {};
-            updateData.stats = {
-                ...userData.stats,
-                questsCompleted: (userData.stats.questsCompleted || 0) + 1,
-                totalXP: newXP
-            };
-            
-            await window.dataManager.updateUser(user.uid, updateData);
-            
-            // Notification level up
-            if (newLevel > currentLevel) {
-                window.uiManager?.showToast(`Niveau ${newLevel} atteint!`, 'success');
-                this.showLevelUpEffect(newLevel);
-            }
-            
-            // Mettre à jour l'UI
-            if (window.uiManager) {
-                window.uiManager.updateUserStats({ ...userData, ...updateData });
-            }
-            
-        } catch (error) {
-            console.error('❌ Erreur ajout XP:', error);
-        }
-    }
-    
-    calculateLevel(xp) {
-        return Math.floor(xp / 100) + 1; // 100 XP par niveau
-    }
-    
-    async deleteQuest(questId) {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cette quête ?')) {
-            return false;
-        }
-        
-        try {
-            if (window.dataManager && window.dataManager.deleteQuest) {
-                await window.dataManager.deleteQuest(questId);
-            } else if (window.firebaseManager) {
-                await window.firebaseManager.deleteDocument('quests', questId);
-                this.quests = this.quests.filter(q => q.id !== questId);
-                this.renderQuests();
-            }
-            
-            window.uiManager?.showToast('Quête supprimée', 'success');
-            
-            return true;
-            
-        } catch (error) {
-            console.error('❌ Erreur suppression quête:', error);
-            window.uiManager?.showToast('Erreur lors de la suppression', 'error');
-            return false;
-        }
-    }
-    
-    handleCreateQuest(form) {
-        const formData = new FormData(form);
-        const questData = {
-            title: formData.get('title'),
-            description: formData.get('description'),
-            type: formData.get('type'),
-            xp: parseInt(formData.get('xp')) || 10,
-            priority: formData.get('priority') || 'normal'
-        };
-        
-        this.createQuest(questData);
-    }
-    
-    validateQuestData(data) {
-        if (!data.title || data.title.trim().length < 3) {
-            window.uiManager?.showToast('Le titre doit faire au moins 3 caractères', 'error');
-            return false;
-        }
-        
-        if (!data.type || !['daily', 'weekly', 'special'].includes(data.type)) {
-            window.uiManager?.showToast('Type de quête invalide', 'error');
-            return false;
-        }
-        
-        if (data.xp && (data.xp < 1 || data.xp > 1000)) {
-            window.uiManager?.showToast('L\'XP doit être entre 1 et 1000', 'error');
-            return false;
-        }
-        
-        return true;
-    }
-    
-    renderQuests() {
-        const container = document.getElementById('quests-container');
-        if (!container) return;
-        
-        const filteredQuests = this.getFilteredQuests();
-        
-        if (filteredQuests.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-scroll"></i>
-                    <h3>Aucune quête ${this.getFilterLabel()}</h3>
-                    <p>Les quêtes apparaîtront ici une fois créées</p>
-                </div>
-            `;
-            return;
-        }
-        
-        const questsHTML = filteredQuests.map(quest => this.createQuestCard(quest)).join('');
-        container.innerHTML = questsHTML;
-    }
-    
-    getFilteredQuests() {
-        return this.quests.filter(quest => {
-            if (this.currentFilter === 'all') return true;
-            return quest.type === this.currentFilter;
-        });
-    }
-    
-    getFilterLabel() {
-        const labels = {
-            'daily': 'quotidienne',
-            'weekly': 'hebdomadaire',
-            'special': 'spéciale',
-            'all': ''
-        };
-        return labels[this.currentFilter] || '';
-    }
-    
-    createQuestCard(quest) {
-        const user = window.firebaseManager?.getCurrentUser();
-        const userQuest = user ? this.userQuests.find(uq => 
-            uq.questId === quest.id && 
-            uq.userId === user.uid && 
-            uq.status === 'active'
-        ) : null;
-        
-        const isCompleted = user ? this.userQuests.some(uq => 
-            uq.questId === quest.id && 
-            uq.userId === user.uid && 
-            uq.status === 'completed' &&
-            this.isCompletedToday(uq.completedAt)
-        ) : false;
-        
-        const isStarted = !!userQuest;
-        const canManage = this.canManageQuests();
-        
-        const priorityColors = {
-            low: '#10b981',
-            normal: '#6b7280',
-            high: '#f59e0b',
-            urgent: '#ef4444'
-        };
-        
-        const typeIcons = {
-            daily: 'calendar-day',
-            weekly: 'calendar-week',
-            special: 'star'
-        };
-        
-        return `
-            <div class="quest-card ${isCompleted ? 'completed' : ''} ${isStarted ? 'started' : ''}" data-quest-id="${quest.id}">
-                <div class="quest-header">
-                    <div class="quest-type">
-                        <i class="fas fa-${typeIcons[quest.type]}"></i>
-                        <span>${this.formatQuestType(quest.type)}</span>
-                    </div>
-                    <div class="quest-priority" style="color: ${priorityColors[quest.priority]}">
-                        <i class="fas fa-circle"></i>
-                        ${this.formatPriority(quest.priority)}
-                    </div>
-                </div>
-                
-                <div class="quest-content">
-                    <h3 class="quest-title">${quest.title}</h3>
-                    ${quest.description ? `<p class="quest-description">${quest.description}</p>` : ''}
-                    
-                    <div class="quest-meta">
-                        <div class="quest-xp">
-                            <i class="fas fa-star"></i>
-                            <span>+${quest.xp || 10} XP</span>
-                        </div>
-                        ${quest.deadline ? `
-                            <div class="quest-deadline">
-                                <i class="fas fa-clock"></i>
-                                <span>${this.formatDeadline(quest.deadline)}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    
-                    ${userQuest && userQuest.progress > 0 ? `
-                        <div class="quest-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${userQuest.progress}%"></div>
-                            </div>
-                            <span class="progress-text">${userQuest.progress}%</span>
-                        </div>
-                    ` : ''}
-                </div>
-                
-                <div class="quest-actions">
-                    ${isCompleted ? `
-                        <button class="btn btn-success" disabled>
-                            <i class="fas fa-check"></i> Terminé
-                        </button>
-                    ` : isStarted ? `
-                        <button class="btn btn-primary" data-action="complete-quest" data-quest-id="${quest.id}">
-                            <i class="fas fa-flag-checkered"></i> Terminer
-                        </button>
-                    ` : `
-                        <button class="btn" data-action="start-quest" data-quest-id="${quest.id}">
-                            <i class="fas fa-play"></i> Commencer
-                        </button>
-                    `}
-                    
-                    ${canManage ? `
-                        <button class="btn btn-icon" data-action="edit-quest" data-quest-id="${quest.id}" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-icon btn-danger" data-action="delete-quest" data-quest-id="${quest.id}" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }
-    
-    formatQuestType(type) {
-        const types = {
-            daily: 'Quotidienne',
-            weekly: 'Hebdomadaire',
-            special: 'Spéciale'
-        };
-        return types[type] || type;
-    }
-    
-    formatPriority(priority) {
-        const priorities = {
-            low: 'Faible',
-            normal: 'Normale',
-            high: 'Haute',
-            urgent: 'Urgente'
-        };
-        return priorities[priority] || priority;
-    }
-    
-    formatDeadline(deadline) {
-        const date = new Date(deadline);
-        const now = new Date();
-        const diffHours = Math.ceil((date - now) / (1000 * 60 * 60));
-        
-        if (diffHours < 0) return 'Expiré';
-        if (diffHours < 24) return `${diffHours}h restantes`;
-        
-        const diffDays = Math.ceil(diffHours / 24);
-        return `${diffDays} jour${diffDays > 1 ? 's' : ''} restant${diffDays > 1 ? 's' : ''}`;
-    }
-    
-    isCompletedToday(completedAt) {
-        if (!completedAt) return false;
-        
-        const completed = new Date(completedAt);
-        const today = new Date();
-        
-        return completed.toDateString() === today.toDateString();
-    }
-    
-    canManageQuests() {
-        // TODO: Vérifier les permissions utilisateur
-        return true;
-    }
-    
-    switchTab(tab) {
-        // Mettre à jour les onglets
-        document.querySelectorAll('.quest-tab').forEach(t => {
-            t.classList.toggle('active', t.dataset.tab === tab);
-        });
-        
-        this.currentFilter = tab;
-        this.renderQuests();
-    }
-    
-    showQuestsLoading() {
-        const container = document.getElementById('quests-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>Chargement des quêtes...</p>
-                </div>
-            `;
-        }
-    }
-    
-    showQuestCompletionEffect(quest) {
-        // Effet visuel de completion
-        const effect = document.createElement('div');
-        effect.className = 'quest-completion-effect';
-        effect.innerHTML = `
-            <div class="effect-content">
-                <i class="fas fa-trophy"></i>
-                <h3>Quête terminée!</h3>
-                <p>+${quest.xp || 10} XP</p>
-            </div>
-        `;
-        
-        document.body.appendChild(effect);
-        
-        setTimeout(() => {
-            effect.classList.add('show');
-        }, 100);
-        
-        setTimeout(() => {
-            effect.classList.remove('show');
-            setTimeout(() => effect.remove(), 300);
-        }, 2000);
-    }
-    
-    showLevelUpEffect(level) {
-        // Effet visuel de level up
-        const effect = document.createElement('div');
-        effect.className = 'level-up-effect';
-        effect.innerHTML = `
-            <div class="effect-content">
-                <i class="fas fa-arrow-up"></i>
-                <h3>Niveau ${level}!</h3>
-                <p>Félicitations!</p>
-            </div>
-        `;
-        
-        document.body.appendChild(effect);
-        
-        setTimeout(() => {
-            effect.classList.add('show');
-        }, 100);
-        
-        setTimeout(() => {
-            effect.classList.remove('show');
-            setTimeout(() => effect.remove(), 300);
-        }, 3000);
-    }
-    
-    // Génération automatique de quêtes quotidiennes
-    async generateDailyQuests() {
-        const today = new Date().toDateString();
-        const lastGeneration = localStorage.getItem('last_quest_generation');
-        
-        if (lastGeneration === today) return;
-        
-        try {
-            const dailyQuests = this.getDefaultDailyQuests();
-            
-            for (const questData of dailyQuests) {
-                // Vérifier si la quête existe déjà aujourd'hui
-                const existsToday = this.quests.some(q => 
-                    q.title === questData.title && 
-                    q.type === 'daily' &&
-                    new Date(q.createdAt).toDateString() === today
-                );
-                
-                if (!existsToday) {
-                    await this.createQuest(questData);
+            },
+            {
+                id: 'quest_master',
+                name: 'Maître des missions',
+                description: '10 missions complétées',
+                icon: 'crown',
+                color: '#8b5cf6',
+                rarity: 'rare',
+                requirements: {
+                    type: 'quest_count',
+                    count: 10
                 }
-            }
-            
-            localStorage.setItem('last_quest_generation', today);
-            
-        } catch (error) {
-            console.error('❌ Erreur génération quêtes quotidiennes:', error);
-        }
-    }
-    
-    getDefaultDailyQuests() {
-        return [
-            {
-                title: 'Vérifier la propreté des salles',
-                description: 'S\'assurer que toutes les salles sont propres et rangées',
-                type: 'daily',
-                xp: 15,
-                priority: 'normal'
             },
             {
-                title: 'Accueillir les premiers clients',
-                description: 'Faire un accueil chaleureux aux premiers clients de la journée',
-                type: 'daily',
-                xp: 10,
-                priority: 'normal'
+                id: 'early_bird',
+                name: 'Lève-tôt',
+                description: '7 arrivées avant 8h',
+                icon: 'sun',
+                color: '#f97316',
+                rarity: 'uncommon',
+                requirements: {
+                    type: 'early_arrival',
+                    count: 7,
+                    timeLimit: '08:00'
+                }
             },
             {
-                title: 'Vérifier le matériel technique',
-                description: 'S\'assurer que tout le matériel fonctionne correctement',
-                type: 'daily',
-                xp: 20,
-                priority: 'high'
+                id: 'team_player',
+                name: 'Esprit d\'équipe',
+                description: '5 missions d\'équipe complétées',
+                icon: 'users',
+                color: '#10b981',
+                rarity: 'uncommon',
+                requirements: {
+                    type: 'team_quest_count',
+                    count: 5
+                }
             },
             {
-                title: 'Briefing équipe',
-                description: 'Faire le point avec l\'équipe sur les objectifs du jour',
-                type: 'daily',
-                xp: 15,
-                priority: 'normal'
+                id: 'streak_week',
+                name: 'Semaine parfaite',
+                description: '7 jours de streak consécutifs',
+                icon: 'fire',
+                color: '#ef4444',
+                rarity: 'rare',
+                requirements: {
+                    type: 'streak',
+                    count: 7
+                }
+            },
+            {
+                id: 'legend',
+                name: 'Légende SYNERGIA',
+                description: '100 missions complétées',
+                icon: 'star',
+                color: '#6366f1',
+                rarity: 'legendary',
+                requirements: {
+                    type: 'quest_count',
+                    count: 100
+                }
             }
         ];
-    }
-    
-    checkAchievements() {
-        // TODO: Implémenter système d'achievements
-        const user = window.firebaseManager?.getCurrentUser();
-        if (!user) return;
-        
-        const completedQuests = this.userQuests.filter(uq => 
-            uq.userId === user.uid && uq.status === 'completed'
-        ).length;
-        
-        // Achievement: Première quête
-        if (completedQuests === 1) {
-            this.unlockAchievement('first_quest', 'Première quête terminée!');
+
+        for (const badgeData of defaultBadges) {
+            this.badges.set(badgeData.id, badgeData);
         }
-        
-        // Achievement: 10 quêtes
-        if (completedQuests === 10) {
-            this.unlockAchievement('quest_master', 'Maître des quêtes!');
-        }
-        
-        // Achievement: 50 quêtes
-        if (completedQuests === 50) {
-            this.unlockAchievement('quest_legend', 'Légende des quêtes!');
-        }
+
+        console.log(`🏆 ${defaultBadges.length} badges chargés`);
     }
-    
-    unlockAchievement(id, title) {
-        window.uiManager?.showToast(`🏆 ${title}`, 'success');
-        
-        if (window.firebaseManager) {
-            window.firebaseManager.logEvent('achievement_unlocked', {
-                achievement_id: id,
-                achievement_title: title
-            });
-        }
-    }
-    
-    // Local Storage fallback
-    saveToLocalStorage() {
-        try {
-            localStorage.setItem('synergia_quests', JSON.stringify(this.quests));
-            localStorage.setItem('synergia_user_quests', JSON.stringify(this.userQuests));
-        } catch (error) {
-            console.error('❌ Erreur sauvegarde localStorage:', error);
-        }
-    }
-    
-    loadFromLocalStorage() {
-        try {
-            const savedQuests = localStorage.getItem('synergia_quests');
-            const savedUserQuests = localStorage.getItem('synergia_user_quests');
-            
-            if (savedQuests) {
-                this.quests = JSON.parse(savedQuests);
-            }
-            
-            if (savedUserQuests) {
-                this.userQuests = JSON.parse(savedUserQuests);
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement localStorage:', error);
-            this.quests = [];
-            this.userQuests = [];
-        }
-    }
-    
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-    
-    // API publique
-    getQuests(filter = null) {
-        if (filter) {
-            return this.quests.filter(quest => quest.type === filter);
-        }
-        return this.quests;
-    }
-    
-    getQuest(id) {
-        return this.quests.find(q => q.id === id);
-    }
-    
-    getUserQuests(userId = null) {
-        if (userId) {
-            return this.userQuests.filter(uq => uq.userId === userId);
-        }
-        return this.userQuests;
-    }
-    
-    getActiveQuests(userId = null) {
-        const user = userId || window.firebaseManager?.getUserId();
-        if (!user) return [];
-        
-        return this.userQuests.filter(uq => 
-            uq.userId === user && uq.status === 'active'
-        );
-    }
-    
-    getCompletedQuests(userId = null) {
-        const user = userId || window.firebaseManager?.getUserId();
-        if (!user) return [];
-        
-        return this.userQuests.filter(uq => 
-            uq.userId === user && uq.status === 'completed'
-        );
-    }
-    
-    getTodayQuests() {
-        const today = new Date().toDateString();
-        return this.quests.filter(quest => {
-            if (quest.type === 'daily') return true;
-            if (quest.deadline) {
-                return new Date(quest.deadline).toDateString() === today;
-            }
-            return false;
-        });
-    }
-    
-    getQuestStats(userId = null) {
-        const user = userId || window.firebaseManager?.getUserId();
-        if (!user) return {};
-        
-        const userQuests = this.getUserQuests(user);
-        const completed = userQuests.filter(uq => uq.status === 'completed');
-        const active = userQuests.filter(uq => uq.status === 'active');
-        
-        return {
-            total: userQuests.length,
-            completed: completed.length,
-            active: active.length,
-            completionRate: userQuests.length > 0 ? (completed.length / userQuests.length) * 100 : 0,
-            totalXP: completed.reduce((sum, uq) => sum + (uq.xpGained || 0), 0)
-        };
-    }
-    
-    // Recherche et filtrage
-    searchQuests(query) {
-        const lowerQuery = query.toLowerCase();
-        return this.quests.filter(quest => 
-            quest.title.toLowerCase().includes(lowerQuery) ||
-            (quest.description && quest.description.toLowerCase().includes(lowerQuery))
-        );
-    }
-    
-    filterQuestsByPriority(priority) {
-        return this.quests.filter(quest => quest.priority === priority);
-    }
-    
-    getExpiredQuests() {
+
+    async generateRecurringQuests() {
         const now = new Date();
-        return this.quests.filter(quest => 
-            quest.deadline && new Date(quest.deadline) < now && !quest.completed
-        );
-    }
-    
-    getUpcomingDeadlines(days = 7) {
-        const now = new Date();
-        const future = new Date();
-        future.setDate(now.getDate() + days);
-        
-        return this.quests.filter(quest => 
-            quest.deadline && 
-            new Date(quest.deadline) > now && 
-            new Date(quest.deadline) <= future &&
-            !quest.completed
-        );
-    }
-    
-    // Utilitaires pour le dashboard
-    getDashboardQuests() {
-        const user = window.firebaseManager?.getCurrentUser();
-        if (!user) return [];
-        
-        const todayQuests = this.getTodayQuests();
-        const userActiveQuests = this.getActiveQuests(user.uid);
-        
-        // Combiner et dédupliquer
-        const dashboardQuests = [];
-        const seenIds = new Set();
-        
-        // Ajouter les quêtes actives de l'utilisateur
-        userActiveQuests.forEach(userQuest => {
-            const quest = this.getQuest(userQuest.questId);
-            if (quest && !seenIds.has(quest.id)) {
-                dashboardQuests.push({
-                    ...quest,
-                    userQuest,
-                    isActive: true
-                });
-                seenIds.add(quest.id);
+        const today = now.getDay(); // 0 = Dimanche, 1 = Lundi, etc.
+
+        // Générer les quêtes quotidiennes
+        for (const quest of this.dailyQuests) {
+            if (this.shouldGenerateQuest(quest, 'daily', today)) {
+                await this.assignQuestToUser(quest.id);
             }
-        });
-        
-        // Ajouter les quêtes du jour non démarrées
-        todayQuests.forEach(quest => {
-            if (!seenIds.has(quest.id)) {
-                const userQuest = this.userQuests.find(uq => 
-                    uq.questId === quest.id && 
-                    uq.userId === user.uid
-                );
-                
-                if (!userQuest || userQuest.status !== 'completed') {
-                    dashboardQuests.push({
-                        ...quest,
-                        userQuest,
-                        isActive: false
-                    });
-                    seenIds.add(quest.id);
+        }
+
+        // Générer les quêtes hebdomadaires (le lundi)
+        if (today === 1) { // Lundi
+            for (const quest of this.weeklyQuests) {
+                if (this.shouldGenerateQuest(quest, 'weekly', today)) {
+                    await this.assignQuestToUser(quest.id);
                 }
             }
-        });
-        
-        return dashboardQuests.slice(0, 5); // Limiter à 5 quêtes
-    }
-    
-    renderDashboardQuests() {
-        const container = document.getElementById('daily-quests-container');
-        if (!container) return;
-        
-        const dashboardQuests = this.getDashboardQuests();
-        
-        if (dashboardQuests.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-check-circle"></i>
-                    <p>Toutes les quêtes sont terminées!</p>
-                </div>
-            `;
-            return;
         }
-        
-        const questsHTML = dashboardQuests.map(quest => `
-            <div class="dashboard-quest ${quest.isActive ? 'active' : ''}" data-quest-id="${quest.id}">
-                <div class="quest-icon">
-                    <i class="fas fa-${quest.type === 'daily' ? 'calendar-day' : quest.type === 'weekly' ? 'calendar-week' : 'star'}"></i>
-                </div>
-                <div class="quest-info">
-                    <h4>${quest.title}</h4>
-                    <span class="quest-xp">+${quest.xp || 10} XP</span>
-                </div>
-                <div class="quest-action">
-                    ${quest.userQuest?.status === 'completed' ? `
-                        <i class="fas fa-check-circle text-success"></i>
-                    ` : quest.isActive ? `
-                        <button class="btn btn-sm btn-primary" data-action="complete-quest" data-quest-id="${quest.id}">
-                            Terminer
-                        </button>
-                    ` : `
-                        <button class="btn btn-sm" data-action="start-quest" data-quest-id="${quest.id}">
-                            Commencer
-                        </button>
-                    `}
-                </div>
-            </div>
-        `).join('');
-        
-        container.innerHTML = questsHTML;
+
+        console.log('🔄 Quêtes récurrentes générées');
     }
+
+    shouldGenerateQuest(quest, type, today) {
+        // Vérifier les restrictions de rôle
+        if (quest.roleRestriction) {
+            const userRole = this.getCurrentUserRole();
+            if (!quest.roleRestriction.includes(userRole)) {
+                return false;
+            }
+        }
+
+        // Vérifier si déjà assignée aujourd'hui/cette semaine
+        const userQuest = this.userQuests.get(quest.id);
+        if (userQuest) {
+            const assignedDate = new Date(userQuest.assignedAt);
+            const now = new Date();
+            
+            if (type === 'daily') {
+                // Même jour
+                if (assignedDate.toDateString() === now.toDateString()) {
+                    return false;
+                }
+            } else if (type === 'weekly') {
+                // Même semaine
+                const weekStart = this.getWeekStart(now);
+                if (assignedDate >= weekStart) {
+                    return false;
+                }
+            }
+        }
+
+        // Vérifier les conditions spéciales
+        if (quest.conditions) {
+            if (quest.conditions.newMember && !this.isNewMember()) {
+                return false;
+            }
+            if (quest.conditions.maxDaysWorked && this.getDaysWorked() > quest.conditions.maxDaysWorked) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    async assignQuestToUser(questId, userId = null) {
+        userId = userId || window.firebaseManager?.currentUser?.uid;
+        if (!userId) {
+            console.log('❌ Impossible d\'assigner la quête - pas d\'utilisateur');
+            return null;
+        }
+
+        const quest = this.quests.get(questId);
+        if (!quest) {
+            console.error(`❌ Quête ${questId} non trouvée`);
+            return null;
+        }
+
+        // Vérifier si déjà assignée
+        const existingUserQuest = this.userQuests.get(questId);
+        if (existingUserQuest && existingUserQuest.status !== 'completed') {
+            return existingUserQuest;
+        }
+
+        const userQuest = {
+            id: this.generateId(),
+            questId: questId,
+            userId: userId,
+            status: 'assigned',
+            progress: 0,
+            maxProgress: this.getQuestMaxProgress(quest),
+            assignedAt: new Date(),
+            expiresAt: this.calculateExpiration(quest),
+            attempts: 0,
+            metadata: {}
+        };
+
+        // Sauvegarder
+        this.userQuests.set(questId, userQuest);
+        
+        try {
+            if (window.dataManager) {
+                await window.dataManager.saveToFirebase('userQuests', userQuest);
+            }
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde userQuest:', error);
+        }
+
+        // Dispatcher événement
+        this.dispatchEvent('quest:assigned', { quest, userQuest });
+
+        console.log(`✅ Quête "${quest.title}" assignée à l'utilisateur`);
+        return userQuest;
+    }
+
+    getQuestMaxProgress(quest) {
+        if (quest.requirements.count) {
+            return quest.requirements.count;
+        }
+        return 1; // Mission simple on/off
+    }
+
+    calculateExpiration(quest) {
+        const now = new Date();
+        const duration = this.questTypes[quest.type]?.duration;
+        
+        if (!duration) return null; // Pas d'expiration
+
+        return new Date(now.getTime() + duration);
+    }
+
+    async updateQuestProgress(questId, progress = 1, metadata = {}) {
+        const userQuest = this.userQuests.get(questId);
+        if (!userQuest || userQuest.status === 'completed') {
+            return false;
+        }
+
+        // Mettre à jour le progrès
+        userQuest.progress = Math.min(userQuest.progress + progress, userQuest.maxProgress);
+        userQuest.metadata = { ...userQuest.metadata, ...metadata };
+        userQuest.lastUpdated = new Date();
+
+        // Vérifier si complétée
+        if (userQuest.progress >= userQuest.maxProgress) {
+            return await this.completeQuest(questId);
+        }
+
+        // Sauvegarder
+        try {
+            if (window.dataManager) {
+                await window.dataManager.saveToFirebase('userQuests', userQuest, userQuest.id);
+            }
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde progress:', error);
+        }
+
+        // Dispatcher événement
+        this.dispatchEvent('quest:progress', { questId, progress: userQuest.progress, maxProgress: userQuest.maxProgress });
+
+        return true;
+    }
+
+    async completeQuest(questId, userId = null) {
+        userId = userId || window.firebaseManager?.currentUser?.uid;
+        if (!userId) return false;
+
+        const quest = this.quests.get(questId);
+        const userQuest = this.userQuests.get(questId);
+        
+        if (!quest || !userQuest) {
+            console.error(`❌ Impossible de compléter la quête ${questId}`);
+            return false;
+        }
+
+        // Marquer comme complétée
+        userQuest.status = 'completed';
+        userQuest.completedAt = new Date();
+        userQuest.progress = userQuest.maxProgress;
+        this.completedQuests.add(questId);
+
+        // Calculer l'XP avec bonus
+        const baseXP = quest.rewards.xp;
+        const bonusXP = this.calculateBonusXP(quest, userQuest);
+        const totalXP = baseXP + bonusXP;
+
+        // Donner l'XP à l'utilisateur
+        await this.awardXP(userId, totalXP);
+
+        // Vérifier les badges
+        await this.checkBadges(userId);
+
+        // Vérifier les achievements
+        await this.checkAchievements(userId);
+
+        // Sauvegarder
+        try {
+            if (window.dataManager) {
+                await window.dataManager.saveToFirebase('userQuests', userQuest, userQuest.id);
+            }
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde completion:', error);
+        }
+
+        // Dispatcher événements
+        this.dispatchEvent('quest:completed', { quest, userQuest, xpGained: totalXP });
+
+        console.log(`🎉 Quête "${quest.title}" complétée ! +${totalXP} XP`);
+        return totalXP;
+    }
+
+    calculateBonusXP(quest, userQuest) {
+        let bonus = 0;
+
+        // Bonus de rapidité (complétée rapidement)
+        if (userQuest.expiresAt) {
+            const timeUsed = userQuest.completedAt - userQuest.assignedAt;
+            const timeAvailable = userQuest.expiresAt - userQuest.assignedAt;
+            const timeRatio = timeUsed / timeAvailable;
+
+            if (timeRatio < 0.5) { // Complétée en moins de 50% du temps
+                bonus += Math.round(quest.rewards.xp * 0.2); // +20%
+            }
+        }
+
+        // Bonus de streak
+        const streak = this.getCurrentStreak();
+        if (streak >= 7) {
+            bonus += Math.round(quest.rewards.xp * 0.1 * Math.min(streak / 7, 3)); // Max 30%
+        }
+
+        // Bonus de difficulté
+        if (quest.difficulty >= 4) {
+            bonus += Math.round(quest.rewards.xp * 0.15); // +15% pour missions difficiles
+        }
+
+        return bonus;
+    }
+
+    async awardXP(userId, xp) {
+        try {
+            const userData = await window.dataManager?.getUser(userId);
+            if (!userData) return false;
+
+            const oldLevel = this.getLevel(userData.xp || 0);
+            const newXP = (userData.xp || 0) + xp;
+            const newLevel = this.getLevel(newXP);
+
+            // Mettre à jour l'utilisateur
+            const updatedData = {
+                xp: newXP,
+                level: newLevel,
+                totalXPEarned: (userData.totalXPEarned || 0) + xp,
+                lastXPGain: new Date()
+            };
+
+            await window.dataManager.saveUser(updatedData, userId);
+
+            // Level up ?
+            if (newLevel > oldLevel) {
+                this.dispatchEvent('user:levelUp', { 
+                    userId, 
+                    oldLevel, 
+                    newLevel, 
+                    totalXP: newXP 
+                });
+                console.log(`🎉 Level Up ! Niveau ${newLevel} atteint !`);
+            }
+
+            return { oldLevel, newLevel, totalXP: newXP };
+        } catch (error) {
+            console.error('❌ Erreur attribution XP:', error);
+            return false;
+        }
+    }
+
+    getLevel(xp) {
+        if (xp < this.xpConfig.baseXP) return 1;
+
+        let level = 1;
+        let requiredXP = this.xpConfig.baseXP;
+
+        while (xp >= requiredXP && level < this.xpConfig.maxLevel) {
+            level++;
+            requiredXP += Math.round(this.xpConfig.baseXP * Math.pow(this.xpConfig.multiplier, level - 1));
+        }
+
+        return level;
+    }
+
+    getXPForLevel(level) {
+        if (level <= 1) return 0;
+
+        let totalXP = 0;
+        for (let i = 1; i < level; i++) {
+            totalXP += Math.round(this.xpConfig.baseXP * Math.pow(this.xpConfig.multiplier, i - 1));
+        }
+        return totalXP;
+    }
+
+    getXPProgress(currentXP) {
+        const currentLevel = this.getLevel(currentXP);
+        const currentLevelXP = this.getXPForLevel(currentLevel);
+        const nextLevelXP = this.getXPForLevel(currentLevel + 1);
+        
+        const progress = currentXP - currentLevelXP;
+        const needed = nextLevelXP - currentLevelXP;
+        
+        return {
+            level: currentLevel,
+            progress,
+            needed,
+            percentage: Math.round((progress / needed) * 100)
+        };
+    }
+
+    async checkBadges(userId) {
+        const userData = await window.dataManager?.getUser(userId);
+        if (!userData) return;
+
+        const userBadges = userData.badges || [];
+        const newBadges = [];
+
+        for (const [badgeId, badge] of this.badges) {
+            if (userBadges.includes(badgeId)) continue; // Déjà obtenu
+
+            if (await this.checkBadgeRequirements(badge, userId)) {
+                newBadges.push(badgeId);
+                userBadges.push(badgeId);
+
+                this.dispatchEvent('badge:earned', { badge, userId });
+                console.log(`🏆 Badge "${badge.name}" débloqué !`);
+            }
+        }
+
+        if (newBadges.length > 0) {
+            await window.dataManager.saveUser({ badges: userBadges }, userId);
+        }
+
+        return newBadges;
+    }
+
+    async checkBadgeRequirements(badge, userId) {
+        const requirements = badge.requirements;
+
+        switch (requirements.type) {
+            case 'quest_count':
+                const completedCount = this.getCompletedQuestCount(userId);
+                return completedCount >= requirements.count;
+
+            case 'team_quest_count':
+                const teamQuestCount = this.getCompletedQuestsByCategory(userId, 'teamwork');
+                return teamQuestCount >= requirements.count;
+
+            case 'early_arrival':
+                const earlyArrivals = await this.getEarlyArrivals(userId, requirements.timeLimit);
+                return earlyArrivals >= requirements.count;
+
+            case 'streak':
+                const streak = this.getCurrentStreak(userId);
+                return streak >= requirements.count;
+
+            default:
+                return false;
+        }
+    }
+
+    // API publique pour les autres modules
+
+    /**
+     * Obtenir les quêtes disponibles pour un utilisateur
+     */
+    getAvailableQuests(userId = null) {
+        const userRole = this.getCurrentUserRole();
+        const available = [];
+
+        for (const [questId, quest] of this.quests) {
+            // Vérifier les restrictions de rôle
+            if (quest.roleRestriction && !quest.roleRestriction.includes(userRole)) {
+                continue;
+            }
+
+            // Vérifier si déjà assignée/complétée
+            const userQuest = this.userQuests.get(questId);
+            if (userQuest && ['assigned', 'in_progress'].includes(userQuest.status)) {
+                continue;
+            }
+
+            available.push({
+                ...quest,
+                isAssigned: !!userQuest,
+                isCompleted: this.completedQuests.has(questId)
+            });
+        }
+
+        return available;
+    }
+
+    /**
+     * Obtenir les quêtes actives de l'utilisateur
+     */
+    getActiveQuests(userId = null) {
+        const active = [];
+
+        for (const [questId, userQuest] of this.userQuests) {
+            if (['assigned', 'in_progress'].includes(userQuest.status)) {
+                const quest = this.quests.get(questId);
+                if (quest) {
+                    active.push({
+                        ...quest,
+                        userQuest,
+                        progressPercentage: Math.round((userQuest.progress / userQuest.maxProgress) * 100)
+                    });
+                }
+            }
+        }
+
+        return active.sort((a, b) => new Date(b.userQuest.assignedAt) - new Date(a.userQuest.assignedAt));
+    }
+
+    /**
+     * Obtenir les quêtes par type
+     */
+    getDailyQuests() {
+        return this.getQuestsByType('daily');
+    }
+
+    getWeeklyQuests() {
+        return this.getQuestsByType('weekly');
+    }
+
+    getSpecialQuests() {
+        return this.getQuestsByType('special');
+    }
+
+    getQuestsByType(type) {
+        const quests = [];
+        for (const [questId, quest] of this.quests) {
+            if (quest.type === type) {
+                const userQuest = this.userQuests.get(questId);
+                quests.push({
+                    ...quest,
+                    userQuest,
+                    isAssigned: !!userQuest,
+                    isCompleted: this.completedQuests.has(questId),
+                    progressPercentage: userQuest ? Math.round((userQuest.progress / userQuest.maxProgress) * 100) : 0
+                });
+            }
+        }
+        return quests;
+    }
+
+    /**
+     * Créer une nouvelle quête personnalisée
+     */
+    async createCustomQuest(questData) {
+        const quest = this.createQuest({
+            id: this.generateId(),
+            ...questData,
+            type: questData.type || 'special'
+        });
+
+        this.quests.set(quest.id, quest);
+
+        // Sauvegarder
+        try {
+            if (window.dataManager) {
+                await window.dataManager.saveToFirebase('quests', quest);
+            }
+        } catch (error) {
+            console.error('❌ Erreur création quête:', error);
+        }
+
+        this.dispatchEvent('quest:created', { quest });
+        return quest;
+    }
+
+    /**
+     * Événements automatiques (appelés par d'autres modules)
+     */
     
-    // Nettoyage
-    cleanup() {
-        this.listeners.forEach(unsubscribe => unsubscribe());
-        this.listeners = [];
+    // Appelé lors d'un pointage
+    async handleBadging(badgingData) {
+        const { type, timestamp, userId } = badgingData;
+
+        if (type === 'in') {
+            const hour = new Date(timestamp).getHours();
+            
+            // Quête arrivée matinale
+            if (hour < 9) {
+                await this.updateQuestProgress('daily_checkin', 1, { arrivalTime: timestamp });
+            }
+            
+            // Quête lève-tôt
+            if (hour < 8.5) { // 8h30
+                await this.updateQuestProgress('weekly_early_bird', 1, { arrivalTime: timestamp });
+            }
+        }
+
+        // Vérifier les quêtes de présence parfaite
+        if (type === 'out') {
+            const isFullDay = await this.checkFullDayAttendance(userId, timestamp);
+            if (isFullDay) {
+                await this.updateQuestProgress('daily_perfect_attendance', 1);
+            }
+        }
+    }
+
+    // Appelé lors d'envoi de message
+    async handleMessage(messageData) {
+        const { userId, chatRoomId } = messageData;
+        
+        // Quête messages d'équipe
+        if (chatRoomId && chatRoomId.includes('team')) {
+            await this.updateQuestProgress('daily_team_message', 1);
+        }
+    }
+
+    // Appelé lors de completion d'une formation
+    async handleTrainingComplete(trainingData) {
+        const { moduleId, userId } = trainingData;
+        
+        // Trouver les quêtes de formation correspondantes
+        for (const [questId, quest] of this.quests) {
+            if (quest.requirements.type === 'training' && 
+                quest.requirements.moduleId === moduleId) {
+                await this.updateQuestProgress(questId, 1);
+            }
+        }
+    }
+
+    // Méthodes utilitaires
+    
+    setupEventListeners() {
+        // Écouter les événements de badging
+        document.addEventListener('badging:record', (e) => {
+            this.handleBadging(e.detail);
+        });
+
+        // Écouter les messages
+        document.addEventListener('chat:message:sent', (e) => {
+            this.handleMessage(e.detail);
+        });
+
+        // Écouter les formations
+        document.addEventListener('training:complete', (e) => {
+            this.handleTrainingComplete(e.detail);
+        });
+
+        // Régénérer les quêtes quotidiennes/hebdomadaires
+        this.scheduleQuestGeneration();
+    }
+
+    scheduleQuestGeneration() {
+        // Vérifier toutes les heures si de nouvelles quêtes doivent être générées
+        setInterval(() => {
+            this.generateRecurringQuests();
+        }, 60 * 60 * 1000); // 1 heure
+
+        // Régénération à minuit
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+        
+        const timeToMidnight = midnight - now;
+        setTimeout(() => {
+            this.generateRecurringQuests();
+            // Puis toutes les 24h
+            setInterval(() => {
+                this.generateRecurringQuests();
+            }, 24 * 60 * 60 * 1000);
+        }, timeToMidnight);
+    }
+
+    startAutoChecks() {
+        // Vérifier les expirations toutes les 10 minutes
+        setInterval(() => {
+            this.checkExpiredQuests();
+        }, 10 * 60 * 1000);
+    }
+
+    checkExpiredQuests() {
+        const now = new Date();
+        const expired = [];
+
+        for (const [questId, userQuest] of this.userQuests) {
+            if (userQuest.expiresAt && now > userQuest.expiresAt && userQuest.status !== 'completed') {
+                userQuest.status = 'expired';
+                expired.push(questId);
+            }
+        }
+
+        if (expired.length > 0) {
+            console.log(`⏰ ${expired.length} quêtes expirées`);
+            this.dispatchEvent('quests:expired', { expired });
+        }
+    }
+
+    // Helpers
+    
+    getCurrentUserRole() {
+        return window.firebaseManager?.currentUser?.role || 'employee';
+    }
+
+    isNewMember() {
+        const userData = window.firebaseManager?.currentUser;
+        if (!userData?.joinedAt) return false;
+        
+        const daysSinceJoin = (Date.now() - userData.joinedAt) / (1000 * 60 * 60 * 24);
+        return daysSinceJoin <= 7;
+    }
+
+    getDaysWorked() {
+        // TODO: Calculer depuis les données de badging
+        return 1;
+    }
+
+    getCurrentStreak(userId = null) {
+        // TODO: Calculer le streak depuis les données
+        return 1;
+    }
+
+    getWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Lundi
+        return new Date(d.setDate(diff));
+    }
+
+    getCompletedQuestCount(userId) {
+        return this.completedQuests.size;
+    }
+
+    getCompletedQuestsByCategory(userId, category) {
+        let count = 0;
+        for (const questId of this.completedQuests) {
+            const quest = this.quests.get(questId);
+            if (quest && quest.category === category) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    async getEarlyArrivals(userId, timeLimit) {
+        // TODO: Interroger les données de badging
+        return 0;
+    }
+
+    async checkFullDayAttendance(userId, timestamp) {
+        // TODO: Vérifier les données de pointage
+        return true;
+    }
+
+    generateId() {
+        return 'quest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Système d'événements
+    on(event, callback) {
+        if (!this.listeners.has(event)) {
+            this.listeners.set(event, new Set());
+        }
+        this.listeners.get(event).add(callback);
+        
+        return () => {
+            this.listeners.get(event)?.delete(callback);
+        };
+    }
+
+    dispatchEvent(event, detail) {
+        const callbacks = this.listeners.get(event);
+        if (callbacks) {
+            callbacks.forEach(callback => {
+                try {
+                    callback(detail);
+                } catch (error) {
+                    console.error(`❌ Erreur callback ${event}:`, error);
+                }
+            });
+        }
+
+        // Dispatcher aussi sur document
+        document.dispatchEvent(new CustomEvent(`quest:${event}`, { detail }));
+    }
+
+    // API de debug
+    getStats() {
+        return {
+            totalQuests: this.quests.size,
+            activeUserQuests: Array.from(this.userQuests.values()).filter(q => ['assigned', 'in_progress'].includes(q.status)).length,
+            completedQuests: this.completedQuests.size,
+            availableBadges: this.badges.size,
+            isInitialized: this.isInitialized
+        };
+    }
+
+    exportData() {
+        return {
+            quests: Array.from(this.quests.entries()),
+            userQuests: Array.from(this.userQuests.entries()),
+            completedQuests: Array.from(this.completedQuests),
+            badges: Array.from(this.badges.entries())
+        };
     }
 }
 
-// Initialiser
-document.addEventListener('DOMContentLoaded', () => {
-    window.questManager = new QuestManager();
-});
+// Instance globale
+window.questManager = new QuestManager();
 
-// Export
+// Export pour modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = QuestManager;
 }

@@ -618,6 +618,45 @@
   animation: slideInLeft 0.4s ease-out;
 }
 
+/* === NAVIGATION STATUS INDICATORS === */
+
+.nav-link {
+  position: relative;
+}
+
+.status-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  font-size: 8px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-indicator.active {
+  background: var(--success-color);
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.break {
+  background: var(--warning-color);
+  animation: blink 1s infinite;
+}
+
+.status-indicator.inactive {
+  background: transparent;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
 /* === PRINT STYLES === */
 
 @media print {

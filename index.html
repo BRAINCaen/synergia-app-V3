@@ -2278,6 +2278,232 @@
             }
         }
 
+         // Remplacez la fonction loadQuests existante par :
+async loadQuests() {
+    try {
+        // Vérifier que le Quest Manager est prêt
+        if (!window.questManager?.isInitialized) {
+            console.log('⏳ Quest Manager pas encore prêt');
+            setTimeout(() => this.loadQuests(), 500);
+            return;
+        }
+
+        console.log('🎯 Chargement des quêtes...');
+        
+        // Charger les quêtes actives
+        const activeQuests = window.questManager.getActiveQuests();
+        const dailyQuests = window.questManager.getDailyQuests();
+        const weeklyQuests = window.questManager.getWeeklyQuests();
+        const specialQuests = window.questManager.getSpecialQuests();
+        
+        console.log('Quêtes trouvées:', {
+            actives: activeQuests.length,
+            quotidiennes: dailyQuests.length,
+            hebdomadaires: weeklyQuests.length,
+            spéciales: specialQuests.length
+        });
+
+        // Mettre à jour l'interface
+        this.displayQuests(dailyQuests, 'daily');
+        
+        // Écouter les événements de quêtes
+        this.setupQuestEventListeners();
+        
+    } catch (error) {
+        console.error('❌ Erreur chargement quêtes:', error);
+        this.showToast('Erreur lors du chargement des missions', 'error');
+    }
+}
+
+displayQuests(quests, containerType = 'daily') {
+    const container = document.getElementById('quests-container');
+    if (!container) {
+        console.error('❌ Container quests-container non trouvé');
+        return;
+    }
+
+    // Vider le container
+    container.innerHTML = '';
+    
+    if (!quests || quests.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-scroll fa-3x"></i>
+                <h3>Aucune mission disponible</h3>
+                <p>Les missions apparaîtront ici automatiquement</p>
+                <button class="btn btn-primary" onclick="window.questManager.generateDailyQuests()">
+                    <i class="fas fa-refresh"></i> Actualiser
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    // Afficher les quêtes
+    quests.forEach(quest => {
+        const questCard = this.createQuestCard(quest);
+        container.appendChild(questCard);
+    });
+    
+    console.log(`✅ ${quests.length} missions affichées`);
+}
+
+createQuestCard(quest) {
+    const isCompleted = quest.isCompleted;
+    const isAssigned = quest.isAssigned;
+    const progress = quest.progressPercentage || 0;
+    
+    const card = document.createElement('div');
+    card.className = `quest-card ${isCompleted ? 'completed' : ''} ${isAssigned ? 'assigned' : ''}`;
+    card.innerHTML = `
+        <div class="quest-header">
+            <div class="quest-type-badge ${quest.type}">
+                <i class="fas fa-${this.getQuestIcon(quest.type)}"></i>
+                ${this.getQuestTypeLabel(quest.type)}
+            </div>
+            <div class="quest-xp">+${quest.xp} XP</div>
+        </div>
+        
+        <div class="quest-content">
+            <h3 class="quest-title">${quest.title}</h3>
+            <p class="quest-description">${quest.description}</p>
+            
+            <div class="quest-category">
+                <i class="fas fa-tag"></i>
+                <span>${this.getCategoryLabel(quest.category)}</span>
+            </div>
+            
+            ${isAssigned ? `
+                <div class="quest-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <span class="progress-text">${quest.userQuest?.progress || 0} / ${quest.userQuest?.maxProgress || 1}</span>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="quest-actions">
+            ${!isAssigned && !isCompleted ? `
+                <button class="btn btn-primary" onclick="uiManager.acceptQuest('${quest.id}')">
+                    <i class="fas fa-plus"></i> Accepter
+                </button>
+            ` : ''}
+            
+            ${isAssigned && !isCompleted ? `
+                <button class="btn btn-success" onclick="uiManager.completeQuest('${quest.id}')">
+                    <i class="fas fa-check"></i> Terminer
+                </button>
+            ` : ''}
+            
+            ${isCompleted ? `
+                <div class="quest-completed-badge">
+                    <i class="fas fa-check-circle"></i> Complétée
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    return card;
+}
+
+getQuestIcon(type) {
+    const icons = {
+        daily: 'calendar-day',
+        weekly: 'calendar-week',
+        special: 'star',
+        training: 'graduation-cap',
+        team: 'users'
+    };
+    return icons[type] || 'tasks';
+}
+
+getCategoryLabel(category) {
+    const labels = {
+        attendance: 'Présence',
+        communication: 'Communication',
+        teamwork: 'Travail d\'équipe',
+        onboarding: 'Intégration',
+        achievement: 'Accomplissement',
+        training: 'Formation',
+        general: 'Général'
+    };
+    return labels[category] || category;
+}
+
+setupQuestEventListeners() {
+    // Écouter les événements du Quest Manager
+    document.addEventListener('quest:assigned', (e) => {
+        console.log('🎯 Nouvelle quête assignée:', e.detail.quest.title);
+        this.showToast(`Nouvelle mission: ${e.detail.quest.title}`, 'info');
+        this.loadQuests(); // Recharger l'affichage
+    });
+    
+    document.addEventListener('quest:completed', (e) => {
+        console.log('🎉 Quête complétée:', e.detail.quest.title);
+        this.showToast(`Mission complétée! +${e.detail.xpGained} XP`, 'success');
+        this.loadQuests(); // Recharger l'affichage
+    });
+    
+    document.addEventListener('quest:progress', (e) => {
+        console.log('📈 Progrès quête:', e.detail);
+        // Mettre à jour la barre de progression sans recharger
+        this.updateQuestProgress(e.detail.questId, e.detail.progress, e.detail.maxProgress);
+    });
+}
+
+updateQuestProgress(questId, progress, maxProgress) {
+    const questCard = document.querySelector(`[data-quest-id="${questId}"]`);
+    if (questCard) {
+        const progressBar = questCard.querySelector('.progress-fill');
+        const progressText = questCard.querySelector('.progress-text');
+        
+        if (progressBar) {
+            const percentage = Math.round((progress / maxProgress) * 100);
+            progressBar.style.width = `${percentage}%`;
+        }
+        
+        if (progressText) {
+            progressText.textContent = `${progress} / ${maxProgress}`;
+        }
+    }
+}
+
+async acceptQuest(questId) {
+    try {
+        console.log('✅ Acceptation de la quête:', questId);
+        const result = await window.questManager.assignQuestToUser(questId);
+        
+        if (result) {
+            this.showToast('Mission acceptée!', 'success');
+            this.loadQuests();
+        } else {
+            this.showToast('Impossible d\'accepter cette mission', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erreur acceptation quête:', error);
+        this.showToast('Erreur lors de l\'acceptation', 'error');
+    }
+}
+
+async completeQuest(questId) {
+    try {
+        console.log('🎉 Completion de la quête:', questId);
+        const xpGained = await window.questManager.completeQuest(questId);
+        
+        if (xpGained) {
+            this.showToast(`Mission terminée! +${xpGained} XP`, 'success');
+            this.loadQuests();
+        } else {
+            this.showToast('Impossible de terminer cette mission', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Erreur completion quête:', error);
+        this.showToast('Erreur lors de la completion', 'error');
+    }
+}
+        
+        
         // Application initialization
         class SynergiaApp {
             constructor() {

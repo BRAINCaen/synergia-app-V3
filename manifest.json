@@ -1,63 +1,63 @@
 {
   "name": "SYNERGIA v3.0 - Plateforme Collaborative",
   "short_name": "SYNERGIA",
-  "description": "Plateforme collaborative de gestion d'équipe avec planning, missions et communication",
+  "description": "Plateforme collaborative de gestion d'équipe avec pointage, planning et communication",
   "version": "3.0.0",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#667eea",
-  "background_color": "#f8fafc",
+  "background_color": "#ffffff",
   "lang": "fr",
   "scope": "/",
   "categories": ["productivity", "business", "collaboration"],
   "icons": [
     {
-      "src": "assets/icons/icon-72x72.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfmoA8L3RleHQ+PC9zdmc+",
       "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "assets/icons/icon-512x512.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfmoA8L3RleHQ+PC9zdmc+",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUyIiBoZWlnaHQ9IjE1MiIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzg0IiBoZWlnaHQ9IjM4NCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ],
@@ -65,12 +65,13 @@
     {
       "name": "Pointer",
       "short_name": "Badge",
-      "description": "Accès rapide au badgeage",
+      "description": "Accès rapide au pointage",
       "url": "/#badging",
       "icons": [
         {
-          "src": "assets/icons/badge-icon.png",
-          "sizes": "96x96"
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPuKssDwvdGV4dD48L3N2Zz4=",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -81,46 +82,26 @@
       "url": "/#planning",
       "icons": [
         {
-          "src": "assets/icons/calendar-icon.png",
-          "sizes": "96x96"
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfk4U8L3RleHQ+PC9zdmc+",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
         }
       ]
     },
     {
-      "name": "Chat",
-      "short_name": "Chat",
-      "description": "Messages d'équipe",
-      "url": "/#chat",
+      "name": "Équipe",
+      "short_name": "Team",
+      "description": "Gestion d'équipe",
+      "url": "/#team",
       "icons": [
         {
-          "src": "assets/icons/chat-icon.png",
-          "sizes": "96x96"
+          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfkqU8L3RleHQ+PC9zdmc+",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
         }
       ]
     }
   ],
   "related_applications": [],
-  "prefer_related_applications": false,
-  "screenshots": [
-    {
-      "src": "assets/screenshots/desktop-dashboard.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Dashboard principal sur desktop"
-    },
-    {
-      "src": "assets/screenshots/mobile-planning.png",
-      "sizes": "375x812",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "Planning sur mobile"
-    }
-  ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+synergia",
-      "url": "/?action=%s"
-    }
-  ]
+  "prefer_related_applications": false
 }

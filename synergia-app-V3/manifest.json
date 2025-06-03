@@ -1,58 +1,126 @@
 {
-  "name": "SYNERGIA - Gestion d'équipe gamifiée",
+  "name": "SYNERGIA v3.0 - Plateforme Collaborative",
   "short_name": "SYNERGIA",
-  "description": "Application de gestion d'équipe avec gamification pour parc de loisir",
+  "description": "Plateforme collaborative de gestion d'équipe avec planning, missions et communication",
+  "version": "3.0.0",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0a0a0f",
-  "theme_color": "#6d28d9",
-  "categories": ["productivity", "business"],
-  "lang": "fr-FR",
-  "dir": "ltr",
-  "prefer_related_applications": false,
+  "orientation": "portrait-primary",
+  "theme_color": "#667eea",
+  "background_color": "#f8fafc",
+  "lang": "fr",
+  "scope": "/",
+  "categories": ["productivity", "business", "collaboration"],
   "icons": [
     {
-      "src": "/assets/icons/icon-72x72.png",
+      "src": "assets/icons/icon-72x72.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/assets/icons/icon-96x96.png",
+      "src": "assets/icons/icon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/assets/icons/icon-128x128.png",
+      "src": "assets/icons/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/assets/icons/icon-144x144.png",
+      "src": "assets/icons/icon-144x144.png",
       "sizes": "144x144",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/assets/icons/icon-152x152.png",
+      "src": "assets/icons/icon-152x152.png",
       "sizes": "152x152",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/assets/icons/icon-192x192.png",
+      "src": "assets/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     },
     {
-      "src": "/assets/icons/icon-384x384.png",
+      "src": "assets/icons/icon-384x384.png",
       "sizes": "384x384",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/assets/icons/icon-512x512.png",
+      "src": "assets/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pointer",
+      "short_name": "Badge",
+      "description": "Accès rapide au badgeage",
+      "url": "/#badging",
+      "icons": [
+        {
+          "src": "assets/icons/badge-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Planning",
+      "short_name": "Planning",
+      "description": "Voir le planning d'équipe",
+      "url": "/#planning",
+      "icons": [
+        {
+          "src": "assets/icons/calendar-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "short_name": "Chat",
+      "description": "Messages d'équipe",
+      "url": "/#chat",
+      "icons": [
+        {
+          "src": "assets/icons/chat-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "assets/screenshots/desktop-dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Dashboard principal sur desktop"
+    },
+    {
+      "src": "assets/screenshots/mobile-planning.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Planning sur mobile"
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+synergia",
+      "url": "/?action=%s"
     }
   ]
 }

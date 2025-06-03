@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGIA - Gestion d'équipe gamifiée</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6d28d9">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+    
+    <!-- Meta tags -->
+    <meta name="description" content="Application de gestion d'équipe gamifiée pour Brain Escape Game">
+    <meta name="author" content="Allan Boehme">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mobile-fixes.css">
+    
+    <!-- Module Styles -->
+    <link rel="stylesheet" href="/css/modules/chat.css">
+    <link rel="stylesheet" href="/css/modules/planning.css">
+    <link rel="stylesheet" href="/css/modules/badging.css">
+    <link rel="stylesheet" href="/css/modules/notifications.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>SYNERGIA</h1>
+                <p>Gestion d'équipe gamifiée</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-container" class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content container">
+                <div class="user-profile">
+                    <img id="user-avatar" class="user-avatar" src="/assets/images/default-avatar.jpg" alt="Avatar">
+                    <div class="user-info">
+                        <h3 id="user-name">Chargement...</h3>
+                        <span id="user-role" class="role">...</span>
+                    </div>
+                </div>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span id="user-level" class="value">1</span>
+                        <span class="label">Niveau</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="user-xp" class="value">0 XP</span>
+                        <span class="label">Expérience</span>
+                        <div class="xp-bar">
+                            <div id="user-xp-bar" class="xp-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <button id="notifications-btn" class="btn btn-icon" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="notifications-badge" style="display: none">0</span>
+                        </button>
+                    </div>
+                    <div class="stat-item">
+                        <button id="logout-btn" class="btn btn-icon" title="Déconnexion">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pages Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page-content active">
+                <div class="page-header">
+                    <h1>Tableau de bord</h1>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-tasks"></i>
+                            <span class="stat-value" data-stat="questsCompleted">0</span>
+                            <span class="stat-label">Quêtes terminées</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star"></i>
+                            <span class="stat-value" data-stat="totalXP">0</span>
+                            <span class="stat-label">XP Total</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-fire"></i>
+                            <span class="stat-value" data-stat="streak">0</span>
+                            <span class="stat-label">Série en cours</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-medal"></i>
+                            <span class="stat-value" data-stat="badges">0</span>
+                            <span class="stat-label">Badges obtenus</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Quêtes du jour</h2>
+                            <a href="#" class="btn btn-sm" data-page="quests">Voir tout</a>
+                        </div>
+                        <div id="daily-quests-container" class="loading"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Activité de l'équipe</h2>
+                            <a href="#" class="btn btn-sm" data-page="team">Voir l'équipe</a>
+                        </div>
+                        <div id="team-activity-container" class="loading"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Mon planning</h2>
+                            <a href="#" class="btn btn-sm" data-page="planning">Voir planning</a>
+                        </div>
+                        <div id="my-planning-container" class="loading"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quests Page -->
+            <div id="quests-page" class="page-content">
+                <div class="page-header">
+                    <h1>Quêtes</h1>
+                    <button id="create-quest-btn" class="btn">
+                        <i class="fas fa-plus"></i> Nouvelle quête
+                    </button>
+                </div>
+                <div class="quest-tabs">
+                    <button class="quest-tab active" data-tab="daily">Quotidiennes</button>
+                    <button class="quest-tab" data-tab="weekly">Hebdomadaires</button>
+                    <button class="quest-tab" data-tab="special">Spéciales</button>
+                </div>
+                <div id="quests-container" class="loading"></div>
+            </div>
+
+            <!-- Team Page -->
+            <div id="team-page" class="page-content">
+                <div class="page-header">
+                    <h1>Équipe</h1>
+                    <button id="add-member-btn" class="btn">
+                        <i class="fas fa-plus"></i> Ajouter un membre
+                    </button>
+                </div>
+                <div class="team-tabs">
+                    <button class="team-tab active" data-tab="members">Membres</button>
+                    <button class="team-tab" data-tab="roles">Rôles</button>
+                    <button class="team-tab" data-tab="stats">Statistiques</button>
+                </div>
+                <div id="team-members-container" style="display: block;">
+                    <div id="team-members-grid" class="team-members-grid loading"></div>
+                </div>
+                <div id="team-roles-container" style="display: none;"></div>
+                <div id="team-stats-container" style="display: none;"></div>
+            </div>
+
+            <!-- Planning Page -->
+            <div id="planning-page" class="page-content">
+                <div class="page-header">
+                    <h1>Planning & Calendrier</h1>
+                    <div class="planning-actions">
+                        <button id="add-shift-btn" class="btn">
+                            <i class="fas fa-plus"></i> Ajouter un shift
+                        </button>
+                        <button id="add-event-btn" class="btn btn-secondary">
+                            <i class="fas fa-calendar-plus"></i> Nouvel événement
+                        </button>
+                    </div>
+                </div>
+                <div class="planning-toolbar">
+                    <div class="view-selector">
+                        <button class="view-btn active" data-view="week">Semaine</button>
+                        <button class="view-btn" data-view="month">Mois</button>
+                        <button class="view-btn" data-view="day">Jour</button>
+                    </div>
+                    <div class="date-navigation">
+                        <button id="prev-period" class="btn btn-icon"><i class="fas fa-chevron-left"></i></button>
+                        <span id="current-period">Semaine du...</span>
+                        <button id="next-period" class="btn btn-icon"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div id="planning-container" class="planning-container loading"></div>
+            </div>
+
+            <!-- Chat Page -->
+            <div id="chat-page" class="page-content">
+                <div class="chat-container">
+                    <div class="chat-sidebar">
+                        <div class="chat-header">
+                            <h2>Conversations</h2>
+                            <button id="new-conversation-btn" class="btn btn-icon">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="chat-search">
+                            <input type="text" placeholder="Rechercher..." id="chat-search">
+                        </div>
+                        <div id="conversations-list" class="conversations-list"></div>
+                    </div>
+                    <div class="chat-main">
+                        <div id="chat-welcome" class="chat-welcome">
+                            <i class="fas fa-comments"></i>
+                            <h3>Sélectionnez une conversation</h3>
+                            <p>Ou créez-en une nouvelle pour commencer</p>
+                        </div>
+                        <div id="chat-view" class="chat-view" style="display: none;">
+                            <div class="chat-view-header">
+                                <div class="chat-info">
+                                    <img id="chat-avatar" src="" alt="">
+                                    <div>
+                                        <h3 id="chat-title"></h3>
+                                        <span id="chat-status"></span>
+                                    </div>
+                                </div>
+                                <div class="chat-actions">
+                                    <button class="btn btn-icon"><i class="fas fa-phone"></i></button>
+                                    <button class="btn btn-icon"><i class="fas fa-video"></i></button>
+                                    <button class="btn btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                                </div>
+                            </div>
+                            <div id="messages-container" class="messages-container"></div>
+                            <div class="chat-input-container">
+                                <div id="typing-indicator" class="typing-indicator" style="display: none;">
+                                    <span></span> est en train d'écrire...
+                                </div>
+                                <form id="message-form" class="message-form">
+                                    <button type="button" class="btn btn-icon" id="attach-btn">
+                                        <i class="fas fa-paperclip"></i>
+                                    </button>
+                                    <input type="text" id="message-input" placeholder="Tapez votre message..." autocomplete="off">
+                                    <button type="button" class="btn btn-icon" id="emoji-btn">
+                                        <i class="fas fa-smile"></i>
+                                    </button>
+                                    <button type="submit" class="btn btn-icon btn-primary">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badging Page -->
+            <div id="badging-page" class="page-content">
+                <div class="page-header">
+                    <h1>Pointage</h1>
+                </div>
+                <div class="badging-container">
+                    <div class="badging-status" id="badging-status">
+                        <div class="status-card inactive" id="status-card">
+                            <h2 id="status-text">Non pointé</h2>
+                            <div class="digital-clock" id="clock">00:00:00</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Votre shift aujourd'hui</h3>
+                        <div id="today-shift-info">
+                            <p class="text-muted">Aucun shift prévu</p>
+                        </div>
+                    </div>
+
+                    <div class="badging-actions">
+                        <button class="btn btn-success btn-lg" id="btn-clock-in">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Pointer l'arrivée
+                        </button>
+
+                        <button class="btn btn-warning btn-lg hidden" id="btn-break-start">
+                            <i class="fas fa-coffee"></i>
+                            Commencer la pause
+                        </button>
+
+                        <button class="btn btn-info btn-lg hidden" id="btn-break-end">
+                            <i class="fas fa-play-circle"></i>
+                            Terminer la pause
+                        </button>
+
+                        <button class="btn btn-danger btn-lg hidden" id="btn-clock-out">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Pointer le départ
+                        </button>
+                    </div>
+
+                    <div class="badging-history">
+                        <h3>Historique du jour</h3>
+                        <div id="badging-history-list"></div>
+                    </div>
+
+                    <div class="badging-stats">
+                        <div class="stat-box">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <span class="stat-value" id="total-hours">0h00</span>
+                                <span class="stat-label">Temps total</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-briefcase"></i>
+                            <div>
+                                <span class="stat-value" id="work-hours">0h00</span>
+                                <span class="stat-label">Temps travaillé</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-mug-hot"></i>
+                            <div>
+                                <span class="stat-value" id="break-hours">0h00</span>
+                                <span class="stat-label">Temps de pause</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-container">
+                <a class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Accueil</span>
+                </a>
+                <a class="nav-item" data-page="quests">
+                    <i class="fas fa-scroll"></i>
+                    <span>Quêtes</span>
+                </a>
+                <a class="nav-item" data-page="team">
+                    <i class="fas fa-users"></i>
+                    <span>Équipe</span>
+                </a>
+                <a class="nav-item" data-page="planning">
+                    <i class="fas fa-calendar"></i>
+                    <span>Planning</span>
+                </a>
+                <a class="nav-item" data-page="chat">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                    <span class="badge" id="chat-badge" style="display: none">0</span>
+                </a>
+                <a class="nav-item" data-page="badging">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>Pointage</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Notifications Center -->
+    <div id="notifications-center" class="notifications-center">
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button id="close-notifications" class="btn btn-icon">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="notifications-list" class="notifications-list"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Modals -->
+    <div id="modal-container"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics-compat.js"></script>
+
+    <!-- Libraries -->
+    <script src="/libs/qrcode.min.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="/js/core/firebase-manager.js"></script>
+    <script src="/js/core/ui-manager.js"></script>
+    <script src="/js/core/data-manager.js"></script>
+    <script src="/js/core/router.js"></script>
+
+    <!-- Utils -->
+    <script src="/js/utils/helpers.js"></script>
+    <script src="/js/utils/constants.js"></script>
+    <script src="/js/utils/validators.js"></script>
+
+    <!-- Modules -->
+    <script src="/js/modules/team/team-manager.js"></script>
+    <script src="/js/modules/team/team-ui.js"></script>
+    <script src="/js/modules/quests/quest-manager.js"></script>
+    <script src="/js/modules/quests/quest-ui.js"></script>
+    <script src="/js/modules/chat/chat-manager.js"></script>
+    <script src="/js/modules/chat/chat-ui.js"></script>
+    <script src="/js/modules/planning/planning-manager.js"></script>
+    <script src="/js/modules/planning/planning-ui.js"></script>
+    <script src="/js/modules/planning/calendar-view.js"></script>
+    <script src="/js/modules/badging/badging-manager.js"></script>
+    <script src="/js/modules/badging/badging-ui.js"></script>
+    <script src="/js/modules/badging/qr-scanner.js"></script>
+    <script src="/js/modules/notifications/notification-manager.js"></script>
+
+    <!-- Main App -->
+    <script src="/js/app.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('✅ Service Worker enregistré'))
+                    .catch(err => console.error('❌ Erreur Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>

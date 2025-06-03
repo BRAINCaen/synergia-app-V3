@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Avancées - SYNERGIA v3.0</title>
+    
+    <!-- Chart.js avec plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .analytics-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .analytics-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .analytics-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .analytics-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .select-input, .date-input {
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-large {
+            height: 400px;
+        }
+
+        .metric-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .metric-up {
+            color: #28a745;
+        }
+
+        .metric-down {
+            color: #dc3545;
+        }
+
+        .metric-stable {
+            color: #ffc107;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .real-time-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .detailed-analytics {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .analytics-container {
+                padding: 1rem;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="analytics-container">
+        <!-- Header Analytics -->
+        <div class="analytics-header">
+            <h1><i class="fas fa-chart-line"></i> Analytics Avancées</h1>
+            <p>Tableaux de bord interactifs et métriques temps réel pour SYNERGIA v3.0</p>
+            
+            <div class="analytics-controls">
+                <div class="control-group">
+                    <label>Période d'analyse</label>
+                    <select id="period-select" class="select-input">
+                        <option value="today">Aujourd'hui</option>
+                        <option value="week" selected>Cette semaine</option>
+                        <option value="month">Ce mois</option>
+                        <option value="quarter">Ce trimestre</option>
+                        <option value="year">Cette année</option>
+                        <option value="custom">Période personnalisée</option>
+                    </select>
+                </div>
+                
+                <div class="control-group" id="date-range" style="display: none;">
+                    <label>Date de début</label>
+                    <input type="date" id="start-date" class="date-input">
+                </div>
+                
+                <div class="control-group" id="date-range-end" style="display: none;">
+                    <label>Date de fin</label>
+                    <input type="date" id="end-date" class="date-input">
+                </div>
+                
+                <div class="control-group">
+                    <label>Équipe/Membre</label>
+                    <select id="team-select" class="select-input">
+                        <option value="all">Toute l'équipe</option>
+                        <option value="allan">Allan Boehme</option>
+                        <option value="polar">Polar Caron</option>
+                        <option value="marie">Marie Dubois</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button id="refresh-analytics" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                </div>
+                
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button id="export-analytics" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Exporter
+                    </button>
+                </div>
+            </div>
+            
+            <div class="real-time-indicator">
+                <div class="pulse-dot"></div>
+                Temps réel activé
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="kpi-value" id="kpi-active-users">12</div>
+                <div class="kpi-label">Utilisateurs actifs</div>
+                <div class="kpi-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+23% vs semaine dernière</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="kpi-value" id="kpi-avg-hours">8.4h</div>
+                <div class="kpi-label">Temps moyen/jour</div>
+                <div class="kpi-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+0.2h vs mois dernier</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="kpi-value" id="kpi-missions">147</div>
+                <div class="kpi-label">Missions complétées</div>
+                <div class="kpi-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+15% ce mois</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="kpi-value" id="kpi-productivity">94%</div>
+                <div class="kpi-label">Taux de productivité</div>
+                <div class="kpi-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+6% amélioration</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques Principaux -->
+        <div class="analytics-grid">
+            <!-- Graphique Présence Temps Réel -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-area"></i>
+                        Présence Temps Réel
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-icon" onclick="toggleChartType('attendance')" title="Type de graphique">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                        <button class="btn-icon" onclick="zoomChart('attendance')" title="Zoom">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="btn-icon" onclick="exportChart('attendance')" title="Exporter">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="attendance-realtime-chart"></canvas>
+                </div>
+                <div class="metric-summary">
+                    <div class="metric-item">
+                        <div class="metric-value">88%</div>
+                        <div class="metric-label">Aujourd'hui</div>
+                        <div class="metric-change metric-up">+5%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">92%</div>
+                        <div class="metric-label">Cette semaine</div>
+                        <div class="metric-change metric-up">+3%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">9.2h</div>
+                        <div class="metric-label">Moyenne/jour</div>
+                        <div class="metric-change metric-stable">±0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphique Productivité -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-rocket"></i>
+                        Productivité par Membre
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-icon" onclick="toggleChartType('productivity')" title="Type de graphique">
+                            <i class="fas fa-chart-pie"></i>
+                        </button>
+                        <button class="btn-icon" onclick="drillDown('productivity')" title="Détails">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="productivity-chart"></canvas>
+                </div>
+                <div class="metric-summary">
+                    <div class="metric-item">
+                        <div class="metric-value">Allan</div>
+                        <div class="metric-label">Top performer</div>
+                        <div class="metric-change metric-up">98%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">23</div>
+                        <div class="metric-label">Missions/semaine</div>
+                        <div class="metric-change metric-up">+12%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphique Missions & XP -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-tasks"></i>
+                        Évolution Missions & XP
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-icon" onclick="addAnnotation('missions')" title="Ajouter annotation">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                        <button class="btn-icon" onclick="compareData('missions')" title="Comparer">
+                            <i class="fas fa-balance-scale"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="missions-xp-chart"></canvas>
+                </div>
+                <div class="metric-summary">
+                    <div class="metric-item">
+                        <div class="metric-value">1,847</div>
+                        <div class="metric-label">XP Total</div>
+                        <div class="metric-change metric-up">+234</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">67</div>
+                        <div class="metric-label">Missions actives</div>
+                        <div class="metric-change metric-up">+8</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Heatmap Activité -->
+            <div class="analytics-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-fire"></i>
+                        Heatmap d'Activité
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-icon" onclick="changeTimeframe('heatmap')" title="Période">
+                            <i class="fas fa-calendar"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activity-heatmap"></canvas>
+                </div>
+                <div class="metric-summary">
+                    <div class="metric-item">
+                        <div class="metric-value">14h-16h</div>
+                        <div class="metric-label">Pic d'activité</div>
+                        <div class="metric-change metric-up">92%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">Mercredi</div>
+                        <div class="metric-label">Jour le + actif</div>
+                        <div class="metric-change metric-stable">±2%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Détaillées -->
+        <div class="detailed-analytics">
+            <div class="tabs-container">
+                <button class="tab active" data-tab="overview">Vue d'ensemble</button>
+                <button class="tab" data-tab="individual">Analyse individuelle</button>
+                <button class="tab" data-tab="trends">Tendances</button>
+                <button class="tab" data-tab="predictions">Prédictions</button>
+                <button class="tab" data-tab="reports">Rapports</button>
+            </div>
+            
+            <div id="overview" class="tab-content active">
+                <h3>Vue d'ensemble de l'équipe</h3>
+                <div class="chart-container chart-large">
+                    <canvas id="overview-chart"></canvas>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Membre</th>
+                            <th>Présence</th>
+                            <th>Missions</th>
+                            <th>XP</th>
+                            <th>Productivité</th>
+                            <th>Tendance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Allan Boehme</strong></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 98%"></div>
+                                </div>
+                                98%
+                            </td>
+                            <td>47</td>
+                            <td>1,250</td>
+                            <td>96%</td>
+                            <td><i class="fas fa-arrow-up metric-up"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Polar Caron</strong></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 94%"></div>
+                                </div>
+                                94%
+                            </td>
+                            <td>38</td>
+                            <td>980</td>
+                            <td>92%</td>
+                            <td><i class="fas fa-arrow-up metric-up"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marie Dubois</strong></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 89%"></div>
+                                </div>
+                                89%
+                            </td>
+                            <td>32</td>
+                            <td>750</td>
+                            <td>88%</td>
+                            <td><i class="fas fa-arrow-down metric-down"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="individual" class="tab-content">
+                <h3>Analyse individuelle détaillée</h3>
+                <div class="analytics-controls">
+                    <select id="member-select" class="select-input">
+                        <option value="allan">Allan Boehme</option>
+                        <option value="polar">Polar Caron</option>
+                        <option value="marie">Marie Dubois</option>
+                    </select>
+                </div>
+                <div class="chart-container chart-large">
+                    <canvas id="individual-chart"></canvas>
+                </div>
+            </div>
+            
+            <div id="trends" class="tab-content">
+                <h3>Analyse des tendances</h3>
+                <div class="chart-container chart-large">
+                    <canvas id="trends-chart"></canvas>
+                </div>
+            </div>
+            
+            <div id="predictions" class="tab-content">
+                <h3>Prédictions basées sur l'IA</h3>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h4>Prédiction de performance</h4>
+                        <div class="chart-container">
+                            <canvas id="prediction-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Recommandations</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                                <i class="fas fa-lightbulb" style="color: #ffc107;"></i>
+                                Programmer plus de pauses pour Marie
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                                <i class="fas fa-trophy" style="color: #28a745;"></i>
+                                Allan pourrait mentorer l'équipe
+                            </li>
+                            <li style="padding: 0.5rem 0;">
+                                <i class="fas fa-calendar" style="color: #667eea;"></i>
+                                Optimiser les réunions du mercredi
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reports" class="tab-content">
+                <h3>Génération de rapports</h3>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h4>Rapports automatiques</h4>
+                        <button class="btn btn-primary" onclick="generateReport('weekly')">
+                            <i class="fas fa-file-pdf"></i>
+                            Rapport hebdomadaire
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateReport('monthly')">
+                            <i class="fas fa-file-excel"></i>
+                            Rapport mensuel
+                        </button>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Planifier les rapports</h4>
+                        <p>Configuration des rapports automatiques par email</p>
+                        <button class="btn btn-secondary" onclick="scheduleReports()">
+                            <i class="fas fa-clock"></i>
+                            Planifier
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options d'export -->
+        <div class="export-options">
+            <button class="btn btn-primary" onclick="exportToPDF()">
+                <i class="fas fa-file-pdf"></i>
+                Exporter en PDF
+            </button>
+            <button class="btn btn-secondary" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i>
+                Exporter en Excel
+            </button>
+            <button class="btn btn-secondary" onclick="exportToCSV()">
+                <i class="fas fa-file-csv"></i>
+                Exporter en CSV
+            </button>
+            <button class="btn btn-secondary" onclick="shareAnalytics()">
+                <i class="fas fa-share"></i>
+                Partager
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal pour annotations -->
+    <div id="annotation-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Ajouter une annotation</h3>
+            <form id="annotation-form">
+                <div style="margin-bottom: 1rem;">
+                    <label>Date</label>
+                    <input type="date" id="annotation-date" class="date-input" style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Commentaire</label>
+                    <textarea id="annotation-text" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px;"></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Chart.js
+        Chart.register(ChartDataLabels);
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        Chart.defaults.color = '#666';
+
+        // Variables globales
+        let charts = {};
+        let analyticsData = {};
+        let realTimeInterval;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAnalytics();
+            setupEventListeners();
+            startRealTimeUpdates();
+        });
+
+        function initializeAnalytics() {
+            loadAnalyticsData();
+            createCharts();
+            updateKPIs();
+        }
+
+        function loadAnalyticsData() {
+            // Simulation de données temps réel
+            analyticsData = {
+                attendance: {
+                    realTime: generateTimeSeriesData(24, 60, 95),
+                    daily: [88, 92, 85, 94, 89, 91, 87],
+                    weekly: [89, 91, 88, 93, 90],
+                    members: {
+                        allan: { attendance: 98, missions: 47, xp: 1250, productivity: 96 },
+                        polar: { attendance: 94, missions: 38, xp: 980, productivity: 92 },
+                        marie: { attendance: 89, missions: 32, xp: 750, productivity: 88 }
+                    }
+                },
+                productivity: {
+                    daily: [92, 89, 94, 91, 88, 95, 90],
+                    byMember: [96, 92, 88],
+                    trends: generateTrendData(30)
+                },
+                missions: {
+                    completed: [12, 15, 18, 14, 16, 19, 17],
+                    xp: [450, 520, 680, 490, 580, 720, 610],
+                    byType: { daily: 45, weekly: 18, special: 4 }
+                },
+                activity: {
+                    heatmap: generateHeatmapData(),
+                    hourly: Array.from({length: 24}, (_, i) => Math.floor(Math.random() * 100))
+                }
+            };
+        }
+
+        function generateTimeSeriesData(hours, baseValue, variance) {
+            const data = [];
+            const now = new Date();
+            
+            for (let i = hours; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+                const value = baseValue + (Math.random() - 0.5) * variance;
+                data.push({
+                    x: time,
+                    y: Math.max(0, Math.min(100, value))
+                });
+            }
+            
+            return data;
+        }
+
+        function generateTrendData(days) {
+            return Array.from({length: days}, (_, i) => ({
+                x: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000),
+                y: 85 + Math.sin(i / 7) * 10 + Math.random() * 5
+            }));
+        }
+
+        function generateHeatmapData() {
+            const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+            const hours = Array.from({length: 10}, (_, i) => `${8 + i}h`);
+            const data = [];
+            
+            days.forEach((day, dayIndex) => {
+                hours.forEach((hour, hourIndex) => {
+                    data.push({
+                        x: dayIndex,
+                        y: hourIndex,
+                        v: Math.floor(Math.random() * 100)
+                    });
+                });
+            });
+            
+            return data;
+        }
+
+        function createCharts() {
+            createAttendanceRealtimeChart();
+            createProductivityChart();
+            createMissionsXPChart();
+            createActivityHeatmap();
+            createOverviewChart();
+            createIndividualChart();
+            createTrendsChart();
+            createPredictionChart();
+        }
+
+        function createAttendanceRealtimeChart() {
+            const ctx = document.getElementById('attendance-realtime-chart');
+            if (!ctx) return;
+
+            charts.attendanceRealtime = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Présence temps réel',
+                        data: analyticsData.attendance.realTime,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'hour',
+                                displayFormats: {
+                                    hour: 'HH:mm'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Heure'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Taux de présence (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Présence: ${context.parsed.y.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 750
+                    }
+                }
+            });
+        }
+
+        function createProductivityChart() {
+            const ctx = document.getElementById('productivity-chart');
+            if (!ctx) return;
+
+            charts.productivity = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Présence', 'Missions', 'Communication', 'Qualité', 'Innovation', 'Collaboration'],
+                    datasets: [{
+                        label: 'Allan',
+                        data: [98, 94, 89, 96, 91, 93],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Polar',
+                        data: [94, 89, 95, 88, 85, 90],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Marie',
+                        data: [89, 85, 92, 93, 96, 87],
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createMissionsXPChart() {
+            const ctx = document.getElementById('missions-xp-chart');
+            if (!ctx) return;
+
+            charts.missionsXP = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    datasets: [{
+                        label: 'Missions complétées',
+                        data: analyticsData.missions.completed,
+                        backgroundColor: '#667eea',
+                        borderRadius: 4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'XP gagné',
+                        data: analyticsData.missions.xp,
+                        type: 'line',
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Missions'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'XP'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createActivityHeatmap() {
+            const ctx = document.getElementById('activity-heatmap');
+            if (!ctx) return;
+
+            const data = analyticsData.activity.heatmap;
+            const maxValue = Math.max(...data.map(d => d.v));
+
+            charts.activityHeatmap = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Activité',
+                        data: data,
+                        backgroundColor: function(context) {
+                            const value = context.parsed.v;
+                            const intensity = value / maxValue;
+                            return `rgba(102, 126, 234, ${intensity})`;
+                        },
+                        borderColor: '#667eea',
+                        pointRadius: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            min: -0.5,
+                            max: 4.5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
+                                    return days[value] || '';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Jours'
+                            }
+                        },
+                        y: {
+                            min: -0.5,
+                            max: 9.5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return `${8 + value}h`;
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Heures'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+                                    const day = days[context[0].parsed.x];
+                                    const hour = `${8 + context[0].parsed.y}h`;
+                                    return `${day} ${hour}`;
+                                },
+                                label: function(context) {
+                                    return `Activité: ${context.parsed.v}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createOverviewChart() {
+            const ctx = document.getElementById('overview-chart');
+            if (!ctx) return;
+
+            charts.overview = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 30}, (_, i) => {
+                        const date = new Date();
+                        date.setDate(date.getDate() - 29 + i);
+                        return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                    }),
+                    datasets: [{
+                        label: 'Productivité moyenne',
+                        data: analyticsData.productivity.trends.map(d => d.y),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Productivité (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function createIndividualChart() {
+            const ctx = document.getElementById('individual-chart');
+            if (!ctx) return;
+
+            charts.individual = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                    datasets: [{
+                        label: 'Présence',
+                        data: [95, 97, 94, 98],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        fill: true
+                    }, {
+                        label: 'Missions',
+                        data: [12, 15, 11, 18],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTrendsChart() {
+            const ctx = document.getElementById('trends-chart');
+            if (!ctx) return;
+
+            charts.trends = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Tendance générale',
+                        data: analyticsData.productivity.trends,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function createPredictionChart() {
+            const ctx = document.getElementById('prediction-chart');
+            if (!ctx) return;
+
+            const futureData = Array.from({length: 14}, (_, i) => ({
+                x: new Date(Date.now() + i * 24 * 60 * 60 * 1000),
+                y: 88 + Math.sin(i / 7) * 5 + Math.random() * 3
+            }));
+
+            charts.prediction = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Prédiction',
+                        data: futureData,
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateKPIs() {
+            // Mise à jour des KPIs avec animation
+            animateValue('kpi-active-users', 0, 12, 1000);
+            
+            // Simulation de données temps réel
+            setInterval(() => {
+                const newValue = 10 + Math.floor(Math.random() * 5);
+                document.getElementById('kpi-active-users').textContent = newValue;
+            }, 5000);
+        }
+
+        function animateValue(elementId, start, end, duration) {
+            const element = document.getElementById(elementId);
+            const startTime = performance.now();
+            
+            function updateValue(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(start + (end - start) * progress);
+                
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateValue);
+                }
+            }
+            
+            requestAnimationFrame(updateValue);
+        }
+
+        function setupEventListeners() {
+            // Contrôles de période
+            document.getElementById('period-select').addEventListener('change', function(e) {
+                if (e.target.value === 'custom') {
+                    document.getElementById('date-range').style.display = 'block';
+                    document.getElementById('date-range-end').style.display = 'block';
+                } else {
+                    document.getElementById('date-range').style.display = 'none';
+                    document.getElementById('date-range-end').style.display = 'none';
+                }
+                updateChartsData(e.target.value);
+            });
+
+            // Actualisation
+            document.getElementById('refresh-analytics').addEventListener('click', function() {
+                refreshAllCharts();
+            });
+
+            // Export
+            document.getElementById('export-analytics').addEventListener('click', function() {
+                exportAllData();
+            });
+
+            // Onglets
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+
+            // Sélection de membre pour analyse individuelle
+            document.getElementById('member-select').addEventListener('change', function(e) {
+                updateIndividualChart(e.target.value);
+            });
+
+            // Modal
+            document.querySelector('.close').addEventListener('click', closeModal);
+            document.getElementById('annotation-form').addEventListener('submit', addAnnotation);
+        }
+
+        function startRealTimeUpdates() {
+            realTimeInterval = setInterval(() => {
+                updateRealTimeData();
+            }, 10000); // Mise à jour toutes les 10 secondes
+        }
+
+        function updateRealTimeData() {
+            // Ajouter un nouveau point de données
+            const now = new Date();
+            const newValue = 85 + Math.random() * 15;
+            
+            if (charts.attendanceRealtime) {
+                const data = charts.attendanceRealtime.data.datasets[0].data;
+                data.push({ x: now, y: newValue });
+                
+                // Garder seulement les 24 dernières heures
+                const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                charts.attendanceRealtime.data.datasets[0].data = data.filter(point => point.x > oneDayAgo);
+                
+                charts.attendanceRealtime.update('none');
+            }
+        }
+
+        function updateChartsData(period) {
+            console.log(`Mise à jour des données pour la période: ${period}`);
+            // Simuler le chargement de nouvelles données
+            loadAnalyticsData();
+            refreshAllCharts();
+        }
+
+        function refreshAllCharts() {
+            console.log('Actualisation de tous les graphiques...');
+            
+            Object.values(charts).forEach(chart => {
+                if (chart) {
+                    chart.update();
+                }
+            });
+            
+            updateKPIs();
+            
+            // Animation de feedback
+            const refreshBtn = document.getElementById('refresh-analytics');
+            refreshBtn.innerHTML = '<div class="loading"></div> Actualisation...';
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualiser';
+            }, 1500);
+        }
+
+        function switchTab(tabName) {
+            // Masquer tous les contenus d'onglets
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Désactiver tous les onglets
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activer l'onglet et le contenu sélectionnés
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        function updateIndividualChart(memberId) {
+            if (!charts.individual) return;
+            
+            const memberData = {
+                allan: { presence: [95, 97, 94, 98], missions: [12, 15, 11, 18] },
+                polar: { presence: [92, 94, 91, 95], missions: [10, 12, 9, 14] },
+                marie: { presence: [88, 90, 87, 91], missions: [8, 10, 7, 12] }
+            };
+            
+            const data = memberData[memberId] || memberData.allan;
+            
+            charts.individual.data.datasets[0].data = data.presence;
+            charts.individual.data.datasets[1].data = data.missions;
+            charts.individual.update();
+        }
+
+        // Fonctions d'interaction avec les graphiques
+        function toggleChartType(chartName) {
+            console.log(`Changement de type pour le graphique: ${chartName}`);
+            // Implémenter le changement de type de graphique
+        }
+
+        function zoomChart(chartName) {
+            console.log(`Zoom sur le graphique: ${chartName}`);
+            // Implémenter le zoom
+        }
+
+        function exportChart(chartName) {
+            const chart = charts[chartName];
+            if (chart) {
+                const url = chart.toBase64Image();
+                const link = document.createElement('a');
+                link.download = `${chartName}-chart.png`;
+                link.href = url;
+                link.click();
+            }
+        }
+
+        function drillDown(chartName) {
+            console.log(`Drill down sur: ${chartName}`);
+            // Implémenter le drill down
+        }
+
+        function addAnnotation(e) {
+            if (e) e.preventDefault();
+            
+            const date = document.getElementById('annotation-date').value;
+            const text = document.getElementById('annotation-text').value;
+            
+            if (date && text) {
+                console.log(`Annotation ajoutée: ${date} - ${text}`);
+                closeModal();
+                
+                // Ajouter l'annotation au graphique approprié
+                // Implementation depends on which chart is active
+            }
+        }
+
+        function compareData(chartName) {
+            console.log(`Comparaison de données pour: ${chartName}`);
+            // Implémenter la comparaison
+        }
+
+        function changeTimeframe(chartName) {
+            console.log(`Changement de période pour: ${chartName}`);
+            // Implémenter le changement de période
+        }
+
+        function closeModal() {
+            document.getElementById('annotation-modal').style.display = 'none';
+        }
+
+        // Fonctions d'export et génération de rapports
+        function exportAllData() {
+            console.log('Export de toutes les données analytics...');
+            
+            const data = {
+                timestamp: new Date().toISOString(),
+                period: document.getElementById('period-select').value,
+                team: document.getElementById('team-select').value,
+                kpis: {
+                    activeUsers: document.getElementById('kpi-active-users').textContent,
+                    avgHours: document.getElementById('kpi-avg-hours').textContent,
+                    missions: document.getElementById('kpi-missions').textContent,
+                    productivity: document.getElementById('kpi-productivity').textContent
+                },
+                analytics: analyticsData
+            };
+            
+            downloadJSON(data, `synergia-analytics-${new Date().toISOString().split('T')[0]}.json`);
+        }
+
+        function exportToPDF() {
+            console.log('Export PDF en cours...');
+            alert('Export PDF - Fonctionnalité en développement');
+        }
+
+        function exportToExcel() {
+            console.log('Export Excel en cours...');
+            alert('Export Excel - Fonctionnalité en développement');
+        }
+
+        function exportToCSV() {
+            console.log('Export CSV en cours...');
+            
+            // Créer les données CSV
+            const csvData = [
+                ['Membre', 'Présence', 'Missions', 'XP', 'Productivité'],
+                ['Allan Boehme', '98%', '47', '1250', '96%'],
+                ['Polar Caron', '94%', '38', '980', '92%'],
+                ['Marie Dubois', '89%', '32', '750', '88%']
+            ];
+            
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+            downloadText(csvContent, `synergia-analytics-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+        }
+
+        function shareAnalytics() {
+            console.log('Partage des analytics...');
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Analytics SYNERGIA v3.0',
+                    text: 'Découvrez les performances de notre équipe',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copier l'URL
+                navigator.clipboard.writeText(window.location.href);
+                alert('Lien copié dans le presse-papiers');
+            }
+        }
+
+        function generateReport(type) {
+            console.log(`Génération du rapport ${type}...`);
+            
+            const reportData = {
+                type: type,
+                generated: new Date().toISOString(),
+                summary: 'Rapport automatique généré par SYNERGIA v3.0',
+                data: analyticsData
+            };
+            
+            downloadJSON(reportData, `rapport-${type}-${new Date().toISOString().split('T')[0]}.json`);
+        }
+
+        function scheduleReports() {
+            console.log('Configuration des rapports programmés...');
+            alert('Configuration des rapports automatiques - Fonctionnalité en développement');
+        }
+
+        // Fonctions utilitaires
+        function downloadJSON(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadText(content, filename, mimeType = 'text/plain') {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Gestion des erreurs
+        window.addEventListener('error', function(e) {
+            console.error('Erreur Analytics:', e.error);
+        });
+
+        // Nettoyage à la fermeture
+        window.addEventListener('beforeunload', function() {
+            if (realTimeInterval) {
+                clearInterval(realTimeInterval);
+            }
+        });
+
+        // API pour intégration avec SYNERGIA principal
+        window.AdvancedAnalytics = {
+            updateData: function(newData) {
+                analyticsData = { ...analyticsData, ...newData };
+                refreshAllCharts();
+            },
+            
+            addMember: function(memberData) {
+                analyticsData.attendance.members[memberData.id] = memberData;
+                refreshAllCharts();
+            },
+            
+            updateMemberData: function(memberId, data) {
+                if (analyticsData.attendance.members[memberId]) {
+                    analyticsData.attendance.members[memberId] = { 
+                        ...analyticsData.attendance.members[memberId], 
+                        ...data 
+                    };
+                    refreshAllCharts();
+                }
+            },
+            
+            exportData: exportAllData,
+            
+            generateReport: generateReport,
+            
+            getChartInstance: function(chartName) {
+                return charts[chartName];
+            },
+            
+            addAnnotation: function(chartName, date, text) {
+                console.log(`Annotation ajoutée à ${chartName}: ${date} - ${text}`);
+                // Implémenter l'ajout d'annotation programmatique
+            }
+        };
+
+    </script>
+</body>
+</html>

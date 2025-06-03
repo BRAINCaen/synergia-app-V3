@@ -4129,18 +4129,6 @@
                 this.createBadgingInterface();
             }
 
-            loadAttendanceHistory() {
-                // Charger l'historique depuis localStorage ou Firebase
-                try {
-                    const saved = localStorage.getItem('synergia_attendance');
-                    if (saved) {
-                        this.attendanceHistory = JSON.parse(saved);
-                    }
-                } catch (error) {
-                    console.warn('Impossible de charger l\'historique de présence');
-                }
-            }
-
             saveAttendanceHistory() {
                 try {
                     localStorage.setItem('synergia_attendance', JSON.stringify(this.attendanceHistory));

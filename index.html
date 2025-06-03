@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
     <!-- Chart.js depuis CDN autorisé -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -321,615 +321,28 @@
             font-size: 0.85rem;
         }
 
-        /* Team Styles */
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .team-member-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .team-member-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .team-member-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .member-avatar {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin-bottom: 1rem;
-        }
-
-        .member-avatar img {
+        /* Analytics Pro Styles */
+        .analytics-pro-container {
             width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .status-indicator {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
-        .status-indicator.online {
-            background: #28a745;
-        }
-
-        .status-indicator.away {
-            background: #ffc107;
-        }
-
-        .status-indicator.offline {
-            background: #6c757d;
-        }
-
-        .member-info h3 {
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .member-role {
-            color: #667eea;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .member-email {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .member-stats {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .member-level,
-        .member-xp {
+            min-height: 600px;
+            border-radius: 16px;
+            overflow: hidden;
             background: #f8f9fa;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: #333;
-        }
-
-        .member-badges {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            align-items: center;
+            justify-content: center;
         }
 
-        .badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
-
-        .member-actions {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
-        }
-
-        .no-members {
+        .analytics-fallback {
             text-align: center;
             padding: 3rem;
             color: #666;
         }
 
-        .no-members i {
+        .analytics-fallback i {
             font-size: 3rem;
             margin-bottom: 1rem;
-            color: #ccc;
-        }
-
-        /* Planning Styles */
-        .planning-container {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .calendar-header h2 {
-            color: #333;
-        }
-
-        .calendar-grid {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 1rem;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-        }
-
-        .events-sidebar {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .events-sidebar h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        /* Chat Styles */
-        .chat-container {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            height: 600px;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .chat-sidebar {
-            background: #f8f9fa;
-            border-right: 1px solid #e9ecef;
-        }
-
-        .chat-header {
-            padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-header h3 {
-            color: #333;
-        }
-
-        .chat-main {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .messages-area {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            background: #fafafa;
-        }
-
-        .welcome-message {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-
-        .welcome-message i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #ccc;
-        }
-
-        .message-input-container {
-            padding: 1rem;
-            border-top: 1px solid #e9ecef;
-            background: white;
-        }
-
-        .message-input {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .message-input input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            outline: none;
-        }
-
-        .message-input input:focus {
-            border-color: #667eea;
-        }
-
-        .btn-send {
-            padding: 0.75rem 1rem;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .btn-send:hover {
-            background: #5a6fd8;
-        }
-
-        /* Quests Styles */
-        .user-progress {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            color: white;
-            margin-bottom: 2rem;
-        }
-
-        .level-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .xp-bar {
-            flex: 1;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .xp-fill {
-            height: 100%;
-            background: white;
-            border-radius: 4px;
-            width: 60%;
-            transition: width 0.3s ease;
-        }
-
-        .quests-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .quest-tab {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            background: #f8f9fa;
-            color: #666;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .quest-tab.active,
-        .quest-tab:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .quests-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .quest-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .quest-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .quest-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .quest-info h3 {
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .quest-info p {
-            color: #666;
-            margin-bottom: 1rem;
-        }
-
-        .quest-reward {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .xp-reward {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .quest-type {
-            background: #f8f9fa;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .badges-section {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 12px;
-        }
-
-        .badges-section h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .badges-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 1rem;
-        }
-
-        /* Analytics Styles */
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .analytics-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .analytics-card h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .analytics-card canvas {
-            max-height: 300px;
-        }
-
-        .chart-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            justify-content: center;
-        }
-
-        .btn-small {
-            padding: 0.25rem 0.5rem;
-            border: 1px solid #dee2e6;
-            background: white;
-            color: #666;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .btn-small:hover {
-            background: #f8f9fa;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 1rem;
-        }
-
-        .stat-value {
-            display: block;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .reports-section {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 12px;
-        }
-
-        .reports-section h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .reports-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-
-        .report-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-
-        .report-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .report-card i {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-
-        .report-card h4 {
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .report-card p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-content h2 {
-            margin-bottom: 1.5rem;
-            color: #333;
-        }
-
-        .close {
-            position: absolute;
-            right: 1rem;
-            top: 1rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-        }
-
-        .select-input {
-            padding: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        .select-input:focus {
-            border-color: #667eea;
+            color: #ffc107;
         }
 
         /* Notifications */
@@ -956,10 +369,16 @@
             }
         }
 
-        .level-up-notification,
-        .badge-notification {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .notification.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .notification.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .notification.info {
+            border-left: 4px solid #17a2b8;
         }
 
         .notification-content {
@@ -972,33 +391,63 @@
             font-size: 1.5rem;
         }
 
-        /* Context Menu */
-        .member-context-menu {
-            position: absolute;
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 2000;
-            min-width: 200px;
+        /* Animations et transitions */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease;
         }
 
-        .context-menu-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #333;
-            transition: background 0.2s ease;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .context-menu-item:hover {
-            background: #f8f9fa;
+        .animate-slide-up {
+            animation: slideUp 0.3s ease;
         }
 
-        .context-menu-item i {
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
             color: #666;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         /* Responsive Design */
@@ -1043,103 +492,6 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-
-            .team-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .planning-container {
-                grid-template-columns: 1fr;
-            }
-
-            .chat-container {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-
-            .analytics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-content {
-                margin: 10% auto;
-                width: 95%;
-            }
-        }
-
-        /* Animations et transitions */
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Loading States */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .btn-logout {
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-logout:hover {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
         }
     </style>
 </head>
@@ -1151,43 +503,43 @@
                 <i class="fas fa-bolt"></i>
                 <span>SYNERGIA v3.0</span>
             </div>
-           <!-- Dans la section nav-menu autour de la ligne 90 -->
-<div class="nav-menu">
-    <a href="#dashboard" class="nav-link active">
-        <i class="fas fa-tachometer-alt"></i>
-        Dashboard
-    </a>
-    <a href="#team" class="nav-link">
-        <i class="fas fa-users"></i>
-        Équipe
-    </a>
-    <a href="#planning" class="nav-link">
-        <i class="fas fa-calendar"></i>
-        Planning
-    </a>
-    <a href="#chat" class="nav-link">
-        <i class="fas fa-comments"></i>
-        Chat
-    </a>
-    <a href="#quests" class="nav-link">
-        <i class="fas fa-trophy"></i>
-        Missions
-    </a>
-    <a href="#analytics" class="nav-link">
-        <i class="fas fa-chart-bar"></i>
-        Analytics
-    </a>
-    <!-- ✅ AJOUTER CETTE LIGNE -->
-    <a href="#analytics-pro" class="nav-link">
-        <i class="fas fa-chart-line"></i>
-        Analytics Pro
-    </a>
-</div>
+            
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="#team" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    Équipe
+                </a>
+                <a href="#planning" class="nav-link">
+                    <i class="fas fa-calendar"></i>
+                    Planning
+                </a>
+                <a href="#chat" class="nav-link">
+                    <i class="fas fa-comments"></i>
+                    Chat
+                </a>
+                <a href="#quests" class="nav-link">
+                    <i class="fas fa-trophy"></i>
+                    Missions
+                </a>
+                <a href="#analytics" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </a>
+                <a href="#analytics-pro" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    Analytics Pro
+                </a>
+            </div>
+            
             <div class="nav-user">
                 <div class="user-avatar">
-                    <img src="assets/default-avatar.png" alt="Avatar" id="user-avatar">
+                    <img src="https://via.placeholder.com/40x40/667eea/white?text=AB" alt="Avatar" id="user-avatar">
                 </div>
-                <span id="user-name">Utilisateur</span>
+                <span id="user-name">Allan Boehme</span>
                 <button id="logout-btn" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -1213,28 +565,28 @@
                 <div class="stat-card animate-slide-up">
                     <i class="fas fa-users"></i>
                     <div class="stat-info">
-                        <h3 id="team-count">0</h3>
+                        <h3 id="team-count">3</h3>
                         <p>Membres d'équipe</p>
                     </div>
                 </div>
                 <div class="stat-card animate-slide-up">
                     <i class="fas fa-tasks"></i>
                     <div class="stat-info">
-                        <h3 id="active-quests">0</h3>
+                        <h3 id="active-quests">5</h3>
                         <p>Missions actives</p>
                     </div>
                 </div>
                 <div class="stat-card animate-slide-up">
                     <i class="fas fa-calendar-check"></i>
                     <div class="stat-info">
-                        <h3 id="events-today">0</h3>
+                        <h3 id="events-today">2</h3>
                         <p>Événements aujourd'hui</p>
                     </div>
                 </div>
                 <div class="stat-card animate-slide-up">
                     <i class="fas fa-star"></i>
                     <div class="stat-info">
-                        <h3 id="user-level">1</h3>
+                        <h3 id="user-level">5</h3>
                         <p>Niveau actuel</p>
                     </div>
                 </div>
@@ -1310,8 +662,8 @@
                         <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">1,250</div>
                         <div style="color: #666;">XP Total</div>
                         <div style="margin-top: 1rem;">
-                            <div class="xp-bar" style="background: #e9ecef;">
-                                <div class="xp-fill" style="width: 60%; background: #667eea;"></div>
+                            <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="width: 60%; height: 100%; background: #667eea; border-radius: 4px;"></div>
                             </div>
                             <small style="color: #666;">Niveau 5 - 60% vers niveau 6</small>
                         </div>
@@ -1320,440 +672,14 @@
             </div>
         </section>
 
-        <!-- Équipe -->
-        <section id="team" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
-                <div class="section-actions">
-                    <input type="text" id="team-search" placeholder="Rechercher un membre..." class="search-input">
-                    <button id="add-member-btn" class="btn btn-primary">
-                        <i class="fas fa-user-plus"></i>
-                        Ajouter un membre
-                    </button>
-                    <button id="export-team-btn" class="btn btn-secondary">
-                        <i class="fas fa-download"></i>
-                        Exporter
-                    </button>
-                </div>
-            </div>
-
-            <div class="team-container">
-                <div id="team-members-list" class="team-grid">
-                    <!-- Les membres seront chargés dynamiquement -->
-                    <div class="loading-placeholder" style="text-align: center; padding: 3rem; color: #666;">
-                        <div class="loading"></div>
-                        <p style="margin-top: 1rem;">Chargement de l'équipe...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Planning -->
-        <section id="planning" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-calendar"></i> Planning d'équipe</h1>
-                <div class="section-actions">
-                    <select id="planning-view" class="select-input">
-                        <option value="month">Vue mensuelle</option>
-                        <option value="week">Vue hebdomadaire</option>
-                        <option value="day">Vue journalière</option>
-                    </select>
-                    <button id="add-event-btn" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Nouvel événement
-                    </button>
-                    <button id="sync-calendar-btn" class="btn btn-secondary">
-                        <i class="fas fa-sync"></i>
-                        Synchroniser
-                    </button>
-                </div>
-            </div>
-
-            <div class="planning-container">
-                <div class="calendar-section">
-                    <div class="calendar-header">
-                        <button id="prev-month" class="btn-icon">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <h2 id="current-month">Décembre 2024</h2>
-                        <button id="next-month" class="btn-icon">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                    <div id="calendar" class="calendar-grid">
-                        <div style="text-align: center; color: #666;">
-                            <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
-                            <p>Calendrier interactif en développement</p>
-                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Bientôt disponible avec intégration complète</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="events-list" class="events-sidebar">
-                    <h3><i class="fas fa-list"></i> Événements à venir</h3>
-                    <div id="events-container">
-                        <div class="activity-item">
-                            <i class="fas fa-users" style="color: #667eea;"></i>
-                            <div>
-                                <strong>Réunion équipe</strong>
-                                <br><small>Demain à 10h00</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <i class="fas fa-graduation-cap" style="color: #28a745;"></i>
-                            <div>
-                                <strong>Formation SYNERGIA</strong>
-                                <br><small>Vendredi à 14h00</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <i class="fas fa-birthday-cake" style="color: #ffc107;"></i>
-                            <div>
-                                <strong>Anniversaire Marie</strong>
-                                <br><small>Lundi prochain</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button id="view-all-events" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
-                        <i class="fas fa-eye"></i>
-                        Voir tous les événements
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Chat -->
-        <section id="chat" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-comments"></i> Chat d'équipe</h1>
-                <div class="section-actions">
-                    <select id="chat-status" class="select-input">
-                        <option value="online">En ligne</option>
-                        <option value="away">Absent</option>
-                        <option value="busy">Occupé</option>
-                        <option value="offline">Hors ligne</option>
-                    </select>
-                    <button id="chat-settings-btn" class="btn btn-secondary">
-                        <i class="fas fa-cog"></i>
-                        Paramètres
-                    </button>
-                </div>
-            </div>
-
-            <div class="chat-container">
-                <div class="chat-sidebar">
-                    <div class="chat-header">
-                        <h3>Conversations</h3>
-                        <button id="new-conversation-btn" class="btn-icon">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    <div id="conversations-list">
-                        <div class="activity-item" style="cursor: pointer; padding: 1rem;">
-                            <i class="fas fa-users" style="color: #667eea;"></i>
-                            <div style="flex: 1;">
-                                <strong>Équipe Générale</strong>
-                                <br><small style="color: #666;">Bonne journée à tous!</small>
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <div style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; margin-bottom: 0.25rem;"></div>
-                                <small style="color: #666;">10:30</small>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item" style="cursor: pointer; padding: 1rem;">
-                            <i class="fas fa-project-diagram" style="color: #ffc107;"></i>
-                            <div style="flex: 1;">
-                                <strong>Projet SYNERGIA</strong>
-                                <br><small style="color: #666;">Les nouvelles fonctionnalités sont prêtes</small>
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <small style="color: #666;">09:15</small>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item" style="cursor: pointer; padding: 1rem;">
-                            <i class="fas fa-user" style="color: #dc3545;"></i>
-                            <div style="flex: 1;">
-                                <strong>Allan Boehme</strong>
-                                <br><small style="color: #666;">Message privé...</small>
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <div style="background: #667eea; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; margin-bottom: 0.25rem;">2</div>
-                                <small style="color: #666;">Hier</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="padding: 1rem; border-top: 1px solid #e9ecef;">
-                        <button class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-plus"></i>
-                            Nouvelle conversation
-                        </button>
-                    </div>
-                </div>
-
-                <div class="chat-main">
-                    <div class="chat-header">
-                        <div class="chat-info">
-                            <h3 id="current-chat-title">Équipe Générale</h3>
-                            <span id="current-chat-status" style="color: #28a745; font-size: 0.9rem;">
-                                <i class="fas fa-circle"></i> 3 membres en ligne
-                            </span>
-                        </div>
-                        <div class="chat-actions">
-                            <button id="video-call-btn" class="btn-icon" title="Appel vidéo">
-                                <i class="fas fa-video"></i>
-                            </button>
-                            <button id="audio-call-btn" class="btn-icon" title="Appel audio">
-                                <i class="fas fa-phone"></i>
-                            </button>
-                            <button id="chat-info-btn" class="btn-icon" title="Informations">
-                                <i class="fas fa-info-circle"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="messages-container" class="messages-area">
-                        <div style="text-align: center; padding: 1rem; color: #666; border-bottom: 1px solid #eee;">
-                            <small>Conversation démarrée le 15 décembre 2024</small>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem; padding: 1rem; margin-bottom: 0.5rem;">
-                            <img src="assets/default-avatar.png" alt="Allan" style="width: 40px; height: 40px; border-radius: 50%;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                                    <strong>Allan Boehme</strong>
-                                    <small style="color: #666;">10:30</small>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 12px; border-top-left-radius: 4px;">
-                                    Bonne journée à tous ! L'équipe SYNERGIA v3.0 est opérationnelle 🚀
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem; padding: 1rem; margin-bottom: 0.5rem;">
-                            <img src="assets/default-avatar.png" alt="Polar" style="width: 40px; height: 40px; border-radius: 50%;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                                    <strong>Polar Caron</strong>
-                                    <small style="color: #666;">10:32</small>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 12px; border-top-left-radius: 4px;">
-                                    Excellent travail ! Les nouvelles fonctionnalités sont impressionnantes 👏
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem; padding: 1rem; margin-bottom: 0.5rem;">
-                            <img src="assets/default-avatar.png" alt="Marie" style="width: 40px; height: 40px; border-radius: 50%;">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                                    <strong>Marie Dubois</strong>
-                                    <small style="color: #666;">10:35</small>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 12px; border-top-left-radius: 4px;">
-                                    L'interface est vraiment intuitive ! Hâte de tester toutes les fonctionnalités ✨
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="message-input-container">
-                        <div class="message-input">
-                            <button class="btn-icon" title="Emoji">
-                                <i class="fas fa-smile"></i>
-                            </button>
-                            <button class="btn-icon" title="Fichier">
-                                <i class="fas fa-paperclip"></i>
-                            </button>
-                            <input type="text" id="message-input" placeholder="Tapez votre message...">
-                            <button id="send-message-btn" class="btn-send">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Missions -->
-        <section id="quests" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-trophy"></i> Missions & Récompenses</h1>
-                <div class="section-actions">
-                    <select id="quest-filter" class="select-input">
-                        <option value="all">Toutes les missions</option>
-                        <option value="available">Disponibles</option>
-                        <option value="active">En cours</option>
-                        <option value="completed">Terminées</option>
-                    </select>
-                    <button id="quest-history-btn" class="btn btn-secondary">
-                        <i class="fas fa-history"></i>
-                        Historique
-                    </button>
-                </div>
-            </div>
-
-            <div class="user-progress">
-                <div class="level-info">
-                    <div style="text-align: center; margin-right: 1rem;">
-                        <div style="font-size: 2rem; margin-bottom: 0.25rem;">⭐</div>
-                        <span id="user-level-display">Niveau 5</span>
-                    </div>
-                    <div class="xp-bar">
-                        <div id="xp-progress" class="xp-fill" style="width: 60%;"></div>
-                    </div>
-                    <div style="text-align: center; margin-left: 1rem;">
-                        <span id="user-xp-display">1,250 XP</span>
-                        <div style="font-size: 0.8rem; opacity: 0.8;">750 XP vers niveau 6</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="quests-tabs">
-                <button class="quest-tab active" data-tab="daily">
-                    <i class="fas fa-sun"></i> Quotidiennes
-                </button>
-                <button class="quest-tab" data-tab="weekly">
-                    <i class="fas fa-calendar-week"></i> Hebdomadaires
-                </button>
-                <button class="quest-tab" data-tab="special">
-                    <i class="fas fa-star"></i> Spéciales
-                </button>
-                <button class="quest-tab" data-tab="completed">
-                    <i class="fas fa-check"></i> Terminées
-                </button>
-            </div>
-
-            <div id="quests-list" class="quests-grid">
-                <!-- Les missions seront chargées dynamiquement -->
-                <div class="quest-card animate-slide-up">
-                    <div class="quest-icon">⏰</div>
-                    <div class="quest-info">
-                        <h3>Pointer son arrivée</h3>
-                        <p>Pointer votre arrivée avant 9h30</p>
-                        <div class="quest-reward">
-                            <span class="xp-reward">50 XP</span>
-                            <span class="quest-type">Quotidienne</span>
-                        </div>
-                    </div>
-                    <div class="quest-actions">
-                        <button onclick="acceptQuest('daily_checkin')" class="btn btn-primary">
-                            Accepter
-                        </button>
-                    </div>
-                </div>
-
-                <div class="quest-card animate-slide-up">
-                    <div class="quest-icon">💬</div>
-                    <div class="quest-info">
-                        <h3>Message d'équipe</h3>
-                        <p>Envoyer un message dans le chat d'équipe</p>
-                        <div class="quest-reward">
-                            <span class="xp-reward">30 XP</span>
-                            <span class="quest-type">Quotidienne</span>
-                        </div>
-                    </div>
-                    <div class="quest-actions">
-                        <button onclick="acceptQuest('daily_team_message')" class="btn btn-primary">
-                            Accepter
-                        </button>
-                    </div>
-                </div>
-
-                <div class="quest-card animate-slide-up">
-                    <div class="quest-icon">⭐</div>
-                    <div class="quest-info">
-                        <h3>Journée parfaite</h3>
-                        <p>Pointer arrivée et départ à l'heure</p>
-                        <div class="quest-reward">
-                            <span class="xp-reward">100 XP</span>
-                            <span class="quest-type">Quotidienne</span>
-                        </div>
-                    </div>
-                    <div class="quest-actions">
-                        <button onclick="acceptQuest('daily_perfect_day')" class="btn btn-primary">
-                            Accepter
-                        </button>
-                    </div>
-                </div>
-
-                <div class="quest-card animate-slide-up">
-                    <div class="quest-icon">🤝</div>
-                    <div class="quest-info">
-                        <h3>Esprit d'équipe</h3>
-                        <p>Participer à 5 conversations d'équipe cette semaine</p>
-                        <div class="quest-reward">
-                            <span class="xp-reward">150 XP</span>
-                            <span class="quest-type">Hebdomadaire</span>
-                        </div>
-                    </div>
-                    <div class="quest-actions">
-                        <button onclick="acceptQuest('weekly_team_player')" class="btn btn-primary">
-                            Accepter
-                        </button>
-                    </div>
-                </div>
-
-                <div class="quest-card animate-slide-up">
-                    <div class="quest-icon">🎯</div>
-                    <div class="quest-info">
-                        <h3>Ponctualité</h3>
-                        <p>Arriver à l'heure 5 jours de suite</p>
-                        <div class="quest-reward">
-                            <span class="xp-reward">200 XP</span>
-                            <span class="quest-type">Hebdomadaire</span>
-                        </div>
-                    </div>
-                    <div class="quest-actions">
-                        <button onclick="acceptQuest('weekly_punctual')" class="btn btn-primary">
-                            Accepter
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="badges-section">
-                <h3><i class="fas fa-trophy"></i> Badges obtenus</h3>
-                <div id="user-badges" class="badges-grid">
-                    <div class="badge-item" style="text-align: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌅</div>
-                        <div style="font-weight: 500; margin-bottom: 0.25rem;">Lève-tôt</div>
-                        <div style="font-size: 0.8rem; color: #666;">Arriver avant 8h30 pendant 5 jours</div>
-                    </div>
-                    
-                    <div class="badge-item" style="text-align: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🤝</div>
-                        <div style="font-weight: 500; margin-bottom: 0.25rem;">Équipier</div>
-                        <div style="font-size: 0.8rem; color: #666;">Envoyer 50 messages d'équipe</div>
-                    </div>
-                    
-                    <div class="badge-item" style="text-align: center; padding: 1rem; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">💡</div>
-                        <div style="font-weight: 500; margin-bottom: 0.25rem;">Innovateur</div>
-                        <div style="font-size: 0.8rem; color: #666;">Proposer une amélioration acceptée</div>
-                    </div>
-                    
-                    <div class="badge-item" style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6; opacity: 0.6;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏆</div>
-                        <div style="font-weight: 500; margin-bottom: 0.25rem;">Expert</div>
-                        <div style="font-size: 0.8rem; color: #666;">À débloquer</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Analytics -->
-       <!-- Analytics Pro -->
+        <!-- Analytics Pro -->
         <section id="analytics-pro" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-chart-line"></i> Analytics Avancées</h1>
                 <div class="section-actions">
                     <button id="fullscreen-analytics" class="btn btn-primary">
                         <i class="fas fa-expand"></i>
-                        Plein écran
+                        Mode Démo
                     </button>
                     <button id="refresh-pro-analytics" class="btn btn-secondary">
                         <i class="fas fa-sync-alt"></i>
@@ -1763,211 +689,94 @@
             </div>
 
             <div class="analytics-pro-container">
-                <!-- Iframe intégrant le module analytics avancé -->
-                <iframe 
-                    id="analytics-pro-iframe"
-                    src="advanced-analytics.html" 
-                    width="100%" 
-                    height="800px"
-                    style="border: none; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
-                </iframe>
-                
-                <!-- Message de fallback si iframe ne fonctionne pas -->
-                <div id="analytics-fallback" style="display: none; text-align: center; padding: 3rem; color: #666;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: #ffc107;"></i>
-                    <h3>Module Analytics Pro non disponible</h3>
-                    <p>Veuillez vous assurer que le fichier <code>advanced-analytics.html</code> est présent.</p>
-                    <button onclick="window.open('advanced-analytics.html', '_blank')" class="btn btn-primary">
-                        <i class="fas fa-external-link-alt"></i>
-                        Ouvrir dans un nouvel onglet
+                <!-- Démonstration interactive plutôt qu'iframe -->
+                <div class="analytics-fallback">
+                    <i class="fas fa-chart-line" style="font-size: 4rem; color: #667eea; margin-bottom: 1rem;"></i>
+                    <h3>Analytics Pro - Mode Démonstration</h3>
+                    <p>Module avancé de visualisation des données d'équipe</p>
+                    <div style="margin: 2rem 0;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <div style="font-size: 2rem; color: #28a745; margin-bottom: 0.5rem;">92%</div>
+                                <div style="color: #666;">Taux de présence</div>
+                            </div>
+                            <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">87%</div>
+                                <div style="color: #666;">Productivité</div>
+                            </div>
+                            <div style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <div style="font-size: 2rem; color: #ffc107; margin-bottom: 0.5rem;">156</div>
+                                <div style="color: #666;">Missions complétées</div>
+                            </div>
+                        </div>
+                        <canvas id="advanced-chart" width="800" height="400" style="max-width: 100%; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>
+                    </div>
+                    <button onclick="showAdvancedAnalytics()" class="btn btn-primary">
+                        <i class="fas fa-chart-bar"></i>
+                        Voir les graphiques avancés
                     </button>
                 </div>
             </div>
         </section>
+
+        <!-- Autres sections -->
+        <section id="team" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
+                <div class="section-actions">
+                    <input type="text" id="team-search" placeholder="Rechercher un membre..." class="search-input">
+                    <button id="add-member-btn" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Ajouter un membre
+                    </button>
+                </div>
+            </div>
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                <p>Section équipe en développement</p>
+            </div>
+        </section>
+
+        <section id="planning" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-calendar"></i> Planning d'équipe</h1>
+            </div>
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                <p>Section planning en développement</p>
+            </div>
+        </section>
+
+        <section id="chat" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-comments"></i> Chat d'équipe</h1>
+            </div>
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                <p>Section chat en développement</p>
+            </div>
+        </section>
+
+        <section id="quests" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-trophy"></i> Missions & Récompenses</h1>
+            </div>
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <i class="fas fa-trophy" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                <p>Section missions en développement</p>
+            </div>
+        </section>
+
+        <section id="analytics" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-bar"></i> Analytics</h1>
+            </div>
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+                <p>Section analytics en développement</p>
+            </div>
+        </section>
     </main>
-
-    <!-- Modals -->
-    <!-- Modal ajout de membre -->
-    <div id="add-member-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-member-modal').style.display='none'">&times;</span>
-            <h2><i class="fas fa-user-plus"></i> Ajouter un nouveau membre</h2>
-            <form id="add-member-form">
-                <div class="form-group">
-                    <label for="member-name">
-                        <i class="fas fa-user"></i> Nom complet
-                    </label>
-                    <input type="text" id="member-name" name="name" required placeholder="Ex: Jean Dupont">
-                </div>
-                <div class="form-group">
-                    <label for="member-email">
-                        <i class="fas fa-envelope"></i> Email
-                    </label>
-                    <input type="email" id="member-email" name="email" required placeholder="jean.dupont@example.com">
-                </div>
-                <div class="form-group">
-                    <label for="member-role">
-                        <i class="fas fa-briefcase"></i> Rôle
-                    </label>
-                    <select id="member-role" name="role" required>
-                        <option value="">Sélectionner un rôle</option>
-                        <option value="Membre">Membre</option>
-                        <option value="Développeur">Développeur</option>
-                        <option value="Designer">Designer</option>
-                        <option value="Manager">Manager</option>
-                        <option value="Admin">Administrateur</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="member-department">
-                        <i class="fas fa-building"></i> Département
-                    </label>
-                    <select id="member-department" name="department">
-                        <option value="">Sélectionner un département</option>
-                        <option value="IT">Informatique</option>
-                        <option value="Design">Design</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="RH">Ressources Humaines</option>
-                        <option value="Finance">Finance</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" id="cancel-add-member" class="btn btn-secondary" onclick="document.getElementById('add-member-modal').style.display='none'">
-                        <i class="fas fa-times"></i> Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Ajouter le membre
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal ajout d'événement -->
-    <div id="add-event-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('add-event-modal').style.display='none'">&times;</span>
-            <h2><i class="fas fa-calendar-plus"></i> Nouvel événement</h2>
-            <form id="add-event-form">
-                <div class="form-group">
-                    <label for="event-title">
-                        <i class="fas fa-heading"></i> Titre de l'événement
-                    </label>
-                    <input type="text" id="event-title" name="title" required placeholder="Ex: Réunion équipe">
-                </div>
-                <div class="form-group">
-                    <label for="event-description">
-                        <i class="fas fa-align-left"></i> Description
-                    </label>
-                    <textarea id="event-description" name="description" placeholder="Description de l'événement..."></textarea>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label for="event-date">
-                            <i class="fas fa-calendar"></i> Date
-                        </label>
-                        <input type="date" id="event-date" name="date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-time">
-                            <i class="fas fa-clock"></i> Heure
-                        </label>
-                        <input type="time" id="event-time" name="time" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="event-type">
-                        <i class="fas fa-tag"></i> Type d'événement
-                    </label>
-                    <select id="event-type" name="type" required>
-                        <option value="">Sélectionner un type</option>
-                        <option value="meeting">🏢 Réunion</option>
-                        <option value="deadline">⏰ Échéance</option>
-                        <option value="event">🎉 Événement</option>
-                        <option value="reminder">📝 Rappel</option>
-                        <option value="training">🎓 Formation</option>
-                        <option value="social">☕ Social</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="event-participants">
-                        <i class="fas fa-users"></i> Participants
-                    </label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; background: #f8f9fa;">
-                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
-                            <input type="checkbox" value="all" checked> Toute l'équipe
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
-                            <input type="checkbox" value="allan"> Allan Boehme
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
-                            <input type="checkbox" value="polar"> Polar Caron
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
-                            <input type="checkbox" value="marie"> Marie Dubois
-                        </label>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-event-modal').style.display='none'">
-                        <i class="fas fa-times"></i> Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-calendar-plus"></i> Créer l'événement
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal profil membre -->
-    <div id="member-profile-modal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <!-- Le contenu sera généré dynamiquement -->
-        </div>
-    </div>
-
-    <!-- Modal paramètres chat -->
-    <div id="chat-settings-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('chat-settings-modal').style.display='none'">&times;</span>
-            <h2><i class="fas fa-cog"></i> Paramètres du chat</h2>
-            <div class="form-group">
-                <label>
-                    <i class="fas fa-bell"></i> Notifications
-                </label>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" checked> Notifications de messages
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" checked> Sons de notification
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox"> Notifications desktop
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="chat-theme">
-                    <i class="fas fa-palette"></i> Thème
-                </label>
-                <select id="chat-theme" class="select-input">
-                    <option value="light">Clair</option>
-                    <option value="dark">Sombre</option>
-                    <option value="auto">Automatique</option>
-                </select>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('chat-settings-modal').style.display='none'">
-                    Fermer
-                </button>
-                <button type="button" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Sauvegarder
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Toast notifications -->
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 0.5rem;">
@@ -1976,324 +785,11 @@
 
     <!-- Scripts intégrés -->
     <script>
-        // Quest Manager intégré (remplace quest-manager.js)
-        class QuestManager {
-            constructor() {
-                this.quests = [];
-                this.userQuests = [];
-                this.badges = [];
-                this.currentUser = null;
-                this.questsLoaded = false;
-                
-                console.log('🎯 Quest Manager créé');
-            }
-
-            async init() {
-                console.log('🎯 Initialisation Quest Manager...');
-                
-                // Attendre que l'authentification soit prête
-                await this.waitForAuth();
-                
-                // Charger les données
-                await this.loadQuests();
-                await this.loadBadges();
-                await this.loadUserQuests();
-                
-                // Générer les quêtes quotidiennes si nécessaire
-                this.generateDailyQuests();
-                
-                // Configurer les événements
-                this.setupEventListeners();
-                
-                console.log('✅ Quest Manager initialisé');
-            }
-
-            async waitForAuth() {
-                return new Promise((resolve) => {
-                    // Vérifier si l'utilisateur est déjà connecté
-                    if (window.auth && window.auth.currentUser) {
-                        this.currentUser = window.auth.currentUser;
-                        console.log(`👤 Utilisateur trouvé: ${this.currentUser.email}`);
-                        resolve();
-                        return;
-                    }
-
-                    // Attendre la connexion ou utiliser le mode démo
-                    let attempts = 0;
-                    const maxAttempts = 30;
-                    
-                    const checkAuth = () => {
-                        attempts++;
-                        
-                        if (window.auth && window.auth.currentUser) {
-                            this.currentUser = window.auth.currentUser;
-                            console.log(`👤 Utilisateur connecté: ${this.currentUser.email}`);
-                            resolve();
-                        } else if (attempts >= maxAttempts) {
-                            console.log('👤 Mode démo - pas d\'utilisateur connecté');
-                            this.currentUser = null;
-                            resolve();
-                        } else {
-                            setTimeout(checkAuth, 100);
-                        }
-                    };
-                    
-                    checkAuth();
-                });
-            }
-
-            async loadQuests() {
-                try {
-                    // Quêtes par défaut du système
-                    this.quests = [
-                        {
-                            id: 'daily_checkin',
-                            title: 'Pointer son arrivée',
-                            description: 'Pointer votre arrivée avant 9h30',
-                            type: 'daily',
-                            xp: 50,
-                            icon: '⏰',
-                            category: 'attendance',
-                            requirements: { action: 'checkin', time_before: '09:30' }
-                        },
-                        {
-                            id: 'daily_team_message',
-                            title: 'Message d\'équipe',
-                            description: 'Envoyer un message dans le chat d\'équipe',
-                            type: 'daily',
-                            xp: 30,
-                            icon: '💬',
-                            category: 'communication',
-                            requirements: { action: 'send_message', target: 'team' }
-                        },
-                        {
-                            id: 'daily_perfect_day',
-                            title: 'Journée parfaite',
-                            description: 'Pointer arrivée et départ à l\'heure',
-                            type: 'daily',
-                            xp: 100,
-                            icon: '⭐',
-                            category: 'attendance',
-                            requirements: { action: 'perfect_attendance' }
-                        },
-                        {
-                            id: 'weekly_team_player',
-                            title: 'Esprit d\'équipe',
-                            description: 'Participer à 5 conversations d\'équipe cette semaine',
-                            type: 'weekly',
-                            xp: 150,
-                            icon: '🤝',
-                            category: 'teamwork',
-                            requirements: { action: 'team_messages', count: 5, period: 'week' }
-                        },
-                        {
-                            id: 'weekly_punctual',
-                            title: 'Ponctualité',
-                            description: 'Arriver à l\'heure 5 jours de suite',
-                            type: 'weekly',
-                            xp: 200,
-                            icon: '🎯',
-                            category: 'attendance',
-                            requirements: { action: 'punctual_streak', count: 5 }
-                        }
-                    ];
-
-                    console.log(`📜 ${this.quests.length} quêtes chargées`);
-                } catch (error) {
-                    console.error('❌ Erreur chargement quêtes:', error);
-                }
-            }
-
-            async loadBadges() {
-                try {
-                    this.badges = [
-                        {
-                            id: 'early_bird',
-                            name: 'Lève-tôt',
-                            description: 'Arriver avant 8h30 pendant 5 jours',
-                            icon: '🌅',
-                            rarity: 'common'
-                        },
-                        {
-                            id: 'team_player',
-                            name: 'Équipier',
-                            description: 'Envoyer 50 messages d\'équipe',
-                            icon: '🤝',
-                            rarity: 'common'
-                        },
-                        {
-                            id: 'innovator',
-                            name: 'Innovateur',
-                            description: 'Proposer 3 améliorations acceptées',
-                            icon: '💡',
-                            rarity: 'legendary'
-                        }
-                    ];
-
-                    console.log(`🏆 ${this.badges.length} badges chargés`);
-                } catch (error) {
-                    console.error('❌ Erreur chargement badges:', error);
-                }
-            }
-
-            async loadUserQuests() {
-                try {
-                    this.userQuests = [];
-                    console.log(`✅ ${this.userQuests.length} quêtes utilisateur chargées`);
-                } catch (error) {
-                    console.error('❌ Erreur chargement quêtes utilisateur:', error);
-                    this.userQuests = [];
-                }
-            }
-
-            generateDailyQuests() {
-                if (!this.currentUser) {
-                    console.log('👤 Mode démo - quêtes système uniquement');
-                    return;
-                }
-
-                try {
-                    const today = new Date().toDateString();
-                    const existingDailyQuests = this.userQuests.filter(q => 
-                        q.type === 'daily' && q.assignedDate === today
-                    );
-
-                    if (existingDailyQuests.length === 0) {
-                        console.log('🔄 Quêtes quotidiennes générées');
-                    }
-                } catch (error) {
-                    console.error('❌ Erreur génération quêtes:', error);
-                }
-            }
-
-            setupEventListeners() {
-                // Événements depuis d'autres managers
-                document.addEventListener('synergia:checkin', (e) => {
-                    this.handleCheckin(e.detail.time);
-                });
-
-                document.addEventListener('synergia:team_message', () => {
-                    this.handleTeamMessage();
-                });
-
-                document.addEventListener('synergia:perfect_day', () => {
-                    this.handlePerfectDay();
-                });
-            }
-
-            async handleCheckin(time) {
-                console.log('✅ Pointage traité par Quest Manager');
-            }
-
-            async handleTeamMessage() {
-                console.log('💬 Message d\'équipe traité par Quest Manager');
-            }
-
-            async handlePerfectDay() {
-                console.log('⭐ Journée parfaite détectée par Quest Manager');
-            }
-
-            getAvailableQuests() {
-                return this.quests.filter(q => q.type === 'daily' || q.type === 'weekly');
-            }
-
-            getUserQuests() {
-                return this.userQuests;
-            }
-
-            getDailyQuests() {
-                const today = new Date().toDateString();
-                return this.userQuests.filter(q => q.type === 'daily' && q.assignedDate === today);
-            }
-
-            getWeeklyQuests() {
-                return this.userQuests.filter(q => q.type === 'weekly');
-            }
-
-            getQuestById(questId) {
-                return this.quests.find(q => q.id === questId);
-            }
-
-            async acceptQuest(questId) {
-                console.log(`✅ Acceptation de la quête: ${questId}`);
-                const quest = this.getQuestById(questId);
-                if (quest) {
-                    console.log(`🎯 Nouvelle quête assignée: ${quest.title}`);
-                    console.log(`INFO: Nouvelle mission: ${quest.title}`);
-                    console.log('SUCCESS: Mission acceptée!');
-                    return quest;
-                }
-                return null;
-            }
-
-            showAssignQuestModal(memberId) {
-                console.log(`🎯 Assignation de quête au membre ${memberId}`);
-                
-                // Créer une modal simple pour assigner des quêtes
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                modal.style.display = 'flex';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
-                        <h2><i class="fas fa-tasks"></i> Assigner une mission</h2>
-                        <p>Sélectionnez une mission à assigner à ce membre :</p>
-                        <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
-                            ${this.quests.map(quest => `
-                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid #e9ecef; border-radius: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 1rem;">
-                                        <span style="font-size: 1.5rem;">${quest.icon}</span>
-                                        <div>
-                                            <strong>${quest.title}</strong>
-                                            <br><small style="color: #666;">${quest.description}</small>
-                                            <br><span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${quest.xp} XP</span>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary" onclick="questManager.assignQuestToMember('${memberId}', '${quest.id}'); this.closest('.modal').remove();">
-                                        Assigner
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div style="text-align: center;">
-                            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()">
-                                Fermer
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-            }
-
-            assignQuestToMember(memberId, questId) {
-                const quest = this.getQuestById(questId);
-                const member = window.teamManager ? window.teamManager.getMemberById(memberId) : null;
-                
-                if (quest && member) {
-                    console.log(`🎯 Assignation quête "${quest.title}" au membre ${member.name}`);
-                    window.showToast(`Mission "${quest.title}" assignée à ${member.name}`, 'success');
-                } else {
-                    console.log(`🎯 Assignation quête ${questId} au membre ${memberId}`);
-                    window.showToast('Mission assignée avec succès', 'success');
-                }
-            }
-        }
-
-        // Initialiser le Quest Manager globalement
-        window.questManager = new QuestManager();
-    </script>
-    
-    <script>
         console.log('🚀 Initializing SYNERGIA v3.0...');
 
         // Variables globales
         let currentUser = null;
-        let teamManager = null;
-        let planningManager = null;
-        let chatManager = null;
-        let analyticsManager = null;
-        let badgingManager = null;
+        let advancedChart = null;
 
         // Fonctions utilitaires globales
         window.showToast = function(message, type = 'info', duration = 3000) {
@@ -2314,25 +810,6 @@
             }, duration);
         };
 
-        window.log = (message, type = 'INFO') => {
-            console.log(`${type}: ${message}`);
-        };
-
-        window.success = (message) => {
-            window.log(message, 'SUCCESS');
-            window.showToast(message, 'success');
-        };
-
-        window.error = (message) => {
-            window.log(message, 'ERROR');
-            window.showToast(message, 'error');
-        };
-
-        window.warning = (message) => {
-            window.log(message, 'WARNING');
-            window.showToast(message, 'warning');
-        };
-
         // Attendre que Firebase soit prêt
         function waitForFirebase() {
             return new Promise((resolve) => {
@@ -2350,9 +827,8 @@
                 currentUser = user;
                 console.log(`👤 Utilisateur connecté: ${user.email}`);
                 updateUserInfo(user);
-                initializeManagers();
             } else {
-                console.log('👤 Aucun utilisateur connecté - Mode démo');
+                console.log('👤 Mode démo activé');
                 initializeDemoMode();
             }
         }
@@ -2362,7 +838,7 @@
             const userAvatar = document.getElementById('user-avatar');
             
             if (userName) userName.textContent = user.displayName || user.email.split('@')[0];
-            if (userAvatar) userAvatar.src = user.photoURL || 'assets/default-avatar.png';
+            if (userAvatar) userAvatar.src = user.photoURL || 'https://via.placeholder.com/40x40/667eea/white?text=AB';
             
             console.log('✅ Utilisateur mis à jour');
         }
@@ -2375,2035 +851,9 @@
                 displayName: 'Allan Boehme'
             };
             updateUserInfo(currentUser);
-            initializeManagers();
-        }
-
-        // Initialisation des managers
-        async function initializeManagers() {
-            try {
-                // Team Manager
-                teamManager = new TeamManager();
-                
-                // Planning Manager
-                planningManager = new PlanningManager();
-                
-                // Chat Manager
-                chatManager = new ChatManager();
-                
-                // Analytics Manager
-                analyticsManager = new AnalyticsManager();
-                
-                // Badging Manager
-                badgingManager = new BadgingManager();
-                
-                // Quest Manager déjà initialisé globalement
-                if (window.questManager) {
-                    await window.questManager.init();
-                }
-                
-                console.log('✅ SYNERGIA v3.0 initialized successfully!');
-                
-            } catch (error) {
-                console.error('❌ Erreur lors de l\'initialisation:', error);
-            }
-        }
-
-        // Team Manager
-        class TeamManager {
-            constructor() {
-                this.members = [];
-                this.currentUser = null;
-                this.init();
-            }
-
-            async init() {
-                console.log('✅ Team Manager initialisé');
-                await this.loadMembers();
-                this.setupEventListeners();
-            }
-
-            async loadMembers() {
-                try {
-                    const user = (window.auth && window.auth.currentUser) || currentUser;
-                    if (!user) {
-                        console.log('❌ Utilisateur non connecté pour charger les membres');
-                        this.loadDemoMembers();
-                        return;
-                    }
-
-                    // Tentative de chargement depuis Firebase
-                    try {
-                        if (window.db && window.firebase && window.firebase.collection) {
-                            const membersRef = window.firebase.collection(window.db, 'teams', user.uid, 'members');
-                            const snapshot = await window.firebase.getDocs(membersRef);
-                            
-                            this.members = [];
-                            snapshot.forEach(doc => {
-                                const memberData = doc.data();
-                                this.members.push({
-                                    id: doc.id,
-                                    name: memberData.name || '',
-                                    email: memberData.email || '',
-                                    role: memberData.role || 'Membre',
-                                    avatar: memberData.avatar || 'assets/default-avatar.png',
-                                    status: memberData.status || 'offline',
-                                    joinDate: memberData.joinDate || new Date(),
-                                    xp: memberData.xp || 0,
-                                    level: memberData.level || 1,
-                                    badges: memberData.badges || []
-                                });
-                            });
-
-                            console.log(`✅ ${this.members.length} membres chargés depuis Firebase`);
-                        } else {
-                            throw new Error('Firebase non disponible');
-                        }
-                    } catch (firebaseError) {
-                        console.log('❌ Erreur Firebase, chargement des données de démo');
-                        this.loadDemoMembers();
-                        return;
-                    }
-                    
-                    this.renderMembers();
-                } catch (error) {
-                    console.error('❌ Erreur lors du chargement des membres:', error);
-                    this.loadDemoMembers();
-                }
-            }
-
-            loadDemoMembers() {
-                this.members = [
-                    {
-                        id: 'demo1',
-                        name: 'Allan Boehme',
-                        email: 'alan.boehme61@gmail.com',
-                        role: 'Manager',
-                        avatar: 'assets/avatars/alan.jpg',
-                        status: 'online',
-                        joinDate: new Date('2024-01-15'),
-                        xp: 1250,
-                        level: 5,
-                        badges: ['early_bird', 'team_player', 'innovator']
-                    },
-                    {
-                        id: 'demo2',
-                        name: 'Polar Caron',
-                        email: 'polar.caron@synergia.com',
-                        role: 'Développeur',
-                        avatar: 'assets/avatars/polar.jpg',
-                        status: 'online',
-                        joinDate: new Date('2024-02-01'),
-                        xp: 980,
-                        level: 4,
-                        badges: ['code_master', 'team_player']
-                    },
-                    {
-                        id: 'demo3',
-                        name: 'Marie Dubois',
-                        email: 'marie.dubois@synergia.com',
-                        role: 'Designer',
-                        avatar: 'assets/avatars/marie.jpg',
-                        status: 'away',
-                        joinDate: new Date('2024-03-10'),
-                        xp: 750,
-                        level: 3,
-                        badges: ['creative', 'perfectionist']
-                    }
-                ];
-                console.log(`👥 ${this.members.length} membres d'équipe chargés`);
-                this.renderMembers();
-            }
-
-            setupEventListeners() {
-                const searchInput = document.getElementById('team-search');
-                if (searchInput) {
-                    searchInput.addEventListener('input', (e) => {
-                        this.filterAndRenderMembers(e.target.value);
-                    });
-                }
-
-                const addMemberBtn = document.getElementById('add-member-btn');
-                if (addMemberBtn) {
-                    addMemberBtn.addEventListener('click', () => {
-                        this.showAddMemberModal();
-                    });
-                }
-
-                const exportTeamBtn = document.getElementById('export-team-btn');
-                if (exportTeamBtn) {
-                    exportTeamBtn.addEventListener('click', () => {
-                        this.exportTeamData();
-                    });
-                }
-            }
-
-            filterAndRenderMembers(searchTerm = '') {
-                console.log('🔍 Debug membres:', {
-                    membersExists: !!this.members,
-                    membersType: typeof this.members,
-                    membersLength: this.members ? this.members.length : 'N/A',
-                    membersContent: this.members
-                });
-
-                try {
-                    if (!this.members || !Array.isArray(this.members)) {
-                        console.warn('⚠️ Membres invalides');
-                        this.renderMembers([]);
-                        return;
-                    }
-
-                    const filteredMembers = this.members.filter(member => {
-                        if (!member) {
-                            return false;
-                        }
-                        
-                        const memberName = member.name || '';
-                        const memberEmail = member.email || '';
-                        const memberRole = member.role || '';
-                        
-                        const searchText = searchTerm || '';
-                        
-                        return memberName.toString().toLowerCase().includes(searchText.toLowerCase()) ||
-                               memberEmail.toString().toLowerCase().includes(searchText.toLowerCase()) ||
-                               memberRole.toString().toLowerCase().includes(searchText.toLowerCase());
-                    });
-                    
-                    this.renderMembers(filteredMembers);
-                    
-                } catch (error) {
-                    console.error('❌ Erreur dans filterAndRenderMembers:', error);
-                    this.renderMembers(this.members || []);
-                }
-            }
-
-            renderMembers(membersToRender = this.members) {
-                const container = document.getElementById('team-members-list');
-                if (!container) {
-                    console.warn('⚠️ Container team-members-list non trouvé');
-                    return;
-                }
-
-                container.innerHTML = '';
-
-                if (membersToRender.length === 0) {
-                    container.innerHTML = `
-                        <div class="no-members">
-                            <i class="fas fa-users"></i>
-                            <p>Aucun membre trouvé</p>
-                            <button onclick="teamManager.showAddMemberModal()" class="btn btn-primary" style="margin-top: 1rem;">
-                                <i class="fas fa-user-plus"></i>
-                                Ajouter le premier membre
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                membersToRender.forEach(member => {
-                    const memberCard = this.createMemberCard(member);
-                    container.appendChild(memberCard);
-                });
-
-                console.log(`👥 ${membersToRender.length} membres d'équipe chargés`);
-                
-                // Mettre à jour le compteur dans le dashboard
-                document.getElementById('team-count').textContent = this.members.length;
-            }
-
-            createMemberCard(member) {
-                const card = document.createElement('div');
-                card.className = 'team-member-card animate-slide-up';
-                card.dataset.memberId = member.id;
-
-                const statusClass = member.status === 'online' ? 'online' : 
-                                   member.status === 'away' ? 'away' : 'offline';
-
-                const joinDate = new Date(member.joinDate).toLocaleDateString('fr-FR');
-
-                card.innerHTML = `
-                    <div class="member-avatar">
-                        <img src="${member.avatar}" alt="${member.name}" onerror="this.src='assets/default-avatar.png'">
-                        <div class="status-indicator ${statusClass}" title="Status: ${member.status}"></div>
-                    </div>
-                    <div class="member-info">
-                        <h3>${member.name}</h3>
-                        <p class="member-role">${member.role}</p>
-                        <p class="member-email">${member.email}</p>
-                        <div class="member-stats">
-                            <span class="member-level" title="Niveau actuel">Niveau ${member.level}</span>
-                            <span class="member-xp" title="Points d'expérience">${member.xp} XP</span>
-                        </div>
-                        <div class="member-badges">
-                            ${member.badges.map(badge => `<span class="badge ${badge}" title="${this.getBadgeName(badge)}">${this.getBadgeIcon(badge)}</span>`).join('')}
-                        </div>
-                        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-                            <i class="fas fa-calendar-alt"></i> Rejoint le ${joinDate}
-                        </div>
-                    </div>
-                    <div class="member-actions">
-                        <button class="btn-icon" onclick="teamManager.sendMessage('${member.id}')" title="Envoyer un message">
-                            <i class="fas fa-envelope"></i>
-                        </button>
-                        <button class="btn-icon" onclick="teamManager.viewMemberProfile('${member.id}')" title="Voir le profil">
-                            <i class="fas fa-user"></i>
-                        </button>
-                        <button class="btn-icon" onclick="teamManager.showMemberOptions('${member.id}')" title="Plus d'options">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                    </div>
-                `;
-
-                return card;
-            }
-
-            getBadgeName(badgeId) {
-                const badges = {
-                    'early_bird': 'Lève-tôt',
-                    'team_player': 'Équipier',
-                    'innovator': 'Innovateur',
-                    'code_master': 'Maître du Code',
-                    'creative': 'Créatif',
-                    'perfectionist': 'Perfectionniste',
-                    'mentor': 'Mentor',
-                    'leader': 'Leader'
-                };
-                return badges[badgeId] || badgeId;
-            }
-
-            getBadgeIcon(badgeId) {
-                const icons = {
-                    'early_bird': '🌅',
-                    'team_player': '🤝',
-                    'innovator': '💡',
-                    'code_master': '💻',
-                    'creative': '🎨',
-                    'perfectionist': '⭐',
-                    'mentor': '🎓',
-                    'leader': '👑'
-                };
-                return icons[badgeId] || '🏆';
-            }
-
-            showAddMemberModal() {
-                console.log('INFO: Fonctionnalité d\'ajout de membre - En développement');
-                const modal = document.getElementById('add-member-modal');
-                if (modal) {
-                    modal.style.display = 'flex';
-                }
-            }
-
-            sendMessage(memberId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    console.log(`INFO: Message à ${member.name}`);
-                    window.showToast(`Ouverture du chat avec ${member.name}`, 'info');
-                    
-                    // Passer à l'onglet chat
-                    document.querySelector('.nav-link[href="#chat"]').click();
-                }
-            }
-
-            viewMemberProfile(memberId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    console.log(`INFO: Profil de ${member.name}`);
-                    this.showMemberProfileModal(member);
-                }
-            }
-
-            showMemberProfileModal(member) {
-                const modal = document.getElementById('member-profile-modal');
-                const modalContent = modal.querySelector('.modal-content');
-                
-                const joinDate = new Date(member.joinDate).toLocaleDateString('fr-FR');
-                const nextLevelXP = (member.level * 250);
-                const currentLevelXP = ((member.level - 1) * 250);
-                const progressXP = member.xp - currentLevelXP;
-                const neededXP = nextLevelXP - member.xp;
-                
-                modalContent.innerHTML = `
-                    <span class="close" onclick="document.getElementById('member-profile-modal').style.display='none'">&times;</span>
-                    <div class="member-profile">
-                        <div style="text-align: center; margin-bottom: 2rem;">
-                            <img src="${member.avatar}" alt="${member.name}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;" onerror="this.src='assets/default-avatar.png'">
-                            <h2 style="margin-bottom: 0.5rem;">${member.name}</h2>
-                            <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">${member.role}</p>
-                            <p style="color: #666; font-size: 0.9rem;">${member.email}</p>
-                            <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: ${member.status === 'online' ? '#28a745' : member.status === 'away' ? '#ffc107' : '#6c757d'}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; margin-top: 0.5rem;">
-                                <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
-                                ${member.status === 'online' ? 'En ligne' : member.status === 'away' ? 'Absent' : 'Hors ligne'}
-                            </div>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: #667eea; margin-bottom: 0.25rem;">Niveau ${member.level}</div>
-                                <div style="font-size: 0.9rem; color: #666;">Niveau actuel</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: #28a745; margin-bottom: 0.25rem;">${member.xp}</div>
-                                <div style="font-size: 0.9rem; color: #666;">Points XP</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107; margin-bottom: 0.25rem;">${member.badges.length}</div>
-                                <div style="font-size: 0.9rem; color: #666;">Badges obtenus</div>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="margin-bottom: 1rem;">Progression vers le niveau ${member.level + 1}</h4>
-                            <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem;">
-                                <div style="width: ${(progressXP / 250) * 100}%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease;"></div>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666;">
-                                <span>${progressXP} XP</span>
-                                <span>${neededXP > 0 ? neededXP + ' XP restants' : 'Niveau max atteint!'}</span>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="margin-bottom: 1rem;">Badges obtenus</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem;">
-                                ${member.badges.map(badge => `
-                                    <div style="text-align: center; padding: 1rem; background: white; border: 1px solid #e9ecef; border-radius: 8px;">
-                                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">${this.getBadgeIcon(badge)}</div>
-                                        <div style="font-weight: 500; margin-bottom: 0.25rem; font-size: 0.9rem;">${this.getBadgeName(badge)}</div>
-                                    </div>
-                                `).join('')}
-                                ${member.badges.length === 0 ? '<p style="color: #666; text-align: center; grid-column: 1 / -1;">Aucun badge obtenu pour le moment</p>' : ''}
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="margin-bottom: 1rem;">Informations</h4>
-                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <i class="fas fa-calendar-alt" style="color: #667eea; width: 16px;"></i>
-                                    <span style="color: #666;">Rejoint le ${joinDate}</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <i class="fas fa-briefcase" style="color: #667eea; width: 16px;"></i>
-                                    <span style="color: #666;">Rôle: ${member.role}</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <i class="fas fa-envelope" style="color: #667eea; width: 16px;"></i>
-                                    <span style="color: #666;">${member.email}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem; justify-content: center;">
-                            <button onclick="teamManager.sendMessage('${member.id}'); document.getElementById('member-profile-modal').style.display='none';" class="btn btn-primary">
-                                <i class="fas fa-envelope"></i> Envoyer un message
-                            </button>
-                            <button onclick="teamManager.assignTask('${member.id}')" class="btn btn-secondary">
-                                <i class="fas fa-tasks"></i> Assigner une mission
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                modal.style.display = 'flex';
-            }
-
-            showMemberOptions(memberId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    console.log(`INFO: Options pour ${member.name}`);
-                    this.showMemberContextMenu(member);
-                }
-            }
-
-            showMemberContextMenu(member) {
-                // Supprimer le menu existant s'il y en a un
-                const existingMenu = document.querySelector('.member-context-menu');
-                if (existingMenu) {
-                    existingMenu.remove();
-                }
-
-                const menu = document.createElement('div');
-                menu.className = 'member-context-menu';
-                menu.innerHTML = `
-                    <div class="context-menu-item" onclick="teamManager.viewMemberProfile('${member.id}')">
-                        <i class="fas fa-user"></i> Voir le profil
-                    </div>
-                    <div class="context-menu-item" onclick="teamManager.sendMessage('${member.id}')">
-                        <i class="fas fa-envelope"></i> Envoyer un message
-                    </div>
-                    <div class="context-menu-item" onclick="teamManager.assignTask('${member.id}')">
-                        <i class="fas fa-tasks"></i> Assigner une mission
-                    </div>
-                    <div class="context-menu-item" onclick="teamManager.viewMemberStats('${member.id}')">
-                        <i class="fas fa-chart-bar"></i> Voir les statistiques
-                    </div>
-                    <div class="context-menu-item" onclick="teamManager.editMember('${member.id}')">
-                        <i class="fas fa-edit"></i> Modifier les informations
-                    </div>
-                `;
-
-                document.body.appendChild(menu);
-
-                // Positionner le menu
-                const event = window.event;
-                if (event) {
-                    menu.style.left = event.pageX + 'px';
-                    menu.style.top = event.pageY + 'px';
-                }
-
-                // Fermer le menu en cliquant ailleurs
-                setTimeout(() => {
-                    document.addEventListener('click', function closeMenu() {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    });
-                }, 100);
-            }
-
-            assignTask(memberId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    console.log(`INFO: Assigner une tâche à ${member.name}`);
-                    window.showToast(`Assignation de mission à ${member.name}`, 'info');
-                    
-                    // Intégration avec le système de quêtes
-                    if (window.questManager) {
-                        window.questManager.showAssignQuestModal(memberId);
-                    }
-                }
-            }
-
-            viewMemberStats(memberId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    console.log(`INFO: Statistiques de ${member.name}`);
-                    window.showToast(`Affichage des stats de ${member.name}`, 'info');
-                    
-                    // Passer aux analytics avec filtre membre
-                    document.querySelector('.nav-link[href="#analytics"]').click();
-                    if (window.analyticsManager) {
-                        window.analyticsManager.showMemberAnalytics(memberId);
-                    }
-                }
-            }
-
-            editMember(memberId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    console.log(`INFO: Modification de ${member.name}`);
-                    window.showToast('Fonction de modification bientôt disponible', 'info');
-                }
-            }
-
-            exportTeamData() {
-                console.log('INFO: Export des données d\'équipe...');
-                
-                // Créer les données CSV
-                const csvData = [
-                    ['Nom', 'Email', 'Rôle', 'Niveau', 'XP', 'Badges', 'Statut', 'Date d\'arrivée'],
-                    ...this.members.map(member => [
-                        member.name,
-                        member.email,
-                        member.role,
-                        member.level,
-                        member.xp,
-                        member.badges.join('; '),
-                        member.status,
-                        new Date(member.joinDate).toLocaleDateString('fr-FR')
-                    ])
-                ];
-
-                // Convertir en CSV
-                const csvContent = csvData.map(row => row.map(field => `"${field}"`).join(',')).join('\n');
-                
-                // Télécharger le fichier
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `equipe_synergia_${new Date().toISOString().split('T')[0]}.csv`;
-                link.click();
-
-                window.success('Données d\'équipe exportées avec succès');
-            }
-
-            updateMemberXP(memberId, xpGained) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member) {
-                    member.xp += xpGained;
-                    const newLevel = Math.floor(member.xp / 250) + 1;
-                    if (newLevel > member.level) {
-                        member.level = newLevel;
-                        console.log(`🎉 ${member.name} monte au niveau ${newLevel}!`);
-                        this.showLevelUpNotification(member);
-                    }
-                    this.renderMembers();
-                    this.saveMemberToStorage(member);
-                }
-            }
-
-            addBadgeToMember(memberId, badgeId) {
-                const member = this.members.find(m => m.id === memberId);
-                if (member && !member.badges.includes(badgeId)) {
-                    member.badges.push(badgeId);
-                    console.log(`🏆 ${member.name} obtient le badge: ${this.getBadgeName(badgeId)}`);
-                    this.renderMembers();
-                    this.showBadgeNotification(member, badgeId);
-                    this.saveMemberToStorage(member);
-                }
-            }
-
-            showLevelUpNotification(member) {
-                const notification = document.createElement('div');
-                notification.className = 'level-up-notification notification';
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fas fa-star"></i>
-                        <div>
-                            <h4>Niveau supérieur !</h4>
-                            <p>${member.name} atteint le niveau ${member.level}</p>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.remove();
-                }, 5000);
-            }
-
-            showBadgeNotification(member, badgeId) {
-                const notification = document.createElement('div');
-                notification.className = 'badge-notification notification';
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fas fa-trophy"></i>
-                        <div>
-                            <h4>Nouveau badge !</h4>
-                            <p>${member.name} obtient: ${this.getBadgeName(badgeId)}</p>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.remove();
-                }, 5000);
-            }
-
-            saveMemberToStorage(member) {
-                // Sauvegarder en localStorage pour la persistance en mode démo
-                try {
-                    localStorage.setItem(`synergia_member_${member.id}`, JSON.stringify(member));
-                } catch (error) {
-                    console.warn('Impossible de sauvegarder en localStorage');
-                }
-            }
-
-            getAllMembers() {
-                return this.members;
-            }
-
-            getMemberById(memberId) {
-                return this.members.find(m => m.id === memberId);
-            }
-
-            async refreshMembers() {
-                await this.loadMembers();
-            }
-        }
-
-        // Planning Manager
-        class PlanningManager {
-            constructor() {
-                this.events = [];
-                this.currentDate = new Date();
-                this.init();
-            }
-
-            async init() {
-                console.log('✅ Planning Manager initialisé');
-                await this.loadEvents();
-                this.renderCalendar();
-                this.setupEventListeners();
-            }
-
-            async loadEvents() {
-                try {
-                    const user = (window.auth && window.auth.currentUser) || currentUser;
-                    if (!user) {
-                        console.log('❌ Utilisateur non connecté pour charger les événements');
-                        this.loadDemoEvents();
-                        return;
-                    }
-
-                    // Vérifier les permissions Firebase
-                    try {
-                        if (window.db && window.firebase) {
-                            const testQuery = window.firebase.query(
-                                window.firebase.collection(window.db, 'events'), 
-                                window.firebase.limit(1)
-                            );
-                            await window.firebase.getDocs(testQuery);
-                            console.log('✅ Permissions événements vérifiées');
-
-                            const eventsRef = window.firebase.collection(window.db, 'events');
-                            const snapshot = await window.firebase.getDocs(eventsRef);
-                            
-                            this.events = [];
-                            snapshot.forEach(doc => {
-                                this.events.push({
-                                    id: doc.id,
-                                    ...doc.data()
-                                });
-                            });
-
-                            console.log(`✅ ${this.events.length} événements chargés depuis Firebase`);
-                        } else {
-                            throw new Error('Firebase non disponible');
-                        }
-                    } catch (permError) {
-                        console.log('❌ Permissions insuffisantes pour les événements, chargement démo');
-                        this.loadDemoEvents();
-                    }
-                } catch (error) {
-                    console.error('❌ Erreur chargement événements:', error);
-                    this.loadDemoEvents();
-                }
-            }
-
-            loadDemoEvents() {
-                this.events = [
-                    {
-                        id: 'demo1',
-                        title: 'Réunion équipe',
-                        description: 'Point hebdomadaire d\'équipe',
-                        date: new Date(2024, 11, 16, 10, 0),
-                        type: 'meeting',
-                        participants: ['demo1', 'demo2', 'demo3'],
-                        createdBy: 'demo1'
-                    },
-                    {
-                        id: 'demo2',
-                        title: 'Formation SYNERGIA',
-                        description: 'Formation sur les nouvelles fonctionnalités',
-                        date: new Date(2024, 11, 20, 14, 0),
-                        type: 'training',
-                        participants: ['demo1', 'demo2'],
-                        createdBy: 'demo1'
-                    },
-                    {
-                        id: 'demo3',
-                        title: 'Anniversaire Marie',
-                        description: 'Célébration d\'anniversaire',
-                        date: new Date(2024, 11, 23, 12, 0),
-                        type: 'social',
-                        participants: ['demo1', 'demo2', 'demo3'],
-                        createdBy: 'demo2'
-                    }
-                ];
-                console.log('📅 Événements de démonstration chargés');
-                this.updateEventsList();
-            }
-
-            renderCalendar() {
-                const calendar = document.getElementById('calendar');
-                const currentMonth = document.getElementById('current-month');
-                
-                if (currentMonth) {
-                    currentMonth.textContent = this.currentDate.toLocaleDateString('fr-FR', { 
-                        month: 'long', 
-                        year: 'numeric' 
-                    });
-                }
-
-                if (calendar) {
-                    // Pour l'instant, affichage simple
-                    calendar.innerHTML = `
-                        <div style="text-align: center; color: #666; padding: 3rem;">
-                            <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
-                            <h3>Calendrier interactif</h3>
-                            <p>Vue ${this.currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</p>
-                            <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">
-                                Calendrier complet bientôt disponible<br>
-                                Consultez la liste des événements à droite
-                            </p>
-                        </div>
-                    `;
-                }
-                
-                this.updateEventsList();
-            }
-
-            updateEventsList() {
-                const container = document.getElementById('events-container');
-                if (!container) return;
-
-                if (this.events.length === 0) {
-                    container.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: #666;">
-                            <i class="fas fa-calendar-plus" style="font-size: 2rem; margin-bottom: 1rem; color: #ccc;"></i>
-                            <p>Aucun événement planifié</p>
-                            <button onclick="planningManager.showAddEventModal()" class="btn btn-primary" style="margin-top: 1rem;">
-                                <i class="fas fa-plus"></i> Créer un événement
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Trier les événements par date
-                const sortedEvents = this.events.sort((a, b) => new Date(a.date) - new Date(b.date));
-                
-                container.innerHTML = '';
-                sortedEvents.forEach(event => {
-                    const eventElement = this.createEventElement(event);
-                    container.appendChild(eventElement);
-                });
-
-                // Mettre à jour le compteur du dashboard
-                const today = new Date();
-                const todayEvents = this.events.filter(event => {
-                    const eventDate = new Date(event.date);
-                    return eventDate.toDateString() === today.toDateString();
-                });
-                document.getElementById('events-today').textContent = todayEvents.length;
-            }
-
-            createEventElement(event) {
-                const eventDate = new Date(event.date);
-                const now = new Date();
-                const isToday = eventDate.toDateString() === now.toDateString();
-                const isPast = eventDate < now;
-                
-                const typeIcons = {
-                    'meeting': 'fas fa-users',
-                    'deadline': 'fas fa-clock',
-                    'event': 'fas fa-star',
-                    'reminder': 'fas fa-bell',
-                    'training': 'fas fa-graduation-cap',
-                    'social': 'fas fa-birthday-cake'
-                };
-
-                const typeColors = {
-                    'meeting': '#667eea',
-                    'deadline': '#dc3545',
-                    'event': '#ffc107',
-                    'reminder': '#6c757d',
-                    'training': '#28a745',
-                    'social': '#e83e8c'
-                };
-
-                const element = document.createElement('div');
-                element.className = `activity-item ${isPast ? 'past-event' : ''} ${isToday ? 'today-event' : ''}`;
-                element.style.cursor = 'pointer';
-                element.style.opacity = isPast ? '0.6' : '1';
-                element.style.borderLeft = isToday ? '3px solid #28a745' : 'none';
-                element.style.paddingLeft = isToday ? '1rem' : '1.25rem';
-
-                element.innerHTML = `
-                    <i class="${typeIcons[event.type] || 'fas fa-calendar'}" style="color: ${typeColors[event.type] || '#667eea'};"></i>
-                    <div style="flex: 1;">
-                        <strong>${event.title}</strong>
-                        ${event.description ? `<br><small style="color: #666;">${event.description}</small>` : ''}
-                        <br><small style="color: ${isToday ? '#28a745' : '#666'}; font-weight: ${isToday ? 'bold' : 'normal'};">
-                            ${isToday ? 'Aujourd\'hui' : eventDate.toLocaleDateString('fr-FR')} à ${eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                        </small>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center;">
-                        ${event.participants ? `<small style="color: #666;">${event.participants.length} participant${event.participants.length > 1 ? 's' : ''}</small>` : ''}
-                        <button class="btn-icon" onclick="planningManager.editEvent('${event.id}')" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                `;
-
-                element.addEventListener('click', () => {
-                    this.showEventDetails(event);
-                });
-
-                return element;
-            }
-
-            setupEventListeners() {
-                const addEventBtn = document.getElementById('add-event-btn');
-                if (addEventBtn) {
-                    addEventBtn.addEventListener('click', () => {
-                        this.showAddEventModal();
-                    });
-                }
-
-                const syncBtn = document.getElementById('sync-calendar-btn');
-                if (syncBtn) {
-                    syncBtn.addEventListener('click', () => {
-                        this.syncCalendar();
-                    });
-                }
-
-                const prevBtn = document.getElementById('prev-month');
-                const nextBtn = document.getElementById('next-month');
-                
-                if (prevBtn) {
-                    prevBtn.addEventListener('click', () => {
-                        this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-                        this.renderCalendar();
-                    });
-                }
-
-                if (nextBtn) {
-                    nextBtn.addEventListener('click', () => {
-                        this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-                        this.renderCalendar();
-                    });
-                }
-
-                const viewSelect = document.getElementById('planning-view');
-                if (viewSelect) {
-                    viewSelect.addEventListener('change', (e) => {
-                        this.changeView(e.target.value);
-                    });
-                }
-
-                const viewAllBtn = document.getElementById('view-all-events');
-                if (viewAllBtn) {
-                    viewAllBtn.addEventListener('click', () => {
-                        this.showAllEventsModal();
-                    });
-                }
-
-                // Form submit
-                const addEventForm = document.getElementById('add-event-form');
-                if (addEventForm) {
-                    addEventForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.saveEvent();
-                    });
-                }
-            }
-
-            showAddEventModal() {
-                console.log('INFO: Ouverture du modal d\'ajout d\'événement');
-                const modal = document.getElementById('add-event-modal');
-                if (modal) {
-                    // Pré-remplir avec la date d'aujourd'hui
-                    const today = new Date();
-                    document.getElementById('event-date').value = today.toISOString().split('T')[0];
-                    document.getElementById('event-time').value = '10:00';
-                    
-                    modal.style.display = 'flex';
-                }
-            }
-
-            showEventDetails(event) {
-                const eventDate = new Date(event.date);
-                window.showToast(`Événement: ${event.title} - ${eventDate.toLocaleDateString('fr-FR')} à ${eventDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`, 'info', 5000);
-            }
-
-            changeView(view) {
-                console.log(`INFO: Changement de vue vers: ${view}`);
-                window.showToast(`Vue ${view} sélectionnée`, 'info');
-            }
-
-            showAllEventsModal() {
-                console.log('INFO: Affichage de tous les événements');
-                window.showToast('Liste complète des événements', 'info');
-            }
-
-            editEvent(eventId) {
-                const event = this.events.find(e => e.id === eventId);
-                if (event) {
-                    console.log(`INFO: Modification de l'événement: ${event.title}`);
-                    window.showToast(`Modification de "${event.title}"`, 'info');
-                }
-            }
-
-            async syncCalendar() {
-                console.log('INFO: Synchronisation en cours...');
-                window.showToast('Synchronisation du calendrier...', 'info');
-                
-                // Simulation de synchronisation
-                setTimeout(() => {
-                    console.log('SUCCESS: Calendrier synchronisé!');
-                    window.success('Calendrier synchronisé avec succès');
-                }, 2000);
-            }
-
-            async saveEvent() {
-                try {
-                    const title = document.getElementById('event-title').value.trim();
-                    const description = document.getElementById('event-description').value.trim();
-                    const date = document.getElementById('event-date').value;
-                    const time = document.getElementById('event-time').value;
-                    const type = document.getElementById('event-type').value;
-
-                    if (!title) {
-                        window.error('Le titre est obligatoire');
-                        return;
-                    }
-
-                    if (!date || !time) {
-                        window.error('La date et l\'heure sont obligatoires');
-                        return;
-                    }
-
-                    const eventDate = new Date(`${date}T${time}`);
-                    const participants = [];
-
-                    // Récupérer les participants sélectionnés
-                    const checkboxes = document.querySelectorAll('#add-event-form input[type="checkbox"]:checked');
-                    checkboxes.forEach(cb => {
-                        if (cb.value !== 'all') {
-                            participants.push(cb.value);
-                        } else {
-                            participants.push('demo1', 'demo2', 'demo3');
-                        }
-                    });
-
-                    const newEvent = {
-                        id: 'event_' + Date.now(),
-                        title,
-                        description,
-                        date: eventDate,
-                        type,
-                        participants: participants,
-                        createdBy: currentUser?.uid || 'demo1',
-                        createdAt: new Date()
-                    };
-
-                    // Tentative de sauvegarde Firebase
-                    try {
-                        const user = auth.currentUser || currentUser;
-                        if (user) {
-                            const eventsRef = collection(db, 'events');
-                            await addDoc(eventsRef, {
-                                ...newEvent,
-                                date: newEvent.date.toISOString(),
-                                createdAt: newEvent.createdAt.toISOString()
-                            });
-                            console.log('SUCCESS: Événement sauvegardé en Firebase');
-                        }
-                    } catch (firebaseError) {
-                        console.log('WARNING: Sauvegarde Firebase échouée, sauvegarde locale');
-                    }
-
-                    // Ajouter à la liste locale
-                    this.events.push(newEvent);
-                    this.updateEventsList();
-
-                    // Fermer le modal et réinitialiser le formulaire
-                    document.getElementById('add-event-modal').style.display = 'none';
-                    document.getElementById('add-event-form').reset();
-
-                    window.success(`Événement "${title}" créé avec succès`);
-
-                } catch (error) {
-                    console.error('❌ Erreur lors de la création de l\'événement:', error);
-                    window.error('Erreur lors de la création de l\'événement');
-                }
-            }
-        }
-
-        // Chat Manager
-        class ChatManager {
-            constructor() {
-                this.conversations = [];
-                this.currentConversation = null;
-                this.messages = [];
-                this.init();
-            }
-
-            async init() {
-                console.log('💬 Chat Manager initialisé');
-                await this.loadConversations();
-                this.setupEventListeners();
-            }
-
-            async loadConversations() {
-                try {
-                    const user = (window.auth && window.auth.currentUser) || currentUser;
-                    if (!user) {
-                        console.log('❌ Utilisateur non connecté pour charger les conversations');
-                        this.loadDemoConversations();
-                        return;
-                    }
-
-                    // Vérifier les permissions Firebase
-                    try {
-                        if (window.db && window.firebase) {
-                            const testQuery = window.firebase.query(
-                                window.firebase.collection(window.db, 'conversations'), 
-                                window.firebase.limit(1)
-                            );
-                            await window.firebase.getDocs(testQuery);
-                            console.log('✅ Permissions conversations vérifiées');
-
-                            const conversationsRef = window.firebase.collection(window.db, 'conversations');
-                            const snapshot = await window.firebase.getDocs(conversationsRef);
-                            
-                            this.conversations = [];
-                            snapshot.forEach(doc => {
-                                this.conversations.push({
-                                    id: doc.id,
-                                    ...doc.data()
-                                });
-                            });
-
-                            console.log(`💬 ${this.conversations.length} conversations chargées depuis Firebase`);
-                        } else {
-                            throw new Error('Firebase non disponible');
-                        }
-                    } catch (permError) {
-                        console.log('❌ Erreur Firebase conversations, chargement démo');
-                        this.loadDemoConversations();
-                    }
-                } catch (error) {
-                    console.error('❌ Erreur chargement conversations:', error);
-                    this.loadDemoConversations();
-                }
-            }
-
-            loadDemoConversations() {
-                this.conversations = [
-                    {
-                        id: 'demo1',
-                        name: 'Équipe Générale',
-                        type: 'group',
-                        participants: ['demo1', 'demo2', 'demo3'],
-                        lastMessage: 'Bonne journée à tous!',
-                        lastMessageTime: new Date(),
-                        unreadCount: 0,
-                        isActive: true
-                    },
-                    {
-                        id: 'demo2',
-                        name: 'Projet SYNERGIA',
-                        type: 'group',
-                        participants: ['demo1', 'demo2'],
-                        lastMessage: 'Les nouvelles fonctionnalités sont prêtes',
-                        lastMessageTime: new Date(Date.now() - 3600000),
-                        unreadCount: 0,
-                        isActive: true
-                    },
-                    {
-                        id: 'demo3',
-                        name: 'Allan Boehme',
-                        type: 'private',
-                        participants: ['demo1'],
-                        lastMessage: 'Message privé...',
-                        lastMessageTime: new Date(Date.now() - 86400000),
-                        unreadCount: 2,
-                        isActive: false
-                    }
-                ];
-                console.log('💬 Conversations de démonstration chargées');
-                this.renderConversations();
-            }
-
-            renderConversations() {
-                const container = document.getElementById('conversations-list');
-                if (!container) return;
-
-                // Le container est déjà rempli dans le HTML, on peut ajouter plus de logique ici
-                // Pour l'instant, on garde le contenu statique du HTML
-            }
-
-            setupEventListeners() {
-                const newConversationBtn = document.getElementById('new-conversation-btn');
-                if (newConversationBtn) {
-                    newConversationBtn.addEventListener('click', () => {
-                        this.showNewConversationModal();
-                    });
-                }
-
-                const videoCallBtn = document.getElementById('video-call-btn');
-                if (videoCallBtn) {
-                    videoCallBtn.addEventListener('click', () => {
-                        console.log('INFO: Appel vidéo - Bientôt disponible');
-                        window.showToast('Appel vidéo bientôt disponible', 'info');
-                    });
-                }
-
-                const audioCallBtn = document.getElementById('audio-call-btn');
-                if (audioCallBtn) {
-                    audioCallBtn.addEventListener('click', () => {
-                        console.log('INFO: Appel audio - Bientôt disponible');
-                        window.showToast('Appel audio bientôt disponible', 'info');
-                    });
-                }
-
-                const chatInfoBtn = document.getElementById('chat-info-btn');
-                if (chatInfoBtn) {
-                    chatInfoBtn.addEventListener('click', () => {
-                        console.log('INFO: Informations conversation - Bientôt disponible');
-                        window.showToast('Informations de conversation', 'info');
-                    });
-                }
-
-                const sendBtn = document.getElementById('send-message-btn');
-                const messageInput = document.getElementById('message-input');
-                
-                if (sendBtn) {
-                    sendBtn.addEventListener('click', () => {
-                        this.sendMessage();
-                    });
-                }
-
-                if (messageInput) {
-                    messageInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            this.sendMessage();
-                        }
-                    });
-                }
-
-                const chatSettingsBtn = document.getElementById('chat-settings-btn');
-                if (chatSettingsBtn) {
-                    chatSettingsBtn.addEventListener('click', () => {
-                        this.showChatSettings();
-                    });
-                }
-
-                const chatStatusSelect = document.getElementById('chat-status');
-                if (chatStatusSelect) {
-                    chatStatusSelect.addEventListener('change', (e) => {
-                        this.updateUserStatus(e.target.value);
-                    });
-                }
-            }
-
-            showNewConversationModal() {
-                console.log('INFO: Nouvelle conversation - Bientôt disponible');
-                window.showToast('Création de nouvelle conversation bientôt disponible', 'info');
-            }
-
-            sendMessage() {
-                const input = document.getElementById('message-input');
-                const message = input.value.trim();
-                
-                if (!message) return;
-
-                console.log(`💬 Envoi du message: ${message}`);
-                
-                // Ajouter le message à l'interface
-                this.addMessageToUI({
-                    content: message,
-                    sender: currentUser?.displayName || 'Vous',
-                    timestamp: new Date(),
-                    isOwn: true
-                });
-
-                // Vider l'input
-                input.value = '';
-
-                // Simuler une réponse automatique
-                setTimeout(() => {
-                    const responses = [
-                        "Message reçu ! 👍",
-                        "Parfait, merci pour l'info",
-                        "C'est noté 📝",
-                        "Super idée ! 💡",
-                        "Je suis d'accord",
-                        "On en discute en réunion ?"
-                    ];
-                    
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    this.addMessageToUI({
-                        content: randomResponse,
-                        sender: 'Équipe',
-                        timestamp: new Date(),
-                        isOwn: false
-                    });
-                }, 1000 + Math.random() * 2000);
-
-                // Notifier le Quest Manager si c'est un message d'équipe
-                if (window.questManager) {
-                    window.questManager.handleTeamMessage();
-                }
-
-                window.success('Message envoyé');
-            }
-
-            addMessageToUI(message) {
-                const messagesContainer = document.getElementById('messages-container');
-                if (!messagesContainer) return;
-
-                const messageElement = document.createElement('div');
-                messageElement.style.cssText = `
-                    display: flex; 
-                    gap: 1rem; 
-                    padding: 1rem; 
-                    margin-bottom: 0.5rem; 
-                    ${message.isOwn ? 'flex-direction: row-reverse;' : ''}
-                `;
-
-                const avatarUrl = message.isOwn ? 'assets/default-avatar.png' : 'assets/default-avatar.png';
-                
-                messageElement.innerHTML = `
-                    <img src="${avatarUrl}" alt="${message.sender}" style="width: 40px; height: 40px; border-radius: 50%;">
-                    <div ${message.isOwn ? 'style="text-align: right;"' : ''}>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; ${message.isOwn ? 'flex-direction: row-reverse;' : ''}">
-                            <strong>${message.sender}</strong>
-                            <small style="color: #666;">${message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</small>
-                        </div>
-                        <div style="background: ${message.isOwn ? '#667eea' : '#f8f9fa'}; color: ${message.isOwn ? 'white' : 'black'}; padding: 0.75rem; border-radius: 12px; ${message.isOwn ? 'border-top-right-radius: 4px;' : 'border-top-left-radius: 4px;'}">
-                            ${message.content}
-                        </div>
-                    </div>
-                `;
-
-                messagesContainer.appendChild(messageElement);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-
-            showChatSettings() {
-                const modal = document.getElementById('chat-settings-modal');
-                if (modal) {
-                    modal.style.display = 'flex';
-                }
-            }
-
-            updateUserStatus(status) {
-                console.log(`INFO: Statut mis à jour: ${status}`);
-                const statusText = {
-                    'online': 'En ligne',
-                    'away': 'Absent',
-                    'busy': 'Occupé',
-                    'offline': 'Hors ligne'
-                };
-                window.showToast(`Statut: ${statusText[status]}`, 'info');
-            }
-
-            startPrivateChat(memberId) {
-                console.log(`INFO: Chat privé avec membre ${memberId}`);
-                window.showToast('Ouverture du chat privé', 'info');
-            }
-        }
-
-        // Analytics Manager
-        class AnalyticsManager {
-            constructor() {
-                this.data = {};
-                this.charts = {};
-                this.init();
-            }
-  // Intégration Analytics Pro
-        initializeAdvancedAnalytics() {
-            // Attendre que l'iframe soit chargé
-            const iframe = document.getElementById('analytics-pro-iframe');
-            if (iframe) {
-                iframe.addEventListener('load', () => {
-                    console.log('📊 Analytics Pro chargé');
-                    this.syncWithAdvancedAnalytics();
-                });
-                
-                // Gestion des erreurs de chargement
-                iframe.addEventListener('error', () => {
-                    console.warn('⚠️ Erreur chargement Analytics Pro');
-                    document.getElementById('analytics-fallback').style.display = 'block';
-                    iframe.style.display = 'none';
-                });
-            }
-        }
-
-        syncWithAdvancedAnalytics() {
-            try {
-                const iframe = document.getElementById('analytics-pro-iframe');
-                if (iframe && iframe.contentWindow && iframe.contentWindow.AdvancedAnalytics) {
-                    const advancedAnalytics = iframe.contentWindow.AdvancedAnalytics;
-                    
-                    // Synchroniser les données des membres
-                    if (window.teamManager) {
-                        const members = window.teamManager.getAllMembers();
-                        members.forEach(member => {
-                            advancedAnalytics.updateMemberData(member.id, {
-                                attendance: this.calculateAttendanceRate(member.id),
-                                missions: this.getMemberMissions(member.id),
-                                xp: member.xp || 0,
-                                productivity: this.calculateProductivity(member.id)
-                            });
-                        });
-                    }
-                    
-                    // Synchroniser les données globales
-                    advancedAnalytics.updateData({
-                        globalMetrics: this.data.performance,
-                        attendance: this.data.attendance,
-                        missions: this.data.quests
-                    });
-                    
-                    console.log('✅ Synchronisation Analytics Pro réussie');
-                }
-            } catch (error) {
-                console.warn('⚠️ Erreur synchronisation Analytics Pro:', error);
-            }
-        }
-
-        calculateAttendanceRate(memberId) {
-            // Calculer le taux de présence d'un membre
-            // Utiliser les données de badgingManager si disponible
-            if (window.badgingManager) {
-                const stats = window.badgingManager.getAttendanceStats();
-                return stats.punctualityRate || 85;
-            }
-            return 85 + Math.random() * 15; // Simulation
-        }
-
-        getMemberMissions(memberId) {
-            // Récupérer le nombre de missions d'un membre
-            if (window.questManager) {
-                const userQuests = window.questManager.getUserQuests();
-                return userQuests.filter(q => q.status === 'completed').length;
-            }
-            return Math.floor(Math.random() * 50); // Simulation
-        }
-
-        calculateProductivity(memberId) {
-            // Calculer la productivité d'un membre
-            const attendance = this.calculateAttendanceRate(memberId);
-            const missions = this.getMemberMissions(memberId);
-            return Math.min(100, (attendance * 0.6) + (missions * 0.8));
-        }
-
-        // Méthode pour mettre à jour Analytics Pro depuis SYNERGIA
-        updateAdvancedAnalytics(memberData) {
-            try {
-                const iframe = document.getElementById('analytics-pro-iframe');
-                if (iframe && iframe.contentWindow && iframe.contentWindow.AdvancedAnalytics) {
-                    iframe.contentWindow.AdvancedAnalytics.updateMemberData(memberData.id, memberData);
-                }
-            } catch (error) {
-                console.warn('Erreur mise à jour Analytics Pro:', error);
-            }
-        }
-            async init() {
-                console.log('📊 Analytics Manager initialisé');
-                await this.loadAnalyticsData();
-                this.setupEventListeners();
-                this.initializeCharts();
-                this.initializeAdvancedAnalytics();
-            }
-
-            async loadAnalyticsData() {
-                console.log('📊 Chargement des données analytics...');
-                
-                // Simulation de chargement de données
-                this.data = {
-                    attendance: {
-                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'],
-                        data: [85, 92, 78, 96, 89],
-                        average: 88
-                    },
-                    xp: {
-                        labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-                        data: [1250, 1350, 1450, 1600],
-                        weekly: [100, 100, 150]
-                    },
-                    quests: {
-                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'],
-                        data: [3, 5, 2, 7, 4],
-                        total: 21
-                    },
-                    performance: {
-                        totalMembers: teamManager ? teamManager.members.length : 3,
-                        totalQuests: 21,
-                        totalEvents: planningManager ? planningManager.events.length : 5,
-                        avgAttendance: 88,
-                        productivity: 12,
-                        engagement: 8,
-                        collaboration: 15
-                    }
-                };
-                
-                this.updateAnalytics();
-                console.log('SUCCESS: Analytics actualisées');
-            }
-
-            updateAnalytics() {
-                // Mettre à jour les statistiques globales
-                const elements = {
-                    'total-members': this.data.performance.totalMembers,
-                    'total-quests': this.data.performance.totalQuests,
-                    'total-events': this.data.performance.totalEvents,
-                    'avg-attendance': `${this.data.performance.avgAttendance}%`
-                };
-
-                Object.entries(elements).forEach(([id, value]) => {
-                    const element = document.getElementById(id);
-                    if (element) element.textContent = value;
-                });
-
-                // Mettre à jour les graphiques
-                this.updateCharts();
-            }
-
-            initializeCharts() {
-                // Vérifier que Chart.js est disponible
-                if (typeof Chart === 'undefined') {
-                    console.warn('Chart.js non disponible');
-                    return;
-                }
-
-                this.createAttendanceChart();
-                this.createXPChart();
-                this.createQuestsChart();
-            }
-
-            createAttendanceChart() {
-                const ctx = document.getElementById('attendance-chart');
-                if (!ctx) return;
-
-                this.charts.attendance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: this.data.attendance.labels,
-                        datasets: [{
-                            label: 'Présence (%)',
-                            data: this.data.attendance.data,
-                            borderColor: '#28a745',
-                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + '%';
-                                    }
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            }
-
-            createXPChart() {
-                const ctx = document.getElementById('xp-chart');
-                if (!ctx) return;
-
-                this.charts.xp = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: this.data.xp.labels,
-                        datasets: [{
-                            label: 'XP Total',
-                            data: this.data.xp.data,
-                            backgroundColor: '#667eea',
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            }
-
-            createQuestsChart() {
-                const ctx = document.getElementById('quests-chart');
-                if (!ctx) return;
-
-                this.charts.quests = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Quotidiennes', 'Hebdomadaires', 'Spéciales'],
-                        datasets: [{
-                            data: [15, 4, 2],
-                            backgroundColor: ['#ffc107', '#667eea', '#28a745'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-            }
-
-            updateCharts() {
-                // Mettre à jour les données des graphiques
-                Object.values(this.charts).forEach(chart => {
-                    if (chart) chart.update();
-                });
-            }
-
-            setupEventListeners() {
-                const exportBtn = document.getElementById('export-data-btn');
-                if (exportBtn) {
-                    exportBtn.addEventListener('click', () => {
-                        this.exportData();
-                    });
-                }
- // Analytics Pro
-            const fullscreenBtn = document.getElementById('fullscreen-analytics');
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', () => {
-                    this.toggleFullscreenAnalytics();
-                });
-            }
-
-            const refreshProBtn = document.getElementById('refresh-pro-analytics');
-            if (refreshProBtn) {
-                refreshProBtn.addEventListener('click', () => {
-                    this.refreshAdvancedAnalytics();
-                });
-            }
-        }
-
-        toggleFullscreenAnalytics() {
-            const iframe = document.getElementById('analytics-pro-iframe');
-            if (iframe) {
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else {
-                    // Fallback: ouvrir dans un nouvel onglet
-                    window.open('advanced-analytics.html', '_blank');
-                }
-            }
-        }
-
-        refreshAdvancedAnalytics() {
-            const iframe = document.getElementById('analytics-pro-iframe');
-            if (iframe) {
-                iframe.src = iframe.src; // Recharger l'iframe
-            }
-        }
-                const refreshBtn = document.getElementById('refresh-analytics-btn');
-                if (refreshBtn) {
-                    refreshBtn.addEventListener('click', () => {
-                        this.refreshAnalytics();
-                    });
-                }
-
-                const periodSelect = document.getElementById('analytics-period');
-                if (periodSelect) {
-                    periodSelect.addEventListener('change', (e) => {
-                        this.changePeriod(e.target.value);
-                    });
-                }
-
-                const advancedBtn = document.getElementById('advanced-analytics-btn');
-                if (advancedBtn) {
-                    advancedBtn.addEventListener('click', () => {
-                        this.showAdvancedAnalytics();
-                    });
-                }
-
-                const exportAllBtn = document.getElementById('export-all-reports-btn');
-                if (exportAllBtn) {
-                    exportAllBtn.addEventListener('click', () => {
-                        this.exportAllReports();
-                    });
-                }
-            }
-
-            switchView(chartType, period) {
-                console.log(`INFO: Vue ${chartType} - Graphique mis à jour`);
-                window.showToast(`Graphique ${chartType} - période ${period}`, 'info');
-            }
-
-            changePeriod(period) {
-                console.log(`INFO: Changement de période: ${period}`);
-                window.showToast(`Période changée: ${period}`, 'info');
-                this.loadAnalyticsData();
-            }
-
-            refreshAnalytics() {
-                console.log('INFO: Actualisation des analytics...');
-                window.showToast('Actualisation des données...', 'info');
-                this.loadAnalyticsData();
-            }
-
-            showAdvancedAnalytics() {
-                console.log('INFO: Analytics avancées');
-                window.showToast('Analytics avancées bientôt disponibles', 'info');
-            }
-
-            generateReport(reportType) {
-                console.log(`INFO: Génération du rapport ${reportType}...`);
-                window.showToast(`Génération du rapport ${reportType}...`, 'info');
-                
-                if (reportType === 'attendance') {
-                    console.log('INFO: Téléchargement du rapport attendance...');
-                    console.log('INFO: Partage du rapport attendance...');
-                    console.log('INFO: Génération du rapport en cours...');
-                    setTimeout(() => {
-                        console.log('SUCCESS: Rapport généré avec succès!');
-                        window.success('Rapport de présence généré');
-                    }, 2000);
-                }
-            }
-
-            exportData() {
-                console.log('INFO: Export des données en cours...');
-                window.showToast('Export des données...', 'info');
-                
-                setTimeout(() => {
-                    console.log('SUCCESS: Données exportées vers CSV');
-                    window.success('Données exportées vers CSV');
-                    
-                    // Créer et télécharger un fichier CSV
-                    const csvData = [
-                        ['Type', 'Valeur', 'Date'],
-                        ['Membres actifs', this.data.performance.totalMembers, new Date().toLocaleDateString()],
-                        ['Missions totales', this.data.performance.totalQuests, new Date().toLocaleDateString()],
-                        ['Événements', this.data.performance.totalEvents, new Date().toLocaleDateString()],
-                        ['Présence moyenne', `${this.data.performance.avgAttendance}%`, new Date().toLocaleDateString()]
-                    ];
-
-                    const csvContent = csvData.map(row => row.join(',')).join('\n');
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `analytics_synergia_${new Date().toISOString().split('T')[0]}.csv`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                }, 1000);
-            }
-
-            exportAllReports() {
-                console.log('INFO: Export de tous les rapports...');
-                window.showToast('Export de tous les rapports...', 'info');
-                
-                setTimeout(() => {
-                    window.success('Tous les rapports exportés');
-                }, 2000);
-            }
-
-            showMemberAnalytics(memberId) {
-                console.log(`INFO: Analytics pour membre ${memberId}`);
-                window.showToast('Analytics personnalisées', 'info');
-            }
-        }
-
-        // Badging Manager
-        class BadgingManager {
-            constructor() {
-                this.clockedIn = false;
-                this.currentSession = null;
-                this.attendanceHistory = [];
-                this.init();
-            }
-
-            init() {
-                console.log('✅ Badging Manager initialized');
-                this.loadAttendanceHistory();
-                this.setupEventListeners();
-                this.createBadgingInterface();
-            }
-
-            loadAttendanceHistory() {
-                // Charger l'historique depuis localStorage ou Firebase
-                try {
-                    const saved = localStorage.getItem('synergia_attendance');
-                    if (saved) {
-                        this.attendanceHistory = JSON.parse(saved);
-                    }
-                } catch (error) {
-                    console.warn('Impossible de charger l\'historique de présence');
-                }
-            }
-
-            saveAttendanceHistory() {
-                try {
-                    localStorage.setItem('synergia_attendance', JSON.stringify(this.attendanceHistory));
-                } catch (error) {
-                    console.warn('Impossible de sauvegarder l\'historique de présence');
-                }
-            }
-
-            createBadgingInterface() {
-                // Ajouter l'interface de pointage au dashboard
-                const dashboardWidget = document.createElement('div');
-                dashboardWidget.className = 'dashboard-widget animate-slide-up';
-                dashboardWidget.innerHTML = `
-                    <h3><i class="fas fa-clock"></i> Pointage</h3>
-                    <div style="text-align: center; padding: 1rem;">
-                        <div style="font-size: 1.2rem; margin-bottom: 1rem; color: #667eea;">
-                            <i class="fas fa-clock"></i>
-                            <span id="current-time">${new Date().toLocaleTimeString('fr-FR')}</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                            <button id="clock-in-btn" class="btn btn-primary" ${this.clockedIn ? 'disabled' : ''}>
-                                <i class="fas fa-sign-in-alt"></i> Arrivée
-                            </button>
-                            <button id="clock-out-btn" class="btn btn-secondary" ${!this.clockedIn ? 'disabled' : ''}>
-                                <i class="fas fa-sign-out-alt"></i> Départ
-                            </button>
-                            <button id="break-start-btn" class="btn btn-secondary" ${!this.clockedIn ? 'disabled' : ''}>
-                                <i class="fas fa-coffee"></i> Pause
-                            </button>
-                        </div>
-                        <div id="session-info" style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                            ${this.clockedIn ? 'En service' : 'Non pointé'}
-                        </div>
-                    </div>
-                `;
-
-                // Ajouter au dashboard
-                const dashboardGrid = document.querySelector('.dashboard-grid');
-                if (dashboardGrid) {
-                    dashboardGrid.appendChild(dashboardWidget);
-                }
-
-                // Mettre à jour l'heure toutes les secondes
-                setInterval(() => {
-                    const timeElement = document.getElementById('current-time');
-                    if (timeElement) {
-                        timeElement.textContent = new Date().toLocaleTimeString('fr-FR');
-                    }
-                }, 1000);
-            }
-
-            setupEventListeners() {
-                // Utiliser la délégation d'événements car les boutons sont créés dynamiquement
-                document.addEventListener('click', (e) => {
-                    switch (e.target.id) {
-                        case 'clock-in-btn':
-                            this.clockIn();
-                            break;
-                        case 'clock-out-btn':
-                            this.clockOut();
-                            break;
-                        case 'break-start-btn':
-                            this.startBreak();
-                            break;
-                        case 'break-end-btn':
-                            this.endBreak();
-                            break;
-                    }
-                });
-            }
-
-            clockIn() {
-                const now = new Date();
-                this.clockedIn = true;
-                this.currentSession = {
-                    clockIn: now,
-                    breaks: [],
-                    date: now.toDateString()
-                };
-                
-                console.log('SUCCESS: Pointage d\'arrivée enregistré!');
-                window.success('Pointage d\'arrivée enregistré!');
-                
-                // Mettre à jour l'interface
-                this.updateBadgingInterface();
-                
-                // Notifier le Quest Manager
-                if (window.questManager) {
-                    window.questManager.handleCheckin(now);
-                }
-                
-                // Émettre événement personnalisé
-                document.dispatchEvent(new CustomEvent('synergia:checkin', {
-                    detail: { time: now }
-                }));
-
-                // Vérifier si c'est une arrivée matinale
-                if (now.getHours() < 9) {
-                    window.success('Bravo ! Arrivée matinale 🌅');
-                }
-            }
-
-            clockOut() {
-                if (!this.currentSession) {
-                    window.error('Aucune session active');
-                    return;
-                }
-
-                const now = new Date();
-                this.currentSession.clockOut = now;
-                
-                // Calculer la durée de travail
-                const workDuration = this.calculateWorkDuration(this.currentSession);
-                
-                // Ajouter à l'historique
-                this.attendanceHistory.push({
-                    ...this.currentSession,
-                    workDuration
-                });
-                
-                console.log('SUCCESS: Pointage de départ enregistré!');
-                window.success(`Pointage de départ enregistré! Durée: ${workDuration}`);
-                
-                // Vérifier si c'est une journée parfaite
-                this.checkPerfectDay();
-                
-                // Réinitialiser
-                this.clockedIn = false;
-                this.currentSession = null;
-                this.updateBadgingInterface();
-                this.saveAttendanceHistory();
-            }
-
-            startBreak() {
-                if (!this.currentSession) {
-                    window.error('Aucune session active');
-                    return;
-                }
-
-                this.currentSession.breaks.push({
-                    start: new Date()
-                });
-                
-                console.log('INFO: Pause commencée');
-                window.showToast('Pause commencée', 'info');
-                this.updateBadgingInterface();
-            }
-
-            endBreak() {
-                if (!this.currentSession || this.currentSession.breaks.length === 0) {
-                    window.error('Aucune pause active');
-                    return;
-                }
-
-                const lastBreak = this.currentSession.breaks[this.currentSession.breaks.length - 1];
-                if (!lastBreak.end) {
-                    lastBreak.end = new Date();
-                    console.log('INFO: Pause terminée');
-                    window.showToast('Pause terminée', 'info');
-                    this.updateBadgingInterface();
-                }
-            }
-
-            calculateWorkDuration(session) {
-                if (!session.clockOut) return '0h00';
-
-                let totalWork = session.clockOut - session.clockIn;
-                
-                // Soustraire les pauses
-                session.breaks.forEach(breakPeriod => {
-                    if (breakPeriod.end) {
-                        totalWork -= (breakPeriod.end - breakPeriod.start);
-                    }
-                });
-
-                const hours = Math.floor(totalWork / (1000 * 60 * 60));
-                const minutes = Math.floor((totalWork % (1000 * 60 * 60)) / (1000 * 60));
-                
-                return `${hours}h${minutes.toString().padStart(2, '0')}`;
-            }
-
-            updateBadgingInterface() {
-                const clockInBtn = document.getElementById('clock-in-btn');
-                const clockOutBtn = document.getElementById('clock-out-btn');
-                const breakStartBtn = document.getElementById('break-start-btn');
-                const sessionInfo = document.getElementById('session-info');
-
-                if (clockInBtn) clockInBtn.disabled = this.clockedIn;
-                if (clockOutBtn) clockOutBtn.disabled = !this.clockedIn;
-                if (breakStartBtn) breakStartBtn.disabled = !this.clockedIn;
-
-                if (sessionInfo) {
-                    if (this.clockedIn && this.currentSession) {
-                        const duration = this.calculateWorkDuration({
-                            ...this.currentSession,
-                            clockOut: new Date()
-                        });
-                        sessionInfo.innerHTML = `
-                            En service depuis ${this.currentSession.clockIn.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                            <br><small>Durée: ${duration}</small>
-                        `;
-                    } else {
-                        sessionInfo.textContent = 'Non pointé';
-                    }
-                }
-            }
-
-            checkPerfectDay() {
-                if (!this.currentSession) return;
-
-                const clockIn = this.currentSession.clockIn;
-                const clockOut = this.currentSession.clockOut;
-                
-                // Journée parfaite = arrivée avant 9h30 et départ après 17h
-                const isPerfect = clockIn.getHours() < 9 || (clockIn.getHours() === 9 && clockIn.getMinutes() <= 30);
-                const isFullDay = clockOut.getHours() >= 17;
-                
-                if (isPerfect && isFullDay) {
-                    console.log('⭐ Journée parfaite détectée!');
-                    window.success('🎉 Journée parfaite ! Bonus XP accordé');
-                    
-                    // Notifier le Quest Manager
-                    if (window.questManager) {
-                        window.questManager.handlePerfectDay();
-                    }
-                    
-                    document.dispatchEvent(new CustomEvent('synergia:perfect_day'));
-                }
-            }
-
-            getAttendanceStats() {
-                const thisWeek = this.attendanceHistory.filter(session => {
-                    const sessionDate = new Date(session.date);
-                    const weekAgo = new Date();
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    return sessionDate >= weekAgo;
-                });
-
-                return {
-                    totalSessions: this.attendanceHistory.length,
-                    thisWeek: thisWeek.length,
-                    averageHours: this.calculateAverageHours(),
-                    punctualityRate: this.calculatePunctualityRate()
-                };
-            }
-
-            calculateAverageHours() {
-                if (this.attendanceHistory.length === 0) return 0;
-
-                const totalMinutes = this.attendanceHistory.reduce((sum, session) => {
-                    if (!session.workDuration) return sum;
-                    const [hours, minutes] = session.workDuration.split('h');
-                    return sum + (parseInt(hours) * 60) + parseInt(minutes);
-                }, 0);
-
-                return (totalMinutes / this.attendanceHistory.length / 60).toFixed(1);
-            }
-
-            calculatePunctualityRate() {
-                if (this.attendanceHistory.length === 0) return 100;
-
-                const punctualSessions = this.attendanceHistory.filter(session => {
-                    const clockIn = new Date(session.clockIn);
-                    return clockIn.getHours() < 9 || (clockIn.getHours() === 9 && clockIn.getMinutes() <= 30);
-                });
-
-                return Math.round((punctualSessions.length / this.attendanceHistory.length) * 100);
-            }
         }
 
         // Navigation
-      // ✅ MODIFIER dans setupNavigation() autour de la ligne 4300
-
         function setupNavigation() {
             const navLinks = document.querySelectorAll('.nav-link');
             const sections = document.querySelectorAll('.content-section');
@@ -4426,158 +876,99 @@
                     if (targetSection) {
                         targetSection.classList.add('active');
                         
-                        // Déclencher des actions spécifiques selon la section
-                        switch (targetId) {
-                            case 'analytics':
-                                if (analyticsManager) {
-                                    analyticsManager.refreshAnalytics();
-                                }
-                                break;
-                            
-                            // ✅ AJOUTER CE CAS
-                            case 'analytics-pro':
-                                if (analyticsManager) {
-                                    // Synchroniser les données avec Analytics Pro
-                                    setTimeout(() => {
-                                        analyticsManager.syncWithAdvancedAnalytics();
-                                    }, 500);
-                                }
-                                break;
-                                
-                            case 'team':
-                                if (teamManager) {
-                                    teamManager.refreshMembers();
-                                }
-                                break;
-                            case 'planning':
-                                if (planningManager) {
-                                    planningManager.renderCalendar();
-                                }
-                                break;
+                        // Actions spécifiques selon la section
+                        if (targetId === 'analytics-pro') {
+                            initializeAdvancedChart();
                         }
                     }
                 });
             });
         }
 
-        // Quests UI
-        function setupQuestsUI() {
-            // Gestion des onglets de quêtes
-            const questTabs = document.querySelectorAll('.quest-tab');
-            questTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Retirer l'active de tous les onglets
-                    questTabs.forEach(t => t.classList.remove('active'));
-                    // Ajouter l'active à l'onglet cliqué
-                    tab.classList.add('active');
-                    
-                    // Filtrer les quêtes selon l'onglet
-                    const tabType = tab.dataset.tab;
-                    filterQuests(tabType);
-                });
-            });
+        // Analytics Pro
+        function initializeAdvancedChart() {
+            const canvas = document.getElementById('advanced-chart');
+            if (!canvas || !window.Chart) return;
 
-            // Charger les quêtes quotidiennes
-            function loadQuests() {
-                if (!window.questManager) {
-                    setTimeout(loadQuests, 1000);
-                    return;
-                }
-
-                console.log('🎯 Chargement des quêtes...');
-                
-                const dailyQuests = window.questManager.getDailyQuests();
-                const weeklyQuests = window.questManager.getWeeklyQuests();
-                const userQuests = window.questManager.getUserQuests();
-                
-                console.log(`Quêtes quotidiennes: ${dailyQuests.length}`);
-                console.log(`Quêtes hebdomadaires: ${weeklyQuests.length}`);
-                console.log(`Quêtes utilisateur: ${userQuests.length}`);
-                
-                updateQuestCounts();
-                updateUserLevelDisplay();
+            // Détruire le graphique existant s'il y en a un
+            if (advancedChart) {
+                advancedChart.destroy();
             }
 
-            function filterQuests(type) {
-                const questCards = document.querySelectorAll('.quest-card');
-                questCards.forEach(card => {
-                    const questType = card.querySelector('.quest-type').textContent.toLowerCase();
-                    const shouldShow = type === 'all' || 
-                                     (type === 'daily' && questType.includes('quotidienne')) ||
-                                     (type === 'weekly' && questType.includes('hebdomadaire')) ||
-                                     (type === 'special' && questType.includes('spéciale')) ||
-                                     (type === 'completed' && card.classList.contains('completed'));
-                    
-                    card.style.display = shouldShow ? 'block' : 'none';
-                });
-            }
-
-            function updateQuestCounts() {
-                const activeQuests = document.querySelectorAll('.quest-card').length;
-                document.getElementById('active-quests').textContent = activeQuests;
-            }
-
-            async function acceptQuest(questId) {
-                console.log(`✅ Acceptation de la quête: ${questId}`);
-                
-                if (window.questManager) {
-                    const userQuest = await window.questManager.acceptQuest(questId);
-                    if (userQuest) {
-                        const quest = window.questManager.getQuestById(questId);
-                        console.log(`🎯 Nouvelle quête assignée: ${quest.title}`);
-                        console.log(`INFO: Nouvelle mission: ${quest.title}`);
-                        console.log('SUCCESS: Mission acceptée!');
-                        window.success(`Mission "${quest.title}" acceptée!`);
-                        
-                        // Recharger la liste des quêtes
-                        loadQuests();
+            const ctx = canvas.getContext('2d');
+            
+            advancedChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Performance équipe',
+                        data: [65, 72, 80, 78, 85, 92],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Productivité',
+                        data: [60, 68, 75, 82, 79, 87],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Analytics Avancées - Performance Équipe'
+                        }
                     }
                 }
-            }
-
-            function updateUserLevelDisplay() {
-                console.log('INFO: Niveau 1 - 0 XP - 0/5 missions');
-                
-                // Mettre à jour l'affichage du niveau dans le dashboard
-                const currentLevel = 5; // Exemple
-                const currentXP = 1250; // Exemple
-                
-                document.getElementById('user-level').textContent = currentLevel;
-                document.getElementById('user-level-display').textContent = `Niveau ${currentLevel}`;
-                document.getElementById('user-xp-display').textContent = `${currentXP} XP`;
-                
-                // Mettre à jour la barre de progression
-                const xpProgress = document.getElementById('xp-progress');
-                if (xpProgress) {
-                    const progressPercent = ((currentXP % 250) / 250) * 100;
-                    xpProgress.style.width = `${progressPercent}%`;
-                }
-            }
-
-            // Exposer les fonctions globalement
-            window.loadQuests = loadQuests;
-            window.acceptQuest = acceptQuest;
-            window.filterQuests = filterQuests;
-
-            // Charger les quêtes au démarrage
-            setTimeout(loadQuests, 1000);
+            });
         }
 
-        // Dashboard updates
-        function updateDashboardStats() {
-            if (teamManager) {
-                document.getElementById('team-count').textContent = teamManager.members.length;
-            }
+        // Fonctions Analytics Pro
+        window.showAdvancedAnalytics = function() {
+            window.showToast('Analytics avancées - Mode démo actif', 'info');
             
-            if (planningManager) {
-                const today = new Date();
-                const todayEvents = planningManager.events.filter(event => {
-                    const eventDate = new Date(event.date);
-                    return eventDate.toDateString() === today.toDateString();
-                });
-                document.getElementById('events-today').textContent = todayEvents.length;
+            // Animer les statistiques
+            const stats = document.querySelectorAll('.analytics-fallback [style*="font-size: 2rem"]');
+            stats.forEach((stat, index) => {
+                setTimeout(() => {
+                    stat.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        stat.style.transform = 'scale(1)';
+                    }, 200);
+                }, index * 200);
+            });
+            
+            // Redessiner le graphique avec de nouvelles données
+            if (advancedChart) {
+                advancedChart.data.datasets[0].data = [
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100,
+                    Math.random() * 100
+                ];
+                advancedChart.update();
             }
-        }
+        };
 
         // Initialisation principale
         async function init() {
@@ -4596,23 +987,13 @@
                 // Configuration de la navigation
                 setupNavigation();
                 
-                // Configuration des quêtes
-                setupQuestsUI();
-                
                 // Logout
                 const logoutBtn = document.getElementById('logout-btn');
                 if (logoutBtn) {
                     logoutBtn.addEventListener('click', () => {
                         if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                            if (window.auth && window.auth.signOut) {
-                                window.auth.signOut().then(() => {
-                                    window.showToast('Déconnexion réussie', 'success');
-                                    location.reload();
-                                });
-                            } else {
-                                window.showToast('Déconnexion simulée', 'info');
-                                location.reload();
-                            }
+                            window.showToast('Déconnexion simulée', 'info');
+                            setTimeout(() => location.reload(), 1000);
                         }
                     });
                 }
@@ -4621,51 +1002,38 @@
                 const refreshDashboard = document.getElementById('refresh-dashboard');
                 if (refreshDashboard) {
                     refreshDashboard.addEventListener('click', () => {
-                        window.showToast('Actualisation du dashboard...', 'info');
-                        updateDashboardStats();
-                        if (analyticsManager) analyticsManager.refreshAnalytics();
-                        window.success('Dashboard actualisé');
+                        window.showToast('Dashboard actualisé', 'success');
                     });
                 }
 
-                // Gestion des modals
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('close')) {
-                        const modal = e.target.closest('.modal');
-                        if (modal) {
-                            modal.style.display = 'none';
-                        }
-                    }
-                    
-                    if (e.target.classList.contains('modal')) {
-                        e.target.style.display = 'none';
-                    }
-                });
+                // Analytics Pro buttons
+                const fullscreenBtn = document.getElementById('fullscreen-analytics');
+                if (fullscreenBtn) {
+                    fullscreenBtn.addEventListener('click', () => {
+                        window.showToast('Mode démo Analytics Pro', 'info');
+                        showAdvancedAnalytics();
+                    });
+                }
 
-                // Raccourcis clavier
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        const openModals = document.querySelectorAll('.modal[style*="display: flex"]');
-                        openModals.forEach(modal => {
-                            modal.style.display = 'none';
-                        });
-                    }
-                });
+                const refreshProBtn = document.getElementById('refresh-pro-analytics');
+                if (refreshProBtn) {
+                    refreshProBtn.addEventListener('click', () => {
+                        window.showToast('Analytics Pro actualisées', 'success');
+                        initializeAdvancedChart();
+                    });
+                }
 
                 console.log('✅ SYNERGIA v3.0 initialized successfully!');
+                window.showToast('SYNERGIA v3.0 initialisé avec succès!', 'success');
                 
             } catch (error) {
                 console.error('❌ Erreur lors de l\'initialisation:', error);
+                window.showToast('Erreur d\'initialisation', 'error');
             }
         }
 
         // Démarrage de l'application
         document.addEventListener('DOMContentLoaded', init);
-
-        // Mise à jour périodique
-        setInterval(() => {
-            updateDashboardStats();
-        }, 30000); // Toutes les 30 secondes
 
     </script>
 </body>

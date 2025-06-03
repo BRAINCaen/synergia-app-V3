@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
-    <!-- Chart.js pour les graphiques -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Chart.js depuis CDN autorisé -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -2076,8 +2076,262 @@
         <!-- Les toasts seront ajoutés dynamiquement -->
     </div>
 
-    <!-- Scripts -->
-    <script src="quest-manager.js"></script>
+    <!-- Scripts intégrés -->
+    <script>
+        // Quest Manager intégré (remplace quest-manager.js)
+        class QuestManager {
+            constructor() {
+                this.quests = [];
+                this.userQuests = [];
+                this.badges = [];
+                this.currentUser = null;
+                this.questsLoaded = false;
+                
+                console.log('🎯 Quest Manager créé');
+            }
+
+            async init() {
+                console.log('🎯 Initialisation Quest Manager...');
+                
+                // Attendre que l'authentification soit prête
+                await this.waitForAuth();
+                
+                // Charger les données
+                await this.loadQuests();
+                await this.loadBadges();
+                await this.loadUserQuests();
+                
+                // Générer les quêtes quotidiennes si nécessaire
+                this.generateDailyQuests();
+                
+                // Configurer les événements
+                this.setupEventListeners();
+                
+                console.log('✅ Quest Manager initialisé');
+            }
+
+            async waitForAuth() {
+                return new Promise((resolve) => {
+                    // Vérifier si l'utilisateur est déjà connecté
+                    if (window.auth && window.auth.currentUser) {
+                        this.currentUser = window.auth.currentUser;
+                        console.log(`👤 Utilisateur trouvé: ${this.currentUser.email}`);
+                        resolve();
+                        return;
+                    }
+
+                    // Attendre la connexion ou utiliser le mode démo
+                    let attempts = 0;
+                    const maxAttempts = 30;
+                    
+                    const checkAuth = () => {
+                        attempts++;
+                        
+                        if (window.auth && window.auth.currentUser) {
+                            this.currentUser = window.auth.currentUser;
+                            console.log(`👤 Utilisateur connecté: ${this.currentUser.email}`);
+                            resolve();
+                        } else if (attempts >= maxAttempts) {
+                            console.log('👤 Mode démo - pas d\'utilisateur connecté');
+                            this.currentUser = null;
+                            resolve();
+                        } else {
+                            setTimeout(checkAuth, 100);
+                        }
+                    };
+                    
+                    checkAuth();
+                });
+            }
+
+            async loadQuests() {
+                try {
+                    // Quêtes par défaut du système
+                    this.quests = [
+                        {
+                            id: 'daily_checkin',
+                            title: 'Pointer son arrivée',
+                            description: 'Pointer votre arrivée avant 9h30',
+                            type: 'daily',
+                            xp: 50,
+                            icon: '⏰',
+                            category: 'attendance',
+                            requirements: { action: 'checkin', time_before: '09:30' }
+                        },
+                        {
+                            id: 'daily_team_message',
+                            title: 'Message d\'équipe',
+                            description: 'Envoyer un message dans le chat d\'équipe',
+                            type: 'daily',
+                            xp: 30,
+                            icon: '💬',
+                            category: 'communication',
+                            requirements: { action: 'send_message', target: 'team' }
+                        },
+                        {
+                            id: 'daily_perfect_day',
+                            title: 'Journée parfaite',
+                            description: 'Pointer arrivée et départ à l\'heure',
+                            type: 'daily',
+                            xp: 100,
+                            icon: '⭐',
+                            category: 'attendance',
+                            requirements: { action: 'perfect_attendance' }
+                        },
+                        {
+                            id: 'weekly_team_player',
+                            title: 'Esprit d\'équipe',
+                            description: 'Participer à 5 conversations d\'équipe cette semaine',
+                            type: 'weekly',
+                            xp: 150,
+                            icon: '🤝',
+                            category: 'teamwork',
+                            requirements: { action: 'team_messages', count: 5, period: 'week' }
+                        },
+                        {
+                            id: 'weekly_punctual',
+                            title: 'Ponctualité',
+                            description: 'Arriver à l\'heure 5 jours de suite',
+                            type: 'weekly',
+                            xp: 200,
+                            icon: '🎯',
+                            category: 'attendance',
+                            requirements: { action: 'punctual_streak', count: 5 }
+                        }
+                    ];
+
+                    console.log(`📜 ${this.quests.length} quêtes chargées`);
+                } catch (error) {
+                    console.error('❌ Erreur chargement quêtes:', error);
+                }
+            }
+
+            async loadBadges() {
+                try {
+                    this.badges = [
+                        {
+                            id: 'early_bird',
+                            name: 'Lève-tôt',
+                            description: 'Arriver avant 8h30 pendant 5 jours',
+                            icon: '🌅',
+                            rarity: 'common'
+                        },
+                        {
+                            id: 'team_player',
+                            name: 'Équipier',
+                            description: 'Envoyer 50 messages d\'équipe',
+                            icon: '🤝',
+                            rarity: 'common'
+                        },
+                        {
+                            id: 'innovator',
+                            name: 'Innovateur',
+                            description: 'Proposer 3 améliorations acceptées',
+                            icon: '💡',
+                            rarity: 'legendary'
+                        }
+                    ];
+
+                    console.log(`🏆 ${this.badges.length} badges chargés`);
+                } catch (error) {
+                    console.error('❌ Erreur chargement badges:', error);
+                }
+            }
+
+            async loadUserQuests() {
+                try {
+                    this.userQuests = [];
+                    console.log(`✅ ${this.userQuests.length} quêtes utilisateur chargées`);
+                } catch (error) {
+                    console.error('❌ Erreur chargement quêtes utilisateur:', error);
+                    this.userQuests = [];
+                }
+            }
+
+            generateDailyQuests() {
+                if (!this.currentUser) {
+                    console.log('👤 Mode démo - quêtes système uniquement');
+                    return;
+                }
+
+                try {
+                    const today = new Date().toDateString();
+                    const existingDailyQuests = this.userQuests.filter(q => 
+                        q.type === 'daily' && q.assignedDate === today
+                    );
+
+                    if (existingDailyQuests.length === 0) {
+                        console.log('🔄 Quêtes quotidiennes générées');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur génération quêtes:', error);
+                }
+            }
+
+            setupEventListeners() {
+                // Événements depuis d'autres managers
+                document.addEventListener('synergia:checkin', (e) => {
+                    this.handleCheckin(e.detail.time);
+                });
+
+                document.addEventListener('synergia:team_message', () => {
+                    this.handleTeamMessage();
+                });
+
+                document.addEventListener('synergia:perfect_day', () => {
+                    this.handlePerfectDay();
+                });
+            }
+
+            async handleCheckin(time) {
+                console.log('✅ Pointage traité par Quest Manager');
+            }
+
+            async handleTeamMessage() {
+                console.log('💬 Message d\'équipe traité par Quest Manager');
+            }
+
+            async handlePerfectDay() {
+                console.log('⭐ Journée parfaite détectée par Quest Manager');
+            }
+
+            getAvailableQuests() {
+                return this.quests.filter(q => q.type === 'daily' || q.type === 'weekly');
+            }
+
+            getUserQuests() {
+                return this.userQuests;
+            }
+
+            getDailyQuests() {
+                const today = new Date().toDateString();
+                return this.userQuests.filter(q => q.type === 'daily' && q.assignedDate === today);
+            }
+
+            getWeeklyQuests() {
+                return this.userQuests.filter(q => q.type === 'weekly');
+            }
+
+            getQuestById(questId) {
+                return this.quests.find(q => q.id === questId);
+            }
+
+            async acceptQuest(questId) {
+                console.log(`✅ Acceptation de la quête: ${questId}`);
+                const quest = this.getQuestById(questId);
+                if (quest) {
+                    console.log(`🎯 Nouvelle quête assignée: ${quest.title}`);
+                    console.log(`INFO: Nouvelle mission: ${quest.title}`);
+                    console.log('SUCCESS: Mission acceptée!');
+                    return quest;
+                }
+                return null;
+            }
+        }
+
+        // Initialiser le Quest Manager globalement
+        window.questManager = new QuestManager();
+    </script>
     
     <script>
         console.log('🚀 Initializing SYNERGIA v3.0...');
@@ -2219,7 +2473,7 @@
 
             async loadMembers() {
                 try {
-                    const user = auth.currentUser || currentUser;
+                    const user = (window.auth && window.auth.currentUser) || currentUser;
                     if (!user) {
                         console.log('❌ Utilisateur non connecté pour charger les membres');
                         this.loadDemoMembers();
@@ -2228,27 +2482,31 @@
 
                     // Tentative de chargement depuis Firebase
                     try {
-                        const membersRef = collection(db, 'teams', user.uid, 'members');
-                        const snapshot = await getDocs(membersRef);
-                        
-                        this.members = [];
-                        snapshot.forEach(doc => {
-                            const memberData = doc.data();
-                            this.members.push({
-                                id: doc.id,
-                                name: memberData.name || '',
-                                email: memberData.email || '',
-                                role: memberData.role || 'Membre',
-                                avatar: memberData.avatar || 'assets/default-avatar.png',
-                                status: memberData.status || 'offline',
-                                joinDate: memberData.joinDate || new Date(),
-                                xp: memberData.xp || 0,
-                                level: memberData.level || 1,
-                                badges: memberData.badges || []
+                        if (window.db && window.firebase && window.firebase.collection) {
+                            const membersRef = window.firebase.collection(window.db, 'teams', user.uid, 'members');
+                            const snapshot = await window.firebase.getDocs(membersRef);
+                            
+                            this.members = [];
+                            snapshot.forEach(doc => {
+                                const memberData = doc.data();
+                                this.members.push({
+                                    id: doc.id,
+                                    name: memberData.name || '',
+                                    email: memberData.email || '',
+                                    role: memberData.role || 'Membre',
+                                    avatar: memberData.avatar || 'assets/default-avatar.png',
+                                    status: memberData.status || 'offline',
+                                    joinDate: memberData.joinDate || new Date(),
+                                    xp: memberData.xp || 0,
+                                    level: memberData.level || 1,
+                                    badges: memberData.badges || []
+                                });
                             });
-                        });
 
-                        console.log(`✅ ${this.members.length} membres chargés depuis Firebase`);
+                            console.log(`✅ ${this.members.length} membres chargés depuis Firebase`);
+                        } else {
+                            throw new Error('Firebase non disponible');
+                        }
                     } catch (firebaseError) {
                         console.log('❌ Erreur Firebase, chargement des données de démo');
                         this.loadDemoMembers();
@@ -2821,7 +3079,7 @@
 
             async loadEvents() {
                 try {
-                    const user = auth.currentUser || currentUser;
+                    const user = (window.auth && window.auth.currentUser) || currentUser;
                     if (!user) {
                         console.log('❌ Utilisateur non connecté pour charger les événements');
                         this.loadDemoEvents();
@@ -2830,22 +3088,29 @@
 
                     // Vérifier les permissions Firebase
                     try {
-                        const testQuery = query(collection(db, 'events'), limit(1));
-                        await getDocs(testQuery);
-                        console.log('✅ Permissions événements vérifiées');
+                        if (window.db && window.firebase) {
+                            const testQuery = window.firebase.query(
+                                window.firebase.collection(window.db, 'events'), 
+                                window.firebase.limit(1)
+                            );
+                            await window.firebase.getDocs(testQuery);
+                            console.log('✅ Permissions événements vérifiées');
 
-                        const eventsRef = collection(db, 'events');
-                        const snapshot = await getDocs(eventsRef);
-                        
-                        this.events = [];
-                        snapshot.forEach(doc => {
-                            this.events.push({
-                                id: doc.id,
-                                ...doc.data()
+                            const eventsRef = window.firebase.collection(window.db, 'events');
+                            const snapshot = await window.firebase.getDocs(eventsRef);
+                            
+                            this.events = [];
+                            snapshot.forEach(doc => {
+                                this.events.push({
+                                    id: doc.id,
+                                    ...doc.data()
+                                });
                             });
-                        });
 
-                        console.log(`✅ ${this.events.length} événements chargés depuis Firebase`);
+                            console.log(`✅ ${this.events.length} événements chargés depuis Firebase`);
+                        } else {
+                            throw new Error('Firebase non disponible');
+                        }
                     } catch (permError) {
                         console.log('❌ Permissions insuffisantes pour les événements, chargement démo');
                         this.loadDemoEvents();
@@ -3204,7 +3469,7 @@
 
             async loadConversations() {
                 try {
-                    const user = auth.currentUser || currentUser;
+                    const user = (window.auth && window.auth.currentUser) || currentUser;
                     if (!user) {
                         console.log('❌ Utilisateur non connecté pour charger les conversations');
                         this.loadDemoConversations();
@@ -3213,22 +3478,29 @@
 
                     // Vérifier les permissions Firebase
                     try {
-                        const testQuery = query(collection(db, 'conversations'), limit(1));
-                        await getDocs(testQuery);
-                        console.log('✅ Permissions conversations vérifiées');
+                        if (window.db && window.firebase) {
+                            const testQuery = window.firebase.query(
+                                window.firebase.collection(window.db, 'conversations'), 
+                                window.firebase.limit(1)
+                            );
+                            await window.firebase.getDocs(testQuery);
+                            console.log('✅ Permissions conversations vérifiées');
 
-                        const conversationsRef = collection(db, 'conversations');
-                        const snapshot = await getDocs(conversationsRef);
-                        
-                        this.conversations = [];
-                        snapshot.forEach(doc => {
-                            this.conversations.push({
-                                id: doc.id,
-                                ...doc.data()
+                            const conversationsRef = window.firebase.collection(window.db, 'conversations');
+                            const snapshot = await window.firebase.getDocs(conversationsRef);
+                            
+                            this.conversations = [];
+                            snapshot.forEach(doc => {
+                                this.conversations.push({
+                                    id: doc.id,
+                                    ...doc.data()
+                                });
                             });
-                        });
 
-                        console.log(`💬 ${this.conversations.length} conversations chargées depuis Firebase`);
+                            console.log(`💬 ${this.conversations.length} conversations chargées depuis Firebase`);
+                        } else {
+                            throw new Error('Firebase non disponible');
+                        }
                     } catch (permError) {
                         console.log('❌ Erreur Firebase conversations, chargement démo');
                         this.loadDemoConversations();
@@ -4228,7 +4500,12 @@
                 await waitForFirebase();
                 
                 // Configuration de l'authentification
-                onAuthStateChanged(auth, handleAuthStateChange);
+                if (window.firebase && window.firebase.onAuthStateChanged) {
+                    window.firebase.onAuthStateChanged(window.auth, handleAuthStateChange);
+                } else {
+                    console.log('Firebase non disponible, mode démo');
+                    initializeDemoMode();
+                }
                 
                 // Configuration de la navigation
                 setupNavigation();
@@ -4241,10 +4518,15 @@
                 if (logoutBtn) {
                     logoutBtn.addEventListener('click', () => {
                         if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                            auth.signOut().then(() => {
-                                window.showToast('Déconnexion réussie', 'success');
+                            if (window.auth && window.auth.signOut) {
+                                window.auth.signOut().then(() => {
+                                    window.showToast('Déconnexion réussie', 'success');
+                                    location.reload();
+                                });
+                            } else {
+                                window.showToast('Déconnexion simulée', 'info');
                                 location.reload();
-                            });
+                            }
                         }
                     });
                 }

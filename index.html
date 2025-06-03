@@ -18,6 +18,7 @@
     
     <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Firebase SDKs -->
@@ -378,6 +379,17 @@
         .btn-danger { background: var(--danger-color); }
         .btn-warning { background: var(--warning-color); }
         .btn-secondary { background: var(--muted-color); }
+        
+        /* Auth specific buttons */
+        .btn:has(.fab.fa-google) {
+            background: #4285f4;
+            border-color: #4285f4;
+        }
+        
+        .btn:has(.fab.fa-google):hover {
+            background: #3367d6;
+            border-color: #3367d6;
+        }
 
         /* === CARDS === */
         .card {
@@ -1434,20 +1446,30 @@
             <div class="page-header">
                 <h1><i class="fas fa-tasks"></i> Gestion des missions</h1>
                 <div class="header-actions">
-                    <button class="btn btn-primary" onclick="window.questManager?.generateDailyQuests()">
+                    <button class="btn btn-primary" onclick="window.questManager?.generateDailyQuests(); window.router?.loadQuests()">
                         <i class="fas fa-sync"></i>
                         Actualiser
                     </button>
-                    <button class="btn btn-secondary">
+                    <button class="btn btn-secondary" onclick="window.questManager?.simulateClockIn()">
+                        <i class="fas fa-clock"></i>
+                        Test Pointage
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.router?.showUserStats()">
                         <i class="fas fa-trophy"></i>
-                        Mes badges
+                        Mes stats
                     </button>
                 </div>
+            </div>
+            
+            <!-- Stats utilisateur -->
+            <div class="user-quest-stats" id="user-quest-stats" style="margin-bottom: 2rem;">
+                <!-- Stats XP/Niveau dynamiques -->
             </div>
             
             <div class="card">
                 <div class="card-header">
                     <h3><i class="fas fa-scroll"></i> Missions disponibles</h3>
+                    <span id="quest-count-badge" class="badge" style="background: var(--primary-color); color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">0</span>
                 </div>
                 <div class="card-content">
                     <div id="quests-container">
@@ -1623,14 +1645,28 @@
             constructor() {
                 this.isReady = false;
                 this.currentUser = null;
+                this.db = null;
+                this.auth = null;
             }
             
             async init() {
                 try {
                     if (typeof firebase !== 'undefined') {
                         firebase.initializeApp(firebaseConfig);
+                        this.db = firebase.firestore();
+                        this.auth = firebase.auth();
                         this.isReady = true;
+                        
                         console.log('✅ Firebase initialized');
+                        
+                        // Écouter les changements d'authentification
+                        this.auth.onAuthStateChanged((user) => {
+                            this.handleAuthStateChange(user);
+                        });
+                        
+                        // Vérifier si un utilisateur est déjà connecté
+                        await this.checkAuthState();
+                        
                     } else {
                         console.warn('⚠️ Firebase SDK not loaded');
                         this.isReady = true;
@@ -1640,6 +1676,255 @@
                 } catch (error) {
                     console.error('❌ Firebase error:', error);
                 }
+            }
+            
+            async checkAuthState() {
+                return new Promise((resolve) => {
+                    const unsubscribe = this.auth.onAuthStateChanged((user) => {
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+            }
+            
+            handleAuthStateChange(user) {
+                this.currentUser = user;
+                
+                if (user) {
+                    console.log('👤 Utilisateur connecté:', user.email);
+                    this.showUserInterface();
+                    
+                    // Initialiser les données utilisateur
+                    this.initUserData(user);
+                    
+                    // Notifier les autres modules
+                    document.dispatchEvent(new CustomEvent('auth:signed-in', { 
+                        detail: { user } 
+                    }));
+                } else {
+                    console.log('👤 Utilisateur déconnecté');
+                    this.showAuthInterface();
+                    
+                    document.dispatchEvent(new CustomEvent('auth:signed-out'));
+                }
+            }
+            
+            async initUserData(user) {
+                try {
+                    // Vérifier si l'utilisateur existe dans Firestore
+                    const userDoc = await this.db.collection('users').doc(user.uid).get();
+                    
+                    if (!userDoc.exists) {
+                        // Créer un nouvel utilisateur
+                        const userData = {
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || user.email.split('@')[0],
+                            avatar: user.photoURL || this.generateDefaultAvatar(user.displayName || user.email),
+                            role: 'employee',
+                            department: 'Non assigné',
+                            joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                            xp: 0,
+                            level: 1,
+                            questsCompleted: 0,
+                            status: 'online',
+                            badges: [],
+                            achievements: []
+                        };
+                        
+                        await this.db.collection('users').doc(user.uid).set(userData);
+                        console.log('✅ Nouvel utilisateur créé');
+                    } else {
+                        // Mettre à jour lastSeen
+                        await this.db.collection('users').doc(user.uid).update({
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                            status: 'online'
+                        });
+                        console.log('✅ Utilisateur mis à jour');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur initialisation utilisateur:', error);
+                }
+            }
+            
+            showAuthInterface() {
+                const authHtml = `
+                    <div class="auth-container" style="
+                        position: fixed; 
+                        top: 0; 
+                        left: 0; 
+                        width: 100%; 
+                        height: 100%; 
+                        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        z-index: 10000;
+                        color: white;
+                    ">
+                        <div class="auth-card" style="
+                            background: white; 
+                            padding: 3rem; 
+                            border-radius: 16px; 
+                            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+                            text-align: center;
+                            color: var(--text-primary);
+                            max-width: 400px;
+                            width: 90%;
+                        ">
+                            <i class="fas fa-users-cog fa-4x" style="color: var(--primary-color); margin-bottom: 1rem;"></i>
+                            <h2 style="margin-bottom: 0.5rem;">SYNERGIA v3.0</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Connectez-vous pour accéder à la plateforme</p>
+                            
+                            <div class="auth-buttons" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <button class="btn btn-primary" onclick="window.firebaseManager.signInWithGoogle()" style="width: 100%; padding: 1rem;">
+                                    <i class="fab fa-google"></i>
+                                    Connexion avec Google
+                                </button>
+                                <button class="btn btn-secondary" onclick="window.firebaseManager.showEmailSignIn()" style="width: 100%; padding: 1rem;">
+                                    <i class="fas fa-envelope"></i>
+                                    Connexion par email
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', authHtml);
+            }
+            
+            showUserInterface() {
+                // Supprimer l'interface d'authentification
+                const authContainer = document.querySelector('.auth-container');
+                if (authContainer) {
+                    authContainer.remove();
+                }
+                
+                // Mettre à jour l'interface utilisateur
+                this.updateUserProfile();
+            }
+            
+            updateUserProfile() {
+                const userProfile = document.getElementById('user-profile');
+                if (userProfile && this.currentUser) {
+                    userProfile.innerHTML = `
+                        <div class="user-menu" style="position: relative;">
+                            <img src="${this.currentUser.photoURL || this.generateDefaultAvatar(this.currentUser.displayName)}" 
+                                 alt="Profil" 
+                                 class="avatar" 
+                                 style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;"
+                                 onclick="window.firebaseManager.toggleUserMenu()">
+                            <div class="user-dropdown" id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 8px; box-shadow: var(--shadow-lg); min-width: 200px; z-index: 1000;">
+                                <div style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                    <div style="font-weight: 600;">${this.currentUser.displayName || 'Utilisateur'}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${this.currentUser.email}</div>
+                                </div>
+                                <div style="padding: 0.5rem;">
+                                    <button class="btn btn-secondary" onclick="window.firebaseManager.signOut()" style="width: 100%; margin: 0;">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Déconnexion
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            toggleUserMenu() {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) {
+                    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                }
+            }
+            
+            async signInWithGoogle() {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('profile');
+                    provider.addScope('email');
+                    
+                    const result = await this.auth.signInWithPopup(provider);
+                    console.log('✅ Connexion Google réussie:', result.user.email);
+                } catch (error) {
+                    console.error('❌ Erreur connexion Google:', error);
+                    this.showToast('Erreur de connexion', 'error');
+                }
+            }
+            
+            showEmailSignIn() {
+                // Interface de connexion par email (simplifiée)
+                const email = prompt('Email:');
+                const password = prompt('Mot de passe:');
+                
+                if (email && password) {
+                    this.signInWithEmail(email, password);
+                }
+            }
+            
+            async signInWithEmail(email, password) {
+                try {
+                    await this.auth.signInWithEmailAndPassword(email, password);
+                    console.log('✅ Connexion email réussie');
+                } catch (error) {
+                    console.error('❌ Erreur connexion email:', error);
+                    this.showToast('Erreur de connexion', 'error');
+                }
+            }
+            
+            async signOut() {
+                try {
+                    // Mettre à jour le statut avant déconnexion
+                    if (this.currentUser) {
+                        await this.db.collection('users').doc(this.currentUser.uid).update({
+                            status: 'offline',
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    
+                    await this.auth.signOut();
+                    console.log('✅ Déconnexion réussie');
+                } catch (error) {
+                    console.error('❌ Erreur déconnexion:', error);
+                }
+            }
+            
+            generateDefaultAvatar(name) {
+                const initials = (name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'];
+                const color = colors[name ? name.length % colors.length : 0];
+                
+                return `data:image/svg+xml,${encodeURIComponent(`
+                    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="50" fill="${color}"/>
+                        <text x="50" y="50" text-anchor="middle" dy="0.35em" 
+                              font-family="Arial" font-size="36" fill="white" font-weight="bold">
+                            ${initials}
+                        </text>
+                    </svg>
+                `)}`;
+            }
+            
+            showToast(message, type = 'info') {
+                if (window.badgingManager && window.badgingManager.showToast) {
+                    window.badgingManager.showToast(message, type);
+                } else {
+                    console.log(`${type.toUpperCase()}: ${message}`);
+                }
+            }
+            
+            // Méthodes pour les autres modules
+            getCurrentUser() {
+                return this.currentUser;
+            }
+            
+            getDb() {
+                return this.db;
+            }
+            
+            isAuthenticated() {
+                return !!this.currentUser;
             }
         }
 
@@ -1735,17 +2020,30 @@
                 try {
                     console.log('🎯 Chargement des quêtes...');
                     
+                    // Vérifier l'authentification
+                    if (!window.firebaseManager.isAuthenticated()) {
+                        console.log('❌ Utilisateur non connecté');
+                        this.showAuthRequired();
+                        return;
+                    }
+                    
                     if (!window.questManager || !window.questManager.isInitialized) {
                         console.log('⏳ Quest Manager pas encore prêt');
                         return;
                     }
                     
-                    // Charger les quêtes actives
-                    const activeQuests = window.questManager.getActiveQuests();
-                    console.log('Quêtes trouvées:', activeQuests.length);
+                    // Charger toutes les quêtes disponibles
+                    const allQuests = window.questManager.getAllQuests();
+                    const userQuests = await window.questManager.getUserQuestsFromFirebase();
+                    
+                    console.log('Quêtes disponibles:', allQuests.length);
+                    console.log('Quêtes utilisateur:', userQuests.length);
 
+                    // Combiner les quêtes pour l'affichage
+                    const questsToDisplay = this.combineQuestsForDisplay(allQuests, userQuests);
+                    
                     // Mettre à jour l'interface
-                    this.displayQuests(activeQuests);
+                    this.displayQuests(questsToDisplay);
                     
                     // Écouter les événements de quêtes
                     this.setupQuestEventListeners();
@@ -1756,11 +2054,56 @@
                 }
             }
 
+            showAuthRequired() {
+                const container = document.getElementById('quests-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-lock fa-3x"></i>
+                            <h3>Connexion requise</h3>
+                            <p>Vous devez être connecté pour voir vos missions</p>
+                            <button class="btn btn-primary" onclick="window.firebaseManager.signInWithGoogle()">
+                                <i class="fab fa-google"></i> Se connecter
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+
+            combineQuestsForDisplay(allQuests, userQuests) {
+                // Créer une map des quêtes utilisateur pour un accès rapide
+                const userQuestMap = new Map();
+                userQuests.forEach(uq => {
+                    userQuestMap.set(uq.questId, uq);
+                });
+                
+                // Combiner les données
+                return allQuests.map(quest => {
+                    const userQuest = userQuestMap.get(quest.id);
+                    return {
+                        ...quest,
+                        isAssigned: !!userQuest,
+                        isCompleted: userQuest ? userQuest.isCompleted : false,
+                        progress: userQuest ? userQuest.progress : 0,
+                        maxProgress: userQuest ? userQuest.maxProgress : quest.maxProgress || 1,
+                        progressPercentage: userQuest ? Math.round((userQuest.progress / userQuest.maxProgress) * 100) : 0,
+                        userQuest: userQuest
+                    };
+                });
+            }
+
             displayQuests(quests) {
                 const container = document.getElementById('quests-container');
+                const countBadge = document.getElementById('quest-count-badge');
+                
                 if (!container) {
                     console.error('❌ Container quests-container non trouvé');
                     return;
+                }
+
+                // Mettre à jour le compteur
+                if (countBadge) {
+                    countBadge.textContent = quests ? quests.length : 0;
                 }
 
                 // Vider le container
@@ -1772,8 +2115,8 @@
                             <i class="fas fa-scroll fa-3x"></i>
                             <h3>Aucune mission disponible</h3>
                             <p>Les missions apparaîtront ici automatiquement</p>
-                            <button class="btn btn-primary" onclick="window.questManager.generateDailyQuests()">
-                                <i class="fas fa-refresh"></i> Actualiser
+                            <button class="btn btn-primary" onclick="window.questManager.generateDailyQuests(); window.router.loadQuests()">
+                                <i class="fas fa-refresh"></i> Générer missions
                             </button>
                         </div>
                     `;
@@ -1786,7 +2129,80 @@
                     container.appendChild(questCard);
                 });
                 
+                // Mettre à jour les stats utilisateur
+                this.updateUserQuestStats();
+                
                 console.log(`✅ ${quests.length} missions affichées`);
+            }
+
+            updateUserQuestStats() {
+                const statsContainer = document.getElementById('user-quest-stats');
+                if (!statsContainer || !window.questManager) return;
+                
+                const userLevel = window.questManager.userLevel || 1;
+                const userXP = window.questManager.userXP || 0;
+                const completedQuests = window.questManager.getUserQuests().filter(q => q.isCompleted).length;
+                const activeQuests = window.questManager.getUserQuests().filter(q => !q.isCompleted).length;
+                
+                statsContainer.innerHTML = `
+                    <div class="team-stats-grid">
+                        <div class="team-stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Niveau ${userLevel}</h3>
+                                <p>${userXP} XP</p>
+                            </div>
+                        </div>
+                        
+                        <div class="team-stat-card">
+                            <div class="stat-icon" style="background: var(--success-color);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>${completedQuests}</h3>
+                                <p>Missions terminées</p>
+                            </div>
+                        </div>
+                        
+                        <div class="team-stat-card">
+                            <div class="stat-icon" style="background: var(--info-color);">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>${activeQuests}</h3>
+                                <p>Missions actives</p>
+                            </div>
+                        </div>
+                        
+                        <div class="team-stat-card">
+                            <div class="stat-icon" style="background: var(--warning-color);">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>0</h3>
+                                <p>Badges gagnés</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            showUserStats() {
+                if (!window.questManager) {
+                    this.showToast('Quest Manager non disponible', 'error');
+                    return;
+                }
+                
+                const stats = {
+                    level: window.questManager.userLevel || 1,
+                    xp: window.questManager.userXP || 0,
+                    completedQuests: window.questManager.getUserQuests().filter(q => q.isCompleted).length,
+                    totalQuests: window.questManager.getAllQuests().length
+                };
+                
+                this.showToast(`Niveau ${stats.level} - ${stats.xp} XP - ${stats.completedQuests}/${stats.totalQuests} missions`, 'info');
             }
 
             createQuestCard(quest) {
@@ -1796,6 +2212,7 @@
                 
                 const card = document.createElement('div');
                 card.className = `quest-card ${isCompleted ? 'completed' : ''} ${isAssigned ? 'assigned' : ''}`;
+                card.setAttribute('data-quest-id', quest.id);
                 card.innerHTML = `
                     <div class="quest-header">
                         <div class="quest-type-badge ${quest.type}">
@@ -1819,21 +2236,24 @@
                                 <div class="progress-bar">
                                     <div class="progress-fill" style="width: ${progress}%"></div>
                                 </div>
-                                <span class="progress-text">${quest.userQuest?.progress || 0} / ${quest.userQuest?.maxProgress || 1}</span>
+                                <span class="progress-text">${quest.progress || 0} / ${quest.maxProgress || 1}</span>
                             </div>
                         ` : ''}
                     </div>
                     
                     <div class="quest-actions">
                         ${!isAssigned && !isCompleted ? `
-                            <button class="btn btn-primary" onclick="router.acceptQuest('${quest.id}')">
+                            <button class="btn btn-primary" onclick="window.router.acceptQuest('${quest.id}')">
                                 <i class="fas fa-plus"></i> Accepter
                             </button>
                         ` : ''}
                         
                         ${isAssigned && !isCompleted ? `
-                            <button class="btn btn-success" onclick="router.completeQuest('${quest.id}')">
+                            <button class="btn btn-success" onclick="window.router.completeQuest('${quest.id}')">
                                 <i class="fas fa-check"></i> Terminer
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.router.progressQuest('${quest.id}')" style="font-size: 0.8rem;">
+                                <i class="fas fa-plus"></i> +1
                             </button>
                         ` : ''}
                         
@@ -1954,6 +2374,27 @@
                     this.showToast('Erreur lors de la completion', 'error');
                 }
             }
+
+            async progressQuest(questId) {
+                try {
+                    console.log('📈 Progression de la quête:', questId);
+                    const result = await window.questManager.updateQuestProgress(questId, 1);
+                    
+                    if (result) {
+                        this.showToast('Progression +1!', 'info');
+                        // Mise à jour en temps réel de la barre de progression
+                        const userQuest = window.questManager.getUserQuest(questId);
+                        if (userQuest) {
+                            this.updateQuestProgress(questId, userQuest.progress, userQuest.maxProgress);
+                        }
+                    } else {
+                        this.showToast('Impossible de progresser', 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur progression quête:', error);
+                    this.showToast('Erreur lors de la progression', 'error');
+                }
+            }
             
             startClock() {
                 this.updateClock();
@@ -2002,6 +2443,7 @@
                 this.searchQuery = '';
                 this.roleFilter = '';
                 this.statusFilter = '';
+                this.unsubscribeTeam = null;
                 
                 this.roles = {
                     'admin': { label: 'Administrateur', color: '#dc3545', icon: 'user-shield' },
@@ -2023,8 +2465,60 @@
             
             init() {
                 this.setupEventListeners();
-                this.loadSampleData();
                 console.log('✅ Team Manager initialisé');
+                
+                // Écouter l'authentification
+                document.addEventListener('auth:signed-in', () => {
+                    this.loadTeamFromFirebase();
+                });
+                
+                document.addEventListener('auth:signed-out', () => {
+                    this.cleanup();
+                });
+            }
+            
+            async loadTeamFromFirebase() {
+                try {
+                    if (!window.firebaseManager.isAuthenticated()) {
+                        console.log('❌ Pas d\'authentification pour charger l\'équipe');
+                        return;
+                    }
+                    
+                    const db = window.firebaseManager.getDb();
+                    
+                    // Écouter les changements en temps réel
+                    this.unsubscribeTeam = db.collection('users')
+                        .onSnapshot((snapshot) => {
+                            this.teamMembers = [];
+                            
+                            snapshot.forEach((doc) => {
+                                const userData = doc.data();
+                                this.teamMembers.push({
+                                    id: doc.id,
+                                    ...userData,
+                                    joinedAt: userData.joinedAt?.toDate() || new Date(),
+                                    lastSeen: userData.lastSeen?.toDate() || new Date()
+                                });
+                            });
+                            
+                            console.log(`✅ ${this.teamMembers.length} membres chargés depuis Firebase`);
+                            this.filterAndRenderMembers();
+                        }, (error) => {
+                            console.error('❌ Erreur écoute équipe:', error);
+                        });
+                        
+                } catch (error) {
+                    console.error('❌ Erreur chargement équipe Firebase:', error);
+                }
+            }
+            
+            cleanup() {
+                if (this.unsubscribeTeam) {
+                    this.unsubscribeTeam();
+                    this.unsubscribeTeam = null;
+                }
+                this.teamMembers = [];
+                this.filteredMembers = [];
             }
             
             setupEventListeners() {
@@ -2069,91 +2563,72 @@
                 });
             }
             
-            loadSampleData() {
-                this.teamMembers = [
-                    {
-                        id: '1',
-                        displayName: 'Marie Dubois',
-                        email: 'marie.dubois@synergia.com',
-                        role: 'admin',
-                        status: 'online',
-                        avatar: this.generateAvatar('Marie Dubois'),
-                        phone: '+33 6 12 34 56 78',
-                        department: 'Direction',
-                        joinedAt: new Date('2023-01-15'),
-                        lastSeen: new Date(),
-                        skills: ['Management', 'Stratégie', 'Leadership'],
-                        currentTask: 'Planification Q2 2025',
-                        location: 'Bureau principal',
-                        stats: { tasksCompleted: 156, hoursWorked: 1840, projectsLed: 12 }
-                    },
-                    {
-                        id: '2',
-                        displayName: 'Pierre Martin',
-                        email: 'pierre.martin@synergia.com',
-                        role: 'manager',
-                        status: 'busy',
-                        avatar: this.generateAvatar('Pierre Martin'),
-                        phone: '+33 6 23 45 67 89',
-                        department: 'Développement',
-                        joinedAt: new Date('2023-03-10'),
-                        lastSeen: new Date(Date.now() - 300000),
-                        skills: ['JavaScript', 'React', 'Node.js', 'Management'],
-                        currentTask: 'Code review - Module Planning',
-                        location: 'Télétravail',
-                        stats: { tasksCompleted: 234, hoursWorked: 1650, projectsLed: 8 }
-                    },
-                    {
-                        id: '3',
-                        displayName: 'Sophie Leroy',
-                        email: 'sophie.leroy@synergia.com',
-                        role: 'employee',
-                        status: 'online',
-                        avatar: this.generateAvatar('Sophie Leroy'),
-                        phone: '+33 6 34 56 78 90',
-                        department: 'Design',
-                        joinedAt: new Date('2023-06-20'),
-                        lastSeen: new Date(),
-                        skills: ['UI/UX', 'Figma', 'Adobe Creative'],
-                        currentTask: 'Design système - Interface',
-                        location: 'Bureau principal',
-                        stats: { tasksCompleted: 189, hoursWorked: 1420, projectsLed: 5 }
-                    },
-                    {
-                        id: '4',
-                        displayName: 'Thomas Petit',
-                        email: 'thomas.petit@synergia.com',
-                        role: 'employee',
-                        status: 'away',
-                        avatar: this.generateAvatar('Thomas Petit'),
-                        phone: '+33 6 45 67 89 01',
-                        department: 'Développement',
-                        joinedAt: new Date('2023-09-05'),
-                        lastSeen: new Date(Date.now() - 1800000),
-                        skills: ['Python', 'Firebase', 'API'],
-                        currentTask: 'Pause déjeuner',
-                        location: 'Bureau principal',
-                        stats: { tasksCompleted: 98, hoursWorked: 890, projectsLed: 2 }
-                    },
-                    {
-                        id: '5',
-                        displayName: 'Emma Garcia',
-                        email: 'emma.garcia@synergia.com',
-                        role: 'intern',
-                        status: 'online',
-                        avatar: this.generateAvatar('Emma Garcia'),
-                        phone: '+33 6 56 78 90 12',
-                        department: 'Marketing',
-                        joinedAt: new Date('2024-01-08'),
-                        lastSeen: new Date(),
-                        skills: ['Marketing Digital', 'Réseaux Sociaux'],
-                        currentTask: 'Campagne Q2 - Réseaux sociaux',
-                        location: 'Bureau principal',
-                        stats: { tasksCompleted: 45, hoursWorked: 320, projectsLed: 1 }
+            
+            setupEventListeners() {
+                document.addEventListener('page:change', (e) => {
+                    if (e.detail.page === 'team') {
+                        this.refreshTeamData();
                     }
-                ];
+                });
                 
-                this.filterAndRenderMembers();
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('#add-member-btn') || e.target.closest('#add-member-btn')) {
+                        e.preventDefault();
+                        this.showAddMemberModal();
+                    }
+                    
+                    if (e.target.matches('[data-member-action]') || e.target.closest('[data-member-action]')) {
+                        e.preventDefault();
+                        const btn = e.target.matches('[data-member-action]') ? e.target : e.target.closest('[data-member-action]');
+                        const action = btn.dataset.memberAction;
+                        const memberId = btn.dataset.memberId;
+                        this.handleMemberAction(action, memberId);
+                    }
+                });
+                
+                document.addEventListener('input', (e) => {
+                    if (e.target.matches('#team-search')) {
+                        this.searchQuery = e.target.value;
+                        this.filterAndRenderMembers();
+                    }
+                });
+                
+                document.addEventListener('change', (e) => {
+                    if (e.target.matches('#role-filter')) {
+                        this.roleFilter = e.target.value;
+                        this.filterAndRenderMembers();
+                    }
+                    
+                    if (e.target.matches('#status-filter')) {
+                        this.statusFilter = e.target.value;
+                        this.filterAndRenderMembers();
+                    }
+                });
+            }
+            
+            refreshTeamData() {
+                if (window.firebaseManager.isAuthenticated()) {
+                    // Les données sont déjà mises à jour en temps réel
+                    this.filterAndRenderMembers();
+                } else {
+                    this.showAuthRequired();
+                }
+            }
+            
+            showAuthRequired() {
+                const container = document.getElementById('team-grid');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <i class="fas fa-lock fa-3x"></i>
+                            <h3>Connexion requise</h3>
+                            <p>Connectez-vous pour voir l'équipe</p>
+                            <button class="btn btn-primary" onclick="window.firebaseManager.signInWithGoogle()">
+                                <i class="fab fa-google"></i> Se connecter
+                            </button>
+                        </div>
+                    `;
+                }
             }
             
             filterAndRenderMembers() {
@@ -2201,15 +2676,24 @@
             }
             
             createMemberCard(member) {
-                const role = this.roles[member.role];
-                const status = this.statuses[member.status];
+                const role = this.roles[member.role] || this.roles['employee'];
+                const status = this.statuses[member.status] || this.statuses['offline'];
                 const timeAgo = this.getTimeAgo(member.lastSeen);
+                
+                // Données par défaut si manquantes
+                const avatar = member.avatar || this.generateAvatar(member.displayName);
+                const skills = member.skills || [];
+                const currentTask = member.currentTask || 'Aucune tâche assignée';
+                const phone = member.phone || 'Non renseigné';
+                const department = member.department || 'Non assigné';
+                const location = member.location || 'Non spécifié';
+                const stats = member.stats || { tasksCompleted: 0, hoursWorked: 0, projectsLed: 0 };
                 
                 return `
                     <div class="member-card">
                         <div class="member-header">
                             <div class="member-avatar-container">
-                                <img src="${member.avatar}" alt="${member.displayName}" class="member-avatar">
+                                <img src="${avatar}" alt="${member.displayName}" class="member-avatar">
                                 <div class="status-indicator status-${member.status}">
                                     <i class="fas fa-${status.icon}"></i>
                                 </div>
@@ -2235,14 +2719,14 @@
                             </div>
                             <div class="member-department">
                                 <i class="fas fa-building"></i>
-                                <span>${member.department}</span>
+                                <span>${department}</span>
                             </div>
                         </div>
                         
                         <div class="member-status-info">
                             <div class="current-task">
                                 <i class="fas fa-tasks"></i>
-                                <span>${member.currentTask}</span>
+                                <span>${currentTask}</span>
                             </div>
                             <div class="last-seen">
                                 <i class="fas fa-clock"></i>
@@ -2258,31 +2742,31 @@
                                 </div>
                                 <div class="contact-item">
                                     <i class="fas fa-phone"></i>
-                                    <span>${member.phone}</span>
+                                    <span>${phone}</span>
                                 </div>
                                 <div class="contact-item">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>${member.location}</span>
+                                    <span>${location}</span>
                                 </div>
                             </div>
                             
                             <div class="skills-container">
                                 <div class="skills-list">
-                                    ${member.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                                    ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
                                 </div>
                             </div>
                             
                             <div class="member-stats">
                                 <div class="stat-item">
-                                    <span class="stat-number">${member.stats.tasksCompleted}</span>
+                                    <span class="stat-number">${stats.tasksCompleted || 0}</span>
                                     <span class="stat-label">Tâches</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-number">${Math.round(member.stats.hoursWorked / 8)}</span>
+                                    <span class="stat-number">${Math.round((stats.hoursWorked || 0) / 8)}</span>
                                     <span class="stat-label">Jours</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-number">${member.stats.projectsLed}</span>
+                                    <span class="stat-number">${stats.projectsLed || 0}</span>
                                     <span class="stat-label">Projets</span>
                                 </div>
                             </div>
@@ -2663,8 +3147,11 @@
                     this.modules.teamManager = new TeamManager();
                     this.modules.badgingManager = new BadgingManager();
                     
-                    // Initialize Firebase
+                    // Initialize Firebase first
                     await this.modules.firebaseManager.init();
+                    
+                    // Wait for authentication state
+                    await this.waitForAuth();
                     
                     // Hide loading screen
                     setTimeout(() => {
@@ -2675,7 +3162,7 @@
                                 loadingScreen.style.display = 'none';
                             }, 300);
                         }
-                    }, 2000);
+                    }, 1500);
                     
                     // Expose globally
                     window.firebaseManager = this.modules.firebaseManager;
@@ -2683,11 +3170,45 @@
                     window.teamManager = this.modules.teamManager;
                     window.badgingManager = this.modules.badgingManager;
                     
+                    // Setup click outside handler for user menu
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.user-menu')) {
+                            const dropdown = document.getElementById('user-dropdown');
+                            if (dropdown) {
+                                dropdown.style.display = 'none';
+                            }
+                        }
+                    });
+                    
                     console.log('✅ SYNERGIA v3.0 initialized successfully!');
                     
                 } catch (error) {
                     console.error('❌ Initialization error:', error);
                 }
+            }
+            
+            async waitForAuth() {
+                return new Promise((resolve) => {
+                    // Si déjà authentifié, résoudre immédiatement
+                    if (this.modules.firebaseManager.isAuthenticated()) {
+                        resolve();
+                        return;
+                    }
+                    
+                    // Sinon, attendre un événement d'authentification ou timeout
+                    const authListener = () => {
+                        document.removeEventListener('auth:signed-in', authListener);
+                        resolve();
+                    };
+                    
+                    document.addEventListener('auth:signed-in', authListener);
+                    
+                    // Timeout après 3 secondes si pas d'authentification
+                    setTimeout(() => {
+                        document.removeEventListener('auth:signed-in', authListener);
+                        resolve();
+                    }, 3000);
+                });
             }
         }
 

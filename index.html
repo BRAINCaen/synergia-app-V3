@@ -3063,11 +3063,23 @@
                 try {
                     if (!window.firebaseManager || !window.firebaseManager.isAuthenticated || !window.firebaseManager.isAuthenticated()) {
                         console.log('❌ Pas d\'authentification pour charger les événements');
+                        this.showEventsPermissionError();
                         return;
                     }
                     
                     const db = window.firebaseManager.getDb();
                     if (!db) return;
+                    
+                    // Vérifier d'abord si on peut lire la collection events
+                    try {
+                        // Test simple pour vérifier les permissions
+                        const testSnapshot = await db.collection('events').limit(1).get();
+                        console.log('✅ Permissions événements vérifiées');
+                    } catch (permissionError) {
+                        console.error('❌ Permissions insuffisantes pour les événements:', permissionError);
+                        this.showEventsPermissionError();
+                        return;
+                    }
                     
                     // Écouter les événements en temps réel
                     this.unsubscribeEvents = db.collection('events')
@@ -3090,10 +3102,150 @@
                             this.renderCalendar();
                         }, (error) => {
                             console.error('❌ Erreur écoute événements:', error);
+                            this.showEventsPermissionError();
                         });
                         
                 } catch (error) {
                     console.error('❌ Erreur chargement événements Firebase:', error);
+                    this.showEventsPermissionError();
+                }
+            }
+            
+            showEventsPermissionError() {
+                // Afficher un message d'erreur dans le calendrier
+                const container = document.getElementById('calendar-days');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">
+                            <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom: 1rem;"></i>
+                            <h3>Configuration Firestore requise</h3>
+                            <p>Les événements ne peuvent pas être chargés. Veuillez configurer les règles de sécurité Firestore.</p>
+                            <details style="margin-top: 1rem; text-align: left;">
+                                <summary style="cursor: pointer; font-weight: bold;">Voir les règles à ajouter</summary>
+                                <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; font-size: 0.8rem; overflow-x: auto;">
+// Règles Firestore à ajouter :
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Règle pour la collection events
+    match /events/{eventId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Règle existante pour users
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+                                </pre>
+                            </details>
+                            <button class="btn btn-primary" onclick="window.planningManager.createSampleEvents()" style="margin-top: 1rem;">
+                                <i class="fas fa-database"></i>
+                                Créer des événements de test
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                // Charger des événements de démonstration en local
+                this.loadSampleEvents();
+            }
+            
+            loadSampleEvents() {
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
+                
+                const nextWeek = new Date(today);
+                nextWeek.setDate(today.getDate() + 7);
+                
+                this.events = [
+                    {
+                        id: 'sample-1',
+                        title: 'Réunion équipe',
+                        description: 'Point hebdomadaire de l\'équipe',
+                        startDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0),
+                        endDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0),
+                        type: 'meeting',
+                        priority: 'medium',
+                        location: 'Salle de conférence',
+                        allDay: false,
+                        reminder: true,
+                        attendees: [],
+                        isLocal: true
+                    },
+                    {
+                        id: 'sample-2',
+                        title: 'Formation sécurité',
+                        description: 'Formation obligatoire sur la sécurité informatique',
+                        startDate: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 14, 0),
+                        endDate: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 16, 0),
+                        type: 'training',
+                        priority: 'high',
+                        location: 'Salle de formation',
+                        allDay: false,
+                        reminder: true,
+                        attendees: [],
+                        isLocal: true
+                    },
+                    {
+                        id: 'sample-3',
+                        title: 'Événement équipe',
+                        description: 'Déjeuner d\'équipe mensuel',
+                        startDate: new Date(nextWeek.getFullYear(), nextWeek.getMonth(), nextWeek.getDate(), 12, 0),
+                        endDate: new Date(nextWeek.getFullYear(), nextWeek.getMonth(), nextWeek.getDate(), 14, 0),
+                        type: 'team',
+                        priority: 'low',
+                        location: 'Restaurant Le Jardin',
+                        allDay: false,
+                        reminder: true,
+                        attendees: [],
+                        isLocal: true
+                    }
+                ];
+                
+                console.log('📅 Événements de démonstration chargés');
+                this.renderCalendar();
+            }
+            
+            async createSampleEvents() {
+                try {
+                    const db = window.firebaseManager.getDb();
+                    const currentUser = window.firebaseManager.getCurrentUser();
+                    
+                    if (!db || !currentUser) {
+                        this.showToast('Erreur de connexion', 'error');
+                        return;
+                    }
+                    
+                    const today = new Date();
+                    const sampleEvents = [
+                        {
+                            title: 'Réunion équipe hebdomadaire',
+                            description: 'Point sur les projets en cours',
+                            startDate: firebase.firestore.Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0)),
+                            endDate: firebase.firestore.Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0)),
+                            type: 'meeting',
+                            priority: 'medium',
+                            location: 'Salle de conférence',
+                            allDay: false,
+                            reminder: true,
+                            attendees: [currentUser.uid],
+                            createdBy: currentUser.uid,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }
+                    ];
+                    
+                    for (const event of sampleEvents) {
+                        await db.collection('events').add(event);
+                    }
+                    
+                    this.showToast('Événements de test créés!', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Erreur création événements test:', error);
+                    this.showToast('Impossible de créer les événements de test. Vérifiez les permissions Firestore.', 'error');
                 }
             }
             
@@ -3358,15 +3510,40 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     
-                    if (this.editingEvent) {
-                        // Modifier l'événement existant
-                        await db.collection('events').doc(this.editingEvent.id).update(eventData);
-                        this.showToast('Événement modifié!', 'success');
-                    } else {
-                        // Créer un nouvel événement
-                        eventData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                        await db.collection('events').add(eventData);
-                        this.showToast('Événement créé!', 'success');
+                    try {
+                        if (this.editingEvent && !this.editingEvent.isLocal) {
+                            // Modifier l'événement existant
+                            await db.collection('events').doc(this.editingEvent.id).update(eventData);
+                            this.showToast('Événement modifié!', 'success');
+                        } else {
+                            // Créer un nouvel événement
+                            eventData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                            await db.collection('events').add(eventData);
+                            this.showToast('Événement créé!', 'success');
+                        }
+                    } catch (permissionError) {
+                        console.error('❌ Erreur permissions événement:', permissionError);
+                        this.showToast('Permissions insuffisantes. Événement sauvé localement.', 'warning');
+                        
+                        // Sauvegarder localement
+                        const localEvent = {
+                            id: this.editingEvent?.id || 'local-' + Date.now(),
+                            ...formData,
+                            isLocal: true,
+                            createdBy: currentUser.uid,
+                            createdAt: new Date()
+                        };
+                        
+                        if (this.editingEvent) {
+                            const index = this.events.findIndex(e => e.id === this.editingEvent.id);
+                            if (index !== -1) {
+                                this.events[index] = localEvent;
+                            }
+                        } else {
+                            this.events.push(localEvent);
+                        }
+                        
+                        this.renderCalendar();
                     }
                     
                     this.closeEventModal();
@@ -3383,10 +3560,18 @@
                 }
                 
                 try {
-                    const db = window.firebaseManager.getDb();
-                    await db.collection('events').doc(this.editingEvent.id).delete();
+                    if (this.editingEvent.isLocal) {
+                        // Supprimer l'événement local
+                        this.events = this.events.filter(e => e.id !== this.editingEvent.id);
+                        this.renderCalendar();
+                        this.showToast('Événement supprimé!', 'success');
+                    } else {
+                        // Supprimer de Firebase
+                        const db = window.firebaseManager.getDb();
+                        await db.collection('events').doc(this.editingEvent.id).delete();
+                        this.showToast('Événement supprimé!', 'success');
+                    }
                     
-                    this.showToast('Événement supprimé!', 'success');
                     this.closeEventModal();
                     
                 } catch (error) {

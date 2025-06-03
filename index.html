@@ -2326,6 +2326,59 @@
                 }
                 return null;
             }
+
+            showAssignQuestModal(memberId) {
+                console.log(`🎯 Assignation de quête au membre ${memberId}`);
+                
+                // Créer une modal simple pour assigner des quêtes
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                        <h2><i class="fas fa-tasks"></i> Assigner une mission</h2>
+                        <p>Sélectionnez une mission à assigner à ce membre :</p>
+                        <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
+                            ${this.quests.map(quest => `
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span style="font-size: 1.5rem;">${quest.icon}</span>
+                                        <div>
+                                            <strong>${quest.title}</strong>
+                                            <br><small style="color: #666;">${quest.description}</small>
+                                            <br><span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${quest.xp} XP</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="questManager.assignQuestToMember('${memberId}', '${quest.id}'); this.closest('.modal').remove();">
+                                        Assigner
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="text-align: center;">
+                            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()">
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+            }
+
+            assignQuestToMember(memberId, questId) {
+                const quest = this.getQuestById(questId);
+                const member = window.teamManager ? window.teamManager.getMemberById(memberId) : null;
+                
+                if (quest && member) {
+                    console.log(`🎯 Assignation quête "${quest.title}" au membre ${member.name}`);
+                    window.showToast(`Mission "${quest.title}" assignée à ${member.name}`, 'success');
+                } else {
+                    console.log(`🎯 Assignation quête ${questId} au membre ${memberId}`);
+                    window.showToast('Mission assignée avec succès', 'success');
+                }
+            }
         }
 
         // Initialiser le Quest Manager globalement

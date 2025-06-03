@@ -8,7 +8,6 @@
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SYNERGIA">
@@ -778,21 +777,97 @@
         <div class="page" id="page-team">
             <div class="page-header">
                 <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
-                <button class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Ajouter un membre
-                </button>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="add-member-btn">
+                        <i class="fas fa-plus"></i>
+                        Ajouter un membre
+                    </button>
+                    <button class="btn btn-secondary" id="export-team-btn">
+                        <i class="fas fa-download"></i>
+                        Exporter
+                    </button>
+                </div>
             </div>
             
-            <div class="card">
-                <div class="card-header">
-                    <h3>Membres de l'équipe</h3>
+            <!-- Statistiques de l'équipe -->
+            <div class="team-stats-section">
+                <div id="team-stats">
+                    <!-- Stats dynamiques -->
                 </div>
-                <div class="card-content">
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>Équipe en cours de chargement</p>
-                        <small>Les membres apparaîtront bientôt</small>
+            </div>
+            
+            <!-- Filtres et contrôles -->
+            <div class="team-controls">
+                <div class="search-and-filters">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" 
+                               id="team-search" 
+                               class="search-input" 
+                               placeholder="Rechercher un membre par nom, email, département ou compétence...">
+                    </div>
+                    
+                    <div class="filters-container">
+                        <select id="role-filter" class="filter-select">
+                            <option value="">Tous les rôles</option>
+                            <option value="admin">Administrateur</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employé</option>
+                            <option value="intern">Stagiaire</option>
+                            <option value="external">Externe</option>
+                        </select>
+                        
+                        <select id="status-filter" class="filter-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="online">En ligne</option>
+                            <option value="busy">Occupé</option>
+                            <option value="away">Absent</option>
+                            <option value="offline">Hors ligne</option>
+                        </select>
+                        
+                        <button class="btn btn-secondary" id="sort-members" title="Changer le tri">
+                            <i class="fas fa-sort"></i>
+                            Trier
+                        </button>
+                        
+                        <button class="btn btn-secondary" id="toggle-view" title="Changer la vue">
+                            <i class="fas fa-th"></i>
+                            Vue
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="results-info">
+                    <span id="results-count">0 membre(s) affiché(s)</span>
+                    <button class="btn btn-sm btn-link" onclick="window.teamManager.clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Effacer les filtres
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Grille des membres -->
+            <div class="team-container">
+                <div class="team-grid" id="team-grid">
+                    <!-- Membres dynamiques -->
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Chargement de l'équipe...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modale générique -->
+            <div class="modal-overlay" id="team-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modal-title">Titre</h3>
+                        <button class="modal-close" onclick="window.teamManager.closeModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+                        <!-- Contenu dynamique -->
                     </div>
                 </div>
             </div>

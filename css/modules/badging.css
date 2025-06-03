@@ -1,0 +1,681 @@
+/* ========================================
+   SYNERGIA v3.0 - Badging System CSS
+   ======================================== */
+
+/* === PAGE BADGING === */
+
+.page#page-badging {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page#page-badging .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-radius: 16px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.page#page-badging .page-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.current-time-display {
+  text-align: right;
+}
+
+.live-clock {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.current-date {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* === BADGING CONTAINER === */
+
+.badging-container {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+/* === STATUS CARD === */
+
+.status-main-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.status-main-card.active {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success-color);
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.2);
+}
+
+.status-main-card.break {
+  background: linear-gradient(135deg, #fff3cd, #ffeeba);
+  border-color: var(--warning-color);
+  box-shadow: 0 8px 32px rgba(255, 193, 7, 0.2);
+}
+
+.status-main-card.inactive {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-color: var(--muted-color);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.status-main-card.active .status-icon {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--success-color);
+}
+
+.status-main-card.break .status-icon {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--warning-color);
+}
+
+.status-info h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.status-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+/* === ACTION BUTTONS === */
+
+.badging-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.action-btn {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.action-btn.hidden {
+  display: none;
+}
+
+.action-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.primary-action .action-icon {
+  background: linear-gradient(135deg, var(--success-color), #20c997);
+}
+
+.danger-action .action-icon {
+  background: linear-gradient(135deg, var(--danger-color), #e74c3c);
+}
+
+.warning-action .action-icon {
+  background: linear-gradient(135deg, var(--warning-color), #f39c12);
+}
+
+.success-action .action-icon {
+  background: linear-gradient(135deg, var(--info-color), #3498db);
+}
+
+.action-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.action-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* === CARDS === */
+
+.today-shift-card,
+.badging-history-card,
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--background-secondary);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.history-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+/* === SHIFT INFO === */
+
+.shift-info {
+  display: grid;
+  gap: 1rem;
+}
+
+.shift-time,
+.shift-role,
+.shift-location {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--background-secondary);
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.shift-time i {
+  color: var(--primary-color);
+}
+
+.shift-role i {
+  color: var(--info-color);
+}
+
+.shift-location i {
+  color: var(--warning-color);
+}
+
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+/* === HISTORY === */
+
+.history-timeline {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-left: 3px solid var(--border-color);
+  margin-bottom: 0.5rem;
+  background: var(--background-secondary);
+  border-radius: 0 12px 12px 0;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.history-item.success {
+  border-left-color: var(--success-color);
+}
+
+.history-item.danger {
+  border-left-color: var(--danger-color);
+}
+
+.history-item.warning {
+  border-left-color: var(--warning-color);
+}
+
+.history-item.info {
+  border-left-color: var(--info-color);
+}
+
+.history-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.history-item.success .history-icon {
+  background: var(--success-color);
+}
+
+.history-item.danger .history-icon {
+  background: var(--danger-color);
+}
+
+.history-item.warning .history-icon {
+  background: var(--warning-color);
+}
+
+.history-item.info .history-icon {
+  background: var(--info-color);
+}
+
+.history-info {
+  flex: 1;
+}
+
+.history-type {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.history-time {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.history-meta {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.history-status {
+  flex-shrink: 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.empty-state small {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* === DETAILED STATS === */
+
+.detailed-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.stat-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--background-secondary);
+}
+
+.stat-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-body {
+  padding: 1.5rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
+.stat-progress {
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.performance-badges {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 768px) {
+  .page#page-badging {
+    padding: 0.5rem;
+  }
+  
+  .page#page-badging .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .live-clock {
+    font-size: 2rem;
+  }
+  
+  .badging-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .detailed-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-btn {
+    padding: 1.5rem;
+  }
+  
+  .action-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .status-indicator {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .status-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-header {
+    padding: 1rem;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+  
+  .status-main-card {
+    padding: 1.5rem;
+  }
+  
+  .history-controls {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .history-item {
+    padding: 0.75rem;
+  }
+}
+
+/* === ANIMATIONS === */
+
+.status-main-card {
+  animation: slideUp 0.5s ease-out;
+}
+
+.action-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.action-card:nth-child(1) { animation-delay: 0.1s; }
+.action-card:nth-child(2) { animation-delay: 0.2s; }
+.action-card:nth-child(3) { animation-delay: 0.3s; }
+.action-card:nth-child(4) { animation-delay: 0.4s; }
+
+.history-item {
+  animation: slideInLeft 0.4s ease-out;
+}
+
+/* === NAVIGATION STATUS INDICATORS === */
+
+.nav-link {
+  position: relative;
+}
+
+.status-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  font-size: 8px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-indicator.active {
+  background: var(--success-color);
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.break {
+  background: var(--warning-color);
+  animation: blink 1s infinite;
+}
+
+.status-indicator.inactive {
+  background: transparent;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+/* === PRINT STYLES === */
+
+@media print {
+  .badging-actions-grid {
+    display: none;
+  }
+  
+  .page#page-badging .page-header {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  
+  .card-header {
+    background: white !important;
+  }
+  
+  .history-timeline {
+    max-height: none;
+    overflow: visible;
+  }
+}

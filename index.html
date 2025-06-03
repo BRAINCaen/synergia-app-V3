@@ -1450,7 +1450,7 @@
                         <i class="fas fa-sync"></i>
                         Actualiser
                     </button>
-                    <button class="btn btn-secondary" onclick="window.questManager?.simulateClockIn()">
+                    <button class="btn btn-secondary" onclick="window.questManager?.clockIn && window.questManager.clockIn()">
                         <i class="fas fa-clock"></i>
                         Test Pointage
                     </button>
@@ -2032,14 +2032,17 @@
                         return;
                     }
                     
-                    // Charger toutes les quêtes disponibles
-                    const allQuests = window.questManager.getAllQuests();
-                    const userQuests = await window.questManager.getUserQuestsFromFirebase();
+                    // Utiliser les méthodes disponibles du Quest Manager
+                    const dailyQuests = window.questManager.getDailyQuests ? window.questManager.getDailyQuests() : [];
+                    const weeklyQuests = window.questManager.getWeeklyQuests ? window.questManager.getWeeklyQuests() : [];
+                    const userQuests = window.questManager.currentUser ? window.questManager.currentUser.quests || [] : [];
                     
-                    console.log('Quêtes disponibles:', allQuests.length);
+                    console.log('Quêtes quotidiennes:', dailyQuests.length);
+                    console.log('Quêtes hebdomadaires:', weeklyQuests.length);
                     console.log('Quêtes utilisateur:', userQuests.length);
 
-                    // Combiner les quêtes pour l'affichage
+                    // Combiner toutes les quêtes
+                    const allQuests = [...dailyQuests, ...weeklyQuests];
                     const questsToDisplay = this.combineQuestsForDisplay(allQuests, userQuests);
                     
                     // Mettre à jour l'interface
@@ -2141,8 +2144,16 @@
                 
                 const userLevel = window.questManager.userLevel || 1;
                 const userXP = window.questManager.userXP || 0;
-                const completedQuests = window.questManager.getUserQuests().filter(q => q.isCompleted).length;
-                const activeQuests = window.questManager.getUserQuests().filter(q => !q.isCompleted).length;
+                
+                // Calculer les stats des quêtes de manière sécurisée
+                let completedQuests = 0;
+                let activeQuests = 0;
+                
+                if (window.questManager.currentUser && window.questManager.currentUser.quests) {
+                    const userQuests = window.questManager.currentUser.quests;
+                    completedQuests = userQuests.filter(q => q.isCompleted).length;
+                    activeQuests = userQuests.filter(q => !q.isCompleted).length;
+                }
                 
                 statsContainer.innerHTML = `
                     <div class="team-stats-grid">
@@ -2195,14 +2206,22 @@
                     return;
                 }
                 
-                const stats = {
-                    level: window.questManager.userLevel || 1,
-                    xp: window.questManager.userXP || 0,
-                    completedQuests: window.questManager.getUserQuests().filter(q => q.isCompleted).length,
-                    totalQuests: window.questManager.getAllQuests().length
-                };
+                const level = window.questManager.userLevel || 1;
+                const xp = window.questManager.userXP || 0;
                 
-                this.showToast(`Niveau ${stats.level} - ${stats.xp} XP - ${stats.completedQuests}/${stats.totalQuests} missions`, 'info');
+                let completedQuests = 0;
+                let totalQuests = 0;
+                
+                if (window.questManager.currentUser && window.questManager.currentUser.quests) {
+                    completedQuests = window.questManager.currentUser.quests.filter(q => q.isCompleted).length;
+                }
+                
+                // Compter les quêtes disponibles
+                const dailyQuests = window.questManager.getDailyQuests ? window.questManager.getDailyQuests().length : 0;
+                const weeklyQuests = window.questManager.getWeeklyQuests ? window.questManager.getWeeklyQuests().length : 0;
+                totalQuests = dailyQuests + weeklyQuests;
+                
+                this.showToast(`Niveau ${level} - ${xp} XP - ${completedQuests}/${totalQuests} missions`, 'info');
             }
 
             createQuestCard(quest) {
@@ -2344,6 +2363,12 @@
             async acceptQuest(questId) {
                 try {
                     console.log('✅ Acceptation de la quête:', questId);
+                    
+                    if (!window.questManager.assignQuestToUser) {
+                        this.showToast('Fonction non disponible', 'error');
+                        return;
+                    }
+                    
                     const result = await window.questManager.assignQuestToUser(questId);
                     
                     if (result) {
@@ -2361,6 +2386,12 @@
             async completeQuest(questId) {
                 try {
                     console.log('🎉 Completion de la quête:', questId);
+                    
+                    if (!window.questManager.completeQuest) {
+                        this.showToast('Fonction non disponible', 'error');
+                        return;
+                    }
+                    
                     const xpGained = await window.questManager.completeQuest(questId);
                     
                     if (xpGained) {
@@ -2378,15 +2409,18 @@
             async progressQuest(questId) {
                 try {
                     console.log('📈 Progression de la quête:', questId);
+                    
+                    if (!window.questManager.updateQuestProgress) {
+                        this.showToast('Fonction non disponible', 'error');
+                        return;
+                    }
+                    
                     const result = await window.questManager.updateQuestProgress(questId, 1);
                     
                     if (result) {
                         this.showToast('Progression +1!', 'info');
-                        // Mise à jour en temps réel de la barre de progression
-                        const userQuest = window.questManager.getUserQuest(questId);
-                        if (userQuest) {
-                            this.updateQuestProgress(questId, userQuest.progress, userQuest.maxProgress);
-                        }
+                        // Recharger les quêtes pour mettre à jour l'affichage
+                        this.loadQuests();
                     } else {
                         this.showToast('Impossible de progresser', 'error');
                     }
@@ -2778,8 +2812,17 @@
             updateTeamStats() {
                 const totalMembers = this.teamMembers.length;
                 const onlineMembers = this.teamMembers.filter(m => m.status === 'online').length;
-                const activeProjects = this.teamMembers.reduce((sum, m) => sum + m.stats.projectsLed, 0);
-                const totalTasks = this.teamMembers.reduce((sum, m) => sum + m.stats.tasksCompleted, 0);
+                
+                // Sécuriser l'accès aux stats avec des valeurs par défaut
+                const activeProjects = this.teamMembers.reduce((sum, m) => {
+                    const stats = m.stats || {};
+                    return sum + (stats.projectsLed || 0);
+                }, 0);
+                
+                const totalTasks = this.teamMembers.reduce((sum, m) => {
+                    const stats = m.stats || {};
+                    return sum + (stats.tasksCompleted || 0);
+                }, 0);
                 
                 this.renderTeamStatsCard(totalMembers, onlineMembers, activeProjects, totalTasks);
             }

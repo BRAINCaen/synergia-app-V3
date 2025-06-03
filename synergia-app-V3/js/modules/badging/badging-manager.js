@@ -678,3 +678,48 @@ window.addEventListener('beforeunload', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = BadgingManager;
 }
+setupEventListeners() {
+        // Boutons de pointage
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('#btn-clock-in') || e.target.closest('#btn-clock-in')) {
+                e.preventDefault();
+                this.clockIn();
+            }
+            
+            if (e.target.matches('#btn-clock-out') || e.target.closest('#btn-clock-out')) {
+                e.preventDefault();
+                this.clockOut();
+            }
+            
+            if (e.target.matches('#btn-break-start') || e.target.closest('#btn-break-start')) {
+                e.preventDefault();
+                this.startBreak();
+            }
+            
+            if (e.target.matches('#btn-break-end') || e.target.closest('#btn-break-end')) {
+                e.preventDefault();
+                this.endBreak();
+            }
+            
+            if (e.target.matches('#refresh-history')) {
+                e.preventDefault();
+                this.refreshBadgingData();
+            }
+            
+            if (e.target.matches('#export-history')) {
+                e.preventDefault();
+                this.exportHistory();
+            }
+        });
+        
+        // Navigation vers la page badging
+        document.addEventListener('page:change', (e) => {
+            if (e.detail.page === 'badging') {
+                this.refreshBadgingData();
+            }
+        });
+        
+        // Mise à jour de la date
+        this.updateDate();
+        setInterval(() => this.updateDate(), 60000); // Toutes les minutes
+    }

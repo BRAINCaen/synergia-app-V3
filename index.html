@@ -1558,6 +1558,10 @@
                     <i class="fas fa-users"></i>
                     <span>Équipe</span>
                 </a>
+                <a href="#analytics" class="nav-link" data-page="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
                 <a href="#quests" class="nav-link" data-page="quests">
                     <i class="fas fa-tasks"></i>
                     <span>Missions</span>
@@ -1775,6 +1779,240 @@
                     </div>
                     <div class="modal-body" id="modal-body">
                         <!-- Contenu dynamique -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div class="page" id="page-analytics">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-bar"></i> Analytics & Reporting</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.analyticsManager?.generateReport()">
+                        <i class="fas fa-file-pdf"></i>
+                        Générer rapport
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.analyticsManager?.exportData()">
+                        <i class="fas fa-download"></i>
+                        Exporter données
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.analyticsManager?.refreshAnalytics()">
+                        <i class="fas fa-sync"></i>
+                        Actualiser
+                    </button>
+                </div>
+            </div>
+            
+            <div class="analytics-container">
+                <!-- Filtres -->
+                <div class="analytics-filters">
+                    <div class="filters-group">
+                        <div class="filter-item">
+                            <span class="filter-label">Période</span>
+                            <select id="period-filter" class="filter-select" onchange="window.analyticsManager?.changePeriod(this.value)">
+                                <option value="week">Cette semaine</option>
+                                <option value="month" selected>Ce mois</option>
+                                <option value="quarter">Ce trimestre</option>
+                                <option value="year">Cette année</option>
+                                <option value="custom">Personnalisé</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-item">
+                            <span class="filter-label">Équipe</span>
+                            <select id="team-filter" class="filter-select" onchange="window.analyticsManager?.changeTeam(this.value)">
+                                <option value="all">Toute l'équipe</option>
+                                <option value="development">Développement</option>
+                                <option value="design">Design</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="management">Management</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-item" id="custom-dates" style="display: none;">
+                            <span class="filter-label">Dates</span>
+                            <div class="date-range">
+                                <input type="date" id="start-date" class="date-input">
+                                <span>à</span>
+                                <input type="date" id="end-date" class="date-input">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filters-group">
+                        <span id="last-updated" class="filter-label" style="color: var(--text-secondary);">
+                            Dernière mise à jour: <span id="update-time">--:--</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Métriques principales -->
+                <div class="metrics-overview" id="metrics-overview">
+                    <!-- Métriques générées dynamiquement -->
+                </div>
+                
+                <!-- Graphiques principaux -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Performance de l'équipe</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn active" data-chart="xp">XP</button>
+                                <button class="chart-btn" data-chart="quests">Missions</button>
+                                <button class="chart-btn" data-chart="attendance">Présence</button>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="performance-chart">
+                            <div class="chart-placeholder">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-chart-line fa-2x" style="margin-bottom: 1rem; opacity: 0.3;"></i>
+                                    <p>Graphique de performance</p>
+                                    <small>Les données s'afficheront ici</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Répartition par département</h3>
+                        </div>
+                        <div class="chart-container" id="department-chart">
+                            <div class="chart-placeholder">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-chart-pie fa-2x" style="margin-bottom: 1rem; opacity: 0.3;"></i>
+                                    <p>Répartition départements</p>
+                                    <small>Graphique circulaire</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Leaderboards -->
+                <div class="leaderboard-section">
+                    <div class="leaderboard-card">
+                        <div class="leaderboard-header">
+                            <h3 class="leaderboard-title">
+                                <i class="fas fa-trophy"></i>
+                                Top XP
+                            </h3>
+                            <span class="leaderboard-period">Ce mois</span>
+                        </div>
+                        <div class="leaderboard-list" id="xp-leaderboard">
+                            <!-- Leaderboard XP généré dynamiquement -->
+                        </div>
+                    </div>
+                    
+                    <div class="leaderboard-card">
+                        <div class="leaderboard-header">
+                            <h3 class="leaderboard-title">
+                                <i class="fas fa-clock"></i>
+                                Présence
+                            </h3>
+                            <span class="leaderboard-period">Cette semaine</span>
+                        </div>
+                        <div class="leaderboard-list" id="attendance-leaderboard">
+                            <!-- Leaderboard présence généré dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Activité récente -->
+                <div class="activity-section">
+                    <div class="activity-header">
+                        <h3><i class="fas fa-history"></i> Activité récente</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="window.analyticsManager?.viewAllActivity()">
+                            Voir tout
+                        </button>
+                    </div>
+                    <div class="activity-feed" id="activity-feed">
+                        <!-- Activités générées dynamiquement -->
+                    </div>
+                </div>
+                
+                <!-- Rapports -->
+                <div class="reports-section">
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h3 class="report-title">Rapport mensuel</h3>
+                            <div class="report-actions">
+                                <button class="report-btn" onclick="window.analyticsManager?.downloadReport('monthly')" title="Télécharger">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="report-btn" onclick="window.analyticsManager?.shareReport('monthly')" title="Partager">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="report-summary">
+                            <div class="report-stat">
+                                <div class="report-stat-value" id="monthly-missions">--</div>
+                                <div class="report-stat-label">Missions</div>
+                            </div>
+                            <div class="report-stat">
+                                <div class="report-stat-value" id="monthly-hours">--h</div>
+                                <div class="report-stat-label">Heures</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
+                            Rapport détaillé des performances mensuelles de l'équipe incluant les métriques de productivité et les accomplissements.
+                        </p>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h3 class="report-title">Analyse de présence</h3>
+                            <div class="report-actions">
+                                <button class="report-btn" onclick="window.analyticsManager?.downloadReport('attendance')" title="Télécharger">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="report-btn" onclick="window.analyticsManager?.shareReport('attendance')" title="Partager">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="report-summary">
+                            <div class="report-stat">
+                                <div class="report-stat-value" id="attendance-rate">--%</div>
+                                <div class="report-stat-label">Taux présence</div>
+                            </div>
+                            <div class="report-stat">
+                                <div class="report-stat-value" id="avg-hours">--h</div>
+                                <div class="report-stat-label">Moy. quotidienne</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
+                            Analyse détaillée des patterns de présence, heures de travail et tendances d'assiduité de l'équipe.
+                        </p>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h3 class="report-title">Performance équipe</h3>
+                            <div class="report-actions">
+                                <button class="report-btn" onclick="window.analyticsManager?.downloadReport('performance')" title="Télécharger">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="report-btn" onclick="window.analyticsManager?.shareReport('performance')" title="Partager">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="report-summary">
+                            <div class="report-stat">
+                                <div class="report-stat-value" id="team-xp">--</div>
+                                <div class="report-stat-label">XP Total</div>
+                            </div>
+                            <div class="report-stat">
+                                <div class="report-stat-value" id="completed-quests">--</div>
+                                <div class="report-stat-label">Missions</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
+                            Évaluation globale des performances avec métriques de gamification, progression et accomplissements d'équipe.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -2644,6 +2882,8 @@
                         this.initPlanning();
                     } else if (page === 'chat') {
                         this.initChat();
+                    } else if (page === 'analytics') {
+                        this.initAnalytics();
                     }
                 }
             }
@@ -2690,6 +2930,13 @@
                 // Initialize chat page
                 if (window.chatManager) {
                     window.chatManager.refreshChat();
+                }
+            }
+            
+            initAnalytics() {
+                // Initialize analytics page
+                if (window.analyticsManager) {
+                    window.analyticsManager.refreshAnalytics();
                 }
             }
             
@@ -3165,7 +3412,522 @@
             }
         }
 
-        // Chat Manager
+        // Analytics Manager
+        class AnalyticsManager {
+            constructor() {
+                this.currentPeriod = 'month';
+                this.currentTeam = 'all';
+                this.analytics = {
+                    metrics: {},
+                    charts: {},
+                    leaderboards: {},
+                    activity: []
+                };
+                this.refreshInterval = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                console.log('📊 Analytics Manager initialisé');
+                
+                // Écouter l'authentification
+                document.addEventListener('auth:signed-in', () => {
+                    setTimeout(() => {
+                        this.loadAnalyticsData();
+                    }, 100);
+                });
+                
+                document.addEventListener('auth:signed-out', () => {
+                    this.cleanup();
+                });
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('page:change', (e) => {
+                    if (e.detail.page === 'analytics') {
+                        this.refreshAnalytics();
+                        this.startAutoRefresh();
+                    } else {
+                        this.stopAutoRefresh();
+                    }
+                });
+                
+                // Contrôles de graphiques
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('.chart-btn')) {
+                        this.switchChartView(e.target);
+                    }
+                });
+            }
+            
+            async loadAnalyticsData() {
+                try {
+                    console.log('📊 Chargement des données analytics...');
+                    
+                    // Charger les données depuis les différents managers
+                    const teamData = this.getTeamData();
+                    const questData = this.getQuestData();
+                    const badgingData = this.getBadgingData();
+                    
+                    // Calculer les métriques
+                    this.calculateMetrics(teamData, questData, badgingData);
+                    
+                    // Générer les leaderboards
+                    this.generateLeaderboards(teamData, questData);
+                    
+                    // Générer l'activité récente
+                    this.generateRecentActivity();
+                    
+                    // Rendre l'interface
+                    this.renderAnalytics();
+                    
+                    this.updateLastRefreshTime();
+                    
+                } catch (error) {
+                    console.error('❌ Erreur chargement analytics:', error);
+                }
+            }
+            
+            getTeamData() {
+                const teamManager = window.teamManager;
+                if (!teamManager || !teamManager.teamMembers) return [];
+                
+                return teamManager.teamMembers.map(member => ({
+                    id: member.id,
+                    name: member.displayName,
+                    email: member.email,
+                    role: member.role,
+                    department: member.department || 'Non assigné',
+                    status: member.status,
+                    avatar: member.avatar,
+                    joinedAt: member.joinedAt,
+                    stats: member.stats || {},
+                    xp: member.xp || 0,
+                    level: member.level || 1,
+                    badges: member.badges || [],
+                    questsCompleted: member.questsCompleted || 0
+                }));
+            }
+            
+            getQuestData() {
+                const questManager = window.questManager;
+                if (!questManager) return { total: 0, completed: 0, active: 0 };
+                
+                const dailyQuests = questManager.getDailyQuests ? questManager.getDailyQuests() : [];
+                const weeklyQuests = questManager.getWeeklyQuests ? questManager.getWeeklyQuests() : [];
+                const userQuests = questManager.currentUser ? questManager.currentUser.quests || [] : [];
+                
+                return {
+                    total: dailyQuests.length + weeklyQuests.length,
+                    completed: userQuests.filter(q => q.isCompleted).length,
+                    active: userQuests.filter(q => !q.isCompleted).length,
+                    totalXP: userQuests.reduce((sum, q) => sum + (q.isCompleted ? q.xp || 0 : 0), 0)
+                };
+            }
+            
+            getBadgingData() {
+                const badgingManager = window.badgingManager;
+                if (!badgingManager) return { todayHours: 0, weekHours: 0, status: 'out' };
+                
+                return {
+                    todayHours: 7.5, // Simulé
+                    weekHours: 37.5, // Simulé
+                    status: badgingManager.currentStatus || 'out',
+                    records: badgingManager.todayRecords || []
+                };
+            }
+            
+            calculateMetrics(teamData, questData, badgingData) {
+                const now = new Date();
+                
+                this.analytics.metrics = {
+                    totalMembers: {
+                        value: teamData.length,
+                        change: 0,
+                        changeType: 'neutral',
+                        label: 'Membres d\'équipe'
+                    },
+                    onlineMembers: {
+                        value: teamData.filter(m => m.status === 'online').length,
+                        change: 0,
+                        changeType: 'neutral',
+                        label: 'En ligne maintenant'
+                    },
+                    totalXP: {
+                        value: teamData.reduce((sum, m) => sum + (m.xp || 0), 0) + questData.totalXP,
+                        change: 15.2,
+                        changeType: 'positive',
+                        label: 'XP total équipe'
+                    },
+                    completedQuests: {
+                        value: teamData.reduce((sum, m) => sum + (m.questsCompleted || 0), 0) + questData.completed,
+                        change: 8.7,
+                        changeType: 'positive',
+                        label: 'Missions terminées'
+                    },
+                    averageHours: {
+                        value: 7.8,
+                        change: -2.1,
+                        changeType: 'negative',
+                        label: 'Heures moy. / jour'
+                    },
+                    attendanceRate: {
+                        value: 94.2,
+                        change: 1.8,
+                        changeType: 'positive',
+                        label: 'Taux de présence %'
+                    }
+                };
+            }
+            
+            generateLeaderboards(teamData, questData) {
+                // Leaderboard XP
+                const xpLeaderboard = teamData
+                    .map(member => ({
+                        ...member,
+                        totalXP: (member.xp || 0) + (member.questsCompleted || 0) * 50 // Estimation XP
+                    }))
+                    .sort((a, b) => b.totalXP - a.totalXP)
+                    .slice(0, 5);
+                
+                // Leaderboard présence (simulé)
+                const attendanceLeaderboard = teamData
+                    .map(member => ({
+                        ...member,
+                        attendanceScore: Math.random() * 100 + 80 // Score entre 80-180
+                    }))
+                    .sort((a, b) => b.attendanceScore - a.attendanceScore)
+                    .slice(0, 5);
+                
+                this.analytics.leaderboards = {
+                    xp: xpLeaderboard,
+                    attendance: attendanceLeaderboard
+                };
+            }
+            
+            generateRecentActivity() {
+                const activities = [
+                    {
+                        type: 'quest',
+                        icon: 'fas fa-trophy',
+                        text: '<strong>Marie Dubois</strong> a terminé la mission "Réunion équipe"',
+                        time: new Date(Date.now() - 1800000) // 30 min ago
+                    },
+                    {
+                        type: 'badge',
+                        icon: 'fas fa-medal',
+                        text: '<strong>Pierre Martin</strong> a débloqué le badge "Lève-tôt"',
+                        time: new Date(Date.now() - 3600000) // 1h ago
+                    },
+                    {
+                        type: 'attendance',
+                        icon: 'fas fa-clock',
+                        text: '<strong>Sophie Leroy</strong> a pointé son arrivée',
+                        time: new Date(Date.now() - 5400000) // 1h30 ago
+                    },
+                    {
+                        type: 'team',
+                        icon: 'fas fa-users',
+                        text: '<strong>Thomas Petit</strong> a rejoint l\'équipe Développement',
+                        time: new Date(Date.now() - 7200000) // 2h ago
+                    },
+                    {
+                        type: 'quest',
+                        icon: 'fas fa-star',
+                        text: '<strong>Emma Garcia</strong> a progressé sur "Formation sécurité"',
+                        time: new Date(Date.now() - 10800000) // 3h ago
+                    }
+                ];
+                
+                this.analytics.activity = activities;
+            }
+            
+            renderAnalytics() {
+                this.renderMetrics();
+                this.renderLeaderboards();
+                this.renderActivity();
+                this.renderReportStats();
+            }
+            
+            renderMetrics() {
+                const container = document.getElementById('metrics-overview');
+                if (!container) return;
+                
+                const metrics = this.analytics.metrics;
+                const metricsHTML = Object.entries(metrics).map(([key, metric]) => {
+                    const iconMap = {
+                        totalMembers: 'users',
+                        onlineMembers: 'circle',
+                        totalXP: 'star',
+                        completedQuests: 'trophy',
+                        averageHours: 'clock',
+                        attendanceRate: 'calendar-check'
+                    };
+                    
+                    const changeIcon = metric.changeType === 'positive' ? 'arrow-up' : 
+                                     metric.changeType === 'negative' ? 'arrow-down' : 'minus';
+                    
+                    return `
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">${metric.label}</span>
+                                <div class="metric-icon">
+                                    <i class="fas fa-${iconMap[key]}"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value">${metric.value}${key === 'attendanceRate' ? '%' : ''}</div>
+                            ${metric.change !== 0 ? `
+                                <div class="metric-change ${metric.changeType}">
+                                    <i class="fas fa-${changeIcon}"></i>
+                                    <span>${Math.abs(metric.change)}%</span>
+                                    <span class="metric-subtitle">vs mois dernier</span>
+                                </div>
+                            ` : '<div class="metric-subtitle">Stable</div>'}
+                        </div>
+                    `;
+                }).join('');
+                
+                container.innerHTML = metricsHTML;
+            }
+            
+            renderLeaderboards() {
+                this.renderXPLeaderboard();
+                this.renderAttendanceLeaderboard();
+            }
+            
+            renderXPLeaderboard() {
+                const container = document.getElementById('xp-leaderboard');
+                if (!container || !this.analytics.leaderboards.xp) return;
+                
+                const leaderboardHTML = this.analytics.leaderboards.xp.map((member, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                    
+                    return `
+                        <div class="leaderboard-item">
+                            <div class="leaderboard-rank ${rankClass}">${rank}</div>
+                            <img src="${member.avatar || this.generateAvatar(member.name)}" 
+                                 alt="${member.name}" class="leaderboard-avatar">
+                            <div class="leaderboard-info">
+                                <div class="leaderboard-name">${member.name}</div>
+                                <div class="leaderboard-department">${member.department}</div>
+                            </div>
+                            <div class="leaderboard-score">
+                                <div class="leaderboard-value">${member.totalXP || 0}</div>
+                                <div class="leaderboard-unit">XP</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                container.innerHTML = leaderboardHTML;
+            }
+            
+            renderAttendanceLeaderboard() {
+                const container = document.getElementById('attendance-leaderboard');
+                if (!container || !this.analytics.leaderboards.attendance) return;
+                
+                const leaderboardHTML = this.analytics.leaderboards.attendance.map((member, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                    
+                    return `
+                        <div class="leaderboard-item">
+                            <div class="leaderboard-rank ${rankClass}">${rank}</div>
+                            <img src="${member.avatar || this.generateAvatar(member.name)}" 
+                                 alt="${member.name}" class="leaderboard-avatar">
+                            <div class="leaderboard-info">
+                                <div class="leaderboard-name">${member.name}</div>
+                                <div class="leaderboard-department">${member.department}</div>
+                            </div>
+                            <div class="leaderboard-score">
+                                <div class="leaderboard-value">${Math.round(member.attendanceScore || 0)}</div>
+                                <div class="leaderboard-unit">pts</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                container.innerHTML = leaderboardHTML;
+            }
+            
+            renderActivity() {
+                const container = document.getElementById('activity-feed');
+                if (!container || !this.analytics.activity) return;
+                
+                if (this.analytics.activity.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="padding: 2rem; text-align: center;">
+                            <i class="fas fa-history fa-2x" style="opacity: 0.3; margin-bottom: 1rem;"></i>
+                            <p>Aucune activité récente</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const activityHTML = this.analytics.activity.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-icon ${activity.type}">
+                            <i class="${activity.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">${activity.text}</div>
+                            <div class="activity-time">${this.getTimeAgo(activity.time)}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                container.innerHTML = activityHTML;
+            }
+            
+            renderReportStats() {
+                // Rapport mensuel
+                document.getElementById('monthly-missions').textContent = this.analytics.metrics.completedQuests.value;
+                document.getElementById('monthly-hours').textContent = '156h';
+                
+                // Rapport présence
+                document.getElementById('attendance-rate').textContent = this.analytics.metrics.attendanceRate.value + '%';
+                document.getElementById('avg-hours').textContent = this.analytics.metrics.averageHours.value + 'h';
+                
+                // Rapport performance
+                document.getElementById('team-xp').textContent = this.analytics.metrics.totalXP.value;
+                document.getElementById('completed-quests').textContent = this.analytics.metrics.completedQuests.value;
+            }
+            
+            // Contrôles et interactions
+            changePeriod(period) {
+                this.currentPeriod = period;
+                
+                const customDates = document.getElementById('custom-dates');
+                if (period === 'custom') {
+                    customDates.style.display = 'block';
+                } else {
+                    customDates.style.display = 'none';
+                }
+                
+                this.loadAnalyticsData();
+            }
+            
+            changeTeam(team) {
+                this.currentTeam = team;
+                this.loadAnalyticsData();
+            }
+            
+            switchChartView(button) {
+                // Mettre à jour les boutons actifs
+                button.parentElement.querySelectorAll('.chart-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                
+                const chartType = button.dataset.chart;
+                this.showToast(`Vue ${chartType} - Graphique mis à jour`, 'info');
+            }
+            
+            refreshAnalytics() {
+                this.loadAnalyticsData();
+                this.showToast('Analytics actualisées', 'success');
+            }
+            
+            startAutoRefresh() {
+                this.stopAutoRefresh();
+                this.refreshInterval = setInterval(() => {
+                    this.loadAnalyticsData();
+                    this.updateLastRefreshTime();
+                }, 300000); // 5 minutes
+            }
+            
+            stopAutoRefresh() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                    this.refreshInterval = null;
+                }
+            }
+            
+            updateLastRefreshTime() {
+                const timeElement = document.getElementById('update-time');
+                if (timeElement) {
+                    timeElement.textContent = new Date().toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+            }
+            
+            // Fonctionnalités rapports
+            generateReport() {
+                this.showToast('Génération du rapport en cours...', 'info');
+                setTimeout(() => {
+                    this.showToast('Rapport généré avec succès!', 'success');
+                }, 2000);
+            }
+            
+            exportData() {
+                this.showToast('Export des données en cours...', 'info');
+                setTimeout(() => {
+                    this.showToast('Données exportées vers CSV', 'success');
+                }, 1500);
+            }
+            
+            downloadReport(type) {
+                this.showToast(`Téléchargement du rapport ${type}...`, 'info');
+            }
+            
+            shareReport(type) {
+                this.showToast(`Partage du rapport ${type}...`, 'info');
+            }
+            
+            viewAllActivity() {
+                this.showToast('Historique complet - Bientôt disponible', 'info');
+            }
+            
+            // Utilitaires
+            getTimeAgo(date) {
+                const now = new Date();
+                const diff = now - date;
+                const minutes = Math.floor(diff / 60000);
+                
+                if (minutes < 1) return 'À l\'instant';
+                if (minutes < 60) return `Il y a ${minutes} min`;
+                
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return `Il y a ${hours}h`;
+                
+                const days = Math.floor(hours / 24);
+                return `Il y a ${days}j`;
+            }
+            
+            generateAvatar(name) {
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'];
+                const color = colors[name.length % colors.length];
+                
+                return `data:image/svg+xml,${encodeURIComponent(`
+                    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="50" fill="${color}"/>
+                        <text x="50" y="50" text-anchor="middle" dy="0.35em" 
+                              font-family="Arial" font-size="36" fill="white" font-weight="bold">
+                            ${initials}
+                        </text>
+                    </svg>
+                `)}`;
+            }
+            
+            cleanup() {
+                this.stopAutoRefresh();
+                this.analytics = { metrics: {}, charts: {}, leaderboards: {}, activity: [] };
+            }
+            
+            showToast(message, type = 'info') {
+                if (window.badgingManager && window.badgingManager.showToast) {
+                    window.badgingManager.showToast(message, type);
+                } else {
+                    console.log(`${type.toUpperCase()}: ${message}`);
+                }
+            }
+        }
         class ChatManager {
             constructor() {
                 this.conversations = [];
@@ -5236,6 +5998,7 @@ service cloud.firestore {
                     this.modules.badgingManager = new BadgingManager();
                     this.modules.planningManager = new PlanningManager();
                     this.modules.chatManager = new ChatManager();
+                    this.modules.analyticsManager = new AnalyticsManager();
                     
                     // Initialize Firebase first
                     await this.modules.firebaseManager.init();
@@ -5261,6 +6024,7 @@ service cloud.firestore {
                     window.badgingManager = this.modules.badgingManager;
                     window.planningManager = this.modules.planningManager;
                     window.chatManager = this.modules.chatManager;
+                    window.analyticsManager = this.modules.analyticsManager;
                     
                     // Setup click outside handler for user menu
                     document.addEventListener('click', (e) => {

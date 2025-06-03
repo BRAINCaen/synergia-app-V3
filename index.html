@@ -1932,6 +1932,8 @@
         class Router {
             constructor() {
                 this.currentPage = 'dashboard';
+                this.loadingQuests = false;
+                this.questListenersSetup = false;
                 this.init();
             }
             
@@ -2018,6 +2020,13 @@
             
             async loadQuests() {
                 try {
+                    // Éviter les appels multiples simultanés
+                    if (this.loadingQuests) {
+                        console.log('⏳ Chargement des quêtes déjà en cours...');
+                        return;
+                    }
+                    this.loadingQuests = true;
+                    
                     console.log('🎯 Chargement des quêtes...');
                     
                     // Vérifier l'authentification avec sécurité
@@ -2048,12 +2057,17 @@
                     // Mettre à jour l'interface
                     this.displayQuests(questsToDisplay);
                     
-                    // Écouter les événements de quêtes
+                    // Écouter les événements de quêtes (une seule fois)
                     this.setupQuestEventListeners();
                     
                 } catch (error) {
                     console.error('❌ Erreur chargement quêtes:', error);
                     this.showToast('Erreur lors du chargement des missions', 'error');
+                } finally {
+                    // Libérer le verrou après un petit délai
+                    setTimeout(() => {
+                        this.loadingQuests = false;
+                    }, 1000);
                 }
             }
 
@@ -2323,17 +2337,22 @@
             }
 
             setupQuestEventListeners() {
+                // Éviter les listeners multiples
+                if (this.questListenersSetup) return;
+                this.questListenersSetup = true;
+                
                 // Écouter les événements du Quest Manager
                 document.addEventListener('quest:assigned', (e) => {
                     console.log('🎯 Nouvelle quête assignée:', e.detail.quest.title);
                     this.showToast(`Nouvelle mission: ${e.detail.quest.title}`, 'info');
-                    this.loadQuests(); // Recharger l'affichage
+                    // NE PAS recharger automatiquement pour éviter la boucle
                 });
                 
                 document.addEventListener('quest:completed', (e) => {
                     console.log('🎉 Quête complétée:', e.detail.quest.title);
                     this.showToast(`Mission complétée! +${e.detail.xpGained} XP`, 'success');
-                    this.loadQuests(); // Recharger l'affichage
+                    // Recharger seulement après completion
+                    setTimeout(() => this.loadQuests(), 500);
                 });
                 
                 document.addEventListener('quest:progress', (e) => {
@@ -2373,7 +2392,10 @@
                     
                     if (result) {
                         this.showToast('Mission acceptée!', 'success');
-                        this.loadQuests();
+                        // Recharger après un délai pour éviter les conflits
+                        setTimeout(() => {
+                            this.loadQuests();
+                        }, 500);
                     } else {
                         this.showToast('Impossible d\'accepter cette mission', 'error');
                     }
@@ -2396,7 +2418,7 @@
                     
                     if (xpGained) {
                         this.showToast(`Mission terminée! +${xpGained} XP`, 'success');
-                        this.loadQuests();
+                        // Les événements se chargeront du rechargement
                     } else {
                         this.showToast('Impossible de terminer cette mission', 'error');
                     }
@@ -2419,8 +2441,7 @@
                     
                     if (result) {
                         this.showToast('Progression +1!', 'info');
-                        // Recharger les quêtes pour mettre à jour l'affichage
-                        this.loadQuests();
+                        // Les événements se chargeront de la mise à jour
                     } else {
                         this.showToast('Impossible de progresser', 'error');
                     }

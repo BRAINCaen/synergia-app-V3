@@ -29,20 +29,109 @@ class QuestManager {
         console.log('✅ Quest Manager initialisé');
     }
 
-    async waitForAuth() {
-        return new Promise((resolve) => {
+// CORRECTION pour la synchronisation utilisateur dans Quest Manager
+
+async waitForAuth() {
+    return new Promise((resolve) => {
+        // Vérifier si l'utilisateur est déjà connecté
+        if (auth.currentUser) {
+            this.currentUser = auth.currentUser;
+            console.log(`👤 Utilisateur trouvé: ${this.currentUser.email}`);
+            resolve();
+            return;
+        }
+
+        // Attendre la connexion
+        let attempts = 0;
+        const maxAttempts = 50; // 5 secondes max
+        
+        const checkAuth = () => {
+            attempts++;
+            
             if (auth.currentUser) {
                 this.currentUser = auth.currentUser;
+                console.log(`👤 Utilisateur connecté après ${attempts * 100}ms: ${this.currentUser.email}`);
+                resolve();
+            } else if (attempts >= maxAttempts) {
+                console.log('⚠️ Timeout - Mode démo activé');
+                this.currentUser = null;
                 resolve();
             } else {
-                const unsubscribe = onAuthStateChanged(auth, (user) => {
-                    this.currentUser = user;
-                    unsubscribe();
-                    resolve();
-                });
+                setTimeout(checkAuth, 100);
             }
-        });
+        };
+        
+        checkAuth();
+    });
+}
+
+// CORRECTION pour la génération des quêtes quotidiennes
+generateDailyQuests() {
+    if (!this.currentUser) {
+        console.log('👤 Mode démo - quêtes système uniquement');
+        return;
     }
+
+    try {
+        const today = new Date().toDateString();
+        const existingDailyQuests = this.userQuests.filter(q => 
+            q.type === 'daily' && q.assignedDate === today
+        );
+
+        if (existingDailyQuests.length === 0) {
+            console.log('🔄 Génération des quêtes quotidiennes...');
+            
+            // Générer les quêtes sans attendre Firebase
+            const dailyQuests = this.quests.filter(q => q.type === 'daily');
+            
+            dailyQuests.forEach(quest => {
+                // Créer la quête localement d'abord
+                const userQuest = {
+                    questId: quest.id,
+                    title: quest.title,
+                    description: quest.description,
+                    type: 'daily',
+                    xp: quest.xp,
+                    icon: quest.icon,
+                    category: quest.category,
+                    status: 'assigned',
+                    progress: 0,
+                    maxProgress: quest.requirements.count || 1,
+                    assignedDate: today,
+                    assignedAt: new Date(),
+                    requirements: quest.requirements
+                };
+
+                // Ajouter à la liste locale immédiatement
+                this.userQuests.push(userQuest);
+                
+                // Sauvegarder en Firebase en arrière-plan
+                this.saveQuestToFirebase(userQuest);
+            });
+
+            console.log('🔄 Quêtes quotidiennes générées');
+        }
+    } catch (error) {
+        console.error('❌ Erreur génération quêtes:', error);
+    }
+}
+
+// NOUVELLE MÉTHODE pour sauvegarder sans bloquer
+async saveQuestToFirebase(userQuest) {
+    if (!this.currentUser) return;
+
+    try {
+        const userQuestsRef = collection(db, 'users', this.currentUser.uid, 'quests');
+        const docRef = await addDoc(userQuestsRef, userQuest);
+        
+        // Mettre à jour l'ID local
+        userQuest.id = docRef.id;
+        
+        console.log(`✅ Quête "${userQuest.title}" sauvegardée en Firebase`);
+    } catch (error) {
+        console.warn(`⚠️ Quête "${userQuest.title}" reste locale (Firebase inaccessible)`);
+    }
+}
 
     async loadQuests() {
         try {

@@ -378,63 +378,184 @@
         <!-- Badging Page -->
         <div class="page" id="page-badging">
             <div class="page-header">
-                <h1>Système de badgeage</h1>
-                <div class="current-status" id="current-status">
-                    <span class="status-text">Statut : <strong id="badge-status">Non pointé</strong></span>
-                    <span class="time-display" id="current-time"></span>
+                <h1><i class="fas fa-clock"></i> Système de Pointage</h1>
+                <div class="current-time-display">
+                    <div class="live-clock" id="clock">--:--:--</div>
+                    <div class="current-date" id="current-date"></div>
                 </div>
             </div>
             
             <div class="badging-container">
-                <div class="badge-actions">
-                    <div class="badge-card">
-                        <h2>Pointer</h2>
-                        <div class="badge-buttons">
-                            <button class="badge-btn entry" id="badge-in-btn">
+                <!-- Statut Principal -->
+                <div class="status-main-card" id="status-card">
+                    <div class="status-indicator">
+                        <div class="status-icon" id="status-icon">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div class="status-info">
+                            <h2 class="status-title" id="status-text">Non pointé</h2>
+                            <p class="status-subtitle" id="status-subtitle">En attente de pointage</p>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Temps travaillé</span>
+                            <span class="stat-value" id="work-hours">0h 00m</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Temps total</span>
+                            <span class="stat-value" id="total-hours">0h 00m</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Pauses</span>
+                            <span class="stat-value" id="break-hours">0h 00m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions de Pointage -->
+                <div class="badging-actions-grid">
+                    <!-- Arrivée -->
+                    <div class="action-card clock-in-card">
+                        <button class="action-btn primary-action hidden" id="btn-clock-in">
+                            <div class="action-icon">
                                 <i class="fas fa-sign-in-alt"></i>
-                                <span>Arrivée</span>
-                            </button>
-                            <button class="badge-btn exit" id="badge-out-btn" disabled>
+                            </div>
+                            <div class="action-content">
+                                <h3>Pointer l'arrivée</h3>
+                                <p>Commencer votre journée de travail</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Départ -->
+                    <div class="action-card clock-out-card">
+                        <button class="action-btn danger-action hidden" id="btn-clock-out">
+                            <div class="action-icon">
                                 <i class="fas fa-sign-out-alt"></i>
-                                <span>Départ</span>
+                            </div>
+                            <div class="action-content">
+                                <h3>Pointer le départ</h3>
+                                <p>Terminer votre journée de travail</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Début de pause -->
+                    <div class="action-card break-start-card">
+                        <button class="action-btn warning-action hidden" id="btn-break-start">
+                            <div class="action-icon">
+                                <i class="fas fa-coffee"></i>
+                            </div>
+                            <div class="action-content">
+                                <h3>Commencer une pause</h3>
+                                <p>Pause déjeuner, courte ou personnelle</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Fin de pause -->
+                    <div class="action-card break-end-card">
+                        <button class="action-btn success-action hidden" id="btn-break-end">
+                            <div class="action-icon">
+                                <i class="fas fa-play-circle"></i>
+                            </div>
+                            <div class="action-content">
+                                <h3>Reprendre le travail</h3>
+                                <p>Terminer votre pause</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Shift du jour -->
+                <div class="today-shift-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-day"></i> Planning du jour</h3>
+                    </div>
+                    <div class="card-content" id="today-shift-info">
+                        <div class="loading-placeholder">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Chargement du planning...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historique du jour -->
+                <div class="badging-history-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Historique du jour</h3>
+                        <div class="history-controls">
+                            <button class="btn btn-sm" id="refresh-history">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn btn-sm" id="export-history">
+                                <i class="fas fa-download"></i>
                             </button>
                         </div>
-                        <div class="badge-info" id="badge-info">
-                            <p>Dernière action : <span id="last-badge">Aucune</span></p>
-                            <p>Temps de travail aujourd'hui : <span id="work-time-today">0h 0m</span></p>
+                    </div>
+                    <div class="card-content">
+                        <div class="history-timeline" id="badging-history-list">
+                            <div class="empty-state">
+                                <i class="fas fa-clock"></i>
+                                <p>Aucun pointage aujourd'hui</p>
+                                <small>Commencez par pointer votre arrivée</small>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="badge-history">
-                    <h2>Historique</h2>
-                    <div class="history-filters">
-                        <input type="date" id="history-date" class="form-input">
-                        <select id="history-period" class="form-select">
-                            <option value="today">Aujourd'hui</option>
-                            <option value="week">Cette semaine</option>
-                            <option value="month">Ce mois</option>
-                        </select>
-                    </div>
-                    <div class="history-list" id="badge-history-list">
-                        <!-- Historique dynamique -->
-                    </div>
-                </div>
-                
-                <div class="time-summary">
-                    <h2>Résumé temporel</h2>
-                    <div class="summary-grid">
-                        <div class="summary-card">
-                            <h3>Aujourd'hui</h3>
-                            <p class="time-value" id="time-today">0h 0m</p>
+
+                <!-- Statistiques détaillées -->
+                <div class="detailed-stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-calendar-week"></i>
+                            <h4>Cette semaine</h4>
                         </div>
-                        <div class="summary-card">
-                            <h3>Cette semaine</h3>
-                            <p class="time-value" id="time-week">0h 0m</p>
+                        <div class="stat-body">
+                            <div class="stat-number" id="week-hours">0h 00m</div>
+                            <div class="stat-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="week-progress" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text">0% de l'objectif</span>
+                            </div>
                         </div>
-                        <div class="summary-card">
-                            <h3>Ce mois</h3>
-                            <p class="time-value" id="time-month">0h 0m</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h4>Ce mois</h4>
+                        </div>
+                        <div class="stat-body">
+                            <div class="stat-number" id="month-hours">0h 00m</div>
+                            <div class="stat-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="month-progress" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text">0% de l'objectif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-trophy"></i>
+                            <h4>Performance</h4>
+                        </div>
+                        <div class="stat-body">
+                            <div class="performance-badges">
+                                <div class="badge-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Ponctuel</span>
+                                </div>
+                                <div class="badge-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Régulier</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

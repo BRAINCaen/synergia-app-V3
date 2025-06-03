@@ -3686,12 +3686,101 @@
                 this.charts = {};
                 this.init();
             }
+  // Intégration Analytics Pro
+        initializeAdvancedAnalytics() {
+            // Attendre que l'iframe soit chargé
+            const iframe = document.getElementById('analytics-pro-iframe');
+            if (iframe) {
+                iframe.addEventListener('load', () => {
+                    console.log('📊 Analytics Pro chargé');
+                    this.syncWithAdvancedAnalytics();
+                });
+                
+                // Gestion des erreurs de chargement
+                iframe.addEventListener('error', () => {
+                    console.warn('⚠️ Erreur chargement Analytics Pro');
+                    document.getElementById('analytics-fallback').style.display = 'block';
+                    iframe.style.display = 'none';
+                });
+            }
+        }
 
+        syncWithAdvancedAnalytics() {
+            try {
+                const iframe = document.getElementById('analytics-pro-iframe');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.AdvancedAnalytics) {
+                    const advancedAnalytics = iframe.contentWindow.AdvancedAnalytics;
+                    
+                    // Synchroniser les données des membres
+                    if (window.teamManager) {
+                        const members = window.teamManager.getAllMembers();
+                        members.forEach(member => {
+                            advancedAnalytics.updateMemberData(member.id, {
+                                attendance: this.calculateAttendanceRate(member.id),
+                                missions: this.getMemberMissions(member.id),
+                                xp: member.xp || 0,
+                                productivity: this.calculateProductivity(member.id)
+                            });
+                        });
+                    }
+                    
+                    // Synchroniser les données globales
+                    advancedAnalytics.updateData({
+                        globalMetrics: this.data.performance,
+                        attendance: this.data.attendance,
+                        missions: this.data.quests
+                    });
+                    
+                    console.log('✅ Synchronisation Analytics Pro réussie');
+                }
+            } catch (error) {
+                console.warn('⚠️ Erreur synchronisation Analytics Pro:', error);
+            }
+        }
+
+        calculateAttendanceRate(memberId) {
+            // Calculer le taux de présence d'un membre
+            // Utiliser les données de badgingManager si disponible
+            if (window.badgingManager) {
+                const stats = window.badgingManager.getAttendanceStats();
+                return stats.punctualityRate || 85;
+            }
+            return 85 + Math.random() * 15; // Simulation
+        }
+
+        getMemberMissions(memberId) {
+            // Récupérer le nombre de missions d'un membre
+            if (window.questManager) {
+                const userQuests = window.questManager.getUserQuests();
+                return userQuests.filter(q => q.status === 'completed').length;
+            }
+            return Math.floor(Math.random() * 50); // Simulation
+        }
+
+        calculateProductivity(memberId) {
+            // Calculer la productivité d'un membre
+            const attendance = this.calculateAttendanceRate(memberId);
+            const missions = this.getMemberMissions(memberId);
+            return Math.min(100, (attendance * 0.6) + (missions * 0.8));
+        }
+
+        // Méthode pour mettre à jour Analytics Pro depuis SYNERGIA
+        updateAdvancedAnalytics(memberData) {
+            try {
+                const iframe = document.getElementById('analytics-pro-iframe');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.AdvancedAnalytics) {
+                    iframe.contentWindow.AdvancedAnalytics.updateMemberData(memberData.id, memberData);
+                }
+            } catch (error) {
+                console.warn('Erreur mise à jour Analytics Pro:', error);
+            }
+        }
             async init() {
                 console.log('📊 Analytics Manager initialisé');
                 await this.loadAnalyticsData();
                 this.setupEventListeners();
                 this.initializeCharts();
+                this.initializeAdvancedAnalytics();
             }
 
             async loadAnalyticsData() {
@@ -3871,7 +3960,40 @@
                         this.exportData();
                     });
                 }
+ // Analytics Pro
+            const fullscreenBtn = document.getElementById('fullscreen-analytics');
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', () => {
+                    this.toggleFullscreenAnalytics();
+                });
+            }
 
+            const refreshProBtn = document.getElementById('refresh-pro-analytics');
+            if (refreshProBtn) {
+                refreshProBtn.addEventListener('click', () => {
+                    this.refreshAdvancedAnalytics();
+                });
+            }
+        }
+
+        toggleFullscreenAnalytics() {
+            const iframe = document.getElementById('analytics-pro-iframe');
+            if (iframe) {
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else {
+                    // Fallback: ouvrir dans un nouvel onglet
+                    window.open('advanced-analytics.html', '_blank');
+                }
+            }
+        }
+
+        refreshAdvancedAnalytics() {
+            const iframe = document.getElementById('analytics-pro-iframe');
+            if (iframe) {
+                iframe.src = iframe.src; // Recharger l'iframe
+            }
+        }
                 const refreshBtn = document.getElementById('refresh-analytics-btn');
                 if (refreshBtn) {
                     refreshBtn.addEventListener('click', () => {

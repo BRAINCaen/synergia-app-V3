@@ -2020,8 +2020,8 @@
                 try {
                     console.log('🎯 Chargement des quêtes...');
                     
-                    // Vérifier l'authentification
-                    if (!window.firebaseManager.isAuthenticated()) {
+                    // Vérifier l'authentification avec sécurité
+                    if (!window.firebaseManager || !window.firebaseManager.isAuthenticated || !window.firebaseManager.isAuthenticated()) {
                         console.log('❌ Utilisateur non connecté');
                         this.showAuthRequired();
                         return;
@@ -2501,9 +2501,11 @@
                 this.setupEventListeners();
                 console.log('✅ Team Manager initialisé');
                 
-                // Écouter l'authentification
+                // Écouter l'authentification avec un délai pour s'assurer que Firebase Manager est prêt
                 document.addEventListener('auth:signed-in', () => {
-                    this.loadTeamFromFirebase();
+                    setTimeout(() => {
+                        this.loadTeamFromFirebase();
+                    }, 100);
                 });
                 
                 document.addEventListener('auth:signed-out', () => {
@@ -2513,12 +2515,17 @@
             
             async loadTeamFromFirebase() {
                 try {
-                    if (!window.firebaseManager.isAuthenticated()) {
+                    // Vérifier si Firebase Manager existe et est prêt
+                    if (!window.firebaseManager || !window.firebaseManager.isAuthenticated || !window.firebaseManager.isAuthenticated()) {
                         console.log('❌ Pas d\'authentification pour charger l\'équipe');
                         return;
                     }
                     
                     const db = window.firebaseManager.getDb();
+                    if (!db) {
+                        console.log('❌ Base de données non disponible');
+                        return;
+                    }
                     
                     // Écouter les changements en temps réel
                     this.unsubscribeTeam = db.collection('users')
@@ -2641,7 +2648,7 @@
             }
             
             refreshTeamData() {
-                if (window.firebaseManager.isAuthenticated()) {
+                if (window.firebaseManager && window.firebaseManager.isAuthenticated && window.firebaseManager.isAuthenticated()) {
                     // Les données sont déjà mises à jour en temps réel
                     this.filterAndRenderMembers();
                 } else {

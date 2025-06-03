@@ -1,846 +1,564 @@
-// js/modules/team/team-manager.js
-// Gestionnaire d'équipe pour SYNERGIA v3.0
-
 class TeamManager {
     constructor() {
-        this.teamMembers = [];
+        this.members = [];
         this.currentUser = null;
-        this.filteredMembers = [];
-        this.searchQuery = '';
-        this.roleFilter = '';
-        this.statusFilter = '';
-        this.sortBy = 'name';
-        this.sortOrder = 'asc';
-        this.isLoading = false;
-        
-        // Configuration des rôles
-        this.roles = {
-            'admin': {
-                label: 'Administrateur',
-                color: '#dc3545',
-                icon: 'user-shield',
-                permissions: ['all']
-            },
-            'manager': {
-                label: 'Manager',
-                color: '#fd7e14',
-                icon: 'user-tie',
-                permissions: ['manage_team', 'view_reports', 'manage_planning']
-            },
-            'employee': {
-                label: 'Employé',
-                color: '#28a745',
-                icon: 'user',
-                permissions: ['view_team', 'manage_own_data']
-            },
-            'intern': {
-                label: 'Stagiaire',
-                color: '#17a2b8',
-                icon: 'user-graduate',
-                permissions: ['view_team']
-            },
-            'external': {
-                label: 'Externe',
-                color: '#6c757d',
-                icon: 'user-friends',
-                permissions: ['limited_access']
-            }
-        };
-        
-        // Configuration des statuts
-        this.statuses = {
-            'online': {
-                label: 'En ligne',
-                color: '#28a745',
-                icon: 'circle'
-            },
-            'busy': {
-                label: 'Occupé',
-                color: '#dc3545',
-                icon: 'minus-circle'
-            },
-            'away': {
-                label: 'Absent',
-                color: '#ffc107',
-                icon: 'clock'
-            },
-            'offline': {
-                label: 'Hors ligne',
-                color: '#6c757d',
-                icon: 'circle'
-            }
-        };
-        
         this.init();
     }
-    
-    init() {
-        this.setupEventListeners();
-        this.loadSampleData();
+
+    async init() {
         console.log('✅ Team Manager initialisé');
+        await this.loadMembers();
+        this.setupEventListeners();
     }
-    
-    setupEventListeners() {
-        // Navigation vers la page équipe
-        document.addEventListener('page:change', (e) => {
-            if (e.detail.page === 'team') {
-                this.refreshTeamData();
-            }
-        });
-        
-        // Gestion des événements de l'interface
-        document.addEventListener('click', (e) => {
-            // Ajouter un membre
-            if (e.target.matches('#add-member-btn') || e.target.closest('#add-member-btn')) {
-                e.preventDefault();
-                this.showAddMemberModal();
-            }
-            
-            // Actions sur les membres
-            if (e.target.matches('[data-member-action]') || e.target.closest('[data-member-action]')) {
-                e.preventDefault();
-                const btn = e.target.matches('[data-member-action]') ? e.target : e.target.closest('[data-member-action]');
-                const action = btn.dataset.memberAction;
-                const memberId = btn.dataset.memberId;
-                this.handleMemberAction(action, memberId);
-            }
-            
-            // Filtres et tri
-            if (e.target.matches('#sort-members')) {
-                this.toggleSort();
-            }
-            
-            if (e.target.matches('#toggle-view')) {
-                this.toggleViewMode();
-            }
-        });
-        
-        // Recherche en temps réel
-        document.addEventListener('input', (e) => {
-            if (e.target.matches('#team-search')) {
-                this.searchQuery = e.target.value;
-                this.filterAndRenderMembers();
-            }
-        });
-        
-        // Filtres
-        document.addEventListener('change', (e) => {
-            if (e.target.matches('#role-filter')) {
-                this.roleFilter = e.target.value;
-                this.filterAndRenderMembers();
-            }
-            
-            if (e.target.matches('#status-filter')) {
-                this.statusFilter = e.target.value;
-                this.filterAndRenderMembers();
-            }
-        });
-        
-        // Authentification
-        document.addEventListener('auth:login', (e) => {
-            this.currentUser = e.detail.user;
-            this.loadTeamData();
-        });
-    }
-    
-    async loadTeamData() {
-        if (this.isLoading) return;
-        
-        this.isLoading = true;
-        this.showLoadingState();
-        
+
+    async loadMembers() {
         try {
-            if (window.dataManager) {
-                // Charger depuis DataManager avec cache
-                this.teamMembers = await window.dataManager.getTeamMembers() || [];
-            } else if (window.firebaseManager && window.firebaseManager.isReady) {
-                // Charger depuis Firebase directement
-                this.teamMembers = await window.firebaseManager.getCollection('teamMembers', {
-                    field: 'displayName',
-                    direction: 'asc'
-                }) || [];
+            const user = auth.currentUser;
+            if (!user) {
+                console.log('❌ Utilisateur non connecté pour charger les membres');
+                return;
             }
+
+            const membersRef = collection(db, 'teams', user.uid, 'members');
+            const snapshot = await getDocs(membersRef);
             
-            // Si pas de données, charger les données de démonstration
-            if (this.teamMembers.length === 0) {
-                this.loadSampleData();
-            }
-            
-            this.filterAndRenderMembers();
-            
+            this.members = [];
+            snapshot.forEach(doc => {
+                const memberData = doc.data();
+                this.members.push({
+                    id: doc.id,
+                    name: memberData.name || '',
+                    email: memberData.email || '',
+                    role: memberData.role || 'Membre',
+                    avatar: memberData.avatar || 'assets/default-avatar.png',
+                    status: memberData.status || 'offline',
+                    joinDate: memberData.joinDate || new Date(),
+                    xp: memberData.xp || 0,
+                    level: memberData.level || 1,
+                    badges: memberData.badges || []
+                });
+            });
+
+            console.log(`✅ ${this.members.length} membres chargés depuis Firebase`);
+            this.renderMembers();
         } catch (error) {
-            console.error('❌ Erreur chargement équipe:', error);
-            this.showError('Erreur lors du chargement de l\'équipe');
-            this.loadSampleData(); // Fallback sur les données de démo
-        } finally {
-            this.isLoading = false;
-            this.hideLoadingState();
+            console.error('❌ Erreur lors du chargement des membres:', error);
+            // Charger des données de démonstration en cas d'erreur
+            this.loadDemoMembers();
         }
     }
-    
-    loadSampleData() {
-        // Données de démonstration pour l'équipe
-        this.teamMembers = [
+
+    loadDemoMembers() {
+        this.members = [
             {
-                id: '1',
-                displayName: 'Marie Dubois',
+                id: 'demo1',
+                name: 'Allan Boehme',
+                email: 'alan.boehme61@gmail.com',
+                role: 'Manager',
+                avatar: 'assets/avatars/alan.jpg',
+                status: 'online',
+                joinDate: new Date('2024-01-15'),
+                xp: 1250,
+                level: 5,
+                badges: ['early_bird', 'team_player', 'innovator']
+            },
+            {
+                id: 'demo2',
+                name: 'Marie Dubois',
                 email: 'marie.dubois@synergia.com',
-                role: 'admin',
+                role: 'Développeur',
+                avatar: 'assets/avatars/marie.jpg',
                 status: 'online',
-                avatar: this.generateAvatar('Marie Dubois'),
-                phone: '+33 6 12 34 56 78',
-                department: 'Direction',
-                joinedAt: new Date('2023-01-15'),
-                lastSeen: new Date(),
-                skills: ['Management', 'Stratégie', 'Leadership'],
-                currentTask: 'Planification Q2 2025',
-                workingHours: { start: '08:00', end: '18:00' },
-                location: 'Bureau principal',
-                stats: {
-                    tasksCompleted: 156,
-                    hoursWorked: 1840,
-                    projectsLed: 12
-                }
+                joinDate: new Date('2024-02-01'),
+                xp: 980,
+                level: 4,
+                badges: ['code_master', 'team_player']
             },
             {
-                id: '2',
-                displayName: 'Pierre Martin',
-                email: 'pierre.martin@synergia.com',
-                role: 'manager',
-                status: 'busy',
-                avatar: this.generateAvatar('Pierre Martin'),
-                phone: '+33 6 23 45 67 89',
-                department: 'Développement',
-                joinedAt: new Date('2023-03-10'),
-                lastSeen: new Date(Date.now() - 300000), // 5 min ago
-                skills: ['JavaScript', 'React', 'Node.js', 'Management'],
-                currentTask: 'Code review - Module Planning',
-                workingHours: { start: '09:00', end: '17:30' },
-                location: 'Télétravail',
-                stats: {
-                    tasksCompleted: 234,
-                    hoursWorked: 1650,
-                    projectsLed: 8
-                }
-            },
-            {
-                id: '3',
-                displayName: 'Sophie Leroy',
-                email: 'sophie.leroy@synergia.com',
-                role: 'employee',
-                status: 'online',
-                avatar: this.generateAvatar('Sophie Leroy'),
-                phone: '+33 6 34 56 78 90',
-                department: 'Design',
-                joinedAt: new Date('2023-06-20'),
-                lastSeen: new Date(),
-                skills: ['UI/UX', 'Figma', 'Adobe Creative', 'Prototyping'],
-                currentTask: 'Design système - Badging Interface',
-                workingHours: { start: '08:30', end: '17:00' },
-                location: 'Bureau principal',
-                stats: {
-                    tasksCompleted: 189,
-                    hoursWorked: 1420,
-                    projectsLed: 5
-                }
-            },
-            {
-                id: '4',
-                displayName: 'Thomas Petit',
-                email: 'thomas.petit@synergia.com',
-                role: 'employee',
+                id: 'demo3',
+                name: 'Thomas Martin',
+                email: 'thomas.martin@synergia.com',
+                role: 'Designer',
+                avatar: 'assets/avatars/thomas.jpg',
                 status: 'away',
-                avatar: this.generateAvatar('Thomas Petit'),
-                phone: '+33 6 45 67 89 01',
-                department: 'Développement',
-                joinedAt: new Date('2023-09-05'),
-                lastSeen: new Date(Date.now() - 1800000), // 30 min ago
-                skills: ['Python', 'Firebase', 'API', 'DevOps'],
-                currentTask: 'Pause déjeuner',
-                workingHours: { start: '09:30', end: '18:30' },
-                location: 'Bureau principal',
-                stats: {
-                    tasksCompleted: 98,
-                    hoursWorked: 890,
-                    projectsLed: 2
-                }
-            },
-            {
-                id: '5',
-                displayName: 'Emma Garcia',
-                email: 'emma.garcia@synergia.com',
-                role: 'intern',
-                status: 'online',
-                avatar: this.generateAvatar('Emma Garcia'),
-                phone: '+33 6 56 78 90 12',
-                department: 'Marketing',
-                joinedAt: new Date('2024-01-08'),
-                lastSeen: new Date(),
-                skills: ['Marketing Digital', 'Réseaux Sociaux', 'Content'],
-                currentTask: 'Campagne Q2 - Réseaux sociaux',
-                workingHours: { start: '09:00', end: '16:00' },
-                location: 'Bureau principal',
-                stats: {
-                    tasksCompleted: 45,
-                    hoursWorked: 320,
-                    projectsLed: 1
-                }
-            },
-            {
-                id: '6',
-                displayName: 'Lucas Moreau',
-                email: 'lucas.moreau@external.com',
-                role: 'external',
-                status: 'offline',
-                avatar: this.generateAvatar('Lucas Moreau'),
-                phone: '+33 6 67 89 01 23',
-                department: 'Consultant',
-                joinedAt: new Date('2024-02-15'),
-                lastSeen: new Date(Date.now() - 7200000), // 2h ago
-                skills: ['Consulting', 'Process', 'Audit', 'Formation'],
-                currentTask: 'Audit sécurité - Finalisation',
-                workingHours: { start: '10:00', end: '16:00' },
-                location: 'Client',
-                stats: {
-                    tasksCompleted: 23,
-                    hoursWorked: 156,
-                    projectsLed: 3
-                }
+                joinDate: new Date('2024-03-10'),
+                xp: 750,
+                level: 3,
+                badges: ['creative', 'perfectionist']
             }
         ];
-        
-        this.filterAndRenderMembers();
+        console.log('👥 Membres de démonstration chargés');
+        this.renderMembers();
     }
-    
-    filterAndRenderMembers() {
-        let filtered = [...this.teamMembers];
-        
-        // Filtrage par recherche
-        if (this.searchQuery) {
-            const query = this.searchQuery.toLowerCase();
-            filtered = filtered.filter(member => 
-                member.displayName.toLowerCase().includes(query) ||
-                member.email.toLowerCase().includes(query) ||
-                member.department.toLowerCase().includes(query) ||
-                member.skills.some(skill => skill.toLowerCase().includes(query))
-            );
+
+    setupEventListeners() {
+        // Recherche de membres
+        const searchInput = document.getElementById('team-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.filterAndRenderMembers(e.target.value);
+            });
         }
-        
-        // Filtrage par rôle
-        if (this.roleFilter) {
-            filtered = filtered.filter(member => member.role === this.roleFilter);
+
+        // Bouton d'ajout de membre
+        const addMemberBtn = document.getElementById('add-member-btn');
+        if (addMemberBtn) {
+            addMemberBtn.addEventListener('click', () => {
+                this.showAddMemberModal();
+            });
         }
-        
-        // Filtrage par statut
-        if (this.statusFilter) {
-            filtered = filtered.filter(member => member.status === this.statusFilter);
+
+        // Modal d'ajout de membre
+        const addMemberModal = document.getElementById('add-member-modal');
+        const addMemberForm = document.getElementById('add-member-form');
+        const cancelAddBtn = document.getElementById('cancel-add-member');
+
+        if (addMemberForm) {
+            addMemberForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.addMember();
+            });
         }
-        
-        // Tri
-        filtered.sort((a, b) => {
-            let aValue, bValue;
-            
-            switch (this.sortBy) {
-                case 'name':
-                    aValue = a.displayName.toLowerCase();
-                    bValue = b.displayName.toLowerCase();
-                    break;
-                case 'role':
-                    aValue = a.role;
-                    bValue = b.role;
-                    break;
-                case 'department':
-                    aValue = a.department.toLowerCase();
-                    bValue = b.department.toLowerCase();
-                    break;
-                case 'joined':
-                    aValue = a.joinedAt;
-                    bValue = b.joinedAt;
-                    break;
-                case 'status':
-                    aValue = a.status;
-                    bValue = b.status;
-                    break;
-                default:
-                    aValue = a.displayName.toLowerCase();
-                    bValue = b.displayName.toLowerCase();
-            }
-            
-            if (aValue < bValue) return this.sortOrder === 'asc' ? -1 : 1;
-            if (aValue > bValue) return this.sortOrder === 'asc' ? 1 : -1;
-            return 0;
-        });
-        
-        this.filteredMembers = filtered;
-        this.renderTeamMembers();
-        this.updateTeamStats();
+
+        if (cancelAddBtn) {
+            cancelAddBtn.addEventListener('click', () => {
+                this.hideAddMemberModal();
+            });
+        }
+
+        // Fermer modal en cliquant à l'extérieur
+        if (addMemberModal) {
+            addMemberModal.addEventListener('click', (e) => {
+                if (e.target === addMemberModal) {
+                    this.hideAddMemberModal();
+                }
+            });
+        }
     }
-    
-    renderTeamMembers() {
-        const container = document.getElementById('team-grid');
-        if (!container) return;
-        
-        if (this.filteredMembers.length === 0) {
+
+    filterAndRenderMembers(searchTerm = '') {
+        try {
+            const filteredMembers = this.members.filter(member => {
+                // Protection contre les propriétés undefined
+                const name = (member.name || '').toString();
+                const email = (member.email || '').toString();
+                const role = (member.role || '').toString();
+                
+                const search = searchTerm.toLowerCase();
+                
+                return name.toLowerCase().includes(search) ||
+                       email.toLowerCase().includes(search) ||
+                       role.toLowerCase().includes(search);
+            });
+            
+            this.renderMembers(filteredMembers);
+        } catch (error) {
+            console.error('❌ Erreur lors du filtrage des membres:', error);
+            // En cas d'erreur, afficher tous les membres
+            this.renderMembers(this.members);
+        }
+    }
+
+    renderMembers(membersToRender = this.members) {
+        const container = document.getElementById('team-members-list');
+        if (!container) {
+            console.warn('⚠️ Container team-members-list non trouvé');
+            return;
+        }
+
+        container.innerHTML = '';
+
+        if (membersToRender.length === 0) {
             container.innerHTML = `
-                <div class="empty-state" style="grid-column: 1 / -1;">
-                    <i class="fas fa-users fa-3x"></i>
-                    <h3>Aucun membre trouvé</h3>
-                    <p>Aucun membre ne correspond à vos critères de recherche</p>
-                    <button class="btn btn-primary" onclick="window.teamManager.clearFilters()">
-                        <i class="fas fa-times"></i>
-                        Effacer les filtres
-                    </button>
+                <div class="no-members">
+                    <i class="fas fa-users"></i>
+                    <p>Aucun membre trouvé</p>
                 </div>
             `;
             return;
         }
-        
-        const membersHTML = this.filteredMembers.map(member => this.createMemberCard(member)).join('');
-        container.innerHTML = membersHTML;
-        
-        // Animation d'entrée
-        setTimeout(() => {
-            const cards = container.querySelectorAll('.member-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 50);
-            });
-        }, 10);
+
+        membersToRender.forEach(member => {
+            const memberCard = this.createMemberCard(member);
+            container.appendChild(memberCard);
+        });
+
+        console.log(`👥 ${membersToRender.length} membres d'équipe chargés`);
     }
-    
+
     createMemberCard(member) {
-        const role = this.roles[member.role];
-        const status = this.statuses[member.status];
-        const timeAgo = this.getTimeAgo(member.lastSeen);
-        
-        return `
-            <div class="member-card" style="opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
-                <div class="member-header">
-                    <div class="member-avatar-container">
-                        <img src="${member.avatar}" alt="${member.displayName}" class="member-avatar">
-                        <div class="status-indicator status-${member.status}" title="${status.label}">
-                            <i class="fas fa-${status.icon}"></i>
-                        </div>
-                    </div>
-                    <div class="member-actions">
-                        <button class="action-btn" data-member-action="message" data-member-id="${member.id}" title="Envoyer un message">
-                            <i class="fas fa-comment"></i>
-                        </button>
-                        <button class="action-btn" data-member-action="call" data-member-id="${member.id}" title="Appeler">
-                            <i class="fas fa-phone"></i>
-                        </button>
-                        <button class="action-btn" data-member-action="more" data-member-id="${member.id}" title="Plus d'options">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                    </div>
+        const card = document.createElement('div');
+        card.className = 'team-member-card';
+        card.dataset.memberId = member.id;
+
+        const statusClass = member.status === 'online' ? 'online' : 
+                           member.status === 'away' ? 'away' : 'offline';
+
+        card.innerHTML = `
+            <div class="member-avatar">
+                <img src="${member.avatar}" alt="${member.name}" onerror="this.src='assets/default-avatar.png'">
+                <div class="status-indicator ${statusClass}"></div>
+            </div>
+            <div class="member-info">
+                <h3>${member.name}</h3>
+                <p class="member-role">${member.role}</p>
+                <p class="member-email">${member.email}</p>
+                <div class="member-stats">
+                    <span class="member-level">Niveau ${member.level}</span>
+                    <span class="member-xp">${member.xp} XP</span>
                 </div>
-                
-                <div class="member-info">
-                    <h3 class="member-name">${member.displayName}</h3>
-                    <div class="member-role" style="color: ${role.color};">
-                        <i class="fas fa-${role.icon}"></i>
-                        <span>${role.label}</span>
-                    </div>
-                    <div class="member-department">
-                        <i class="fas fa-building"></i>
-                        <span>${member.department}</span>
-                    </div>
-                </div>
-                
-                <div class="member-status-info">
-                    <div class="current-task">
-                        <i class="fas fa-tasks"></i>
-                        <span>${member.currentTask}</span>
-                    </div>
-                    <div class="last-seen">
-                        <i class="fas fa-clock"></i>
-                        <span>${timeAgo}</span>
-                    </div>
-                </div>
-                
-                <div class="member-details">
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            <span>${member.email}</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <span>${member.phone}</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${member.location}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="skills-container">
-                        <div class="skills-label">Compétences:</div>
-                        <div class="skills-list">
-                            ${member.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
-                        </div>
-                    </div>
-                    
-                    <div class="member-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">${member.stats.tasksCompleted}</span>
-                            <span class="stat-label">Tâches</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">${Math.round(member.stats.hoursWorked / 8)}</span>
-                            <span class="stat-label">Jours</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">${member.stats.projectsLed}</span>
-                            <span class="stat-label">Projets</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="member-actions-extended">
-                    <button class="btn btn-sm btn-primary" data-member-action="view-profile" data-member-id="${member.id}">
-                        <i class="fas fa-user"></i>
-                        Profil
-                    </button>
-                    <button class="btn btn-sm btn-secondary" data-member-action="view-schedule" data-member-id="${member.id}">
-                        <i class="fas fa-calendar"></i>
-                        Planning
-                    </button>
+                <div class="member-badges">
+                    ${member.badges.map(badge => `<span class="badge ${badge}">${this.getBadgeName(badge)}</span>`).join('')}
                 </div>
             </div>
-        `;
-    }
-    
-    updateTeamStats() {
-        // Statistiques globales de l'équipe
-        const totalMembers = this.teamMembers.length;
-        const onlineMembers = this.teamMembers.filter(m => m.status === 'online').length;
-        const activeProjects = this.teamMembers.reduce((sum, m) => sum + m.stats.projectsLed, 0);
-        const totalTasks = this.teamMembers.reduce((sum, m) => sum + m.stats.tasksCompleted, 0);
-        
-        // Mise à jour des compteurs dans le header si ils existent
-        const teamCountEl = document.getElementById('team-count');
-        if (teamCountEl) {
-            teamCountEl.textContent = totalMembers;
-        }
-        
-        // Mise à jour des stats dans le dashboard
-        this.updateDashboardStats(totalMembers, onlineMembers, activeProjects, totalTasks);
-        
-        // Affichage des stats dans la page équipe
-        this.renderTeamStatsCard(totalMembers, onlineMembers, activeProjects, totalTasks);
-    }
-    
-    renderTeamStatsCard(total, online, projects, tasks) {
-        const statsContainer = document.getElementById('team-stats');
-        if (!statsContainer) return;
-        
-        statsContainer.innerHTML = `
-            <div class="team-stats-grid">
-                <div class="team-stat-card">
-                    <div class="stat-icon" style="background: var(--primary-color);">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>${total}</h3>
-                        <p>Membres total</p>
-                    </div>
-                </div>
-                
-                <div class="team-stat-card">
-                    <div class="stat-icon" style="background: var(--success-color);">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>${online}</h3>
-                        <p>En ligne</p>
-                    </div>
-                </div>
-                
-                <div class="team-stat-card">
-                    <div class="stat-icon" style="background: var(--info-color);">
-                        <i class="fas fa-project-diagram"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>${projects}</h3>
-                        <p>Projets actifs</p>
-                    </div>
-                </div>
-                
-                <div class="team-stat-card">
-                    <div class="stat-icon" style="background: var(--warning-color);">
-                        <i class="fas fa-tasks"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>${tasks}</h3>
-                        <p>Tâches réalisées</p>
-                    </div>
-                </div>
+            <div class="member-actions">
+                <button class="btn-icon" onclick="teamManager.sendMessage('${member.id}')" title="Envoyer un message">
+                    <i class="fas fa-envelope"></i>
+                </button>
+                <button class="btn-icon" onclick="teamManager.showMemberOptions('${member.id}')" title="Plus d'options">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
             </div>
         `;
+
+        return card;
     }
-    
-    handleMemberAction(action, memberId) {
-        const member = this.teamMembers.find(m => m.id === memberId);
-        if (!member) return;
-        
-        switch (action) {
-            case 'message':
-                this.openChat(member);
-                break;
-            case 'call':
-                this.initiateCall(member);
-                break;
-            case 'view-profile':
-                this.showMemberProfile(member);
-                break;
-            case 'view-schedule':
-                this.showMemberSchedule(member);
-                break;
-            case 'edit':
-                this.editMember(member);
-                break;
-            case 'delete':
-                this.deleteMember(member);
-                break;
-            case 'more':
-                this.showMemberMenu(member);
-                break;
-        }
+
+    getBadgeName(badgeId) {
+        const badges = {
+            'early_bird': 'Lève-tôt',
+            'team_player': 'Équipier',
+            'innovator': 'Innovateur',
+            'code_master': 'Maître du Code',
+            'creative': 'Créatif',
+            'perfectionist': 'Perfectionniste',
+            'leader': 'Leader',
+            'mentor': 'Mentor'
+        };
+        return badges[badgeId] || badgeId;
     }
-    
+
     showAddMemberModal() {
-        // Créer et afficher la modale d'ajout de membre
-        const modal = this.createModal('add-member', 'Ajouter un membre d\'équipe', this.getAddMemberForm());
-        this.showModal(modal);
+        console.log('INFO: Fonctionnalité d\'ajout de membre - En développement');
+        const modal = document.getElementById('add-member-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
     }
-    
-    getAddMemberForm() {
-        const roleOptions = Object.entries(this.roles).map(([key, role]) => 
-            `<option value="${key}">${role.label}</option>`
-        ).join('');
+
+    hideAddMemberModal() {
+        const modal = document.getElementById('add-member-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
         
-        return `
-            <form id="add-member-form" class="member-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="member-name" class="form-label">Nom complet *</label>
-                        <input type="text" id="member-name" name="displayName" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="member-email" class="form-label">Email *</label>
-                        <input type="email" id="member-email" name="email" class="form-input" required>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="member-phone" class="form-label">Téléphone</label>
-                        <input type="tel" id="member-phone" name="phone" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="member-role" class="form-label">Rôle *</label>
-                        <select id="member-role" name="role" class="form-select" required>
-                            <option value="">Sélectionner un rôle</option>
-                            ${roleOptions}
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="member-department" class="form-label">Département</label>
-                        <input type="text" id="member-department" name="department" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="member-location" class="form-label">Localisation</label>
-                        <select id="member-location" name="location" class="form-select">
-                            <option value="Bureau principal">Bureau principal</option>
-                            <option value="Télétravail">Télétravail</option>
-                            <option value="Client">Chez le client</option>
-                            <option value="Terrain">Terrain</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="member-skills" class="form-label">Compétences (séparées par des virgules)</label>
-                    <textarea id="member-skills" name="skills" class="form-textarea" rows="2" 
-                              placeholder="JavaScript, React, Management, etc."></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="window.teamManager.closeModal()">
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Ajouter le membre
-                    </button>
-                </div>
-            </form>
-        `;
+        // Reset form
+        const form = document.getElementById('add-member-form');
+        if (form) {
+            form.reset();
+        }
     }
-    
-    async addMember(memberData) {
+
+    async addMember() {
         try {
-            const newMember = {
-                id: this.generateId(),
-                displayName: memberData.displayName,
-                email: memberData.email,
-                phone: memberData.phone || '',
-                role: memberData.role,
-                department: memberData.department || 'Non spécifié',
-                location: memberData.location || 'Bureau principal',
-                status: 'offline',
-                avatar: this.generateAvatar(memberData.displayName),
-                skills: memberData.skills ? memberData.skills.split(',').map(s => s.trim()) : [],
-                joinedAt: new Date(),
-                lastSeen: new Date(),
-                currentTask: 'Nouveau membre',
-                workingHours: { start: '09:00', end: '17:00' },
-                stats: {
-                    tasksCompleted: 0,
-                    hoursWorked: 0,
-                    projectsLed: 0
-                }
-            };
-            
-            // Ajouter à Firebase si disponible
-            if (window.dataManager) {
-                await window.dataManager.addTeamMember(newMember);
+            const name = document.getElementById('member-name').value.trim();
+            const email = document.getElementById('member-email').value.trim();
+            const role = document.getElementById('member-role').value;
+
+            if (!name || !email) {
+                alert('Veuillez remplir tous les champs requis');
+                return;
             }
+
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Vous devez être connecté pour ajouter un membre');
+                return;
+            }
+
+            const newMember = {
+                name,
+                email,
+                role,
+                avatar: 'assets/default-avatar.png',
+                status: 'offline',
+                joinDate: new Date(),
+                xp: 0,
+                level: 1,
+                badges: []
+            };
+
+            // Ajouter à Firebase
+            const membersRef = collection(db, 'teams', user.uid, 'members');
+            const docRef = await addDoc(membersRef, newMember);
             
-            // Ajouter localement
-            this.teamMembers.push(newMember);
-            this.filterAndRenderMembers();
-            
-            this.closeModal();
-            this.showToast(`${newMember.displayName} a été ajouté à l'équipe`, 'success');
-            
+            // Ajouter à la liste locale
+            newMember.id = docRef.id;
+            this.members.push(newMember);
+
+            // Rafraîchir l'affichage
+            this.renderMembers();
+            this.hideAddMemberModal();
+
+            console.log('✅ Nouveau membre ajouté:', name);
+            alert(`Membre ${name} ajouté avec succès !`);
+
         } catch (error) {
-            console.error('❌ Erreur ajout membre:', error);
-            this.showToast('Erreur lors de l\'ajout du membre', 'error');
+            console.error('❌ Erreur lors de l\'ajout du membre:', error);
+            alert('Erreur lors de l\'ajout du membre');
         }
     }
-    
-    // Utilitaires
-    generateAvatar(name) {
-        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF'];
-        const color = colors[name.length % colors.length];
-        
-        return `data:image/svg+xml,${encodeURIComponent(`
-            <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="50" fill="${color}"/>
-                <text x="50" y="50" text-anchor="middle" dy="0.35em" 
-                      font-family="Arial, sans-serif" font-size="36" fill="white" font-weight="bold">
-                    ${initials}
-                </text>
-            </svg>
-        `)}`;
+
+    sendMessage(memberId) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member) {
+            console.log(`INFO: Message à ${member.name}`);
+            // Intégration avec le Chat Manager
+            if (window.chatManager) {
+                window.chatManager.startPrivateChat(memberId);
+            }
+        }
     }
-    
-    getTimeAgo(date) {
-        const now = new Date();
-        const diff = now - date;
-        const minutes = Math.floor(diff / 60000);
-        
-        if (minutes < 1) return 'À l\'instant';
-        if (minutes < 60) return `Il y a ${minutes} min`;
-        
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `Il y a ${hours}h`;
-        
-        const days = Math.floor(hours / 24);
-        if (days < 7) return `Il y a ${days}j`;
-        
-        return date.toLocaleDateString('fr-FR');
+
+    showMemberOptions(memberId) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member) {
+            console.log(`INFO: Options pour ${member.name}`);
+            // Afficher un menu contextuel avec les options
+            this.showMemberContextMenu(member);
+        }
     }
-    
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+    showMemberContextMenu(member) {
+        // Créer un menu contextuel dynamique
+        const existingMenu = document.querySelector('.member-context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+
+        const menu = document.createElement('div');
+        menu.className = 'member-context-menu';
+        menu.innerHTML = `
+            <div class="context-menu-item" onclick="teamManager.viewMemberProfile('${member.id}')">
+                <i class="fas fa-user"></i> Voir le profil
+            </div>
+            <div class="context-menu-item" onclick="teamManager.sendMessage('${member.id}')">
+                <i class="fas fa-envelope"></i> Envoyer un message
+            </div>
+            <div class="context-menu-item" onclick="teamManager.assignTask('${member.id}')">
+                <i class="fas fa-tasks"></i> Assigner une tâche
+            </div>
+            <div class="context-menu-item" onclick="teamManager.viewMemberStats('${member.id}')">
+                <i class="fas fa-chart-bar"></i> Voir les statistiques
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+
+        // Positionner le menu
+        const event = window.event;
+        if (event) {
+            menu.style.left = event.pageX + 'px';
+            menu.style.top = event.pageY + 'px';
+        }
+
+        // Fermer le menu en cliquant ailleurs
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu() {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            });
+        }, 100);
     }
-    
-    // Interface helpers
-    showLoadingState() {
-        const container = document.getElementById('team-grid');
-        if (container) {
-            container.innerHTML = `
-                <div class="loading-state" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-                    <div class="spinner" style="margin: 0 auto 1rem;"></div>
-                    <p>Chargement de l'équipe...</p>
+
+    viewMemberProfile(memberId) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member) {
+            console.log(`INFO: Profil de ${member.name}`);
+            // Afficher le profil détaillé du membre
+            this.showMemberProfileModal(member);
+        }
+    }
+
+    showMemberProfileModal(member) {
+        // Créer une modal de profil dynamique
+        const modalHtml = `
+            <div id="member-profile-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="document.getElementById('member-profile-modal').remove()">&times;</span>
+                    <div class="member-profile">
+                        <div class="profile-header">
+                            <img src="${member.avatar}" alt="${member.name}" class="profile-avatar">
+                            <div class="profile-info">
+                                <h2>${member.name}</h2>
+                                <p class="profile-role">${member.role}</p>
+                                <p class="profile-email">${member.email}</p>
+                            </div>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <h3>Niveau</h3>
+                                <p>${member.level}</p>
+                            </div>
+                            <div class="stat">
+                                <h3>Expérience</h3>
+                                <p>${member.xp} XP</p>
+                            </div>
+                            <div class="stat">
+                                <h3>Date d'arrivée</h3>
+                                <p>${new Date(member.joinDate).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div class="profile-badges">
+                            <h3>Badges obtenus</h3>
+                            <div class="badges-list">
+                                ${member.badges.map(badge => `
+                                    <span class="badge ${badge}">${this.getBadgeName(badge)}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            `;
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    assignTask(memberId) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member) {
+            console.log(`INFO: Assigner une tâche à ${member.name}`);
+            // Intégration avec le système de tâches/quêtes
+            if (window.questManager) {
+                window.questManager.showAssignQuestModal(memberId);
+            }
         }
     }
-    
-    hideLoadingState() {
-        // Le loading sera remplacé par le contenu réel
-    }
-    
-    showError(message) {
-        this.showToast(message, 'error');
-    }
-    
-    showToast(message, type = 'info') {
-        console.log(`${type.toUpperCase()}: ${message}`);
-        
-        // Utiliser le système de toast existant ou créer un simple
-        if (window.badgingManager && window.badgingManager.showToast) {
-            window.badgingManager.showToast(message, type);
-        } else {
-            alert(message);
+
+    viewMemberStats(memberId) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member) {
+            console.log(`INFO: Statistiques de ${member.name}`);
+            // Intégration avec Analytics Manager
+            if (window.analyticsManager) {
+                window.analyticsManager.showMemberAnalytics(memberId);
+            }
         }
     }
-    
-    refreshTeamData() {
-        this.loadTeamData();
-    }
-    
-    clearFilters() {
-        this.searchQuery = '';
-        this.roleFilter = '';
-        this.statusFilter = '';
-        
-        // Reset UI
-        const searchInput = document.getElementById('team-search');
-        const roleSelect = document.getElementById('role-filter');
-        const statusSelect = document.getElementById('status-filter');
-        
-        if (searchInput) searchInput.value = '';
-        if (roleSelect) roleSelect.value = '';
-        if (statusSelect) statusSelect.value = '';
-        
-        this.filterAndRenderMembers();
-    }
-    
-    // API publique
-    getTeamMembers() {
-        return this.teamMembers;
-    }
-    
-    getMemberById(id) {
-        return this.teamMembers.find(m => m.id === id);
-    }
-    
-    getOnlineMembers() {
-        return this.teamMembers.filter(m => m.status === 'online');
-    }
-    
-    getMembersByRole(role) {
-        return this.teamMembers.filter(m => m.role === role);
-    }
-}
 
-// Initialiser le Team Manager
-document.addEventListener('DOMContentLoaded', () => {
-    window.teamManager = new TeamManager();
-});
+    // Méthodes pour l'intégration avec d'autres managers
+    updateMemberXP(memberId, xpGained) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member) {
+            member.xp += xpGained;
+            
+            // Vérifier si le membre monte de niveau
+            const newLevel = Math.floor(member.xp / 250) + 1;
+            if (newLevel > member.level) {
+                member.level = newLevel;
+                console.log(`🎉 ${member.name} monte au niveau ${newLevel}!`);
+                this.showLevelUpNotification(member);
+            }
 
-// Export pour les modules ES6
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = TeamManager;
+            // Sauvegarder en Firebase
+            this.saveMemberToFirebase(member);
+            
+            // Rafraîchir l'affichage
+            this.renderMembers();
+        }
+    }
+
+    addBadgeToMember(memberId, badgeId) {
+        const member = this.members.find(m => m.id === memberId);
+        if (member && !member.badges.includes(badgeId)) {
+            member.badges.push(badgeId);
+            console.log(`🏆 ${member.name} obtient le badge: ${this.getBadgeName(badgeId)}`);
+            
+            // Sauvegarder en Firebase
+            this.saveMemberToFirebase(member);
+            
+            // Rafraîchir l'affichage
+            this.renderMembers();
+
+            // Afficher notification
+            this.showBadgeNotification(member, badgeId);
+        }
+    }
+
+    showLevelUpNotification(member) {
+        // Afficher une notification de montée de niveau
+        const notification = document.createElement('div');
+        notification.className = 'level-up-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-star"></i>
+                <h3>Niveau supérieur !</h3>
+                <p>${member.name} atteint le niveau ${member.level}</p>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    showBadgeNotification(member, badgeId) {
+        // Afficher une notification de nouveau badge
+        const notification = document.createElement('div');
+        notification.className = 'badge-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-trophy"></i>
+                <h3>Nouveau badge !</h3>
+                <p>${member.name} obtient: ${this.getBadgeName(badgeId)}</p>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    async saveMemberToFirebase(member) {
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const memberRef = doc(db, 'teams', user.uid, 'members', member.id);
+            await updateDoc(memberRef, {
+                name: member.name,
+                email: member.email,
+                role: member.role,
+                avatar: member.avatar,
+                status: member.status,
+                xp: member.xp,
+                level: member.level,
+                badges: member.badges
+            });
+
+            console.log(`✅ Membre ${member.name} sauvegardé`);
+        } catch (error) {
+            console.error('❌ Erreur sauvegarde membre:', error);
+        }
+    }
+
+    // Méthode pour obtenir un membre par ID
+    getMemberById(memberId) {
+        return this.members.find(m => m.id === memberId);
+    }
+
+    // Méthode pour obtenir tous les membres
+    getAllMembers() {
+        return this.members;
+    }
+
+    // Méthode pour rafraîchir la liste des membres
+    async refreshMembers() {
+        await this.loadMembers();
+    }
 }

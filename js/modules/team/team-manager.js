@@ -136,28 +136,41 @@ class TeamManager {
         }
     }
 
-    filterAndRenderMembers(searchTerm = '') {
-        try {
-            const filteredMembers = this.members.filter(member => {
-                // Protection contre les propriétés undefined
-                const name = (member.name || '').toString();
-                const email = (member.email || '').toString();
-                const role = (member.role || '').toString();
-                
-                const search = searchTerm.toLowerCase();
-                
-                return name.toLowerCase().includes(search) ||
-                       email.toLowerCase().includes(search) ||
-                       role.toLowerCase().includes(search);
-            });
-            
-            this.renderMembers(filteredMembers);
-        } catch (error) {
-            console.error('❌ Erreur lors du filtrage des membres:', error);
-            // En cas d'erreur, afficher tous les membres
-            this.renderMembers(this.members);
+   // HOTFIX IMMÉDIAT - Remplacer la méthode filterAndRenderMembers ligne ~5480
+
+filterAndRenderMembers(searchTerm = '') {
+    try {
+        // Protection contre les données undefined/null
+        if (!this.members || !Array.isArray(this.members)) {
+            console.warn('⚠️ Aucun membre à filtrer');
+            this.renderMembers([]);
+            return;
         }
+
+        const filteredMembers = this.members.filter(member => {
+            // Vérification que member existe
+            if (!member) return false;
+            
+            // Protection contre toutes les propriétés undefined
+            const name = (member.name || '').toString().toLowerCase();
+            const email = (member.email || '').toString().toLowerCase();
+            const role = (member.role || '').toString().toLowerCase();
+            
+            const search = (searchTerm || '').toString().toLowerCase();
+            
+            return name.includes(search) ||
+                   email.includes(search) ||
+                   role.includes(search);
+        });
+        
+        this.renderMembers(filteredMembers);
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du filtrage des membres:', error);
+        // En cas d'erreur, afficher tous les membres sans filtrage
+        this.renderMembers(this.members || []);
     }
+}
 
     renderMembers(membersToRender = this.members) {
         const container = document.getElementById('team-members-list');

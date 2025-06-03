@@ -3,849 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SYNERGIA v3.0 - Plateforme collaborative de gestion d'équipe">
     <title>SYNERGIA v3.0 - Plateforme Collaborative</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="SYNERGIA">
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-    
-    <!-- CSS Imports -->
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/modules/planning.css">
-    <link rel="stylesheet" href="css/modules/notifications.css">
-    <link rel="stylesheet" href="css/modules/badging.css">
-    
-    <!-- External Libraries -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .version {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .feature-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .status {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+        
+        .status-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #4ade80;
+        }
+        
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .container {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-logo">
-                <i class="fas fa-users-cog fa-3x"></i>
-                <h1>SYNERGIA</h1>
-                <p>v3.0</p>
-            </div>
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-            </div>
-            <p class="loading-text">Initialisation de la plateforme...</p>
-        </div>
-    </div>
-
-    <!-- Navigation Header -->
-    <header class="main-header" id="main-header">
-        <div class="header-container">
-            <div class="header-left">
-                <button class="menu-toggle" id="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo">
-                    <i class="fas fa-users-cog"></i>
-                    <span>SYNERGIA</span>
-                </div>
-            </div>
-            
-            <nav class="main-nav" id="main-nav">
-                <a href="#dashboard" class="nav-link active" data-page="dashboard">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Tableau de bord</span>
-                </a>
-                <a href="#team" class="nav-link" data-page="team">
-                    <i class="fas fa-users"></i>
-                    <span>Équipe</span>
-                </a>
-                <a href="#quests" class="nav-link" data-page="quests">
-                    <i class="fas fa-tasks"></i>
-                    <span>Missions</span>
-                </a>
-                <a href="#planning" class="nav-link" data-page="planning">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Planning</span>
-                </a>
-                <a href="#badging" class="nav-link" data-page="badging">
-                    <i class="fas fa-id-card"></i>
-                    <span>Badgeage</span>
-                </a>
-                <a href="#chat" class="nav-link" data-page="chat">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat</span>
-                    <span class="badge" id="chat-badge">0</span>
-                </a>
-            </nav>
-            
-            <div class="header-right">
-                <!-- Notifications -->
-                <div class="notification-center" id="notification-center">
-                    <button class="notification-btn" id="notification-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notification-badge">0</span>
-                    </button>
-                    <div class="notification-dropdown" id="notification-dropdown">
-                        <div class="notification-header">
-                            <h3>Notifications</h3>
-                            <button class="mark-all-read" id="mark-all-read">
-                                <i class="fas fa-check-double"></i>
-                            </button>
-                        </div>
-                        <div class="notification-list" id="notification-list">
-                            <!-- Notifications dynamiques -->
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Profil utilisateur -->
-                <div class="user-profile" id="user-profile">
-                    <img src="assets/images/default-avatar.jpg" alt="Profil" class="avatar" id="user-avatar">
-                    <div class="user-dropdown" id="user-dropdown">
-                        <div class="user-info">
-                            <img src="assets/images/default-avatar.jpg" alt="Profil" class="avatar">
-                            <div>
-                                <h4 id="user-name">Utilisateur</h4>
-                                <p id="user-role">Membre</p>
-                            </div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="#profile" class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            Mon Profil
-                        </a>
-                        <a href="#settings" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            Paramètres
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#logout" class="dropdown-item logout" id="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Déconnexion
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content" id="main-content">
-        <!-- Dashboard Page -->
-        <div class="page active" id="page-dashboard">
-            <div class="page-header">
-                <h1>Tableau de bord</h1>
-                <p>Vue d'ensemble de votre activité</p>
-            </div>
-            
-            <div class="dashboard-grid">
-                <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="team-count">0</h3>
-                            <p>Membres d'équipe</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="active-quests">0</h3>
-                            <p>Missions actives</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="hours-today">0h</h3>
-                            <p>Heures aujourd'hui</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="achievements">0</h3>
-                            <p>Succès débloqués</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <h2>Actions rapides</h2>
-                    <div class="action-grid">
-                        <button class="action-btn" data-action="badge-in">
-                            <i class="fas fa-sign-in-alt"></i>
-                            <span>Pointer arrivée</span>
-                        </button>
-                        <button class="action-btn" data-action="new-quest">
-                            <i class="fas fa-plus"></i>
-                            <span>Nouvelle mission</span>
-                        </button>
-                        <button class="action-btn" data-action="team-chat">
-                            <i class="fas fa-comments"></i>
-                            <span>Chat équipe</span>
-                        </button>
-                        <button class="action-btn" data-action="view-planning">
-                            <i class="fas fa-calendar"></i>
-                            <span>Planning</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Recent Activity -->
-                <div class="recent-activity">
-                    <h2>Activité récente</h2>
-                    <div class="activity-list" id="activity-list">
-                        <!-- Activités dynamiques -->
-                    </div>
-                </div>
-                
-                <!-- Team Status -->
-                <div class="team-status">
-                    <h2>Statut de l'équipe</h2>
-                    <div class="team-list" id="team-status-list">
-                        <!-- Statuts dynamiques -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Team Page -->
-        <div class="page" id="page-team">
-            <div class="page-header">
-                <h1>Gestion d'équipe</h1>
-                <button class="btn btn-primary" id="add-member-btn">
-                    <i class="fas fa-plus"></i>
-                    Ajouter un membre
-                </button>
-            </div>
-            
-            <div class="team-container">
-                <div class="team-filters">
-                    <input type="text" class="search-input" placeholder="Rechercher un membre..." id="team-search">
-                    <select class="filter-select" id="role-filter">
-                        <option value="">Tous les rôles</option>
-                        <option value="admin">Administrateur</option>
-                        <option value="manager">Manager</option>
-                        <option value="member">Membre</option>
-                    </select>
-                    <select class="filter-select" id="status-filter">
-                        <option value="">Tous les statuts</option>
-                        <option value="online">En ligne</option>
-                        <option value="busy">Occupé</option>
-                        <option value="away">Absent</option>
-                        <option value="offline">Hors ligne</option>
-                    </select>
-                </div>
-                
-                <div class="team-grid" id="team-grid">
-                    <!-- Membres d'équipe dynamiques -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Quests Page -->
-        <div class="page" id="page-quests">
-            <div class="page-header">
-                <h1>Gestion des missions</h1>
-                <button class="btn btn-primary" id="create-quest-btn">
-                    <i class="fas fa-plus"></i>
-                    Créer une mission
-                </button>
-            </div>
-            
-            <div class="quests-container">
-                <div class="quest-filters">
-                    <div class="filter-tabs">
-                        <button class="filter-tab active" data-filter="all">Toutes</button>
-                        <button class="filter-tab" data-filter="todo">À faire</button>
-                        <button class="filter-tab" data-filter="in-progress">En cours</button>
-                        <button class="filter-tab" data-filter="completed">Terminées</button>
-                    </div>
-                    
-                    <div class="quest-search">
-                        <input type="text" class="search-input" placeholder="Rechercher une mission..." id="quest-search">
-                        <select class="filter-select" id="priority-filter">
-                            <option value="">Toutes les priorités</option>
-                            <option value="low">Faible</option>
-                            <option value="medium">Moyenne</option>
-                            <option value="high">Élevée</option>
-                            <option value="urgent">Urgente</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="quest-board" id="quest-board">
-                    <div class="quest-column" data-status="todo">
-                        <h3>À faire <span class="count">0</span></h3>
-                        <div class="quest-list" id="todo-quests"></div>
-                    </div>
-                    <div class="quest-column" data-status="in-progress">
-                        <h3>En cours <span class="count">0</span></h3>
-                        <div class="quest-list" id="in-progress-quests"></div>
-                    </div>
-                    <div class="quest-column" data-status="completed">
-                        <h3>Terminées <span class="count">0</span></h3>
-                        <div class="quest-list" id="completed-quests"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Planning Page -->
-        <div class="page" id="page-planning">
-            <div class="page-header">
-                <h1>Planning</h1>
-                <div class="planning-controls">
-                    <div class="view-selector">
-                        <button class="view-btn active" data-view="week">Semaine</button>
-                        <button class="view-btn" data-view="month">Mois</button>
-                        <button class="view-btn" data-view="day">Jour</button>
-                    </div>
-                    <button class="btn btn-primary" id="add-event-btn">
-                        <i class="fas fa-plus"></i>
-                        Nouvel événement
-                    </button>
-                </div>
-            </div>
-            
-            <div class="planning-container">
-                <div class="planning-navigation">
-                    <button class="nav-btn" id="prev-period">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <h2 id="current-period">Janvier 2025</h2>
-                    <button class="nav-btn" id="next-period">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <button class="nav-btn today-btn" id="today-btn">Aujourd'hui</button>
-                </div>
-                
-                <div class="planning-calendar" id="planning-calendar">
-                    <!-- Calendrier dynamique -->
-                </div>
-                
-                <div class="planning-sidebar">
-                    <div class="mini-calendar">
-                        <h3>Navigation rapide</h3>
-                        <div id="mini-calendar"></div>
-                    </div>
-                    
-                    <div class="event-legend">
-                        <h3>Légende</h3>
-                        <div class="legend-item">
-                            <span class="legend-color shift"></span>
-                            <span>Shifts de travail</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color meeting"></span>
-                            <span>Réunions</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color vacation"></span>
-                            <span>Congés</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color event"></span>
-                            <span>Événements</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Badging Page -->
-        <div class="page" id="page-badging">
-            <div class="page-header">
-                <h1><i class="fas fa-clock"></i> Système de Pointage</h1>
-                <div class="current-time-display">
-                    <div class="live-clock" id="clock">--:--:--</div>
-                    <div class="current-date" id="current-date"></div>
-                </div>
-            </div>
-            
-            <div class="badging-container">
-                <!-- Statut Principal -->
-                <div class="status-main-card" id="status-card">
-                    <div class="status-indicator">
-                        <div class="status-icon" id="status-icon">
-                            <i class="fas fa-user-clock"></i>
-                        </div>
-                        <div class="status-info">
-                            <h2 class="status-title" id="status-text">Non pointé</h2>
-                            <p class="status-subtitle" id="status-subtitle">En attente de pointage</p>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Temps travaillé</span>
-                            <span class="stat-value" id="work-hours">0h 00m</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Temps total</span>
-                            <span class="stat-value" id="total-hours">0h 00m</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Pauses</span>
-                            <span class="stat-value" id="break-hours">0h 00m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actions de Pointage -->
-                <div class="badging-actions-grid">
-                    <!-- Arrivée -->
-                    <div class="action-card clock-in-card">
-                        <button class="action-btn primary-action hidden" id="btn-clock-in">
-                            <div class="action-icon">
-                                <i class="fas fa-sign-in-alt"></i>
-                            </div>
-                            <div class="action-content">
-                                <h3>Pointer l'arrivée</h3>
-                                <p>Commencer votre journée de travail</p>
-                            </div>
-                        </button>
-                    </div>
-
-                    <!-- Départ -->
-                    <div class="action-card clock-out-card">
-                        <button class="action-btn danger-action hidden" id="btn-clock-out">
-                            <div class="action-icon">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </div>
-                            <div class="action-content">
-                                <h3>Pointer le départ</h3>
-                                <p>Terminer votre journée de travail</p>
-                            </div>
-                        </button>
-                    </div>
-
-                    <!-- Début de pause -->
-                    <div class="action-card break-start-card">
-                        <button class="action-btn warning-action hidden" id="btn-break-start">
-                            <div class="action-icon">
-                                <i class="fas fa-coffee"></i>
-                            </div>
-                            <div class="action-content">
-                                <h3>Commencer une pause</h3>
-                                <p>Pause déjeuner, courte ou personnelle</p>
-                            </div>
-                        </button>
-                    </div>
-
-                    <!-- Fin de pause -->
-                    <div class="action-card break-end-card">
-                        <button class="action-btn success-action hidden" id="btn-break-end">
-                            <div class="action-icon">
-                                <i class="fas fa-play-circle"></i>
-                            </div>
-                            <div class="action-content">
-                                <h3>Reprendre le travail</h3>
-                                <p>Terminer votre pause</p>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Shift du jour -->
-                <div class="today-shift-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-calendar-day"></i> Planning du jour</h3>
-                    </div>
-                    <div class="card-content" id="today-shift-info">
-                        <div class="loading-placeholder">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <span>Chargement du planning...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Historique du jour -->
-                <div class="badging-history-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-history"></i> Historique du jour</h3>
-                        <div class="history-controls">
-                            <button class="btn btn-sm" id="refresh-history">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                            <button class="btn btn-sm" id="export-history">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="history-timeline" id="badging-history-list">
-                            <div class="empty-state">
-                                <i class="fas fa-clock"></i>
-                                <p>Aucun pointage aujourd'hui</p>
-                                <small>Commencez par pointer votre arrivée</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Statistiques détaillées -->
-                <div class="detailed-stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <i class="fas fa-calendar-week"></i>
-                            <h4>Cette semaine</h4>
-                        </div>
-                        <div class="stat-body">
-                            <div class="stat-number" id="week-hours">0h 00m</div>
-                            <div class="stat-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="week-progress" style="width: 0%"></div>
-                                </div>
-                                <span class="progress-text">0% de l'objectif</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <i class="fas fa-calendar-alt"></i>
-                            <h4>Ce mois</h4>
-                        </div>
-                        <div class="stat-body">
-                            <div class="stat-number" id="month-hours">0h 00m</div>
-                            <div class="stat-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="month-progress" style="width: 0%"></div>
-                                </div>
-                                <span class="progress-text">0% de l'objectif</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <i class="fas fa-trophy"></i>
-                            <h4>Performance</h4>
-                        </div>
-                        <div class="stat-body">
-                            <div class="performance-badges">
-                                <div class="badge-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Ponctuel</span>
-                                </div>
-                                <div class="badge-item">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span>Régulier</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Page -->
-        <div class="page" id="page-chat">
-            <div class="chat-container">
-                <div class="chat-sidebar">
-                    <div class="chat-header">
-                        <h2>Conversations</h2>
-                        <button class="btn btn-sm" id="new-chat-btn">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="chat-search">
-                        <input type="text" placeholder="Rechercher..." class="search-input" id="chat-search">
-                    </div>
-                    
-                    <div class="chat-list" id="chat-list">
-                        <!-- Liste des conversations -->
-                    </div>
-                </div>
-                
-                <div class="chat-main" id="chat-main">
-                    <div class="chat-welcome">
-                        <i class="fas fa-comments fa-3x"></i>
-                        <h3>Sélectionnez une conversation</h3>
-                        <p>Choisissez une conversation existante ou créez-en une nouvelle</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modals -->
-    <div class="modal" id="modal-overlay">
-        <div class="modal-content" id="modal-content">
-            <!-- Contenu dynamique des modales -->
-        </div>
-    </div>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toast-container">
-        <!-- Notifications toast dynamiques -->
-    </div>
-
-    <!-- JavaScript Core -->
-    <script src="js/utils/constants.js"></script>
-    <script src="js/utils/helpers.js"></script>
-    <script src="js/utils/validators.js"></script>
-    
-    <!-- JavaScript Modules -->
-    <script src="js/core/firebase-manager.js"></script>
-    <script src="js/core/data-manager.js"></script>
-    <script src="js/core/ui-manager.js"></script>
-    <script src="js/core/router.js"></script>
-    
-    <!-- Feature Modules -->
-    <script src="js/modules/notifications/notification-manager.js"></script>
-    <script src="js/modules/team/team-manager.js"></script>
-    <script src="js/modules/quests/quest-manager.js"></script>
-    <script src="js/modules/planning/planning-manager.js"></script>
-    <script src="js/modules/badging/badging-manager.js"></script>
-    <script src="js/modules/badging/badging-init.js"></script>
-    <script src="js/modules/chat/chat-manager.js"></script>
-    
-    <!-- Main Application -->
-    <script>
-        // Application initialization
-        class SynergiaApp {
-            constructor() {
-                this.modules = {};
-                this.isInitialized = false;
-            }
-            
-            async init() {
-                try {
-                    // Afficher l'écran de chargement
-                    this.showLoadingScreen();
-                    
-                    // Initialiser Firebase
-                    await FirebaseManager.init();
-                    
-                    // Initialiser les modules core
-                    this.modules.dataManager = new DataManager();
-                    this.modules.uiManager = new UIManager();
-                    this.modules.router = new Router();
-                    this.modules.notificationManager = new NotificationManager();
-                    
-                    // Initialiser les modules métier
-                    this.modules.teamManager = new TeamManager();
-                    this.modules.questManager = new QuestManager();
-                    this.modules.planningManager = new PlanningManager();
-                    this.modules.badgingManager = new BadgingManager();
-                    this.modules.chatManager = new ChatManager();
-                    
-                    // Initialiser tous les modules
-                    for (const [name, module] of Object.entries(this.modules)) {
-                        if (module.init && typeof module.init === 'function') {
-                            await module.init();
-                        }
-                    }
-                    
-                    // Configurer les événements globaux
-                    this.setupGlobalEvents();
-                    
-                    // Charger les données initiales
-                    await this.loadInitialData();
-                    
-                    // Masquer l'écran de chargement
-                    this.hideLoadingScreen();
-                    
-                    this.isInitialized = true;
-                    console.log('✅ SYNERGIA v3.0 initialisé avec succès');
-                    
-                } catch (error) {
-                    console.error('❌ Erreur lors de l\'initialisation:', error);
-                    this.showError('Erreur lors du chargement de l\'application');
-                }
-            }
-            
-            showLoadingScreen() {
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.style.display = 'flex';
-                }
-            }
-            
-            hideLoadingScreen() {
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    setTimeout(() => {
-                        loadingScreen.style.opacity = '0';
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                        }, 300);
-                    }, 1000);
-                }
-            }
-            
-            setupGlobalEvents() {
-                // Menu toggle
-                const menuToggle = document.getElementById('menu-toggle');
-                const mainNav = document.getElementById('main-nav');
-                
-                if (menuToggle && mainNav) {
-                    menuToggle.addEventListener('click', () => {
-                        mainNav.classList.toggle('active');
-                    });
-                }
-                
-                // Navigation
-                document.addEventListener('click', (e) => {
-                    if (e.target.matches('.nav-link') || e.target.closest('.nav-link')) {
-                        e.preventDefault();
-                        const link = e.target.matches('.nav-link') ? e.target : e.target.closest('.nav-link');
-                        const page = link.dataset.page;
-                        if (page && this.modules.router) {
-                            this.modules.router.navigateTo(page);
-                        }
-                    }
-                });
-                
-                // Gestion des clics sur les actions rapides
-                document.addEventListener('click', (e) => {
-                    if (e.target.matches('[data-action]') || e.target.closest('[data-action]')) {
-                        const btn = e.target.matches('[data-action]') ? e.target : e.target.closest('[data-action]');
-                        const action = btn.dataset.action;
-                        this.handleQuickAction(action);
-                    }
-                });
-                
-                // Mise à jour de l'heure
-                this.updateCurrentTime();
-                setInterval(() => this.updateCurrentTime(), 1000);
-            }
-            
-            async loadInitialData() {
-                try {
-                    // Charger les données utilisateur
-                    if (this.modules.dataManager) {
-                        await this.modules.dataManager.loadUserData();
-                    }
-                    
-                    // Mettre à jour les statistiques du dashboard
-                    this.updateDashboardStats();
-                    
-                    // Charger l'activité récente
-                    this.loadRecentActivity();
-                    
-                } catch (error) {
-                    console.error('Erreur lors du chargement des données:', error);
-                }
-            }
-            
-            updateCurrentTime() {
-                const timeElement = document.getElementById('current-time');
-                if (timeElement) {
-                    const now = new Date();
-                    timeElement.textContent = now.toLocaleTimeString('fr-FR');
-                }
-            }
-            
-            updateDashboardStats() {
-                // Statistiques factices pour la démo
-                document.getElementById('team-count').textContent = '12';
-                document.getElementById('active-quests').textContent = '8';
-                document.getElementById('hours-today').textContent = '7h 30m';
-                document.getElementById('achievements').textContent = '15';
-            }
-            
-            loadRecentActivity() {
-                const activityList = document.getElementById('activity-list');
-                if (!activityList) return;
-                
-                // Activités factices pour la démo
-                const activities = [
-                    { icon: 'fas fa-check', text: 'Mission "Optimisation API" terminée', time: 'Il y a 2h' },
-                    { icon: 'fas fa-users', text: 'Marie Dubois a rejoint l\'équipe', time: 'Il y a 3h' },
-                    { icon: 'fas fa-clock', text: 'Pointage: Arrivée à 09:00', time: 'Il y a 6h' },
-                    { icon: 'fas fa-comments', text: 'Nouveau message dans #general', time: 'Il y a 1j' }
-                ];
-                
-                activityList.innerHTML = activities.map(activity => `
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="${activity.icon}"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p>${activity.text}</p>
-                            <span class="activity-time">${activity.time}</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            handleQuickAction(action) {
-                switch (action) {
-                    case 'badge-in':
-                        if (this.modules.badgingManager) {
-                            this.modules.badgingManager.badgeIn();
-                        }
-                        break;
-                    case 'new-quest':
-                        if (this.modules.router) {
-                            this.modules.router.navigateTo('quests');
-                        }
-                        break;
-                    case 'team-chat':
-                        if (this.modules.router) {
-                            this.modules.router.navigateTo('chat');
-                        }
-                        break;
-                    case 'view-planning':
-                        if (this.modules.router) {
-                            this.modules.router.navigateTo('planning');
-                        }
-                        break;
-                }
-            }
-            
-            showError(message) {
-                if (this.modules.notificationManager) {
-                    this.modules.notificationManager.show({
-                        type: 'error',
-                        title: 'Erreur',
-                        message: message
-                    });
-                } else {
-                    alert(message);
-                }
-            }
-        }
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>SYNERGIA</h1>
+        <div class="version">Version 3.0</div>
         
-        // Initialisation de l'application
-        const app = new SynergiaApp();
+        <p class="description">
+            Plateforme collaborative moderne de gestion d'équipe avec systèmes de pointage, 
+            planification et communication en temps réel.
+        </p>
         
-        // Démarrer l'application une fois le DOM chargé
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => app.init());
-        } else {
-            app.init();
-        }
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⏰</div>
+                <div class="feature-title">Pointage</div>
+                <div class="feature-desc">Système de badgeage intelligent</div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">👥</div>
+                <div class="feature-title">Équipe</div>
+                <div class="feature-desc">Gestion collaborative</div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📅</div>
+                <div class="feature-title">Planning</div>
+                <div class="feature-desc">Calendrier intelligent</div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">💬</div>
+                <div class="feature-title">Communication</div>
+                <div class="feature-desc">Chat temps réel</div>
+            </div>
+        </div>
         
-        // Exposer l'application globalement pour le debug
-        window.SynergiaApp = app;
-    </script>
+        <div class="status">
+            <div class="status-title">✅ Déploiement réussi</div>
+            <p>Application correctement déployée sur Netlify</p>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <a href="/app" class="btn">🎯 Accéder à l'App</a>
+            <a href="/debug" class="btn">🔧 Mode Debug</a>
+        </div>
+        
+        <script>
+            // Afficher les infos de déploiement
+            console.log('🚀 SYNERGIA v3.0 déployé avec succès');
+            console.log('📊 Status: Opérationnel');
+            console.log('🌐 URL:', window.location.href);
+            console.log('⏰ Déployé le:', new Date().toLocaleString('fr-FR'));
+            
+            // Test de fonctionnement
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('✅ DOM chargé - Application prête');
+            });
+        </script>
+    </div>
 </body>
 </html>

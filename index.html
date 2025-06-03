@@ -4402,6 +4402,8 @@
         }
 
         // Navigation
+      // ✅ MODIFIER dans setupNavigation() autour de la ligne 4300
+
         function setupNavigation() {
             const navLinks = document.querySelectorAll('.nav-link');
             const sections = document.querySelectorAll('.content-section');
@@ -4431,6 +4433,17 @@
                                     analyticsManager.refreshAnalytics();
                                 }
                                 break;
+                            
+                            // ✅ AJOUTER CE CAS
+                            case 'analytics-pro':
+                                if (analyticsManager) {
+                                    // Synchroniser les données avec Analytics Pro
+                                    setTimeout(() => {
+                                        analyticsManager.syncWithAdvancedAnalytics();
+                                    }, 500);
+                                }
+                                break;
+                                
                             case 'team':
                                 if (teamManager) {
                                     teamManager.refreshMembers();

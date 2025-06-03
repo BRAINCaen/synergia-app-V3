@@ -5471,31 +5471,75 @@ service cloud.firestore {
                     `;
                 }
             }
-            
-            filterAndRenderMembers() {
-                let filtered = [...this.teamMembers];
-                
-                if (this.searchQuery) {
-                    const query = this.searchQuery.toLowerCase();
-                    filtered = filtered.filter(member => 
-                        member.displayName.toLowerCase().includes(query) ||
-                        member.email.toLowerCase().includes(query) ||
-                        member.department.toLowerCase().includes(query)
-                    );
-                }
-                
-                if (this.roleFilter) {
-                    filtered = filtered.filter(member => member.role === this.roleFilter);
-                }
-                
-                if (this.statusFilter) {
-                    filtered = filtered.filter(member => member.status === this.statusFilter);
-                }
-                
-                this.filteredMembers = filtered;
-                this.renderTeamMembers();
-                this.updateTeamStats();
+            // CODE DE DEBUG à ajouter temporairement avant le filter
+
+// Debug: Examiner la structure des membres
+console.log('🔍 Debug membres:', {
+    membersExists: !!this.members,
+    membersType: typeof this.members,
+    membersLength: this.members ? this.members.length : 'N/A',
+    membersContent: this.members
+});
+
+// Vérifier chaque membre individuellement
+if (this.members && Array.isArray(this.members)) {
+    this.members.forEach((member, index) => {
+        console.log(`🔍 Membre ${index}:`, {
+            exists: !!member,
+            type: typeof member,
+            hasName: member && typeof member.name !== 'undefined',
+            hasEmail: member && typeof member.email !== 'undefined',
+            hasRole: member && typeof member.role !== 'undefined',
+            content: member
+        });
+    });
+}
+           // REMPLACEMENT EXACT pour la méthode filterAndRenderMembers (autour de la ligne 5480)
+
+filterAndRenderMembers(searchTerm = '') {
+    try {
+        // Vérifier que members existe et est un tableau
+        if (!this.members || !Array.isArray(this.members)) {
+            console.warn('⚠️ Aucun membre à filtrer');
+            this.renderMembers([]);
+            return;
+        }
+
+        const filteredMembers = this.members.filter(member => {
+            // Vérifier que member existe
+            if (!member) {
+                console.warn('⚠️ Membre null/undefined ignoré');
+                return false;
             }
+            
+            try {
+                // Protection totale contre les propriétés undefined
+                const name = (member.name || '').toString();
+                const email = (member.email || '').toString();
+                const role = (member.role || '').toString();
+                
+                const searchLower = (searchTerm || '').toString().toLowerCase();
+                
+                return name.toLowerCase().includes(searchLower) ||
+                       email.toLowerCase().includes(searchLower) ||
+                       role.toLowerCase().includes(searchLower);
+                       
+            } catch (memberError) {
+                console.warn('⚠️ Erreur traitement membre:', member, memberError);
+                return false;
+            }
+        });
+        
+        this.renderMembers(filteredMembers);
+        console.log(`🔍 ${filteredMembers.length} membres filtrés sur "${searchTerm}"`);
+        
+    } catch (error) {
+        console.error('❌ Erreur critique lors du filtrage des membres:', error);
+        console.log('📊 État members:', this.members);
+        // En cas d'erreur critique, afficher tous les membres
+        this.renderMembers(this.members || []);
+    }
+}
             
             renderTeamMembers() {
                 const container = document.getElementById('team-grid');

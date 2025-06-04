@@ -1379,7 +1379,7 @@
             </div>
             <div class="nav-user">
                 <div class="user-avatar">
-                    <img src="https://via.placeholder.com/40" alt="Avatar" id="user-avatar">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23667eea'/%3E%3Ctext x='20' y='25' text-anchor='middle' fill='white' font-family='Arial' font-size='16'%3EA%3C/text%3E%3C/svg%3E" alt="Avatar" id="user-avatar">
                 </div>
                 <span id="user-name">Allan Boehme</span>
                 <button id="logout-btn" class="btn-icon">
@@ -2608,6 +2608,101 @@
                 });
             }
 
+            showLoginModal() {
+                // Créer une modal de connexion simple
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <h2><i class="fas fa-sign-in-alt"></i> Connexion à SYNERGIA</h2>
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="login-email" required placeholder="votre@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Mot de passe</label>
+                                <input type="password" id="login-password" required placeholder="Mot de passe">
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" onclick="firebaseManager.loginDemo()" class="btn btn-secondary">
+                                    <i class="fas fa-play"></i> Mode Démo
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                                </button>
+                            </div>
+                        </form>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <small style="color: #666;">
+                                Pas de compte ? <a href="#" onclick="firebaseManager.showRegisterForm()" style="color: #667eea;">Créer un compte</a>
+                            </small>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // Gérer la soumission du formulaire
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+            }
+
+            async handleLogin() {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) {
+                    showToast('Veuillez remplir tous les champs', 'error');
+                    return;
+                }
+
+                try {
+                    if (this.isReady) {
+                        // Connexion Firebase réelle
+                        const userCredential = await window.firebase.signInWithEmailAndPassword(window.auth, email, password);
+                        currentUser = userCredential.user;
+                        showToast('Connexion réussie!', 'success');
+                    } else {
+                        // Mode démo
+                        this.loginDemo();
+                    }
+                    
+                    // Fermer la modal
+                    document.querySelector('.modal').remove();
+                    
+                } catch (error) {
+                    console.error('Erreur de connexion:', error);
+                    showToast('Erreur de connexion: ' + error.message, 'error');
+                }
+            }
+
+            loginDemo() {
+                console.log('🎭 Connexion en mode démo');
+                currentUser = {
+                    uid: 'demo-user',
+                    email: 'demo@synergia.com',
+                    displayName: 'Allan Boehme (Démo)'
+                };
+                
+                // Fermer la modal si elle existe
+                const modal = document.querySelector('.modal');
+                if (modal) modal.remove();
+                
+                this.loadDemoData();
+                showToast('Mode démo activé - Toutes les fonctionnalités sont disponibles', 'success');
+                
+                // Mettre à jour l'interface utilisateur
+                document.getElementById('user-name').textContent = currentUser.displayName;
+            }
+
+            showRegisterForm() {
+                showToast('Inscription: Fonctionnalité à venir', 'info');
+            }
+
             async loadUserData() {
                 if (!this.isReady || !currentUser) return;
 
@@ -3280,6 +3375,8 @@
 
         function loadDemoTeam() {
             const teamContainer = document.getElementById('team-members-list');
+            if (!teamContainer) return;
+            
             const demoMembers = [
                 {
                     name: 'Allan Boehme',
@@ -3287,7 +3384,8 @@
                     role: 'Manager',
                     status: 'online',
                     level: 5,
-                    xp: 1250
+                    xp: 1250,
+                    avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23667eea'/%3E%3Ctext x='30' y='35' text-anchor='middle' fill='white' font-family='Arial' font-size='24'%3EA%3C/text%3E%3C/svg%3E"
                 },
                 {
                     name: 'Polar Caron',
@@ -3295,7 +3393,8 @@
                     role: 'Développeur',
                     status: 'online',
                     level: 4,
-                    xp: 980
+                    xp: 980,
+                    avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%2328a745'/%3E%3Ctext x='30' y='35' text-anchor='middle' fill='white' font-family='Arial' font-size='24'%3EP%3C/text%3E%3C/svg%3E"
                 },
                 {
                     name: 'Marie Dubois',
@@ -3303,7 +3402,8 @@
                     role: 'Designer',
                     status: 'away',
                     level: 3,
-                    xp: 750
+                    xp: 750,
+                    avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23e83e8c'/%3E%3Ctext x='30' y='35' text-anchor='middle' fill='white' font-family='Arial' font-size='24'%3EM%3C/text%3E%3C/svg%3E"
                 }
             ];
 
@@ -3313,7 +3413,7 @@
                 memberCard.className = 'team-member-card animate-slide-up';
                 memberCard.innerHTML = `
                     <div class="member-avatar">
-                        <img src="https://via.placeholder.com/60" alt="${member.name}">
+                        <img src="${member.avatar}" alt="${member.name}">
                         <div class="status-indicator ${member.status}"></div>
                     </div>
                     <div class="member-info">
@@ -3339,6 +3439,16 @@
                 `;
                 teamContainer.appendChild(memberCard);
             });
+
+            // Mettre à jour les stats globales
+            users = demoMembers.map((member, index) => ({
+                id: `demo${index + 1}`,
+                ...member
+            }));
+
+            if (firebaseManager) {
+                firebaseManager.updateUsersDisplay();
+            }
         }
 
         function sendMessage(memberName) {
@@ -3401,7 +3511,7 @@
                 const responseElement = document.createElement('div');
                 responseElement.style.cssText = 'display: flex; gap: 1rem; padding: 1rem; margin-bottom: 0.5rem;';
                 responseElement.innerHTML = `
-                    <img src="https://via.placeholder.com/40" alt="Équipe" style="width: 40px; height: 40px; border-radius: 50%;">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2328a745'/%3E%3Ctext x='20' y='25' text-anchor='middle' fill='white' font-family='Arial' font-size='16'%3EE%3C/text%3E%3C/svg%3E" alt="Équipe" style="width: 40px; height: 40px; border-radius: 50%;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                             <strong>Équipe</strong>

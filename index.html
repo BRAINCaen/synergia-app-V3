@@ -1786,24 +1786,20 @@
 
             <div class="analytics-pro-container">
                 <!-- Iframe intégrant le module analytics avancé -->
-                <div id="analytics-pro-placeholder" style="height: 800px; background: #f8f9fa; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #666;">
-                    <div style="text-align: center;">
-                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
-                        <h3>Analytics Pro</h3>
-                        <p>Module d'analytics avancées</p>
-                        <button onclick="window.open('advanced-analytics.html', '_blank')" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt"></i>
-                            Ouvrir dans un nouvel onglet
-                        </button>
-                    </div>
-                </div>
+                <iframe 
+                    id="analytics-pro-iframe"
+                    src="advanced_analytics_module.html" 
+                    style="width: 100%; height: 800px; border: none; border-radius: 16px; background: #f8f9fa;"
+                    onload="this.style.display='block'; document.getElementById('analytics-fallback').style.display='none'"
+                    onerror="this.style.display='none'; document.getElementById('analytics-fallback').style.display='block'">
+                </iframe>
                 
                 <!-- Message de fallback si iframe ne fonctionne pas -->
                 <div id="analytics-fallback" style="display: none; text-align: center; padding: 3rem; color: #666;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: #ffc107;"></i>
                     <h3>Module Analytics Pro non disponible</h3>
-                    <p>Veuillez vous assurer que le fichier <code>advanced-analytics.html</code> est présent.</p>
-                    <button onclick="window.open('advanced-analytics.html', '_blank')" class="btn btn-primary">
+                    <p>Veuillez vous assurer que le fichier <code>advanced_analytics_module.html</code> est présent.</p>
+                    <button onclick="window.open('advanced_analytics_module.html', '_blank')" class="btn btn-primary">
                         <i class="fas fa-external-link-alt"></i>
                         Ouvrir dans un nouvel onglet
                     </button>
@@ -4037,8 +4033,11 @@
                         iframe.requestFullscreen();
                     } else {
                         // Fallback: ouvrir dans un nouvel onglet
-                        window.open('advanced-analytics.html', '_blank');
+                        window.open('advanced_analytics_module.html', '_blank');
                     }
+                } else {
+                    // Si pas d'iframe, ouvrir directement
+                    window.open('advanced_analytics_module.html', '_blank');
                 }
             }
 
@@ -4046,6 +4045,10 @@
                 const iframe = document.getElementById('analytics-pro-iframe');
                 if (iframe) {
                     iframe.src = iframe.src; // Recharger l'iframe
+                    console.log('🔄 Analytics Pro rechargé');
+                } else {
+                    console.log('🔄 Tentative de rechargement Analytics Pro');
+                    this.syncWithAdvancedAnalytics();
                 }
             }
 

@@ -486,44 +486,544 @@
             color: #ccc;
         }
 
-        /* Planning Styles */
-        .planning-container {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
+        /* Planning Styles Avancés */
+        .planning-section {
+            margin-bottom: 2rem;
         }
 
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .planning-admin-controls {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .planning-admin-controls h3 {
             margin-bottom: 1rem;
-        }
-
-        .calendar-header h2 {
             color: #333;
         }
 
-        .calendar-grid {
-            background: #f8f9fa;
+        .admin-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* Staff Schedule Grid */
+        .staff-schedule-grid {
+            background: white;
             border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .schedule-header {
+            display: grid;
+            grid-template-columns: 200px repeat(7, 1fr) 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .schedule-header > div {
             padding: 1rem;
-            min-height: 400px;
+            text-align: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .employee-column {
+            text-align: left !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .schedule-rows {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .schedule-row {
+            display: grid;
+            grid-template-columns: 200px repeat(7, 1fr) 100px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s ease;
+        }
+
+        .schedule-row:hover {
+            background: #f8f9fa;
+        }
+
+        .schedule-row.validated {
+            background: rgba(40, 167, 69, 0.05);
+            border-left: 4px solid #28a745;
+        }
+
+        .employee-info {
+            padding: 1rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.75rem;
+            background: #f8f9fa;
+        }
+
+        .employee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .employee-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .employee-role {
+            font-size: 0.8rem;
             color: #666;
         }
 
-        .events-sidebar {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 1.5rem;
+        .schedule-cell {
+            padding: 0.5rem;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .events-sidebar h3 {
+        .schedule-cell:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .schedule-cell.has-shift {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 3px solid #667eea;
+        }
+
+        .schedule-cell.rest-day {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .schedule-cell.overtime {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid #ffc107;
+        }
+
+        .shift-time {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #333;
+            text-align: center;
+        }
+
+        .shift-duration {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            margin-top: 0.25rem;
+        }
+
+        .total-hours {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .overtime-indicator {
+            color: #ffc107;
+            font-size: 0.8rem;
+        }
+
+        /* Week Summary */
+        .week-summary {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .week-summary h4 {
             margin-bottom: 1rem;
             color: #333;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Team Calendar */
+        .team-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .calendar-navigation {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .team-calendar {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .calendar-header-day {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            padding: 0.5rem;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .calendar-day.today {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+
+        .calendar-day.selected {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            border-width: 2px;
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .calendar-event {
+            background: #667eea;
+            color: white;
+            padding: 0.125rem 0.25rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-event.meeting {
+            background: #28a745;
+        }
+
+        .calendar-event.deadline {
+            background: #dc3545;
+        }
+
+        .calendar-event.social {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* Selected Day Events */
+        .selected-day-events {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .events-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .event-item:hover {
+            background: #f8f9fa;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-time {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .event-participants {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .participant-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Timesheet Styles */
+        .timesheet-controls {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .timesheet-controls h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .timesheet-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .timesheet-table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .timesheet-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .timesheet-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .timesheet-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .timesheet-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.present {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .status-badge.absent {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .status-badge.late {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .status-badge.overtime {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        /* Monthly Summary */
+        .monthly-summary {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Modal Styles pour Planning */
+        .schedule-modal {
+            max-width: 600px;
+        }
+
+        .shift-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .shift-input-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .legal-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .legal-warning i {
+            color: #ffc107;
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive Planning */
+        @media (max-width: 768px) {
+            .admin-controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-header,
+            .schedule-row {
+                grid-template-columns: 120px repeat(7, 60px) 60px;
+                font-size: 0.8rem;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .timesheet-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .timesheet-table {
+                font-size: 0.8rem;
+            }
+
+            .timesheet-table th,
+            .timesheet-table td {
+                padding: 0.5rem;
+            }
         }
 
         /* Chat Styles */
@@ -1390,75 +1890,233 @@
         <!-- Planning -->
         <section id="planning" class="content-section">
             <div class="section-header">
-                <h1><i class="fas fa-calendar"></i> Planning d'équipe</h1>
+                <h1><i class="fas fa-calendar"></i> Planning & Gestion des Horaires</h1>
                 <div class="section-actions">
                     <select id="planning-view" class="select-input">
-                        <option value="month">Vue mensuelle</option>
-                        <option value="week">Vue hebdomadaire</option>
-                        <option value="day">Vue journalière</option>
+                        <option value="staff">Planning Staff</option>
+                        <option value="team">Planning Équipe</option>
+                        <option value="monthly">Vue Mensuelle</option>
+                        <option value="weekly">Vue Hebdomadaire</option>
+                        <option value="timesheet">Feuilles de Temps</option>
                     </select>
                     <button id="add-event-btn" class="btn btn-primary">
                         <i class="fas fa-plus"></i>
                         Nouvel événement
                     </button>
-                    <button id="sync-calendar-btn" class="btn btn-secondary">
-                        <i class="fas fa-sync"></i>
-                        Synchroniser
+                    <button id="create-schedule-btn" class="btn btn-primary" style="display: none;">
+                        <i class="fas fa-calendar-plus"></i>
+                        Créer Planning
+                    </button>
+                    <button id="import-schedule-btn" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i>
+                        Importer
+                    </button>
+                    <button id="export-schedule-btn" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Exporter
+                    </button>
+                    <button id="payroll-report-btn" class="btn btn-secondary">
+                        <i class="fas fa-calculator"></i>
+                        Rapport Paie
                     </button>
                 </div>
             </div>
 
-            <div class="planning-container">
-                <div class="calendar-section">
-                    <div class="calendar-header">
-                        <button id="prev-month" class="btn-icon">
+            <!-- Planning Staff Admin -->
+            <div id="staff-planning-section" class="planning-section">
+                <div class="planning-admin-controls">
+                    <h3>
+                        <i class="fas fa-user-cog"></i>
+                        Gestion Planning Staff (Admin)
+                    </h3>
+                    <div class="admin-controls-grid">
+                        <div class="control-group">
+                            <label>Période</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="week" id="staff-week" class="date-input" value="2025-W23">
+                                <button id="prev-week" class="btn-icon">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button id="next-week" class="btn-icon">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Modèles</label>
+                            <select id="schedule-template" class="select-input">
+                                <option value="">Sélectionner un modèle</option>
+                                <option value="35h">35h/semaine standard</option>
+                                <option value="39h">39h/semaine</option>
+                                <option value="variable">Horaires variables</option>
+                                <option value="equipe">Travail en équipes</option>
+                                <option value="custom">Personnalisé</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Actions rapides</label>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button id="auto-generate" class="btn btn-secondary btn-small">
+                                    <i class="fas fa-magic"></i> Auto-générer
+                                </button>
+                                <button id="copy-previous" class="btn btn-secondary btn-small">
+                                    <i class="fas fa-copy"></i> Copier précédent
+                                </button>
+                                <button id="validate-schedule" class="btn btn-primary btn-small">
+                                    <i class="fas fa-check"></i> Valider
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grille Planning Staff -->
+                <div class="staff-schedule-grid">
+                    <div class="schedule-header">
+                        <div class="employee-column">Employé</div>
+                        <div class="day-column">Lun 03/06</div>
+                        <div class="day-column">Mar 04/06</div>
+                        <div class="day-column">Mer 05/06</div>
+                        <div class="day-column">Jeu 06/06</div>
+                        <div class="day-column">Ven 07/06</div>
+                        <div class="day-column">Sam 08/06</div>
+                        <div class="day-column">Dim 09/06</div>
+                        <div class="total-column">Total</div>
+                    </div>
+                    
+                    <div id="staff-schedule-rows" class="schedule-rows">
+                        <!-- Les lignes seront générées dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Récapitulatif Hebdomadaire -->
+                <div class="week-summary">
+                    <h4><i class="fas fa-chart-bar"></i> Récapitulatif de la semaine</h4>
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <div class="summary-label">Total heures planifiées</div>
+                            <div class="summary-value" id="total-planned-hours">0h</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Heures supplémentaires</div>
+                            <div class="summary-value" id="overtime-hours">0h</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Employés actifs</div>
+                            <div class="summary-value" id="active-employees">0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Coût estimé</div>
+                            <div class="summary-value" id="estimated-cost">0€</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planning Équipe Collaboratif -->
+            <div id="team-planning-section" class="planning-section" style="display: none;">
+                <div class="team-calendar-header">
+                    <h3>
+                        <i class="fas fa-users"></i>
+                        Planning Équipe - Événements & RDV
+                    </h3>
+                    <div class="calendar-navigation">
+                        <button id="team-prev-month" class="btn-icon">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <h2 id="current-month">Décembre 2024</h2>
-                        <button id="next-month" class="btn-icon">
+                        <h4 id="team-current-month">Juin 2025</h4>
+                        <button id="team-next-month" class="btn-icon">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
-                    <div id="calendar" class="calendar-grid">
-                        <div style="text-align: center; color: #666;">
-                            <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
-                            <p>Calendrier interactif en développement</p>
-                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Bientôt disponible avec intégration complète</p>
-                        </div>
+                </div>
+
+                <!-- Calendrier Équipe -->
+                <div id="team-calendar" class="team-calendar">
+                    <!-- Sera généré dynamiquement -->
+                </div>
+
+                <!-- Événements du jour sélectionné -->
+                <div class="selected-day-events">
+                    <h4 id="selected-day-title">Événements du jour</h4>
+                    <div id="selected-day-events-list" class="events-list">
+                        <p style="text-align: center; color: #666; padding: 2rem;">
+                            Sélectionnez un jour pour voir les événements
+                        </p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Feuilles de Temps & Pointages -->
+            <div id="timesheet-section" class="planning-section" style="display: none;">
+                <div class="timesheet-controls">
+                    <h3>
+                        <i class="fas fa-clock"></i>
+                        Feuilles de Temps & Pointages
+                    </h3>
+                    <div class="timesheet-filters">
+                        <select id="timesheet-employee" class="select-input">
+                            <option value="all">Tous les employés</option>
+                            <option value="allan">Allan Boehme</option>
+                            <option value="polar">Polar Caron</option>
+                            <option value="marie">Marie Dubois</option>
+                        </select>
+                        <select id="timesheet-month" class="select-input">
+                            <option value="2025-06">Juin 2025</option>
+                            <option value="2025-05">Mai 2025</option>
+                            <option value="2025-04">Avril 2025</option>
+                        </select>
+                        <button id="generate-payroll" class="btn btn-primary">
+                            <i class="fas fa-file-invoice"></i>
+                            Générer Bulletin
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tableau Pointages -->
+                <div class="timesheet-table-container">
+                    <table class="timesheet-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employé</th>
+                                <th>Arrivée</th>
+                                <th>Départ</th>
+                                <th>Pause</th>
+                                <th>Heures Travaillées</th>
+                                <th>Heures Sup.</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timesheet-data">
+                            <!-- Données générées dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Résumé Mensuel -->
+                <div class="monthly-summary">
+                    <h4><i class="fas fa-calculator"></i> Résumé Mensuel</h4>
+                    <div id="monthly-summary-content" class="summary-content">
+                        <!-- Contenu généré dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Événements -->
+            <div id="events-sidebar" class="events-sidebar">
+                <h3><i class="fas fa-list"></i> Événements à venir</h3>
+                <div id="upcoming-events" class="events-container">
+                    <!-- Événements générés dynamiquement -->
                 </div>
                 
-                <div id="events-list" class="events-sidebar">
-                    <h3><i class="fas fa-list"></i> Événements à venir</h3>
-                    <div id="events-container">
-                        <div class="activity-item">
-                            <i class="fas fa-users" style="color: #667eea;"></i>
-                            <div>
-                                <strong>Réunion équipe</strong>
-                                <br><small>Demain à 10h00</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <i class="fas fa-graduation-cap" style="color: #28a745;"></i>
-                            <div>
-                                <strong>Formation SYNERGIA</strong>
-                                <br><small>Vendredi à 14h00</small>
-                            </div>
-                        </div>
-                        <div class="activity-item">
-                            <i class="fas fa-birthday-cake" style="color: #ffc107;"></i>
-                            <div>
-                                <strong>Anniversaire Marie</strong>
-                                <br><small>Lundi prochain</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button id="view-all-events" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
-                        <i class="fas fa-eye"></i>
-                        Voir tous les événements
-                    </button>
-                </div>
+                <button id="view-all-events" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
+                    <i class="fas fa-eye"></i>
+                    Voir tous les événements
+                </button>
             </div>
         </section>
 

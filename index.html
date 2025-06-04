@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGIA v3.0 - Google Calendar</title>
+    <title>SYNERGIA v3.0 - Application Complète</title>
     
     <style>
         * {
@@ -19,11 +19,15 @@
             color: #333;
         }
 
+        /* Navigation */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .nav-container {
@@ -44,6 +48,48 @@
             color: #667eea;
         }
 
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: #666;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Layout principal */
         .main-content {
             max-width: 1200px;
             margin: 2rem auto;
@@ -51,6 +97,7 @@
         }
 
         .content-section {
+            display: none;
             background: white;
             border-radius: 16px;
             padding: 2rem;
@@ -58,6 +105,32 @@
             margin-bottom: 2rem;
         }
 
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-header h1 {
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Boutons */
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -89,6 +162,73 @@
             box-shadow: none;
         }
 
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        /* Dashboard */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .dashboard-widget {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        /* Google Calendar */
         .google-status {
             display: inline-flex;
             align-items: center;
@@ -114,6 +254,227 @@
             color: #212529;
         }
 
+        /* Équipe */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .team-member-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-member-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-member-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .status-indicator.online { background: #28a745; }
+        .status-indicator.away { background: #ffc107; }
+        .status-indicator.offline { background: #6c757d; }
+
+        /* Events */
+        .event-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .event-item:hover {
+            background: #f8f9fa;
+            transform: translateX(4px);
+        }
+
+        .event-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4285f4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .event-icon.synergia {
+            background: #667eea;
+        }
+
+        /* Chat */
+        .chat-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 600px;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chat-sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            background: white;
+        }
+
+        .message-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .message-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        /* Planning */
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Missions */
+        .user-progress {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .xp-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            width: 60%;
+            transition: width 0.3s ease;
+        }
+
+        .quests-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quest-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f8f9fa;
+            color: #666;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quest-tab.active,
+        .quest-tab:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .quests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .quest-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .quest-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Notifications */
         .notification {
             position: fixed;
             top: 20px;
@@ -146,29 +507,16 @@
             }
         }
 
-        .events-container {
-            margin-top: 2rem;
-        }
-
-        .event-item {
+        .activity-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
         }
 
-        .event-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #4285f4;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .activity-item:last-child {
+            border-bottom: none;
         }
 
         .loading {
@@ -176,20 +524,362 @@
             padding: 2rem;
             color: #666;
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 0 1rem;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container {
+                grid-template-columns: 1fr;
+                height: 70vh;
+            }
+
+            .quests-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                ⚡ SYNERGIA v3.0 - Google Calendar
+                ⚡ SYNERGIA v3.0
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-link active" data-section="dashboard">
+                    🏠 Dashboard
+                </div>
+                <div class="nav-link" data-section="team">
+                    👥 Équipe
+                </div>
+                <div class="nav-link" data-section="planning">
+                    📅 Planning
+                </div>
+                <div class="nav-link" data-section="google-calendar">
+                    📱 Google Calendar
+                </div>
+                <div class="nav-link" data-section="chat">
+                    💬 Chat
+                </div>
+                <div class="nav-link" data-section="quests">
+                    🏆 Missions
+                </div>
+            </div>
+            
+            <div class="nav-user">
+                <div class="user-avatar">A</div>
+                <span>Allan Boehme</span>
+                <button class="btn-icon">🚪</button>
             </div>
         </div>
     </nav>
 
+    <!-- Contenu principal -->
     <main class="main-content">
-        <section class="content-section">
-            <h1>🔗 Google Calendar Integration</h1>
+        <!-- Dashboard -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h1>🏠 Dashboard</h1>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="refreshDashboard()">
+                        🔄 Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <span style="font-size: 2rem;">👥</span>
+                    <div class="stat-info">
+                        <h3 id="team-count">3</h3>
+                        <p>Membres d'équipe</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 2rem;">📱</span>
+                    <div class="stat-info">
+                        <h3 id="google-events-count">0</h3>
+                        <p>Événements Google</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 2rem;">🏆</span>
+                    <div class="stat-info">
+                        <h3 id="active-quests">5</h3>
+                        <p>Missions actives</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 2rem;">🔄</span>
+                    <div class="stat-info">
+                        <h3 id="sync-status-text">Déconnecté</h3>
+                        <p>Synchronisation Google</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-widget">
+                    <h3>📱 Google Calendar Status</h3>
+                    <div style="text-align: center; padding: 2rem;">
+                        <div id="dashboard-google-status" class="google-status disconnected">
+                            ❌ Non connecté
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="goToGoogleCalendar()">
+                                📱 Gérer Google Calendar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widget">
+                    <h3>📈 Dernières activités</h3>
+                    <div id="recent-activities">
+                        <div class="activity-item">
+                            <span style="color: #667eea; font-size: 1.2rem;">🚀</span>
+                            <span>SYNERGIA v3.0 avec Google Calendar activé</span>
+                            <small style="margin-left: auto; color: #666;">Maintenant</small>
+                        </div>
+                        <div class="activity-item">
+                            <span style="color: #4285f4; font-size: 1.2rem;">📱</span>
+                            <span>Google Calendar configuré</span>
+                            <small style="margin-left: auto; color: #666;">Il y a 2 minutes</small>
+                        </div>
+                        <div class="activity-item">
+                            <span style="color: #28a745; font-size: 1.2rem;">👥</span>
+                            <span>Équipe chargée (3 membres)</span>
+                            <small style="margin-left: auto; color: #666;">Il y a 5 minutes</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widget">
+                    <h3>🏆 Missions du jour</h3>
+                    <div id="daily-quests-preview">
+                        <div class="activity-item">
+                            <span style="color: #ffc107; font-size: 1.2rem;">⏰</span>
+                            <span>Pointer son arrivée</span>
+                            <small style="margin-left: auto; color: #667eea; font-weight: bold;">50 XP</small>
+                        </div>
+                        <div class="activity-item">
+                            <span style="color: #28a745; font-size: 1.2rem;">💬</span>
+                            <span>Message d'équipe</span>
+                            <small style="margin-left: auto; color: #667eea; font-weight: bold;">30 XP</small>
+                        </div>
+                        <div class="activity-item">
+                            <span style="color: #4285f4; font-size: 1.2rem;">📱</span>
+                            <span>Sync Google Calendar</span>
+                            <small style="margin-left: auto; color: #667eea; font-weight: bold;">75 XP</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widget">
+                    <h3>📊 Progression XP</h3>
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">1,250</div>
+                        <div style="color: #666;">XP Total</div>
+                        <div style="margin-top: 1rem;">
+                            <div class="xp-bar" style="background: #e9ecef;">
+                                <div class="xp-fill" style="width: 60%; background: #667eea;"></div>
+                            </div>
+                            <small style="color: #666;">Niveau 5 - 60% vers niveau 6</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Équipe -->
+        <section id="team" class="content-section">
+            <div class="section-header">
+                <h1>👥 Gestion d'équipe</h1>
+                <div class="section-actions">
+                    <input type="text" placeholder="Rechercher..." style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; width: 300px;">
+                    <button class="btn btn-primary">
+                        ➕ Ajouter membre
+                    </button>
+                    <button class="btn btn-secondary">
+                        📊 Export équipe
+                    </button>
+                </div>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-member-card">
+                    <div class="member-avatar">
+                        A
+                        <div class="status-indicator online"></div>
+                    </div>
+                    <div class="member-info">
+                        <h3>Allan Boehme</h3>
+                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">Administrateur</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">brain.caen@gmail.com</p>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau 5</span>
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">1,250 XP</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button class="btn-icon" title="Message">💬</button>
+                            <button class="btn-icon" title="Profil">👤</button>
+                            <button class="btn-icon" title="Assigner mission">🎯</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-avatar">
+                        P
+                        <div class="status-indicator online"></div>
+                    </div>
+                    <div class="member-info">
+                        <h3>Polar Caron</h3>
+                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">Développeur</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">polar.caron@synergia.com</p>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau 4</span>
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">980 XP</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button class="btn-icon" title="Message">💬</button>
+                            <button class="btn-icon" title="Profil">👤</button>
+                            <button class="btn-icon" title="Assigner mission">🎯</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-avatar">
+                        M
+                        <div class="status-indicator away"></div>
+                    </div>
+                    <div class="member-info">
+                        <h3>Marie Dubois</h3>
+                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">Designer</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">marie.dubois@synergia.com</p>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau 3</span>
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">750 XP</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button class="btn-icon" title="Message">💬</button>
+                            <button class="btn-icon" title="Profil">👤</button>
+                            <button class="btn-icon" title="Assigner mission">🎯</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Planning -->
+        <section id="planning" class="content-section">
+            <div class="section-header">
+                <h1>📅 Planning</h1>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        ➕ Nouvel événement
+                    </button>
+                    <button class="btn btn-secondary">
+                        📱 Sync Google
+                    </button>
+                    <button class="btn btn-secondary">
+                        📊 Export planning
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 12px;">
+                    <h3>📅 Planning Équipe</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <button class="btn-icon">⬅️</button>
+                        <h4>Juin 2025</h4>
+                        <button class="btn-icon">➡️</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                    <h3>Calendrier SYNERGIA</h3>
+                    <p>Vue planning de l'équipe</p>
+                    <div style="margin-top: 1rem;">
+                        <div class="google-status connected">
+                            ✅ Synchronisé avec Google Calendar
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e9ecef;">
+                <h3>📋 Événements à venir</h3>
+                <div style="margin-top: 1rem;">
+                    <div class="event-item">
+                        <div class="event-icon">👥</div>
+                        <div style="flex: 1;">
+                            <strong>Réunion équipe</strong>
+                            <br><small style="color: #666;">Point hebdomadaire</small>
+                            <br><small style="color: #28a745; font-weight: bold;">Aujourd'hui 10:00</small>
+                            <br><small style="color: #4285f4;">📱 Depuis Google Calendar</small>
+                        </div>
+                    </div>
+                    
+                    <div class="event-item">
+                        <div class="event-icon synergia">🎓</div>
+                        <div style="flex: 1;">
+                            <strong>Formation SYNERGIA</strong>
+                            <br><small style="color: #666;">Nouvelles fonctionnalités</small>
+                            <br><small style="color: #666;">Vendredi 14:00</small>
+                        </div>
+                    </div>
+                    
+                    <div class="event-item">
+                        <div class="event-icon" style="background: #e83e8c;">🎂</div>
+                        <div style="flex: 1;">
+                            <strong>Anniversaire Marie</strong>
+                            <br><small style="color: #666;">Célébration d'équipe</small>
+                            <br><small style="color: #666;">Lundi 12:00</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Google Calendar -->
+        <section id="google-calendar" class="content-section">
+            <div class="section-header">
+                <h1>📱 Google Calendar</h1>
+                <div class="section-actions">
+                    <button id="sync-calendar" class="btn btn-primary" disabled>
+                        🔄 Synchroniser
+                    </button>
+                    <button class="btn btn-secondary">
+                        ➕ Nouvel événement
+                    </button>
+                </div>
+            </div>
             
             <div id="connection-status" class="google-status disconnected">
                 ❌ Non connecté à Google Calendar
@@ -198,9 +888,6 @@
             <div style="margin: 2rem 0;">
                 <button id="connect-google" class="btn btn-primary">
                     📱 Se connecter à Google Calendar
-                </button>
-                <button id="sync-calendar" class="btn btn-primary" disabled style="margin-left: 1rem;">
-                    🔄 Synchroniser
                 </button>
             </div>
 
@@ -211,6 +898,172 @@
             <div id="events-container" class="events-container">
                 <div class="loading">
                     📅 Connectez-vous pour voir vos événements Google Calendar
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat -->
+        <section id="chat" class="content-section">
+            <div class="section-header">
+                <h1>💬 Chat d'équipe</h1>
+                <div class="section-actions">
+                    <select style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                        <option>🟢 En ligne</option>
+                        <option>🟡 Absent</option>
+                        <option>🔴 Occupé</option>
+                    </select>
+                    <button class="btn btn-secondary">
+                        ⚙️ Paramètres
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-sidebar">
+                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef;">
+                        <h3>💬 Conversations</h3>
+                    </div>
+                    <div style="padding: 1rem;">
+                        <div class="activity-item" style="cursor: pointer; padding: 0.5rem; border-radius: 8px;">
+                            <span style="color: #667eea; font-size: 1.2rem;">👥</span>
+                            <div style="flex: 1;">
+                                <strong>Équipe Générale</strong>
+                                <br><small style="color: #666;">Bonne journée à tous!</small>
+                            </div>
+                            <small style="color: #28a745;">🟢</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-main">
+                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef; background: white; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3>👥 Équipe Générale</h3>
+                            <span style="color: #28a745; font-size: 0.9rem;">
+                                🟢 3 membres en ligne
+                            </span>
+                        </div>
+                        <div>
+                            <button class="btn-icon" title="Appel vidéo">📹</button>
+                            <button class="btn-icon" title="Appel audio">📞</button>
+                        </div>
+                    </div>
+
+                    <div class="messages-area">
+                        <div style="text-align: center; padding: 1rem; color: #666; border-bottom: 1px solid #eee;">
+                            <small>Conversation démarrée le 15 décembre 2024</small>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; padding: 1rem;">
+                            <div class="user-avatar" style="width: 40px; height: 40px; font-size: 1rem;">A</div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                    <strong>Allan Boehme</strong>
+                                    <small style="color: #666;">10:30</small>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 12px;">
+                                    Bonne journée ! Google Calendar intégré avec succès 🎉
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message-input-container">
+                        <div class="message-input">
+                            <button class="btn-icon">😊</button>
+                            <input type="text" placeholder="Tapez votre message...">
+                            <button style="padding: 0.75rem 1rem; background: #667eea; color: white; border: none; border-radius: 8px;">
+                                📤
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Missions -->
+        <section id="quests" class="content-section">
+            <div class="section-header">
+                <h1>🏆 Missions & Récompenses</h1>
+                <div class="section-actions">
+                    <select style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                        <option>📋 Toutes les missions</option>
+                        <option>✅ Disponibles</option>
+                        <option>⏳ En cours</option>
+                        <option>🎯 Terminées</option>
+                    </select>
+                    <button class="btn btn-secondary">
+                        📈 Historique
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-progress">
+                <div class="level-info">
+                    <div style="text-align: center; margin-right: 1rem;">
+                        <div style="font-size: 2rem; margin-bottom: 0.25rem;">⭐</div>
+                        <span>Niveau 5</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: 60%;"></div>
+                    </div>
+                    <div style="text-align: center; margin-left: 1rem;">
+                        <span>1,250 XP</span>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">750 XP vers niveau 6</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quests-tabs">
+                <button class="quest-tab active">
+                    ☀️ Quotidiennes
+                </button>
+                <button class="quest-tab">
+                    📅 Hebdomadaires
+                </button>
+                <button class="quest-tab">
+                    ⭐ Spéciales
+                </button>
+            </div>
+
+            <div class="quests-grid">
+                <div class="quest-card">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">⏰</div>
+                    <h3>Pointer son arrivée</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">Pointer votre arrivée avant 9h30</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">50 XP</span>
+                        <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Quotidienne</span>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="acceptQuest('daily_checkin')">
+                        ✅ Accepter
+                    </button>
+                </div>
+
+                <div class="quest-card">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">💬</div>
+                    <h3>Message d'équipe</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">Envoyer un message dans le chat</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">30 XP</span>
+                        <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Quotidienne</span>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="acceptQuest('daily_message')">
+                        ✅ Accepter
+                    </button>
+                </div>
+
+                <div class="quest-card">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">📱</div>
+                    <h3>Synchronisation Google</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">Connecter et synchroniser Google Calendar</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">75 XP</span>
+                        <span style="background: #4285f4; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Google</span>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="acceptQuest('google_sync')">
+                        ✅ Accepter
+                    </button>
                 </div>
             </div>
         </section>
@@ -231,19 +1084,60 @@
         let tokenClient = null;
         let events = [];
 
-        class GoogleCalendarApp {
+        class SynergiaApp {
             constructor() {
+                this.events = [];
                 this.init();
             }
 
             async init() {
-                console.log('🚀 Initialisation Google Calendar');
+                console.log('🚀 Initialisation SYNERGIA v3.0 Complet');
                 
-                // Charger les APIs Google dynamiquement
-                await this.loadGoogleAPIs();
+                // Setup navigation
+                this.setupNavigation();
                 
                 // Setup event listeners
                 this.setupEventListeners();
+                
+                // Charger Google APIs
+                await this.loadGoogleAPIs();
+            }
+
+            setupNavigation() {
+                const navLinks = document.querySelectorAll('.nav-link');
+                const sections = document.querySelectorAll('.content-section');
+
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        const targetSection = link.dataset.section;
+                        
+                        // Retirer active de tous les liens
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                        
+                        // Retirer active de toutes les sections
+                        sections.forEach(section => section.classList.remove('active'));
+                        
+                        // Activer la section cible
+                        const targetElement = document.getElementById(targetSection);
+                        if (targetElement) {
+                            targetElement.classList.add('active');
+                        }
+                    });
+                });
+            }
+
+            setupEventListeners() {
+                // Google Calendar
+                const connectBtn = document.getElementById('connect-google');
+                if (connectBtn) {
+                    connectBtn.addEventListener('click', () => this.connectToGoogle());
+                }
+
+                const syncBtn = document.getElementById('sync-calendar');
+                if (syncBtn) {
+                    syncBtn.addEventListener('click', () => this.syncCalendar());
+                }
             }
 
             async loadGoogleAPIs() {
@@ -280,7 +1174,6 @@
                 } catch (error) {
                     console.error('❌ Erreur chargement APIs:', error);
                     this.updateStatus('❌ Erreur de chargement des APIs Google');
-                    this.showToast('Erreur de chargement des APIs Google', 'error');
                 }
             }
 
@@ -320,16 +1213,6 @@
                 });
             }
 
-            setupEventListeners() {
-                document.getElementById('connect-google').addEventListener('click', () => {
-                    this.connectToGoogle();
-                });
-
-                document.getElementById('sync-calendar').addEventListener('click', () => {
-                    this.syncCalendar();
-                });
-            }
-
             connectToGoogle() {
                 if (!tokenClient) {
                     this.showToast('APIs Google non initialisées', 'error');
@@ -347,12 +1230,16 @@
                 isGoogleSignedIn = true;
                 
                 this.updateConnectionStatus('connected', '✅ Connecté à Google Calendar');
+                this.updateDashboardGoogleStatus('connected', '✅ Connecté');
                 document.getElementById('sync-calendar').disabled = false;
                 
                 this.showToast('Connecté avec succès !', 'success');
                 
                 // Auto-sync
                 await this.syncCalendar();
+                
+                // Mettre à jour les stats dashboard
+                this.updateDashboardStats();
             }
 
             async syncCalendar() {
@@ -379,6 +1266,7 @@
                     
                     this.events = response.result.items || [];
                     this.renderEvents();
+                    this.updateDashboardStats();
                     
                     this.showToast(`${this.events.length} événements synchronisés`, 'success');
                     
@@ -418,12 +1306,39 @@
 
             updateConnectionStatus(status, text) {
                 const statusEl = document.getElementById('connection-status');
-                statusEl.className = `google-status ${status}`;
-                statusEl.textContent = text;
+                if (statusEl) {
+                    statusEl.className = `google-status ${status}`;
+                    statusEl.textContent = text;
+                }
+            }
+
+            updateDashboardGoogleStatus(status, text) {
+                const statusEl = document.getElementById('dashboard-google-status');
+                if (statusEl) {
+                    statusEl.className = `google-status ${status}`;
+                    statusEl.textContent = text;
+                }
             }
 
             updateStatus(message) {
-                document.getElementById('api-status').innerHTML = message;
+                const statusEl = document.getElementById('api-status');
+                if (statusEl) {
+                    statusEl.innerHTML = message;
+                }
+            }
+
+            updateDashboardStats() {
+                // Mettre à jour les stats dans le dashboard
+                const googleEventsEl = document.getElementById('google-events-count');
+                const syncStatusEl = document.getElementById('sync-status-text');
+                
+                if (googleEventsEl) {
+                    googleEventsEl.textContent = this.events.length;
+                }
+                
+                if (syncStatusEl) {
+                    syncStatusEl.textContent = isGoogleSignedIn ? 'Connecté' : 'Déconnecté';
+                }
             }
 
             showToast(message, type = 'info') {
@@ -444,10 +1359,39 @@
             }
         }
 
+        // Fonctions globales
+        function goToGoogleCalendar() {
+            // Aller à l'onglet Google Calendar
+            document.querySelector('[data-section="google-calendar"]').click();
+        }
+
+        function refreshDashboard() {
+            app.showToast('Dashboard actualisé', 'success');
+            app.updateDashboardStats();
+        }
+
+        function acceptQuest(questId) {
+            const quests = {
+                'daily_checkin': 'Pointer son arrivée',
+                'daily_message': 'Message d\'équipe',
+                'google_sync': 'Synchronisation Google'
+            };
+            
+            const questName = quests[questId] || questId;
+            app.showToast(`Mission "${questName}" acceptée! +50 XP`, 'success');
+        }
+
         // Initialisation
+        let app;
+        
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Démarrage SYNERGIA Google Calendar');
-            new GoogleCalendarApp();
+            console.log('🚀 Démarrage SYNERGIA v3.0 Complet');
+            app = new SynergiaApp();
+            
+            // Message de bienvenue
+            setTimeout(() => {
+                app.showToast('🎉 SYNERGIA v3.0 avec Google Calendar prêt!', 'success');
+            }, 2000);
         });
     </script>
 </body>

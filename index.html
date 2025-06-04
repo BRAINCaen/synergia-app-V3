@@ -3,21 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGIA v3.0 - Production avec Google Calendar</title>
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- Google APIs -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
-    
-    <!-- Chart.js pour les analytics -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>SYNERGIA v3.0 - Google Calendar</title>
     
     <style>
-        /* Styles principaux */
         * {
             margin: 0;
             padding: 0;
@@ -31,15 +19,11 @@
             color: #333;
         }
 
-        /* Navigation */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
         }
 
         .nav-container {
@@ -60,42 +44,6 @@
             color: #667eea;
         }
 
-        .nav-menu {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            color: #666;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-avatar img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        /* Layout principal */
         .main-content {
             max-width: 1200px;
             margin: 2rem auto;
@@ -103,7 +51,6 @@
         }
 
         .content-section {
-            display: none;
             background: white;
             border-radius: 16px;
             padding: 2rem;
@@ -111,32 +58,6 @@
             margin-bottom: 2rem;
         }
 
-        .content-section.active {
-            display: block;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .section-header h1 {
-            color: #333;
-            font-size: 2rem;
-        }
-
-        .section-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        /* Boutons */
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -161,73 +82,13 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #333;
-            border: 1px solid #dee2e6;
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        .btn-secondary:hover {
-            background: #e9ecef;
-        }
-
-        .btn-icon {
-            padding: 0.5rem;
-            border: none;
-            background: transparent;
-            border-radius: 6px;
-            cursor: pointer;
-            color: #666;
-            transition: all 0.3s ease;
-        }
-
-        .btn-icon:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-        }
-
-        /* Dashboard */
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .stat-card i {
-            font-size: 2rem;
-            opacity: 0.8;
-        }
-
-        .stat-info h3 {
-            font-size: 2rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .dashboard-widget {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-        }
-
-        /* Google Calendar Specific */
         .google-status {
             display: inline-flex;
             align-items: center;
@@ -235,6 +96,7 @@
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
+            margin: 1rem 0;
         }
 
         .google-status.connected {
@@ -252,222 +114,6 @@
             color: #212529;
         }
 
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .sync-indicator.connected {
-            background: #28a745;
-        }
-
-        .sync-indicator.disconnected {
-            background: #dc3545;
-        }
-
-        .sync-indicator.connecting {
-            background: #ffc107;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        /* Calendrier */
-        .calendar-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 12px;
-        }
-
-        .calendar-navigation {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background: #e9ecef;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .calendar-day {
-            background: white;
-            padding: 0.75rem;
-            min-height: 100px;
-            position: relative;
-        }
-
-        .calendar-day.other-month {
-            background: #f8f9fa;
-            color: #6c757d;
-        }
-
-        .calendar-day.today {
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .calendar-event {
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
-            cursor: pointer;
-        }
-
-        .calendar-event.google {
-            background: #4285f4;
-        }
-
-        /* Events List */
-        .events-list {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .event-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .event-item:hover {
-            background: #f8f9fa;
-            transform: translateX(4px);
-        }
-
-        .event-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: white;
-        }
-
-        .event-icon.google {
-            background: #4285f4;
-        }
-
-        .event-icon.synergia {
-            background: #667eea;
-        }
-
-        /* Modales */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .close {
-            position: absolute;
-            right: 1rem;
-            top: 1rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-        }
-
-        /* Notifications */
         .notification {
             position: fixed;
             top: 20px;
@@ -489,10 +135,6 @@
             border-left-color: #dc3545;
         }
 
-        .notification.warning {
-            border-left-color: #ffc107;
-        }
-
         @keyframes slideInRight {
             from {
                 opacity: 0;
@@ -504,418 +146,80 @@
             }
         }
 
-        /* Loading */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .events-container {
+            margin-top: 2rem;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Google Auth Button */
-        .google-signin-btn {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
+        .event-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
         }
 
-        .google-signin-btn:hover {
-            background: #3367d6;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+        .event-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4285f4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .google-signin-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Status Messages */
-        .status-message {
+        .loading {
             text-align: center;
             padding: 2rem;
             color: #666;
         }
-
-        .status-message i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .main-content {
-                padding: 0 1rem;
-            }
-
-            .dashboard-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .calendar-grid {
-                grid-template-columns: repeat(7, 1fr);
-                gap: 1px;
-            }
-
-            .calendar-day {
-                min-height: 80px;
-                padding: 0.5rem;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <i class="fas fa-bolt"></i>
-                <span>SYNERGIA v3.0 - Google Calendar</span>
-            </div>
-            
-            <div class="nav-menu">
-                <a href="#dashboard" class="nav-link active">
-                    <i class="fas fa-tachometer-alt"></i>
-                    Dashboard
-                </a>
-                <a href="#calendar" class="nav-link">
-                    <i class="fab fa-google"></i>
-                    Google Calendar
-                </a>
-                <a href="#events" class="nav-link">
-                    <i class="fas fa-calendar"></i>
-                    Événements
-                </a>
-                <a href="#settings" class="nav-link">
-                    <i class="fas fa-cog"></i>
-                    Paramètres
-                </a>
-            </div>
-            
-            <div class="nav-user">
-                <div class="user-avatar">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23667eea'/%3E%3Ctext x='20' y='25' text-anchor='middle' fill='white' font-family='Arial' font-size='16'%3EU%3C/text%3E%3C/svg%3E" alt="Avatar" id="user-avatar">
-                </div>
-                <span id="user-name">Utilisateur</span>
-                <button id="logout-btn" class="btn-icon">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
+                ⚡ SYNERGIA v3.0 - Google Calendar
             </div>
         </div>
     </nav>
 
-    <!-- Contenu principal -->
     <main class="main-content">
-        <!-- Dashboard -->
-        <section id="dashboard" class="content-section active">
-            <div class="section-header">
-                <h1>Dashboard</h1>
-                <div class="section-actions">
-                    <button id="refresh-dashboard" class="btn btn-secondary">
-                        <i class="fas fa-sync-alt"></i>
-                        Actualiser
-                    </button>
-                </div>
+        <section class="content-section">
+            <h1>🔗 Google Calendar Integration</h1>
+            
+            <div id="connection-status" class="google-status disconnected">
+                ❌ Non connecté à Google Calendar
+            </div>
+            
+            <div style="margin: 2rem 0;">
+                <button id="connect-google" class="btn btn-primary">
+                    📱 Se connecter à Google Calendar
+                </button>
+                <button id="sync-calendar" class="btn btn-primary" disabled style="margin-left: 1rem;">
+                    🔄 Synchroniser
+                </button>
             </div>
 
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <i class="fab fa-google"></i>
-                    <div class="stat-info">
-                        <h3 id="google-events-count">0</h3>
-                        <p>Événements Google</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-calendar"></i>
-                    <div class="stat-info">
-                        <h3 id="total-events-count">0</h3>
-                        <p>Total événements</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-clock"></i>
-                    <div class="stat-info">
-                        <h3 id="upcoming-events">0</h3>
-                        <p>À venir aujourd'hui</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-sync-alt"></i>
-                    <div class="stat-info">
-                        <h3 id="sync-status-text">Déconnecté</h3>
-                        <p>Statut synchronisation</p>
-                    </div>
-                </div>
+            <div id="api-status" style="padding: 1rem; background: #f8f9fa; border-radius: 8px; margin: 1rem 0;">
+                🔄 Chargement des APIs Google...
             </div>
 
-            <div class="dashboard-grid">
-                <div class="dashboard-widget">
-                    <h3><i class="fab fa-google"></i> Google Calendar Status</h3>
-                    <div id="google-calendar-status" style="text-align: center; padding: 2rem;">
-                        <div id="connection-status" class="google-status disconnected">
-                            <div class="sync-indicator disconnected"></div>
-                            <span>Non connecté</span>
-                        </div>
-                        <div style="margin-top: 1rem;">
-                            <button id="connect-google" class="google-signin-btn">
-                                <i class="fab fa-google"></i>
-                                Se connecter à Google
-                            </button>
-                        </div>
-                        <div id="api-status" style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                            Initialisation des APIs Google...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-widget">
-                    <h3><i class="fas fa-calendar-check"></i> Événements aujourd'hui</h3>
-                    <div id="today-events">
-                        <div class="status-message">
-                            <i class="fas fa-calendar-alt"></i>
-                            <p>Connectez-vous à Google Calendar<br>pour voir vos événements</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-widget">
-                    <h3><i class="fas fa-chart-line"></i> Activité récente</h3>
-                    <div id="recent-activity">
-                        <div class="status-message">
-                            <i class="fas fa-history"></i>
-                            <p>Aucune activité récente</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Google Calendar -->
-        <section id="calendar" class="content-section">
-            <div class="section-header">
-                <h1><i class="fab fa-google"></i> Google Calendar</h1>
-                <div class="section-actions">
-                    <button id="sync-calendar" class="btn btn-primary" disabled>
-                        <i class="fas fa-sync-alt"></i>
-                        Synchroniser
-                    </button>
-                    <button id="add-event" class="btn btn-secondary">
-                        <i class="fas fa-plus"></i>
-                        Nouvel événement
-                    </button>
-                </div>
-            </div>
-
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <h3 id="current-month-year">Juin 2025</h3>
-                    <div class="calendar-navigation">
-                        <button id="prev-month" class="btn-icon">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button id="today-btn" class="btn btn-secondary">Aujourd'hui</button>
-                        <button id="next-month" class="btn-icon">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="calendar-grid" id="calendar-grid">
-                    <div class="status-message">
-                        <i class="fab fa-google"></i>
-                        <p>Connectez-vous pour voir votre calendrier Google</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Événements -->
-        <section id="events" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-calendar"></i> Événements</h1>
-                <div class="section-actions">
-                    <input type="text" id="search-events" placeholder="Rechercher..." style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px;">
-                    <select id="filter-events" style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px;">
-                        <option value="all">Tous</option>
-                        <option value="google">Google Calendar</option>
-                        <option value="synergia">SYNERGIA</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="events-list">
-                <div id="events-container">
-                    <div class="status-message">
-                        <i class="fas fa-calendar-alt"></i>
-                        <p>Aucun événement à afficher</p>
-                        <small>Connectez-vous à Google Calendar pour synchroniser vos événements</small>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Paramètres -->
-        <section id="settings" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-cog"></i> Paramètres</h1>
-            </div>
-
-            <!-- Configuration Google Calendar -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
-                <h3><i class="fab fa-google"></i> Configuration Google Calendar</h3>
-                
-                <div style="margin-bottom: 2rem;">
-                    <div id="google-connection-info" style="padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Non connecté à Google Calendar</strong>
-                        </div>
-                        <small>Connectez-vous pour synchroniser vos événements</small>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Calendrier principal</label>
-                    <select id="primary-calendar" disabled>
-                        <option value="">Connectez-vous d'abord</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Synchronisation automatique</label>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox" id="auto-sync" disabled>
-                            Synchroniser automatiquement
-                        </label>
-                        <select id="sync-interval" disabled>
-                            <option value="5">5 minutes</option>
-                            <option value="15" selected>15 minutes</option>
-                            <option value="30">30 minutes</option>
-                            <option value="60">1 heure</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button id="disconnect-google" class="btn btn-secondary" disabled>
-                        <i class="fas fa-unlink"></i>
-                        Déconnecter
-                    </button>
-                    <button id="test-connection" class="btn btn-secondary" disabled>
-                        <i class="fas fa-test-tube"></i>
-                        Tester
-                    </button>
-                    <button id="save-settings" class="btn btn-primary" disabled>
-                        <i class="fas fa-save"></i>
-                        Sauvegarder
-                    </button>
-                </div>
-            </div>
-
-            <!-- Informations API -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
-                <h3><i class="fas fa-info-circle"></i> Informations API</h3>
-                
-                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                    <p><strong>Client ID configuré :</strong></p>
-                    <code style="font-size: 0.8rem; word-break: break-all;">187598928508-q8h0j0almvtl1lfv9741p3bfu8hvhga1.apps.googleusercontent.com</code>
-                </div>
-
-                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                    <p><strong>API Key configurée :</strong></p>
-                    <code style="font-size: 0.8rem;">AIzaSyCScckTMndwRM1USdc381Jz64oOjojEseY</code>
-                </div>
-
-                <div style="background: #d1ecf1; padding: 1rem; border-radius: 8px; border: 1px solid #bee5eb;">
-                    <p><strong>✅ Configuration prête !</strong></p>
-                    <small>Vos clés Google sont correctement configurées. Vous pouvez maintenant vous connecter à Google Calendar.</small>
+            <div id="events-container" class="events-container">
+                <div class="loading">
+                    📅 Connectez-vous pour voir vos événements Google Calendar
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Modal Nouvel Événement -->
-    <div id="event-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="app.closeEventModal()">&times;</span>
-            <h2><i class="fas fa-calendar-plus"></i> Nouvel événement</h2>
-            <form id="event-form">
-                <div class="form-group">
-                    <label>Titre *</label>
-                    <input type="text" id="event-title" required>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="event-description" rows="3"></textarea>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Date *</label>
-                        <input type="date" id="event-date" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Heure *</label>
-                        <input type="time" id="event-time" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Durée (minutes)</label>
-                    <input type="number" id="event-duration" value="60" min="15" step="15">
-                </div>
-                <div class="form-group">
-                    <label>Calendrier</label>
-                    <select id="event-calendar">
-                        <option value="primary">Calendrier principal</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" onclick="app.closeEventModal()" class="btn btn-secondary">
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-calendar-plus"></i>
-                        Créer
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast container -->
-    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
+    <div id="toast-container"></div>
 
     <script>
-        // ✅ Configuration Google Calendar API - TES VRAIES CLÉS INTÉGRÉES
+        // Configuration Google Calendar - TES VRAIES CLÉS
         const GOOGLE_CONFIG = {
             apiKey: 'AIzaSyCScckTMndwRM1USdc381Jz64oOjojEseY',
             clientId: '187598928508-q8h0j0almvtl1lfv9741p3bfu8hvhga1.apps.googleusercontent.com',
@@ -923,741 +227,211 @@
             scopes: 'https://www.googleapis.com/auth/calendar'
         };
 
-        // Variables globales
-        let isGoogleCalendarReady = false;
         let isGoogleSignedIn = false;
-        let gapi = null;
         let tokenClient = null;
-        let currentEvents = [];
-        let currentDate = new Date();
+        let events = [];
 
-        // Classe principale de l'application
-        class SynergiaApp {
+        class GoogleCalendarApp {
             constructor() {
-                this.currentUser = null;
-                this.googleAuth = null;
-                this.events = [];
-                this.calendars = [];
-                this.autoSyncInterval = null;
-                
                 this.init();
             }
 
             async init() {
-                console.log('🚀 Initialisation SYNERGIA v3.0 avec Google Calendar');
+                console.log('🚀 Initialisation Google Calendar');
                 
-                // Initialiser l'interface
+                // Charger les APIs Google dynamiquement
+                await this.loadGoogleAPIs();
+                
+                // Setup event listeners
                 this.setupEventListeners();
-                this.setupNavigation();
-                
-                // Initialiser Google Calendar API
-                await this.initGoogleCalendar();
-                
-                console.log('✅ SYNERGIA v3.0 initialisé');
             }
 
-            async initGoogleCalendar() {
+            async loadGoogleAPIs() {
                 try {
-                    console.log('🔄 Initialisation Google Calendar API...');
-                    this.updateApiStatus('Chargement des APIs Google...');
+                    this.updateStatus('🔄 Chargement Google APIs...');
                     
-                    // Attendre que gapi soit disponible
+                    // Charger gapi
+                    await this.loadScript('https://apis.google.com/js/api.js');
                     await this.waitForGapi();
                     
-                    // Charger l'API Google
-                    await new Promise((resolve, reject) => {
-                        gapi.load('client', resolve);
-                    });
-
-                    // Initialiser le client
+                    // Charger client
+                    await new Promise(resolve => gapi.load('client', resolve));
+                    
+                    // Initialiser client
                     await gapi.client.init({
                         apiKey: GOOGLE_CONFIG.apiKey,
                         discoveryDocs: [GOOGLE_CONFIG.discoveryDoc]
                     });
-
-                    // Attendre que google.accounts soit disponible
+                    
+                    // Charger Google Identity Services
+                    await this.loadScript('https://accounts.google.com/gsi/client');
                     await this.waitForGoogleAccounts();
-
-                    // Initialiser l'authentification
+                    
+                    // Initialiser token client
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: GOOGLE_CONFIG.clientId,
                         scope: GOOGLE_CONFIG.scopes,
-                        callback: (tokenResponse) => {
-                            this.handleGoogleAuthSuccess(tokenResponse);
-                        }
+                        callback: (response) => this.handleAuthSuccess(response)
                     });
-
-                    isGoogleCalendarReady = true;
-                    console.log('✅ Google Calendar API prêt');
-                    this.updateApiStatus('✅ APIs Google prêtes');
                     
-                    // Activer le bouton de connexion
+                    this.updateStatus('✅ APIs Google prêtes !');
                     document.getElementById('connect-google').disabled = false;
                     
                 } catch (error) {
-                    console.error('❌ Erreur initialisation Google Calendar:', error);
-                    this.updateApiStatus('❌ Erreur de configuration Google');
-                    this.showToast('Erreur de configuration Google Calendar', 'error');
-                    
-                    // Afficher un message d'erreur détaillé
-                    const statusElement = document.getElementById('google-calendar-status');
-                    statusElement.innerHTML = `
-                        <div style="text-align: center; color: #dc3545;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                            <h4>Erreur de configuration</h4>
-                            <p>Impossible de charger les APIs Google</p>
-                            <small>Vérifiez votre connexion internet et les clés API</small>
-                            <div style="margin-top: 1rem;">
-                                <button onclick="location.reload()" class="btn btn-secondary">
-                                    <i class="fas fa-sync-alt"></i> Réessayer
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                    console.error('❌ Erreur chargement APIs:', error);
+                    this.updateStatus('❌ Erreur de chargement des APIs Google');
+                    this.showToast('Erreur de chargement des APIs Google', 'error');
                 }
             }
 
-            async waitForGapi() {
-                return new Promise((resolve) => {
-                    const checkGapi = () => {
+            loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+
+            waitForGapi() {
+                return new Promise(resolve => {
+                    const check = () => {
                         if (typeof gapi !== 'undefined') {
                             resolve();
                         } else {
-                            setTimeout(checkGapi, 100);
+                            setTimeout(check, 100);
                         }
                     };
-                    checkGapi();
+                    check();
                 });
             }
 
-            async waitForGoogleAccounts() {
-                return new Promise((resolve) => {
-                    const checkGoogle = () => {
+            waitForGoogleAccounts() {
+                return new Promise(resolve => {
+                    const check = () => {
                         if (typeof google !== 'undefined' && google.accounts) {
                             resolve();
                         } else {
-                            setTimeout(checkGoogle, 100);
+                            setTimeout(check, 100);
                         }
                     };
-                    checkGoogle();
+                    check();
                 });
             }
 
-            updateApiStatus(message) {
-                const statusElement = document.getElementById('api-status');
-                if (statusElement) {
-                    statusElement.textContent = message;
-                }
-            }
-
             setupEventListeners() {
-                // Connexion Google
                 document.getElementById('connect-google').addEventListener('click', () => {
                     this.connectToGoogle();
                 });
 
-                // Déconnexion Google
-                document.getElementById('disconnect-google').addEventListener('click', () => {
-                    this.disconnectFromGoogle();
-                });
-
-                // Synchronisation
                 document.getElementById('sync-calendar').addEventListener('click', () => {
-                    this.syncGoogleCalendar();
-                });
-
-                // Nouvel événement
-                document.getElementById('add-event').addEventListener('click', () => {
-                    this.showEventModal();
-                });
-
-                // Formulaire événement
-                document.getElementById('event-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createEvent();
-                });
-
-                // Navigation calendrier
-                document.getElementById('prev-month').addEventListener('click', () => {
-                    this.navigateMonth(-1);
-                });
-
-                document.getElementById('next-month').addEventListener('click', () => {
-                    this.navigateMonth(1);
-                });
-
-                document.getElementById('today-btn').addEventListener('click', () => {
-                    this.goToToday();
-                });
-
-                // Sauvegarde paramètres
-                document.getElementById('save-settings').addEventListener('click', () => {
-                    this.saveGoogleSettings();
-                });
-
-                // Test connexion
-                document.getElementById('test-connection').addEventListener('click', () => {
-                    this.testGoogleConnection();
-                });
-
-                // Auto-sync
-                document.getElementById('auto-sync').addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        this.startAutoSync();
-                    } else {
-                        this.stopAutoSync();
-                    }
-                });
-
-                // Actualiser dashboard
-                document.getElementById('refresh-dashboard').addEventListener('click', () => {
-                    this.refreshDashboard();
+                    this.syncCalendar();
                 });
             }
 
-            setupNavigation() {
-                const navLinks = document.querySelectorAll('.nav-link');
-                const sections = document.querySelectorAll('.content-section');
-
-                navLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
-                        
-                        sections.forEach(section => section.classList.remove('active'));
-                        
-                        const targetId = link.getAttribute('href').substring(1);
-                        const targetSection = document.getElementById(targetId);
-                        if (targetSection) {
-                            targetSection.classList.add('active');
-                            
-                            // Actions spécifiques par section
-                            if (targetId === 'calendar') {
-                                this.renderCalendar();
-                            } else if (targetId === 'events') {
-                                this.renderEventsList();
-                            }
-                        }
-                    });
-                });
-            }
-
-            async connectToGoogle() {
-                if (!isGoogleCalendarReady) {
-                    this.showToast('Google Calendar API non initialisé', 'error');
+            connectToGoogle() {
+                if (!tokenClient) {
+                    this.showToast('APIs Google non initialisées', 'error');
                     return;
                 }
 
-                try {
-                    this.showToast('Connexion à Google...', 'info');
-                    this.updateConnectionStatus('connecting', 'Connexion en cours...');
-                    
-                    // Déclencher l'authentification
-                    tokenClient.requestAccessToken();
-                    
-                } catch (error) {
-                    console.error('❌ Erreur connexion Google:', error);
-                    this.showToast('Erreur de connexion à Google', 'error');
-                    this.updateConnectionStatus('disconnected', 'Erreur de connexion');
-                }
+                this.showToast('Connexion à Google...', 'info');
+                this.updateConnectionStatus('connecting', '🔄 Connexion en cours...');
+                
+                tokenClient.requestAccessToken();
             }
 
-            async handleGoogleAuthSuccess(tokenResponse) {
-                console.log('✅ Authentification Google réussie');
+            async handleAuthSuccess(response) {
+                console.log('✅ Authentification réussie');
                 isGoogleSignedIn = true;
                 
-                try {
-                    // Obtenir les informations utilisateur
-                    const userInfo = await this.getUserInfo();
-                    this.currentUser = userInfo;
-                    
-                    // Mettre à jour l'interface
-                    this.updateGoogleAuthUI(true);
-                    
-                    // Charger les calendriers
-                    await this.loadCalendars();
-                    
-                    // Synchroniser les événements
-                    await this.syncGoogleCalendar();
-                    
-                    this.showToast(`Connecté en tant que ${userInfo.name}`, 'success');
-                    
-                } catch (error) {
-                    console.error('❌ Erreur post-authentification:', error);
-                    this.showToast('Erreur lors de la récupération des données', 'error');
-                }
-            }
-
-            async getUserInfo() {
-                try {
-                    const response = await gapi.client.request({
-                        'path': 'https://www.googleapis.com/oauth2/v2/userinfo'
-                    });
-                    return response.result;
-                } catch (error) {
-                    console.error('Erreur récupération info utilisateur:', error);
-                    return { name: 'Utilisateur Google', email: 'user@gmail.com' };
-                }
-            }
-
-            async loadCalendars() {
-                try {
-                    const response = await gapi.client.calendar.calendarList.list();
-                    this.calendars = response.result.items || [];
-                    
-                    // Mettre à jour le sélecteur de calendrier
-                    this.updateCalendarSelector();
-                    
-                    console.log(`📅 ${this.calendars.length} calendriers chargés`);
-                    
-                } catch (error) {
-                    console.error('❌ Erreur chargement calendriers:', error);
-                    this.showToast('Erreur de chargement des calendriers', 'error');
-                }
-            }
-
-            updateCalendarSelector() {
-                const selectors = ['primary-calendar', 'event-calendar'];
+                this.updateConnectionStatus('connected', '✅ Connecté à Google Calendar');
+                document.getElementById('sync-calendar').disabled = false;
                 
-                selectors.forEach(selectorId => {
-                    const selector = document.getElementById(selectorId);
-                    if (selector) {
-                        selector.innerHTML = '';
-                        
-                        this.calendars.forEach(calendar => {
-                            const option = document.createElement('option');
-                            option.value = calendar.id;
-                            option.textContent = calendar.summary;
-                            if (calendar.primary) option.selected = true;
-                            selector.appendChild(option);
-                        });
-                    }
-                });
+                this.showToast('Connecté avec succès !', 'success');
+                
+                // Auto-sync
+                await this.syncCalendar();
             }
 
-            async syncGoogleCalendar() {
+            async syncCalendar() {
                 if (!isGoogleSignedIn) {
-                    this.showToast('Veuillez vous connecter à Google Calendar', 'error');
+                    this.showToast('Connectez-vous d\'abord', 'error');
                     return;
                 }
 
                 try {
-                    this.showToast('Synchronisation en cours...', 'info');
+                    this.showToast('Synchronisation...', 'info');
                     
-                    // Obtenir les événements des 30 prochains jours
-                    const timeMin = new Date().toISOString();
-                    const timeMax = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+                    const now = new Date();
+                    const timeMin = now.toISOString();
+                    const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
                     
-                    let allEvents = [];
+                    const response = await gapi.client.calendar.events.list({
+                        'calendarId': 'primary',
+                        'timeMin': timeMin,
+                        'timeMax': timeMax,
+                        'showDeleted': false,
+                        'singleEvents': true,
+                        'orderBy': 'startTime'
+                    });
                     
-                    // Synchroniser chaque calendrier
-                    for (const calendar of this.calendars) {
-                        try {
-                            const response = await gapi.client.calendar.events.list({
-                                'calendarId': calendar.id,
-                                'timeMin': timeMin,
-                                'timeMax': timeMax,
-                                'showDeleted': false,
-                                'singleEvents': true,
-                                'orderBy': 'startTime'
-                            });
-                            
-                            const events = response.result.items || [];
-                            events.forEach(event => {
-                                event.calendarName = calendar.summary;
-                                event.calendarId = calendar.id;
-                                event.source = 'google';
-                            });
-                            
-                            allEvents = allEvents.concat(events);
-                            
-                        } catch (error) {
-                            console.warn(`Erreur calendrier ${calendar.summary}:`, error);
-                        }
-                    }
+                    this.events = response.result.items || [];
+                    this.renderEvents();
                     
-                    this.events = allEvents;
-                    console.log(`📅 ${allEvents.length} événements synchronisés`);
-                    
-                    // Mettre à jour l'interface
-                    this.updateEventDisplays();
-                    this.updateDashboardStats();
-                    
-                    this.showToast(`${allEvents.length} événements synchronisés`, 'success');
+                    this.showToast(`${this.events.length} événements synchronisés`, 'success');
                     
                 } catch (error) {
-                    console.error('❌ Erreur synchronisation:', error);
+                    console.error('❌ Erreur sync:', error);
                     this.showToast('Erreur de synchronisation', 'error');
                 }
             }
 
-            updateConnectionStatus(status, text) {
-                const statusElement = document.getElementById('connection-status');
-                const indicator = statusElement.querySelector('.sync-indicator');
-                
-                statusElement.className = `google-status ${status}`;
-                indicator.className = `sync-indicator ${status}`;
-                statusElement.querySelector('span').textContent = text;
-            }
-
-            updateGoogleAuthUI(isConnected) {
-                const connectBtn = document.getElementById('connect-google');
-                const disconnectBtn = document.getElementById('disconnect-google');
-                const syncBtn = document.getElementById('sync-calendar');
-                const controls = ['primary-calendar', 'auto-sync', 'sync-interval', 'save-settings', 'test-connection'];
-
-                if (isConnected) {
-                    this.updateConnectionStatus('connected', `Connecté - ${this.currentUser?.name || 'Utilisateur'}`);
-                    
-                    connectBtn.style.display = 'none';
-                    disconnectBtn.disabled = false;
-                    syncBtn.disabled = false;
-                    
-                    controls.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) element.disabled = false;
-                    });
-
-                    // Mettre à jour l'info de connexion dans les paramètres
-                    const connectionInfo = document.getElementById('google-connection-info');
-                    connectionInfo.style.background = '#d4edda';
-                    connectionInfo.style.color = '#155724';
-                    connectionInfo.style.border = '1px solid #c3e6cb';
-                    connectionInfo.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-check-circle"></i>
-                            <strong>Connecté à Google Calendar</strong>
-                        </div>
-                        <small>Utilisateur: ${this.currentUser?.email || 'N/A'}</small>
-                    `;
-
-                } else {
-                    this.updateConnectionStatus('disconnected', 'Non connecté');
-                    
-                    connectBtn.style.display = 'block';
-                    disconnectBtn.disabled = true;
-                    syncBtn.disabled = true;
-                    
-                    controls.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) element.disabled = true;
-                    });
-
-                    // Mettre à jour l'info de connexion dans les paramètres
-                    const connectionInfo = document.getElementById('google-connection-info');
-                    connectionInfo.style.background = '#f8d7da';
-                    connectionInfo.style.color = '#721c24';
-                    connectionInfo.style.border = '1px solid #f5c6cb';
-                    connectionInfo.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Non connecté à Google Calendar</strong>
-                        </div>
-                        <small>Connectez-vous pour synchroniser vos événements</small>
-                    `;
-                }
-            }
-
-            updateEventDisplays() {
-                // Mettre à jour le calendrier si visible
-                if (document.getElementById('calendar').classList.contains('active')) {
-                    this.renderCalendar();
-                }
-                
-                // Mettre à jour la liste d'événements si visible
-                if (document.getElementById('events').classList.contains('active')) {
-                    this.renderEventsList();
-                }
-                
-                // Mettre à jour les événements d'aujourd'hui dans le dashboard
-                this.updateTodayEvents();
-            }
-
-            updateTodayEvents() {
-                const container = document.getElementById('today-events');
-                const todayEvents = this.getEventsForDay(new Date());
-                
-                if (todayEvents.length === 0) {
-                    container.innerHTML = `
-                        <div class="status-message">
-                            <i class="fas fa-calendar-alt"></i>
-                            <p>Aucun événement aujourd'hui</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                container.innerHTML = '';
-                todayEvents.slice(0, 3).forEach(event => {
-                    const eventElement = document.createElement('div');
-                    eventElement.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-bottom: 1px solid #eee;';
-                    eventElement.innerHTML = `
-                        <i class="fa${event.source === 'google' ? 'b fa-google' : 's fa-calendar'}" style="color: ${event.source === 'google' ? '#4285f4' : '#667eea'};"></i>
-                        <div>
-                            <div style="font-weight: 500;">${event.summary || event.title}</div>
-                            <small style="color: #666;">${this.formatEventTime(event)}</small>
-                        </div>
-                    `;
-                    container.appendChild(eventElement);
-                });
-            }
-
-            updateDashboardStats() {
-                const googleEventsCount = this.events.filter(e => e.source === 'google').length;
-                const totalEventsCount = this.events.length;
-                const upcomingToday = this.getEventsForDay(new Date()).length;
-                const syncStatus = isGoogleSignedIn ? 'Connecté' : 'Déconnecté';
-                
-                document.getElementById('google-events-count').textContent = googleEventsCount;
-                document.getElementById('total-events-count').textContent = totalEventsCount;
-                document.getElementById('upcoming-events').textContent = upcomingToday;
-                document.getElementById('sync-status-text').textContent = syncStatus;
-            }
-
-            getEventsForDay(date) {
-                return this.events.filter(event => {
-                    const eventDate = new Date(event.start?.dateTime || event.start?.date);
-                    return eventDate.toDateString() === date.toDateString();
-                });
-            }
-
-            formatEventTime(event) {
-                if (event.start?.dateTime) {
-                    const start = new Date(event.start.dateTime);
-                    const end = new Date(event.end?.dateTime);
-                    return `${start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-                } else {
-                    return "Toute la journée";
-                }
-            }
-
-            renderCalendar() {
-                // Implementation simple du calendrier
-                const calendarGrid = document.getElementById('calendar-grid');
-                calendarGrid.innerHTML = `
-                    <div class="status-message">
-                        <i class="fab fa-google"></i>
-                        <p>Calendrier Google Calendar</p>
-                        <small>${this.events.length} événements synchronisés</small>
-                    </div>
-                `;
-            }
-
-            renderEventsList() {
+            renderEvents() {
                 const container = document.getElementById('events-container');
                 
                 if (this.events.length === 0) {
-                    container.innerHTML = `
-                        <div class="status-message">
-                            <i class="fas fa-calendar-alt"></i>
-                            <p>Aucun événement à afficher</p>
-                            <small>Connectez-vous à Google Calendar pour synchroniser vos événements</small>
-                        </div>
-                    `;
+                    container.innerHTML = '<div class="loading">📅 Aucun événement dans les 30 prochains jours</div>';
                     return;
                 }
                 
-                container.innerHTML = '';
+                container.innerHTML = '<h3>📅 Vos événements Google Calendar:</h3>';
                 
-                // Trier les événements par date
-                const sortedEvents = [...this.events].sort((a, b) => {
-                    const dateA = new Date(a.start?.dateTime || a.start?.date);
-                    const dateB = new Date(b.start?.dateTime || b.start?.date);
-                    return dateA - dateB;
-                });
-                
-                sortedEvents.forEach(event => {
+                this.events.forEach(event => {
+                    const startTime = new Date(event.start?.dateTime || event.start?.date);
                     const eventElement = document.createElement('div');
                     eventElement.className = 'event-item';
-                    
-                    const startTime = new Date(event.start?.dateTime || event.start?.date);
-                    
                     eventElement.innerHTML = `
-                        <div class="event-icon google">
-                            <i class="fab fa-google"></i>
-                        </div>
+                        <div class="event-icon">📅</div>
                         <div style="flex: 1;">
-                            <h4 style="margin-bottom: 0.25rem;">${event.summary || event.title}</h4>
-                            <p style="color: #666; margin-bottom: 0.5rem;">${event.description || 'Aucune description'}</p>
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <span style="background: #4285f4; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
-                                    ${startTime.toLocaleDateString('fr-FR')}
-                                </span>
-                                <span style="color: #666; font-size: 0.9rem;">
-                                    ${this.formatEventTime(event)}
-                                </span>
-                                <span style="color: #666; font-size: 0.8rem;">
-                                    📅 ${event.calendarName || 'Google Calendar'}
-                                </span>
-                            </div>
+                            <h4>${event.summary || 'Sans titre'}</h4>
+                            <p style="color: #666; margin: 0.25rem 0;">${event.description || 'Aucune description'}</p>
+                            <small style="color: #4285f4; font-weight: bold;">
+                                ${startTime.toLocaleDateString('fr-FR')} à ${startTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
+                            </small>
                         </div>
                     `;
-                    
                     container.appendChild(eventElement);
                 });
             }
 
-            showEventModal() {
-                const modal = document.getElementById('event-modal');
-                modal.style.display = 'flex';
-                
-                // Pré-remplir avec la date d'aujourd'hui
-                const today = new Date();
-                document.getElementById('event-date').value = today.toISOString().split('T')[0];
-                document.getElementById('event-time').value = '10:00';
+            updateConnectionStatus(status, text) {
+                const statusEl = document.getElementById('connection-status');
+                statusEl.className = `google-status ${status}`;
+                statusEl.textContent = text;
             }
 
-            closeEventModal() {
-                const modal = document.getElementById('event-modal');
-                modal.style.display = 'none';
-                
-                // Réinitialiser le formulaire
-                document.getElementById('event-form').reset();
+            updateStatus(message) {
+                document.getElementById('api-status').innerHTML = message;
             }
 
-            async createEvent() {
-                const title = document.getElementById('event-title').value;
-                const description = document.getElementById('event-description').value;
-                const date = document.getElementById('event-date').value;
-                const time = document.getElementById('event-time').value;
-                const duration = parseInt(document.getElementById('event-duration').value) || 60;
-                const calendarId = document.getElementById('event-calendar').value;
-
-                if (!title || !date || !time) {
-                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
-                    return;
-                }
-
-                try {
-                    const startDateTime = new Date(`${date}T${time}`);
-                    const endDateTime = new Date(startDateTime.getTime() + duration * 60000);
-
-                    const event = {
-                        'summary': title,
-                        'description': description,
-                        'start': {
-                            'dateTime': startDateTime.toISOString(),
-                            'timeZone': 'Europe/Paris'
-                        },
-                        'end': {
-                            'dateTime': endDateTime.toISOString(),
-                            'timeZone': 'Europe/Paris'
-                        }
-                    };
-
-                    if (isGoogleSignedIn) {
-                        // Créer dans Google Calendar
-                        const response = await gapi.client.calendar.events.insert({
-                            'calendarId': calendarId || 'primary',
-                            'resource': event
-                        });
-
-                        console.log('✅ Événement créé dans Google Calendar:', response.result.id);
-                        this.showToast('Événement créé avec succès', 'success');
-                        
-                        // Resynchroniser
-                        await this.syncGoogleCalendar();
-                        
-                    } else {
-                        this.showToast('Connectez-vous d\'abord à Google Calendar', 'error');
-                        return;
-                    }
-
-                    this.closeEventModal();
-                    
-                } catch (error) {
-                    console.error('❌ Erreur création événement:', error);
-                    this.showToast('Erreur lors de la création', 'error');
-                }
-            }
-
-            disconnectFromGoogle() {
-                if (confirm('Voulez-vous vraiment vous déconnecter de Google Calendar ?')) {
-                    isGoogleSignedIn = false;
-                    this.currentUser = null;
-                    this.events = [];
-                    this.calendars = [];
-                    
-                    this.updateGoogleAuthUI(false);
-                    this.updateEventDisplays();
-                    this.updateDashboardStats();
-                    
-                    // Arrêter la synchronisation automatique
-                    this.stopAutoSync();
-                    
-                    this.showToast('Déconnecté de Google Calendar', 'success');
-                }
-            }
-
-            async testGoogleConnection() {
-                if (!isGoogleSignedIn) {
-                    this.showToast('Veuillez vous connecter d\'abord', 'error');
-                    return;
-                }
-                
-                try {
-                    this.showToast('Test de la connexion Google...', 'info');
-                    
-                    // Test simple: récupérer la liste des calendriers
-                    const response = await gapi.client.calendar.calendarList.list();
-                    const calendars = response.result.items || [];
-                    
-                    this.showToast(`✅ Connexion OK - ${calendars.length} calendriers trouvés`, 'success');
-                    
-                } catch (error) {
-                    console.error('❌ Erreur test connexion:', error);
-                    this.showToast('❌ Échec du test de connexion', 'error');
-                }
-            }
-
-            refreshDashboard() {
-                this.showToast('Actualisation du dashboard...', 'info');
-                
-                // Actualiser les données
-                if (isGoogleSignedIn) {
-                    this.syncGoogleCalendar();
-                } else {
-                    this.updateDashboardStats();
-                    this.updateEventDisplays();
-                }
-                
-                setTimeout(() => {
-                    this.showToast('Dashboard actualisé', 'success');
-                }, 1000);
-            }
-
-            navigateMonth(direction) {
-                currentDate.setMonth(currentDate.getMonth() + direction);
-                this.renderCalendar();
-            }
-
-            goToToday() {
-                currentDate = new Date();
-                this.renderCalendar();
-            }
-
-            startAutoSync() {
-                // À implémenter
-                this.showToast('Synchronisation automatique activée', 'success');
-            }
-
-            stopAutoSync() {
-                // À implémenter
-                this.showToast('Synchronisation automatique désactivée', 'info');
-            }
-
-            saveGoogleSettings() {
-                this.showToast('Paramètres sauvegardés', 'success');
-            }
-
-            showToast(message, type = 'info', duration = 3000) {
+            showToast(message, type = 'info') {
                 const toast = document.createElement('div');
                 toast.className = `notification ${type}`;
                 toast.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
                         <span>${message}</span>
                     </div>
                 `;
@@ -1666,58 +440,15 @@
                 
                 setTimeout(() => {
                     toast.remove();
-                }, duration);
+                }, 3000);
             }
         }
 
-        // Initialisation de l'application
-        let app;
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Démarrage SYNERGIA v3.0 avec Google Calendar...');
-            
-            // Créer l'instance de l'application
-            app = new SynergiaApp();
-            
-            // Fermeture des modales en cliquant à l'extérieur
-            document.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    e.target.style.display = 'none';
-                }
-            });
-            
-            // Message de bienvenue après initialisation
-            setTimeout(() => {
-                app.showToast('🎉 SYNERGIA v3.0 avec Google Calendar prêt!', 'success');
-            }, 2000);
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Démarrage SYNERGIA Google Calendar');
+            new GoogleCalendarApp();
         });
-
-        // Instructions de démarrage (à supprimer en production)
-        console.log(`
-╔════════════════════════════════════════════════════════════════╗
-║                 SYNERGIA v3.0 - GOOGLE CALENDAR               ║
-╠════════════════════════════════════════════════════════════════╣
-║                                                                ║
-║ ✅ Configuration Google Calendar intégrée:                    ║
-║                                                                ║
-║ 📱 Client ID: 187598928508-q8h0j0almvtl1lfv9741p3bfu8hvhga1   ║
-║ 🔑 API Key: AIzaSyCScckTMndwRM1USdc381Jz64oOjojEseY           ║
-║                                                                ║
-║ 🚀 PRÊT À UTILISER:                                           ║
-║ 1. Ouvrez avec Live Server (VS Code)                          ║
-║ 2. Allez sur l'onglet "Google Calendar"                       ║
-║ 3. Cliquez "Se connecter à Google"                            ║
-║ 4. Acceptez les permissions                                   ║
-║ 5. Vos événements Google s'affichent automatiquement!         ║
-║                                                                ║
-║ 🎯 FONCTIONNALITÉS:                                           ║
-║ • Synchronisation bidirectionnelle                            ║
-║ • Création d'événements                                       ║
-║ • Vue calendrier                                              ║
-║ • Dashboard temps réel                                        ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
-        `);
     </script>
 </body>
 </html>

@@ -3990,44 +3990,62 @@ saveMemberToStorage(member) {
             }
         }
 
-        toggleFullscreenAnalytics() {
-            const iframe = document.getElementById('analytics-pro-iframe');
-            if (iframe) {
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else {
-                    // Fallback: ouvrir dans un nouvel onglet
-                    window.open('advanced-analytics.html', '_blank');
-                }
-            }
+      toggleFullscreenAnalytics() {
+    const iframe = document.getElementById('analytics-pro-iframe');
+    if (iframe) {
+        if (iframe.requestFullscreen) {
+            iframe.requestFullscreen();
+        } else {
+            // Fallback: ouvrir dans un nouvel onglet
+            window.open('advanced-analytics.html', '_blank');
         }
-
-        refreshAdvancedAnalytics() {
-            const iframe = document.getElementById('analytics-pro-iframe');
-            if (iframe) {
-                iframe.src = iframe.src; // Recharger l'iframe
-            }
-        }
-                const refreshBtn = document.getElementById('refresh-analytics-btn');
-                if (refreshBtn) {
-                    refreshBtn.addEventListener('click', () => {
-                        this.refreshAnalytics();
-                    });
-                }
+    }
 }
-                const periodSelect = document.getElementById('analytics-period');
-                if (periodSelect) {
-                    periodSelect.addEventListener('change', (e) => {
-                        this.changePeriod(e.target.value);
-                    });
-                }
 
-                const advancedBtn = document.getElementById('advanced-analytics-btn');
-                if (advancedBtn) {
-                    advancedBtn.addEventListener('click', () => {
-                        this.showAdvancedAnalytics();
-                    });
-                }
+refreshAdvancedAnalytics() {
+    const iframe = document.getElementById('analytics-pro-iframe');
+    if (iframe) {
+        iframe.src = iframe.src; // Recharger l'iframe
+    }
+}
+
+setupEventListeners() {
+    const refreshBtn = document.getElementById('refresh-analytics-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            this.refreshAnalytics();
+        });
+    }
+
+    const periodSelect = document.getElementById('analytics-period');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', (e) => {
+            this.changePeriod(e.target.value);
+        });
+    }
+
+    const advancedBtn = document.getElementById('advanced-analytics-btn');
+    if (advancedBtn) {
+        advancedBtn.addEventListener('click', () => {
+            this.showAdvancedAnalytics();
+        });
+    }
+
+    // Analytics Pro
+    const fullscreenBtn = document.getElementById('fullscreen-analytics');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', () => {
+            this.toggleFullscreenAnalytics();
+        });
+    }
+
+    const refreshProBtn = document.getElementById('refresh-pro-analytics');
+    if (refreshProBtn) {
+        refreshProBtn.addEventListener('click', () => {
+            this.refreshAdvancedAnalytics();
+        });
+    }
+}
 
                 const exportAllBtn = document.getElementById('export-all-reports-btn');
                 if (exportAllBtn) {

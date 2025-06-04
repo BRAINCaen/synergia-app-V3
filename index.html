@@ -2976,31 +2976,34 @@
                 }, 5000);
             }
 
-            showBadgeNotification(member, badgeId) {
-                const notification = document.createElement('div');
-                notification.className = 'badge-notification notification';
-                notification.innerHTML = `
-                    <div class="notification-content">
-                        <i class="fas fa-trophy"></i>
-                        <div>
-                            <h4>Nouveau badge !</h4>
-                            <p>${member.name} obtient: ${this.getBadgeName(badgeId)}</p>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.remove();
-                }, 5000);
-            }
+           showBadgeNotification(member, badgeId) {
+    const notification = document.createElement('div');
+    notification.className = 'badge-notification notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-trophy"></i>
+            <div>
+                <h4>Nouveau badge !</h4>
+                <p>${member.name} obtient: ${this.getBadgeName(badgeId)}</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
 
-// CODE CORRIGÉ :
-                } catch (error) {
-                    console.warn('Impossible de sauvegarder l\'historique de présence');
-                }
-            }
+saveMemberToStorage(member) {
+    // Sauvegarder en localStorage pour la persistance en mode démo
+    try {
+        localStorage.setItem(`synergia_member_${member.id}`, JSON.stringify(member));
+    } catch (error) {
+        console.warn('Impossible de sauvegarder en localStorage');
+    }
+}
 
             saveMemberToStorage(member) {
                 // Sauvegarder en localStorage pour la persistance en mode démo

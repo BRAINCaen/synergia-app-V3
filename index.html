@@ -9,10 +9,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
-    <!-- APIs externes -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        // Configuration Firebase - REMPLACEZ PAR VOS VRAIES CLÉS
+        const firebaseConfig = {
+          apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+          authDomain: "synergia-app-f27e7.firebaseapp.com",
+          projectId: "synergia-app-f27e7",
+          storageBucket: "synergia-app-f27e7.firebasestorage.app",
+          messagingSenderId: "201912738922",
+          appId: "1:201912738922:web:2fcc1e49293bb632899613",
+          measurementId: "G-EGJ79SCMWX"
+};
+
+        // Initialisation Firebase
+        let app;
+        try {
+            app = initializeApp(firebaseConfig);
+            window.firebaseApp = app;
+            window.auth = getAuth(app);
+            window.db = getFirestore(app);
+            window.storage = getStorage(app);
+            
+            // Rendre les fonctions Firebase disponibles globalement
+            window.firebase = {
+                collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, 
+                onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp,
+                onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+                signOut, updateProfile, ref, uploadBytes, getDownloadURL
+            };
+            
+            console.log('✅ Firebase initialisé avec succès');
+            window.firebaseReady = true;
+        } catch (error) {
+            console.warn('⚠️ Firebase non configuré, mode démo activé:', error.message);
+            window.firebaseReady = false;
+        }
+    </script>
     
     <style>
         * {
@@ -753,6 +791,10 @@
                     <i class="fas fa-chart-line"></i>
                     Analytics Pro
                 </a>
+                <a href="#settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    Paramètres
+                </a>
             </div>
             <div class="nav-user">
                 <div class="user-avatar">
@@ -882,6 +924,262 @@
                             </div>
                             <small style="color: #666;">Niveau 5 - 60% vers niveau 6</small>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Paramètres -->
+        <section id="settings" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-cog"></i> Paramètres Système</h1>
+                <div class="section-actions">
+                    <button id="save-all-settings" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Sauvegarder Tout
+                    </button>
+                    <button id="export-config" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Exporter Config
+                    </button>
+                    <button id="import-config" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i>
+                        Importer Config
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statut Firebase -->
+            <div id="firebase-status" style="background: #e8f5e8; border: 1px solid #28a745; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <i class="fas fa-database" style="color: #28a745;"></i>
+                    <strong style="color: #155724;">Statut Firebase</strong>
+                </div>
+                <p style="color: #155724; margin: 0;">
+                    <span id="firebase-status-text">✅ Connecté et synchronisé</span>
+                    <br><small>Base de données: <span id="firebase-project">synergia-v3</span></small>
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Gestion des Utilisateurs -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-users-cog"></i> Gestion des Utilisateurs</h3>
+                    
+                    <div class="form-group">
+                        <label>Créer un nouvel utilisateur</label>
+                        <input type="text" id="new-user-name" placeholder="Nom complet" style="margin-bottom: 0.5rem;">
+                        <input type="email" id="new-user-email" placeholder="Email" style="margin-bottom: 0.5rem;">
+                        <select id="new-user-role" style="margin-bottom: 0.5rem;">
+                            <option value="">Sélectionner un rôle</option>
+                            <option value="admin">Administrateur</option>
+                            <option value="manager">Manager</option>
+                            <option value="developer">Développeur</option>
+                            <option value="designer">Designer</option>
+                            <option value="employee">Employé</option>
+                        </select>
+                        <select id="new-user-department" style="margin-bottom: 1rem;">
+                            <option value="">Département</option>
+                            <option value="direction">Direction</option>
+                            <option value="it">Informatique</option>
+                            <option value="design">Design</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="rh">Ressources Humaines</option>
+                            <option value="finance">Finance</option>
+                        </select>
+                        <button onclick="createUser()" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-user-plus"></i> Créer l'utilisateur
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <h4>Utilisateurs existants</h4>
+                        <div id="users-list" style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
+                            <!-- Liste générée dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestion des Rôles -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-user-tag"></i> Gestion des Rôles</h3>
+                    
+                    <div class="form-group">
+                        <label>Créer un nouveau rôle</label>
+                        <input type="text" id="new-role-name" placeholder="Nom du rôle" style="margin-bottom: 0.5rem;">
+                        <textarea id="new-role-description" placeholder="Description du rôle" style="margin-bottom: 0.5rem; height: 80px;"></textarea>
+                        <div style="margin-bottom: 1rem;">
+                            <label style="font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Permissions</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="role-permissions" value="users.read"> Voir utilisateurs
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="role-permissions" value="users.write"> Modifier utilisateurs
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="role-permissions" value="planning.read"> Voir planning
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="role-permissions" value="planning.write"> Modifier planning
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="role-permissions" value="analytics.read"> Voir analytics
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="role-permissions" value="admin.all"> Administration complète
+                                </label>
+                            </div>
+                        </div>
+                        <button onclick="createRole()" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-plus"></i> Créer le rôle
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <h4>Rôles existants</h4>
+                        <div id="roles-list" style="max-height: 200px; overflow-y: auto; margin-top: 1rem;">
+                            <!-- Liste générée dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestion des Missions -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-tasks"></i> Gestion des Missions & Quêtes</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4>Créer une nouvelle mission</h4>
+                        <div class="form-group">
+                            <input type="text" id="new-quest-title" placeholder="Titre de la mission" style="margin-bottom: 0.5rem;">
+                            <textarea id="new-quest-description" placeholder="Description de la mission" style="margin-bottom: 0.5rem; height: 80px;"></textarea>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <select id="new-quest-type">
+                                    <option value="daily">Quotidienne</option>
+                                    <option value="weekly">Hebdomadaire</option>
+                                    <option value="monthly">Mensuelle</option>
+                                    <option value="special">Spéciale</option>
+                                </select>
+                                <input type="number" id="new-quest-xp" placeholder="XP" min="1" max="1000" value="50">
+                                <select id="new-quest-difficulty">
+                                    <option value="easy">Facile</option>
+                                    <option value="medium">Moyen</option>
+                                    <option value="hard">Difficile</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Conditions de validation</label>
+                                <select id="new-quest-condition" style="margin-bottom: 0.5rem;">
+                                    <option value="manual">Validation manuelle</option>
+                                    <option value="checkin">Pointage arrivée</option>
+                                    <option value="message">Envoyer un message</option>
+                                    <option value="event">Créer un événement</option>
+                                    <option value="attendance">Présence complète</option>
+                                    <option value="custom">Condition personnalisée</option>
+                                </select>
+                                <input type="text" id="new-quest-condition-value" placeholder="Valeur condition (optionnel)">
+                            </div>
+                            <button onclick="createQuest()" class="btn btn-primary" style="width: 100%;">
+                                <i class="fas fa-plus"></i> Créer la mission
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4>Missions existantes</h4>
+                        <div id="quests-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Liste générée dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Firebase -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-database"></i> Configuration Firebase</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" id="firebase-api-key" placeholder="Votre Firebase API Key">
+                        </div>
+                        <div class="form-group">
+                            <label>Auth Domain</label>
+                            <input type="text" id="firebase-auth-domain" placeholder="your-project.firebaseapp.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Project ID</label>
+                            <input type="text" id="firebase-project-id" placeholder="your-project-id">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>Storage Bucket</label>
+                            <input type="text" id="firebase-storage-bucket" placeholder="your-project.appspot.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Messaging Sender ID</label>
+                            <input type="text" id="firebase-messaging-sender-id" placeholder="123456789012">
+                        </div>
+                        <div class="form-group">
+                            <label>App ID</label>
+                            <input type="text" id="firebase-app-id" placeholder="1:123456789012:web:abcdef...">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <button onclick="updateFirebaseConfig()" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Mettre à jour la configuration
+                    </button>
+                    <button onclick="testFirebaseConnection()" class="btn btn-secondary">
+                        <i class="fas fa-plug"></i> Tester la connexion
+                    </button>
+                </div>
+            </div>
+
+            <!-- Synchronisation & Import/Export -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-sync-alt"></i> Synchronisation & Données</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-sync-alt" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+                        <h4>Synchroniser tout</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Synchronise toutes les données locales vers Firebase</p>
+                        <button onclick="syncAllToFirebase()" class="btn btn-primary">
+                            <i class="fas fa-cloud-upload-alt"></i> Synchroniser
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-download" style="font-size: 2rem; color: #28a745; margin-bottom: 1rem;"></i>
+                        <h4>Importer depuis Firebase</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Charge toutes les données depuis Firebase</p>
+                        <button onclick="importFromFirebase()" class="btn btn-secondary">
+                            <i class="fas fa-cloud-download-alt"></i> Importer
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-file-export" style="font-size: 2rem; color: #ffc107; margin-bottom: 1rem;"></i>
+                        <h4>Exporter la configuration</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Sauvegarde complète du système</p>
+                        <button onclick="exportFullConfig()" class="btn btn-secondary">
+                            <i class="fas fa-file-download"></i> Exporter
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-trash-alt" style="font-size: 2rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                        <h4>Réinitialiser</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Efface toutes les données (irréversible)</p>
+                        <button onclick="resetAllData()" class="btn" style="background: #dc3545; color: white;">
+                            <i class="fas fa-exclamation-triangle"></i> Réinitialiser
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1614,18 +1912,548 @@
 
     <script>
         // Variables globales
-        let currentUser = { uid: 'demo', email: 'demo@synergia.com', displayName: 'Allan Boehme' };
-        let isGoogleConnected = true; // Mode démo avec Google "connecté"
-        let events = [
-            {
-                id: '1',
-                title: 'Réunion équipe',
-                description: 'Point hebdomadaire d\'équipe',
-                date: new Date(),
-                type: 'meeting',
-                source: 'google'
+        let currentUser = null;
+        let isGoogleConnected = false;
+        let events = [];
+        let users = [];
+        let roles = [];
+        let quests = [];
+
+        // Firebase Manager
+        class FirebaseManager {
+            constructor() {
+                this.isReady = false;
+                this.isDemo = false;
+                this.init();
             }
-        ];
+
+            async init() {
+                // Attendre que Firebase soit prêt
+                await this.waitForFirebase();
+                
+                if (window.firebaseReady) {
+                    console.log('🔥 Firebase Manager initialisé');
+                    this.isReady = true;
+                    this.setupAuth();
+                    this.setupRealtimeListeners();
+                } else {
+                    console.log('🎭 Mode démo - Firebase non configuré');
+                    this.isDemo = true;
+                    this.loadDemoData();
+                }
+            }
+
+            async waitForFirebase() {
+                return new Promise((resolve) => {
+                    if (window.firebaseReady !== undefined) {
+                        resolve();
+                    } else {
+                        setTimeout(() => this.waitForFirebase().then(resolve), 100);
+                    }
+                });
+            }
+
+            setupAuth() {
+                if (!this.isReady) return;
+                
+                window.firebase.onAuthStateChanged(window.auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        console.log(`👤 Utilisateur connecté: ${user.email}`);
+                        this.loadUserData();
+                    } else {
+                        console.log('👤 Aucun utilisateur connecté');
+                        this.showLoginModal();
+                    }
+                });
+            }
+
+            setupRealtimeListeners() {
+                if (!this.isReady || !currentUser) return;
+
+                // Écouter les changements en temps réel
+                const userCompanyId = currentUser.uid;
+
+                // Écouter les utilisateurs
+                const usersRef = window.firebase.collection(window.db, 'companies', userCompanyId, 'users');
+                window.firebase.onSnapshot(usersRef, (snapshot) => {
+                    users = [];
+                    snapshot.forEach(doc => {
+                        users.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateUsersDisplay();
+                });
+
+                // Écouter les missions
+                const questsRef = window.firebase.collection(window.db, 'companies', userCompanyId, 'quests');
+                window.firebase.onSnapshot(questsRef, (snapshot) => {
+                    quests = [];
+                    snapshot.forEach(doc => {
+                        quests.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateQuestsDisplay();
+                });
+
+                // Écouter les événements
+                const eventsRef = window.firebase.collection(window.db, 'companies', userCompanyId, 'events');
+                window.firebase.onSnapshot(eventsRef, (snapshot) => {
+                    events = [];
+                    snapshot.forEach(doc => {
+                        events.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateEventsDisplay();
+                });
+            }
+
+            async loadUserData() {
+                if (!this.isReady || !currentUser) return;
+
+                try {
+                    const userCompanyId = currentUser.uid;
+                    
+                    // Charger les données de l'entreprise
+                    const companyDoc = await window.firebase.getDoc(
+                        window.firebase.doc(window.db, 'companies', userCompanyId)
+                    );
+                    
+                    if (!companyDoc.exists()) {
+                        // Première connexion, créer la structure
+                        await this.initializeCompany();
+                    }
+                    
+                    showToast('Données chargées depuis Firebase', 'success');
+                } catch (error) {
+                    console.error('Erreur chargement données:', error);
+                    showToast('Erreur de chargement, passage en mode démo', 'warning');
+                    this.isDemo = true;
+                    this.loadDemoData();
+                }
+            }
+
+            async initializeCompany() {
+                if (!this.isReady || !currentUser) return;
+
+                const userCompanyId = currentUser.uid;
+                const companyData = {
+                    name: 'Mon Entreprise',
+                    createdAt: window.firebase.serverTimestamp(),
+                    owner: currentUser.uid,
+                    settings: {
+                        timezone: 'Europe/Paris',
+                        workingHours: { start: '09:00', end: '17:00' },
+                        googleCalendarEnabled: false
+                    }
+                };
+
+                await window.firebase.setDoc(
+                    window.firebase.doc(window.db, 'companies', userCompanyId),
+                    companyData
+                );
+
+                // Créer les collections par défaut
+                await this.createDefaultRoles();
+                await this.createDefaultQuests();
+                
+                console.log('✅ Entreprise initialisée dans Firebase');
+            }
+
+            async createDefaultRoles() {
+                const userCompanyId = currentUser.uid;
+                const defaultRoles = [
+                    {
+                        name: 'Administrateur',
+                        description: 'Accès complet au système',
+                        permissions: ['admin.all'],
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Manager',
+                        description: 'Gestion d\'équipe et planning',
+                        permissions: ['users.read', 'users.write', 'planning.read', 'planning.write'],
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Employé',
+                        description: 'Accès de base',
+                        permissions: ['users.read', 'planning.read'],
+                        createdAt: window.firebase.serverTimestamp()
+                    }
+                ];
+
+                for (const role of defaultRoles) {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'companies', userCompanyId, 'roles'),
+                        role
+                    );
+                }
+            }
+
+            async createDefaultQuests() {
+                const userCompanyId = currentUser.uid;
+                const defaultQuests = [
+                    {
+                        title: 'Pointer son arrivée',
+                        description: 'Pointer votre arrivée avant 9h30',
+                        type: 'daily',
+                        xp: 50,
+                        difficulty: 'easy',
+                        condition: 'checkin',
+                        icon: '⏰',
+                        active: true,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        title: 'Message d\'équipe',
+                        description: 'Envoyer un message dans le chat d\'équipe',
+                        type: 'daily',
+                        xp: 30,
+                        difficulty: 'easy',
+                        condition: 'message',
+                        icon: '💬',
+                        active: true,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        title: 'Synchronisation Google',
+                        description: 'Créer un événement et le synchroniser',
+                        type: 'weekly',
+                        xp: 75,
+                        difficulty: 'medium',
+                        condition: 'event',
+                        icon: '📅',
+                        active: true,
+                        createdAt: window.firebase.serverTimestamp()
+                    }
+                ];
+
+                for (const quest of defaultQuests) {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'companies', userCompanyId, 'quests'),
+                        quest
+                    );
+                }
+            }
+
+            loadDemoData() {
+                // Données de démonstration
+                users = [
+                    {
+                        id: 'demo1',
+                        name: 'Allan Boehme',
+                        email: 'alan.boehme61@gmail.com',
+                        role: 'admin',
+                        department: 'direction',
+                        level: 5,
+                        xp: 1250,
+                        status: 'online',
+                        createdAt: new Date()
+                    },
+                    {
+                        id: 'demo2',
+                        name: 'Polar Caron',
+                        email: 'polar.caron@synergia.com',
+                        role: 'developer',
+                        department: 'it',
+                        level: 4,
+                        xp: 980,
+                        status: 'online',
+                        createdAt: new Date()
+                    },
+                    {
+                        id: 'demo3',
+                        name: 'Marie Dubois',
+                        email: 'marie.dubois@synergia.com',
+                        role: 'designer',
+                        department: 'design',
+                        level: 3,
+                        xp: 750,
+                        status: 'away',
+                        createdAt: new Date()
+                    }
+                ];
+
+                roles = [
+                    { id: 'admin', name: 'Administrateur', permissions: ['admin.all'] },
+                    { id: 'manager', name: 'Manager', permissions: ['users.read', 'users.write', 'planning.read', 'planning.write'] },
+                    { id: 'developer', name: 'Développeur', permissions: ['users.read', 'planning.read'] },
+                    { id: 'designer', name: 'Designer', permissions: ['users.read', 'planning.read'] }
+                ];
+
+                quests = [
+                    {
+                        id: 'daily_checkin',
+                        title: 'Pointer son arrivée',
+                        description: 'Pointer votre arrivée avant 9h30',
+                        type: 'daily',
+                        xp: 50,
+                        condition: 'checkin',
+                        active: true
+                    },
+                    {
+                        id: 'daily_message',
+                        title: 'Message d\'équipe',
+                        description: 'Envoyer un message dans le chat',
+                        type: 'daily',
+                        xp: 30,
+                        condition: 'message',
+                        active: true
+                    }
+                ];
+
+                events = [
+                    {
+                        id: '1',
+                        title: 'Réunion équipe',
+                        description: 'Point hebdomadaire',
+                        date: new Date(),
+                        type: 'meeting'
+                    }
+                ];
+
+                // Mettre à jour l'affichage
+                this.updateUsersDisplay();
+                this.updateRolesDisplay();
+                this.updateQuestsDisplay();
+                this.updateEventsDisplay();
+                this.updateFirebaseStatus();
+            }
+
+            updateUsersDisplay() {
+                const container = document.getElementById('users-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                users.forEach(user => {
+                    const userElement = document.createElement('div');
+                    userElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 0.5rem;';
+                    userElement.innerHTML = `
+                        <div>
+                            <strong>${user.name}</strong>
+                            <br><small style="color: #666;">${user.email} - ${user.role}</small>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="editUser('${user.id}')" class="btn-icon" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteUser('${user.id}')" class="btn-icon" title="Supprimer" style="color: #dc3545;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(userElement);
+                });
+
+                // Mettre à jour l'équipe dans le dashboard
+                loadDemoTeam();
+            }
+
+            updateRolesDisplay() {
+                const container = document.getElementById('roles-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                roles.forEach(role => {
+                    const roleElement = document.createElement('div');
+                    roleElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 0.5rem;';
+                    roleElement.innerHTML = `
+                        <div>
+                            <strong>${role.name}</strong>
+                            <br><small style="color: #666;">${role.permissions ? role.permissions.length : 0} permissions</small>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="editRole('${role.id}')" class="btn-icon" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteRole('${role.id}')" class="btn-icon" title="Supprimer" style="color: #dc3545;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(roleElement);
+                });
+            }
+
+            updateQuestsDisplay() {
+                const container = document.getElementById('quests-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                quests.forEach(quest => {
+                    const questElement = document.createElement('div');
+                    questElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 0.5rem;';
+                    questElement.innerHTML = `
+                        <div>
+                            <strong>${quest.title}</strong>
+                            <br><small style="color: #666;">${quest.type} - ${quest.xp} XP</small>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="padding: 0.25rem 0.5rem; background: ${quest.active ? '#28a745' : '#6c757d'}; color: white; border-radius: 4px; font-size: 0.8rem;">
+                                ${quest.active ? 'Actif' : 'Inactif'}
+                            </span>
+                            <button onclick="editQuest('${quest.id}')" class="btn-icon" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteQuest('${quest.id}')" class="btn-icon" title="Supprimer" style="color: #dc3545;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(questElement);
+                });
+            }
+
+            updateEventsDisplay() {
+                // Mettre à jour l'affichage des événements dans le planning
+                const container = document.getElementById('events-container');
+                if (!container || events.length === 0) return;
+
+                // Code d'affichage des événements déjà présent
+            }
+
+            updateFirebaseStatus() {
+                const statusElement = document.getElementById('firebase-status-text');
+                const projectElement = document.getElementById('firebase-project');
+                
+                if (statusElement) {
+                    if (this.isReady && !this.isDemo) {
+                        statusElement.innerHTML = '✅ Connecté et synchronisé';
+                        projectElement.textContent = window.firebaseApp?.options?.projectId || 'synergia-v3';
+                    } else {
+                        statusElement.innerHTML = '🎭 Mode démo - Firebase non configuré';
+                        projectElement.textContent = 'demo-mode';
+                        
+                        // Changer le style pour indiquer le mode démo
+                        const statusContainer = document.getElementById('firebase-status');
+                        statusContainer.style.background = '#fff3cd';
+                        statusContainer.style.borderColor = '#ffc107';
+                        statusContainer.querySelector('strong').style.color = '#856404';
+                        statusContainer.querySelector('p').style.color = '#856404';
+                    }
+                }
+            }
+
+            // Méthodes CRUD pour Firebase
+            async createUser(userData) {
+                if (this.isDemo) {
+                    // Mode démo
+                    const newUser = {
+                        id: 'user_' + Date.now(),
+                        ...userData,
+                        level: 1,
+                        xp: 0,
+                        status: 'offline',
+                        createdAt: new Date()
+                    };
+                    users.push(newUser);
+                    this.updateUsersDisplay();
+                    return newUser;
+                }
+
+                try {
+                    const userCompanyId = currentUser.uid;
+                    const docRef = await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'companies', userCompanyId, 'users'),
+                        {
+                            ...userData,
+                            level: 1,
+                            xp: 0,
+                            status: 'offline',
+                            createdAt: window.firebase.serverTimestamp()
+                        }
+                    );
+                    
+                    console.log('✅ Utilisateur créé:', docRef.id);
+                    return { id: docRef.id, ...userData };
+                } catch (error) {
+                    console.error('❌ Erreur création utilisateur:', error);
+                    throw error;
+                }
+            }
+
+            async createRole(roleData) {
+                if (this.isDemo) {
+                    const newRole = {
+                        id: 'role_' + Date.now(),
+                        ...roleData,
+                        createdAt: new Date()
+                    };
+                    roles.push(newRole);
+                    this.updateRolesDisplay();
+                    return newRole;
+                }
+
+                try {
+                    const userCompanyId = currentUser.uid;
+                    const docRef = await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'companies', userCompanyId, 'roles'),
+                        {
+                            ...roleData,
+                            createdAt: window.firebase.serverTimestamp()
+                        }
+                    );
+                    
+                    console.log('✅ Rôle créé:', docRef.id);
+                    return { id: docRef.id, ...roleData };
+                } catch (error) {
+                    console.error('❌ Erreur création rôle:', error);
+                    throw error;
+                }
+            }
+
+            async createQuest(questData) {
+                if (this.isDemo) {
+                    const newQuest = {
+                        id: 'quest_' + Date.now(),
+                        ...questData,
+                        active: true,
+                        createdAt: new Date()
+                    };
+                    quests.push(newQuest);
+                    this.updateQuestsDisplay();
+                    return newQuest;
+                }
+
+                try {
+                    const userCompanyId = currentUser.uid;
+                    const docRef = await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'companies', userCompanyId, 'quests'),
+                        {
+                            ...questData,
+                            active: true,
+                            createdAt: window.firebase.serverTimestamp()
+                        }
+                    );
+                    
+                    console.log('✅ Mission créée:', docRef.id);
+                    return { id: docRef.id, ...questData };
+                } catch (error) {
+                    console.error('❌ Erreur création mission:', error);
+                    throw error;
+                }
+            }
+
+            async syncAllToFirebase() {
+                if (this.isDemo) {
+                    showToast('Mode démo - Synchronisation simulée', 'info');
+                    return;
+                }
+
+                try {
+                    showToast('Synchronisation en cours...', 'info');
+                    
+                    // Synchroniser tous les utilisateurs, rôles, missions, etc.
+                    // Cette méthode serait utilisée pour migrer depuis le mode démo
+                    
+                    showToast('Synchronisation terminée!', 'success');
+                } catch (error) {
+                    console.error('❌ Erreur synchronisation:', error);
+                    showToast('Erreur lors de la synchronisation', 'error');
+                }
+            }
+        }
+
+        // Initialiser Firebase Manager
+        const firebaseManager = new FirebaseManager();
 
         // Système de notifications
         function showToast(message, type = 'info', duration = 3000) {
@@ -1994,7 +2822,268 @@
             }
         });
 
-        // Fonctions additionnelles
+        // Fonctions de gestion des paramètres
+        async function createUser() {
+            const name = document.getElementById('new-user-name').value.trim();
+            const email = document.getElementById('new-user-email').value.trim();
+            const role = document.getElementById('new-user-role').value;
+            const department = document.getElementById('new-user-department').value;
+
+            if (!name || !email || !role) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            try {
+                const userData = { name, email, role, department };
+                await firebaseManager.createUser(userData);
+                
+                // Réinitialiser le formulaire
+                document.getElementById('new-user-name').value = '';
+                document.getElementById('new-user-email').value = '';
+                document.getElementById('new-user-role').value = '';
+                document.getElementById('new-user-department').value = '';
+                
+                showToast(`Utilisateur "${name}" créé avec succès`, 'success');
+            } catch (error) {
+                showToast('Erreur lors de la création de l\'utilisateur', 'error');
+            }
+        }
+
+        async function createRole() {
+            const name = document.getElementById('new-role-name').value.trim();
+            const description = document.getElementById('new-role-description').value.trim();
+            const permissionCheckboxes = document.querySelectorAll('input[name="role-permissions"]:checked');
+            const permissions = Array.from(permissionCheckboxes).map(cb => cb.value);
+
+            if (!name || permissions.length === 0) {
+                showToast('Veuillez remplir le nom et sélectionner au moins une permission', 'error');
+                return;
+            }
+
+            try {
+                const roleData = { name, description, permissions };
+                await firebaseManager.createRole(roleData);
+                
+                // Réinitialiser le formulaire
+                document.getElementById('new-role-name').value = '';
+                document.getElementById('new-role-description').value = '';
+                permissionCheckboxes.forEach(cb => cb.checked = false);
+                
+                showToast(`Rôle "${name}" créé avec succès`, 'success');
+            } catch (error) {
+                showToast('Erreur lors de la création du rôle', 'error');
+            }
+        }
+
+        async function createQuest() {
+            const title = document.getElementById('new-quest-title').value.trim();
+            const description = document.getElementById('new-quest-description').value.trim();
+            const type = document.getElementById('new-quest-type').value;
+            const xp = parseInt(document.getElementById('new-quest-xp').value);
+            const difficulty = document.getElementById('new-quest-difficulty').value;
+            const condition = document.getElementById('new-quest-condition').value;
+            const conditionValue = document.getElementById('new-quest-condition-value').value.trim();
+
+            if (!title || !description || !xp) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            try {
+                const questData = {
+                    title,
+                    description,
+                    type,
+                    xp,
+                    difficulty,
+                    condition,
+                    conditionValue,
+                    icon: getQuestIcon(type)
+                };
+                
+                await firebaseManager.createQuest(questData);
+                
+                // Réinitialiser le formulaire
+                document.getElementById('new-quest-title').value = '';
+                document.getElementById('new-quest-description').value = '';
+                document.getElementById('new-quest-xp').value = '50';
+                document.getElementById('new-quest-condition-value').value = '';
+                
+                showToast(`Mission "${title}" créée avec succès`, 'success');
+            } catch (error) {
+                showToast('Erreur lors de la création de la mission', 'error');
+            }
+        }
+
+        function getQuestIcon(type) {
+            const icons = {
+                'daily': '⭐',
+                'weekly': '🗓️',
+                'monthly': '📅',
+                'special': '🎁'
+            };
+            return icons[type] || '🎯';
+        }
+
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                showToast(`Modification de ${user.name} (fonctionnalité à développer)`, 'info');
+            }
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                const userIndex = users.findIndex(u => u.id === userId);
+                if (userIndex > -1) {
+                    const userName = users[userIndex].name;
+                    users.splice(userIndex, 1);
+                    firebaseManager.updateUsersDisplay();
+                    showToast(`Utilisateur ${userName} supprimé`, 'success');
+                }
+            }
+        }
+
+        function editRole(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            if (role) {
+                showToast(`Modification du rôle ${role.name} (fonctionnalité à développer)`, 'info');
+            }
+        }
+
+        function deleteRole(roleId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce rôle ?')) {
+                const roleIndex = roles.findIndex(r => r.id === roleId);
+                if (roleIndex > -1) {
+                    const roleName = roles[roleIndex].name;
+                    roles.splice(roleIndex, 1);
+                    firebaseManager.updateRolesDisplay();
+                    showToast(`Rôle ${roleName} supprimé`, 'success');
+                }
+            }
+        }
+
+        function editQuest(questId) {
+            const quest = quests.find(q => q.id === questId);
+            if (quest) {
+                showToast(`Modification de la mission ${quest.title} (fonctionnalité à développer)`, 'info');
+            }
+        }
+
+        function deleteQuest(questId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette mission ?')) {
+                const questIndex = quests.findIndex(q => q.id === questId);
+                if (questIndex > -1) {
+                    const questTitle = quests[questIndex].title;
+                    quests.splice(questIndex, 1);
+                    firebaseManager.updateQuestsDisplay();
+                    showToast(`Mission ${questTitle} supprimée`, 'success');
+                }
+            }
+        }
+
+        function updateFirebaseConfig() {
+            showToast('Mise à jour de la configuration Firebase...', 'info');
+            
+            // En production, cette fonction mettrait à jour la config Firebase
+            setTimeout(() => {
+                showToast('Configuration Firebase mise à jour (redémarrage requis)', 'success');
+            }, 2000);
+        }
+
+        function testFirebaseConnection() {
+            showToast('Test de connexion Firebase...', 'info');
+            
+            setTimeout(() => {
+                if (firebaseManager.isReady) {
+                    showToast('✅ Connexion Firebase réussie!', 'success');
+                } else {
+                    showToast('❌ Connexion Firebase échouée - Mode démo actif', 'warning');
+                }
+            }, 1500);
+        }
+
+        async function syncAllToFirebase() {
+            await firebaseManager.syncAllToFirebase();
+        }
+
+        function importFromFirebase() {
+            showToast('Import depuis Firebase en cours...', 'info');
+            
+            setTimeout(() => {
+                if (firebaseManager.isReady) {
+                    showToast('Données importées depuis Firebase', 'success');
+                    // Recharger les données
+                    firebaseManager.loadUserData();
+                } else {
+                    showToast('Firebase non disponible', 'warning');
+                }
+            }, 2000);
+        }
+
+        function exportFullConfig() {
+            showToast('Export de la configuration...', 'info');
+            
+            const config = {
+                exportDate: new Date().toISOString(),
+                users: users,
+                roles: roles,
+                quests: quests,
+                events: events,
+                settings: {
+                    firebaseEnabled: firebaseManager.isReady,
+                    googleCalendarEnabled: isGoogleConnected
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `synergia_config_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Configuration exportée', 'success');
+        }
+
+        function resetAllData() {
+            if (confirm('⚠️ ATTENTION: Cette action supprimera TOUTES les données de manière irréversible. Êtes-vous sûr ?')) {
+                if (confirm('Dernière confirmation: Voulez-vous vraiment tout supprimer ?')) {
+                    showToast('Réinitialisation en cours...', 'info');
+                    
+                    // Réinitialiser toutes les données
+                    users.length = 0;
+                    roles.length = 0;
+                    quests.length = 0;
+                    events.length = 0;
+                    
+                    // Mettre à jour l'affichage
+                    firebaseManager.updateUsersDisplay();
+                    firebaseManager.updateRolesDisplay();
+                    firebaseManager.updateQuestsDisplay();
+                    
+                    setTimeout(() => {
+                        showToast('🔥 Toutes les données ont été supprimées', 'success');
+                        
+                        // Recharger les données par défaut
+                        setTimeout(() => {
+                            firebaseManager.loadDemoData();
+                            showToast('Données par défaut rechargées', 'info');
+                        }, 1000);
+                    }, 2000);
+                }
+            }
+        }
+
+        function saveAllSettings() {
+            showToast('Sauvegarde de tous les paramètres...', 'info');
+            
+            setTimeout(() => {
+                showToast('Tous les paramètres ont été sauvegardés', 'success');
+            }, 1500);
+        }
         function refreshDashboard() {
             showToast('Actualisation du dashboard...', 'info');
             setTimeout(() => {

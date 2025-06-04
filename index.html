@@ -684,10 +684,35 @@
             animation: pulse 2s infinite;
         }
 
+        /* Analytics Pro styles */
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .analytics-pro-container {
+            position: relative;
+        }
+
+        .analytics-pro-container h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .analytics-pro-container h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-pro-container canvas {
+            max-height: 250px;
+        }
+
+        /* Pulse animation for real-time indicator */
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
@@ -723,6 +748,10 @@
                 <a href="#analytics" class="nav-link">
                     <i class="fas fa-chart-bar"></i>
                     Analytics
+                </a>
+                <a href="#analytics-pro" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    Analytics Pro
                 </a>
             </div>
             <div class="nav-user">
@@ -854,6 +883,253 @@
                             <small style="color: #666;">Niveau 5 - 60% vers niveau 6</small>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Pro -->
+        <section id="analytics-pro" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-line"></i> Analytics Avancées</h1>
+                <div class="section-actions">
+                    <button id="fullscreen-analytics" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ouvrir Analytics Pro
+                    </button>
+                    <button id="refresh-pro-analytics" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
+                    </button>
+                    <button id="export-all-reports" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Export Global
+                    </button>
+                </div>
+            </div>
+
+            <div class="analytics-pro-container">
+                <!-- KPI Cards Avancés -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 12px; position: relative;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="pro-active-users">12</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Utilisateurs actifs</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; margin-top: 0.5rem;">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+23% vs semaine dernière</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="pro-avg-hours">8.4h</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Temps moyen/jour</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; margin-top: 0.5rem;">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+0.2h vs mois dernier</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 1.5rem; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="pro-missions">147</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Missions complétées</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; margin-top: 0.5rem;">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+15% ce mois</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 1.5rem; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="pro-productivity">94%</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Taux de productivité</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; margin-top: 0.5rem;">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+6% amélioration</span>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #4285f4 0%, #34a853 100%); color: white; padding: 1.5rem; border-radius: 12px;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="pro-google-sync">98%</div>
+                        <div style="font-size: 1rem; opacity: 0.9;">Sync Google Calendar</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; margin-top: 0.5rem;">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Temps réel actif</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graphiques avancés -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                    <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem; color: #333;">
+                            <i class="fas fa-chart-area"></i>
+                            Présence Temps Réel
+                        </h4>
+                        <div style="position: relative; height: 250px;">
+                            <canvas id="pro-attendance-chart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <button onclick="updateAttendanceChart()" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem; color: #333;">
+                            <i class="fas fa-rocket"></i>
+                            Productivité par Membre
+                        </h4>
+                        <div style="position: relative; height: 250px;">
+                            <canvas id="pro-productivity-chart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <button onclick="updateProductivityChart()" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem; color: #333;">
+                            <i class="fab fa-google"></i>
+                            Synchronisation Google Calendar
+                        </h4>
+                        <div style="position: relative; height: 250px;">
+                            <canvas id="pro-google-chart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <button onclick="updateGoogleChart()" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem; color: #333;">
+                            <i class="fas fa-trophy"></i>
+                            Missions & XP Temps Réel
+                        </h4>
+                        <div style="position: relative; height: 250px;">
+                            <canvas id="pro-missions-chart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <button onclick="updateMissionsChart()" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-sync-alt"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics IA & Prédictions -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-brain"></i> Analytics IA & Prédictions
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px;">
+                            <h4><i class="fas fa-chart-line"></i> Tendance Productivité</h4>
+                            <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;">↗️ +12%</div>
+                            <p style="opacity: 0.9; font-size: 0.9rem;">Prédiction semaine prochaine basée sur l'IA</p>
+                        </div>
+                        
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px;">
+                            <h4><i class="fas fa-users"></i> Engagement Équipe</h4>
+                            <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;">🔥 96%</div>
+                            <p style="opacity: 0.9; font-size: 0.9rem;">Score d'engagement calculé par IA</p>
+                        </div>
+                        
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px;">
+                            <h4><i class="fab fa-google"></i> Optimisation Sync</h4>
+                            <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;">⚡ 99.2%</div>
+                            <p style="opacity: 0.9; font-size: 0.9rem;">Efficacité Google Calendar optimisée</p>
+                        </div>
+                        
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px;">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Alertes IA</h4>
+                            <div style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;">⚠️ 2</div>
+                            <p style="opacity: 0.9; font-size: 0.9rem;">Risques détectés automatiquement</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rapports Avancés -->
+                <div style="background: #f8f9fa; border-radius: 12px; padding: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; color: #333;">
+                        <i class="fas fa-file-alt"></i> Rapports Avancés
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div onclick="generateReport('performance')" style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 1px solid #e9ecef;" 
+                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <i class="fas fa-chart-bar" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+                            <h4 style="margin-bottom: 0.5rem; color: #333;">Rapport Performance</h4>
+                            <p style="color: #666; font-size: 0.9rem;">Analyse complète des performances équipe</p>
+                        </div>
+                        
+                        <div onclick="generateReport('google-integration')" style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 1px solid #e9ecef;"
+                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <i class="fab fa-google" style="font-size: 2rem; color: #4285f4; margin-bottom: 1rem;"></i>
+                            <h4 style="margin-bottom: 0.5rem; color: #333;">Rapport Google Calendar</h4>
+                            <p style="color: #666; font-size: 0.9rem;">Statistiques détaillées de synchronisation</p>
+                        </div>
+                        
+                        <div onclick="generateReport('missions')" style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 1px solid #e9ecef;"
+                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <i class="fas fa-trophy" style="font-size: 2rem; color: #ffc107; margin-bottom: 1rem;"></i>
+                            <h4 style="margin-bottom: 0.5rem; color: #333;">Rapport Missions</h4>
+                            <p style="color: #666; font-size: 0.9rem;">Analyse gamification et récompenses</p>
+                        </div>
+                        
+                        <div onclick="generateReport('predictive')" style="background: white; padding: 1.5rem; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 1px solid #e9ecef;"
+                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <i class="fas fa-brain" style="font-size: 2rem; color: #28a745; margin-bottom: 1rem;"></i>
+                            <h4 style="margin-bottom: 0.5rem; color: #333;">Analyse Prédictive</h4>
+                            <p style="color: #666; font-size: 0.9rem;">Prédictions IA et recommandations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temps réel indicator -->
+                <div style="text-align: center; margin: 2rem 0;">
+                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
+                        <div style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                        Données mises à jour en temps réel • Google Calendar intégré
+                    </div>
+                </div>
+                
+                <!-- Actions finales -->
+                <div style="text-align: center;">
+                    <button onclick="openFullAnalytics()" class="btn btn-primary" style="margin-right: 1rem;">
+                        <i class="fas fa-external-link-alt"></i>
+                        Analytics Pro Complet
+                    </button>
+                    <button onclick="refreshAllAnalytics()" class="btn btn-secondary" style="margin-right: 1rem;">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser Tout
+                    </button>
+                    <button onclick="exportAllData()" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Export Complet
+                    </button>
                 </div>
             </div>
         </section>
@@ -1842,7 +2118,358 @@
             console.log('🎉 SYNERGIA v3.0 avec Google Calendar entièrement initialisé !');
         });
 
-        // Gestion des onglets de missions
+        // Analytics Pro Functions
+        let proCharts = {};
+
+        function initAnalyticsPro() {
+            // Créer les graphiques Analytics Pro
+            createProAttendanceChart();
+            createProProductivityChart();
+            createProGoogleChart();
+            createProMissionsChart();
+            
+            // Démarrer les mises à jour temps réel
+            startProRealTimeUpdates();
+            
+            console.log('📊 Analytics Pro initialisé');
+        }
+
+        function createProAttendanceChart() {
+            const ctx = document.getElementById('pro-attendance-chart');
+            if (!ctx) return;
+
+            proCharts.attendance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${i}h`),
+                    datasets: [{
+                        label: 'Présence temps réel',
+                        data: Array.from({length: 24}, () => 75 + Math.random() * 25),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createProProductivityChart() {
+            const ctx = document.getElementById('pro-productivity-chart');
+            if (!ctx) return;
+
+            proCharts.productivity = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Allan Boehme', 'Polar Caron', 'Marie Dubois'],
+                    datasets: [{
+                        data: [96, 92, 88],
+                        backgroundColor: ['#667eea', '#28a745', '#ffc107'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function createProGoogleChart() {
+            const ctx = document.getElementById('pro-google-chart');
+            if (!ctx) return;
+
+            proCharts.google = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Événements créés', 'Événements importés', 'Conflits résolus', 'Sync réussies'],
+                    datasets: [{
+                        label: 'Google Calendar',
+                        data: [24, 18, 3, 42],
+                        backgroundColor: ['#4285f4', '#34a853', '#fbbc04', '#ea4335'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function createProMissionsChart() {
+            const ctx = document.getElementById('pro-missions-chart');
+            if (!ctx) return;
+
+            proCharts.missions = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    datasets: [
+                        {
+                            label: 'XP Gagnés',
+                            data: [120, 180, 95, 210, 165, 80, 45],
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Missions Complétées',
+                            data: [4, 6, 3, 7, 5, 2, 1],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function startProRealTimeUpdates() {
+            // Mettre à jour les KPIs toutes les 5 secondes
+            setInterval(() => {
+                updateProKPIs();
+            }, 5000);
+        }
+
+        function updateProKPIs() {
+            // Simulation de mise à jour temps réel
+            const elements = {
+                'pro-active-users': () => 10 + Math.floor(Math.random() * 5),
+                'pro-avg-hours': () => (8 + Math.random()).toFixed(1) + 'h',
+                'pro-missions': () => {
+                    const current = parseInt(document.getElementById('pro-missions').textContent);
+                    return current + Math.floor(Math.random() * 3);
+                },
+                'pro-productivity': () => (90 + Math.random() * 10).toFixed(0) + '%',
+                'pro-google-sync': () => (95 + Math.random() * 5).toFixed(1) + '%'
+            };
+
+            Object.entries(elements).forEach(([id, valueFunc]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = valueFunc();
+                }
+            });
+
+            // Mettre à jour les graphiques
+            updateChartData();
+        }
+
+        function updateChartData() {
+            if (proCharts.attendance) {
+                const newData = Array.from({length: 24}, () => 75 + Math.random() * 25);
+                proCharts.attendance.data.datasets[0].data = newData;
+                proCharts.attendance.update('none');
+            }
+
+            if (proCharts.productivity) {
+                const newData = [95 + Math.random() * 5, 90 + Math.random() * 8, 85 + Math.random() * 10];
+                proCharts.productivity.data.datasets[0].data = newData;
+                proCharts.productivity.update('none');
+            }
+        }
+
+        function updateAttendanceChart() {
+            showToast('Mise à jour du graphique de présence...', 'info');
+            if (proCharts.attendance) {
+                const newData = Array.from({length: 24}, () => 75 + Math.random() * 25);
+                proCharts.attendance.data.datasets[0].data = newData;
+                proCharts.attendance.update();
+            }
+            setTimeout(() => showToast('Graphique de présence mis à jour', 'success'), 500);
+        }
+
+        function updateProductivityChart() {
+            showToast('Mise à jour de la productivité...', 'info');
+            if (proCharts.productivity) {
+                const newData = [95 + Math.random() * 5, 90 + Math.random() * 8, 85 + Math.random() * 10];
+                proCharts.productivity.data.datasets[0].data = newData;
+                proCharts.productivity.update();
+            }
+            setTimeout(() => showToast('Graphique de productivité mis à jour', 'success'), 500);
+        }
+
+        function updateGoogleChart() {
+            showToast('Mise à jour des stats Google Calendar...', 'info');
+            if (proCharts.google) {
+                const newData = [
+                    20 + Math.floor(Math.random() * 10),
+                    15 + Math.floor(Math.random() * 8),
+                    1 + Math.floor(Math.random() * 5),
+                    35 + Math.floor(Math.random() * 15)
+                ];
+                proCharts.google.data.datasets[0].data = newData;
+                proCharts.google.update();
+            }
+            setTimeout(() => showToast('Stats Google Calendar mises à jour', 'success'), 500);
+        }
+
+        function updateMissionsChart() {
+            showToast('Mise à jour des missions...', 'info');
+            if (proCharts.missions) {
+                const newXPData = Array.from({length: 7}, () => 50 + Math.random() * 200);
+                const newMissionsData = Array.from({length: 7}, () => 1 + Math.floor(Math.random() * 8));
+                
+                proCharts.missions.data.datasets[0].data = newXPData;
+                proCharts.missions.data.datasets[1].data = newMissionsData;
+                proCharts.missions.update();
+            }
+            setTimeout(() => showToast('Graphique des missions mis à jour', 'success'), 500);
+        }
+
+        function generateReport(type) {
+            const reports = {
+                'performance': 'Rapport de Performance Équipe',
+                'google-integration': 'Rapport Google Calendar',
+                'missions': 'Rapport Missions & Gamification',
+                'predictive': 'Analyse Prédictive IA'
+            };
+            
+            const reportName = reports[type] || type;
+            showToast(`Génération du ${reportName} en cours...`, 'info');
+            
+            setTimeout(() => {
+                showToast(`${reportName} généré et téléchargé`, 'success');
+                
+                // Simulation de téléchargement
+                const reportData = {
+                    type: type,
+                    generatedAt: new Date().toISOString(),
+                    data: {
+                        activeUsers: document.getElementById('pro-active-users').textContent,
+                        avgHours: document.getElementById('pro-avg-hours').textContent,
+                        missions: document.getElementById('pro-missions').textContent,
+                        productivity: document.getElementById('pro-productivity').textContent,
+                        googleSync: document.getElementById('pro-google-sync').textContent
+                    }
+                };
+                
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${type}_report_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }, 2000);
+        }
+
+        function openFullAnalytics() {
+            showToast('Ouverture Analytics Pro dans un nouvel onglet...', 'info');
+            // Simulation d'ouverture dans un nouvel onglet
+            setTimeout(() => {
+                showToast('Analytics Pro ouvert (simulation)', 'success');
+            }, 1000);
+        }
+
+        function refreshAllAnalytics() {
+            showToast('Actualisation complète des analytics...', 'info');
+            
+            // Mettre à jour tous les KPIs
+            updateProKPIs();
+            
+            // Mettre à jour tous les graphiques
+            setTimeout(() => {
+                updateAttendanceChart();
+            }, 500);
+            
+            setTimeout(() => {
+                updateProductivityChart();
+            }, 1000);
+            
+            setTimeout(() => {
+                updateGoogleChart();
+            }, 1500);
+            
+            setTimeout(() => {
+                updateMissionsChart();
+            }, 2000);
+            
+            setTimeout(() => {
+                showToast('🎉 Toutes les analytics ont été actualisées!', 'success');
+            }, 2500);
+        }
+
+        function exportAllData() {
+            showToast('Export de toutes les données Analytics Pro...', 'info');
+            
+            setTimeout(() => {
+                const allData = {
+                    exportedAt: new Date().toISOString(),
+                    kpis: {
+                        activeUsers: document.getElementById('pro-active-users').textContent,
+                        avgHours: document.getElementById('pro-avg-hours').textContent,
+                        missions: document.getElementById('pro-missions').textContent,
+                        productivity: document.getElementById('pro-productivity').textContent,
+                        googleSync: document.getElementById('pro-google-sync').textContent
+                    },
+                    charts: {
+                        attendance: proCharts.attendance ? proCharts.attendance.data : null,
+                        productivity: proCharts.productivity ? proCharts.productivity.data : null,
+                        google: proCharts.google ? proCharts.google.data : null,
+                        missions: proCharts.missions ? proCharts.missions.data : null
+                    },
+                    metadata: {
+                        version: 'SYNERGIA v3.0',
+                        module: 'Analytics Pro',
+                        googleIntegration: isGoogleConnected
+                    }
+                };
+                
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `synergia_analytics_pro_complete_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showToast('Export complet terminé!', 'success');
+            }, 2000);
+        }
         document.querySelectorAll('.quest-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 // Retirer l'active de tous les onglets

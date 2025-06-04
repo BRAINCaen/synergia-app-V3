@@ -4031,29 +4031,27 @@ setupEventListeners() {
         });
     }
 
-    // Analytics Pro
-    const fullscreenBtn = document.getElementById('fullscreen-analytics');
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', () => {
-            this.toggleFullscreenAnalytics();
-        });
-    }
-
-    const refreshProBtn = document.getElementById('refresh-pro-analytics');
-    if (refreshProBtn) {
-        refreshProBtn.addEventListener('click', () => {
-            this.refreshAdvancedAnalytics();
-        });
-    }
+// Analytics Pro
+const fullscreenBtn = document.getElementById('fullscreen-analytics');
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+        this.toggleFullscreenAnalytics();
+    });
 }
 
-                const exportAllBtn = document.getElementById('export-all-reports-btn');
-                if (exportAllBtn) {
-                    exportAllBtn.addEventListener('click', () => {
-                        this.exportAllReports();
-                    });
-                }
-            }
+const refreshProBtn = document.getElementById('refresh-pro-analytics');
+if (refreshProBtn) {
+    refreshProBtn.addEventListener('click', () => {
+        this.refreshAdvancedAnalytics();
+    });
+}
+
+const exportAllBtn = document.getElementById('export-all-reports-btn');
+if (exportAllBtn) {
+    exportAllBtn.addEventListener('click', () => {
+        this.exportAllReports();
+    });
+}
 
             switchView(chartType, period) {
                 console.log(`INFO: Vue ${chartType} - Graphique mis à jour`);

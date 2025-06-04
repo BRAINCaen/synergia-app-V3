@@ -177,7 +177,16 @@ class BadgingManager {
             window.uiManager?.showToast('Erreur lors du pointage', 'error');
         }
     }
-    
+    loadAttendanceHistory() {
+    try {
+        const saved = localStorage.getItem('synergia_attendance');
+        if (saved) {
+            this.attendanceHistory = JSON.parse(saved);
+        }
+    } catch (error) {
+        console.warn('Impossible de charger l\'historique de présence');
+    }
+}
     async clockOut() {
         if (this.currentStatus === 'break') {
             window.uiManager?.showToast('Vous devez terminer votre pause avant de pointer la sortie', 'warning');

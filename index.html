@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYNERGIA v3.0 - Gestion d'équipe</title>
     
-    <!-- Politique de sécurité du contenu mise à jour pour Analytics -->
+    <!-- Politique de sécurité du contenu complète pour Firebase -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval' 
@@ -22,10 +22,15 @@
         connect-src 'self' 
             https://www.gstatic.com 
             https://www.googleapis.com 
+            https://firebase.googleapis.com
             https://firestore.googleapis.com 
+            https://identitytoolkit.googleapis.com
+            https://securetoken.googleapis.com
             https://www.google-analytics.com
-            https://analytics.google.com;
+            https://analytics.google.com
+            https://stats.g.doubleclick.net;
         img-src 'self' data: https:;
+        frame-src 'self' https:;
     ">
     
     <!-- CSS -->
@@ -50,46 +55,63 @@
             measurementId: "G-EGJ79SCMWX"
         };
 
-        // Initialisation Firebase
+        // Initialisation Firebase avec gestion d'erreur améliorée
         let app;
         let analytics = null;
-        try {
-            app = initializeApp(firebaseConfig);
-            
-            window.firebaseApp = app;
-            window.auth = getAuth(app);
-            window.db = getFirestore(app);
-            window.storage = getStorage(app);
-            
-            // Initialisation conditionnelle d'Analytics
+        
+        window.firebaseInitPromise = (async () => {
             try {
-                const { getAnalytics } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js');
-                analytics = getAnalytics(app);
-                window.analytics = analytics;
-                console.log('📊 Analytics activé avec succès');
-            } catch (analyticsError) {
-                console.warn('⚠️ Analytics non disponible (CSP ou autre):', analyticsError.message);
-                console.log('📊 Application fonctionnelle sans Analytics');
+                console.log('🔧 Initialisation Firebase...');
+                app = initializeApp(firebaseConfig);
+                
+                window.firebaseApp = app;
+                window.auth = getAuth(app);
+                window.db = getFirestore(app);
+                window.storage = getStorage(app);
+                
+                // Initialisation conditionnelle d'Analytics avec délai
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 1 seconde
+                    const { getAnalytics, isSupported } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js');
+                    
+                    // Vérifier si Analytics est supporté
+                    const analyticsSupported = await isSupported();
+                    if (analyticsSupported) {
+                        analytics = getAnalytics(app);
+                        window.analytics = analytics;
+                        console.log('📊 Analytics activé avec succès');
+                        window.analyticsReady = true;
+                    } else {
+                        console.warn('⚠️ Analytics non supporté dans cet environnement');
+                        window.analyticsReady = false;
+                    }
+                } catch (analyticsError) {
+                    console.warn('⚠️ Analytics non disponible:', analyticsError.message);
+                    console.log('📊 Application fonctionnelle sans Analytics');
+                    window.analyticsReady = false;
+                }
+                
+                // Rendre les fonctions Firebase disponibles globalement
+                window.firebase = {
+                    collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, 
+                    onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp,
+                    onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+                    signOut, updateProfile, ref, uploadBytes, getDownloadURL
+                };
+                
+                console.log('✅ Firebase initialisé avec succès');
+                window.firebaseReady = true;
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erreur d\'initialisation Firebase:', error);
+                console.log('⚠️ Activation du mode démo');
+                window.firebaseReady = false;
+                window.analyticsReady = false;
+                return false;
             }
-            
-            // Rendre les fonctions Firebase disponibles globalement
-            window.firebase = {
-                collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, 
-                onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp,
-                onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-                signOut, updateProfile, ref, uploadBytes, getDownloadURL
-            };
-            
-            console.log('✅ Firebase initialisé avec succès');
-            window.firebaseReady = true;
-            window.analyticsReady = analytics !== null;
-            
-        } catch (error) {
-            console.error('❌ Erreur d\'initialisation Firebase:', error);
-            console.log('⚠️ Activation du mode démo');
-            window.firebaseReady = false;
-            window.analyticsReady = false;
-        }
+        })();
     </script>
     
     <style>
@@ -335,6 +357,10 @@
             background: #dc3545;
         }
 
+        .sync-status.loading {
+            background: #6c757d;
+        }
+
         .sync-indicator {
             width: 8px;
             height: 8px;
@@ -384,6 +410,22 @@
             gap: 1rem;
             justify-content: flex-end;
             margin-top: 2rem;
+        }
+
+        /* Loading states */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Responsive design */
@@ -516,18 +558,13 @@
                     <div id="recent-activities">
                         <div class="activity-item">
                             <i class="fas fa-rocket" style="color: #667eea;"></i>
-                            <span>SYNERGIA v3.0 initialisé avec Firebase</span>
+                            <span>SYNERGIA v3.0 initialisé</span>
                             <small style="margin-left: auto; color: #666;">Maintenant</small>
                         </div>
                         <div class="activity-item">
-                            <i class="fab fa-google" style="color: #4285f4;"></i>
-                            <span>Authentification Firebase active</span>
-                            <small style="margin-left: auto; color: #666;">Il y a 2 minutes</small>
-                        </div>
-                        <div class="activity-item">
-                            <i class="fas fa-users" style="color: #28a745;"></i>
-                            <span>Utilisateur connecté: allan.boehme61@gmail.com</span>
-                            <small style="margin-left: auto; color: #666;">Il y a 5 minutes</small>
+                            <div class="loading-spinner"></div>
+                            <span>Chargement Firebase...</span>
+                            <small style="margin-left: auto; color: #666;">En cours</small>
                         </div>
                     </div>
                 </div>
@@ -535,18 +572,18 @@
                 <div class="dashboard-widget">
                     <h3><i class="fas fa-database"></i> Statut Firebase</h3>
                     <div style="text-align: center; padding: 1rem;">
-                        <div id="firebase-status-dashboard" class="sync-status" style="margin-bottom: 1rem;">
-                            <div class="sync-indicator"></div>
-                            <span>Firebase Connecté</span>
+                        <div id="firebase-status-dashboard" class="sync-status loading" style="margin-bottom: 1rem;">
+                            <div class="loading-spinner" style="width: 8px; height: 8px; border-width: 1px;"></div>
+                            <span>Initialisation...</span>
                         </div>
                         <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
                             <div>Projet: <strong>synergia-app-f27e7</strong></div>
                             <div id="analytics-status-dashboard">Analytics: <span id="analytics-status-text">Chargement...</span></div>
-                            <div>Auth: <span id="auth-status-text">Actif</span></div>
+                            <div>Auth: <span id="auth-status-text">Initialisation...</span></div>
                         </div>
-                        <button onclick="showFirebaseModal()" class="btn btn-primary">
+                        <button onclick="showFirebaseDetails()" class="btn btn-primary" id="firebase-details-btn" disabled>
                             <i class="fas fa-database"></i>
-                            Gérer Firebase
+                            Initialisation...
                         </button>
                     </div>
                 </div>
@@ -562,26 +599,26 @@
                             <div style="font-size: 1.2rem; color: #28a745; margin-bottom: 0.5rem;">87%</div>
                             <div style="color: #666; font-size: 0.9rem;">Taux de completion missions</div>
                         </div>
-                        <button onclick="trackCustomEvent()" class="btn btn-secondary">
+                        <button onclick="trackCustomEvent()" class="btn btn-secondary" id="analytics-btn" disabled>
                             <i class="fas fa-chart-bar"></i>
-                            Voir Analytics
+                            <span>Chargement...</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="dashboard-widget">
-                    <h3><i class="fas fa-cloud"></i> Synchronisation Cloud</h3>
+                    <h3><i class="fas fa-cloud"></i> Synchronisation</h3>
                     <div style="text-align: center; padding: 1rem;">
-                        <div id="sync-status-display" class="sync-status" style="margin-bottom: 1rem;">
-                            <div class="sync-indicator"></div>
-                            <span>Données synchronisées</span>
+                        <div id="sync-status-display" class="sync-status loading" style="margin-bottom: 1rem;">
+                            <div class="loading-spinner" style="width: 8px; height: 8px; border-width: 1px;"></div>
+                            <span>Connexion...</span>
                         </div>
                         <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
-                            Dernière sync: <span id="last-sync-time">Il y a 2 minutes</span>
+                            Statut: <span id="sync-time-text">Initialisation...</span>
                         </div>
-                        <button onclick="forceSyncData()" class="btn btn-secondary">
+                        <button onclick="forceSyncData()" class="btn btn-secondary" id="sync-btn" disabled>
                             <i class="fas fa-sync-alt"></i>
-                            Forcer la sync
+                            Attente...
                         </button>
                     </div>
                 </div>
@@ -593,7 +630,7 @@
             <div class="section-header">
                 <h1><i class="fas fa-cog"></i> Paramètres Système</h1>
                 <div class="section-actions">
-                    <button onclick="saveAllSettings()" class="btn btn-primary">
+                    <button onclick="saveAllSettings()" class="btn btn-primary" id="save-settings-btn" disabled>
                         <i class="fas fa-save"></i>
                         Sauvegarder
                     </button>
@@ -605,17 +642,17 @@
             </div>
 
             <!-- Statut Firebase Détaillé -->
-            <div id="firebase-status" style="background: #e8f5e8; border: 1px solid #28a745; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+            <div id="firebase-status" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <i class="fas fa-database" style="color: #28a745;"></i>
-                    <strong style="color: #155724;">Statut Firebase</strong>
+                    <div class="loading-spinner" style="width: 16px; height: 16px;"></div>
+                    <strong style="color: #856404;">Statut Firebase - Initialisation</strong>
                 </div>
-                <div id="firebase-status-details" style="color: #155724; font-size: 0.9rem;">
-                    <div>✅ <strong>App:</strong> Initialisé</div>
-                    <div>✅ <strong>Auth:</strong> Connecté (alan.boehme61@gmail.com)</div>
-                    <div>✅ <strong>Firestore:</strong> Opérationnel</div>
-                    <div>✅ <strong>Storage:</strong> Disponible</div>
-                    <div id="analytics-status-detail">⚠️ <strong>Analytics:</strong> Chargement...</div>
+                <div id="firebase-status-details" style="color: #856404; font-size: 0.9rem;">
+                    <div id="status-app">🔄 <strong>App:</strong> Initialisation...</div>
+                    <div id="status-auth">🔄 <strong>Auth:</strong> Chargement...</div>
+                    <div id="status-firestore">🔄 <strong>Firestore:</strong> Connexion...</div>
+                    <div id="status-storage">🔄 <strong>Storage:</strong> Configuration...</div>
+                    <div id="status-analytics">🔄 <strong>Analytics:</strong> Vérification...</div>
                     <div style="margin-top: 0.5rem;"><strong>Projet:</strong> synergia-app-f27e7</div>
                 </div>
             </div>
@@ -657,91 +694,43 @@
                             <input type="text" id="firebase-measurement-id" value="G-EGJ79SCMWX" readonly>
                         </div>
                         <div class="form-group">
-                            <label>Statut Analytics</label>
-                            <div id="analytics-config-status" style="padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">
-                                <i class="fas fa-exclamation-triangle"></i> Vérification en cours...
+                            <label>Statut complet</label>
+                            <div id="full-status-display" style="padding: 0.75rem; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; font-family: monospace; font-size: 0.8rem;">
+                                Initialisation Firebase en cours...
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <div style="margin-top: 1.5rem; text-align: center;">
-                    <button onclick="testFirebaseConnection()" class="btn btn-primary">
-                        <i class="fas fa-plug"></i> Tester la connexion
+                    <button onclick="testFirebaseConnection()" class="btn btn-primary" id="test-firebase-btn" disabled>
+                        <i class="fas fa-plug"></i> Test connexion
                     </button>
-                    <button onclick="initializeFirebaseData()" class="btn btn-secondary">
-                        <i class="fas fa-database"></i> Initialiser les données
+                    <button onclick="initializeFirebaseData()" class="btn btn-secondary" id="init-data-btn" disabled>
+                        <i class="fas fa-database"></i> Initialiser données
                     </button>
-                    <button onclick="testAnalytics()" class="btn btn-secondary">
-                        <i class="fas fa-chart-bar"></i> Tester Analytics
+                    <button onclick="testAnalytics()" class="btn btn-secondary" id="test-analytics-btn" disabled>
+                        <i class="fas fa-chart-bar"></i> Test Analytics
                     </button>
-                </div>
-            </div>
-
-            <!-- Outils de développement -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                <h3><i class="fas fa-tools"></i> Outils de Développement</h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
-                        <i class="fas fa-console" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
-                        <h4>Console Logs</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Voir les logs de débogage</p>
-                        <button onclick="showConsoleLogs()" class="btn btn-secondary">
-                            <i class="fas fa-terminal"></i> Ouvrir Console
-                        </button>
-                    </div>
-                    
-                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
-                        <i class="fas fa-bug" style="font-size: 2rem; color: #28a745; margin-bottom: 1rem;"></i>
-                        <h4>Mode Debug</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Activer le mode débogage</p>
-                        <button onclick="toggleDebugMode()" class="btn btn-secondary">
-                            <i class="fas fa-bug"></i> <span id="debug-btn-text">Activer Debug</span>
-                        </button>
-                    </div>
-                    
-                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
-                        <i class="fas fa-download" style="font-size: 2rem; color: #ffc107; margin-bottom: 1rem;"></i>
-                        <h4>Export Données</h4>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Exporter toutes les données</p>
-                        <button onclick="exportAllData()" class="btn btn-secondary">
-                            <i class="fas fa-file-export"></i> Exporter
-                        </button>
-                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Team (placeholder) -->
+        <!-- Sections placeholder -->
         <section id="team" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
-                <div class="section-actions">
-                    <button class="btn btn-primary">
-                        <i class="fas fa-user-plus"></i>
-                        Ajouter membre
-                    </button>
-                </div>
             </div>
             <p>Section équipe en développement...</p>
         </section>
 
-        <!-- Planning (placeholder) -->
         <section id="planning" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-calendar"></i> Planning</h1>
-                <div class="section-actions">
-                    <button class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Nouvel événement
-                    </button>
-                </div>
             </div>
             <p>Section planning en développement...</p>
         </section>
 
-        <!-- Chat (placeholder) -->
         <section id="chat" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-comments"></i> Chat d'équipe</h1>
@@ -749,7 +738,6 @@
             <p>Section chat en développement...</p>
         </section>
 
-        <!-- Quests (placeholder) -->
         <section id="quests" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-trophy"></i> Missions & Récompenses</h1>
@@ -764,73 +752,162 @@
         let isFirebaseReady = false;
         let isAnalyticsReady = false;
         let isDebugMode = false;
+        let initializationComplete = false;
 
-        // Vérification de l'état Firebase et Analytics
-        function checkFirebaseStatus() {
-            if (window.firebaseReady) {
-                console.log('✅ Firebase prêt et configuré');
-                isFirebaseReady = true;
-                isAnalyticsReady = window.analyticsReady || false;
+        // Attendre l'initialisation Firebase
+        async function waitForFirebaseInit() {
+            console.log('🚀 Initialisation SYNERGIA v3.0...');
+            
+            try {
+                await window.firebaseInitPromise;
                 
+                // Mettre à jour l'interface
                 updateFirebaseStatusDisplay();
-                updateAnalyticsStatus();
+                enableButtons();
                 setupFirebaseAuth();
-            } else {
-                console.log('❌ Firebase non disponible');
-                setTimeout(checkFirebaseStatus, 1000);
+                
+                console.log('✅ Initialisation Firebase terminée');
+                initializationComplete = true;
+                
+                // Mettre à jour les activités
+                updateRecentActivities('Firebase initialisé avec succès');
+                
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation:', error);
+                updateFirebaseStatusDisplay(false);
+                showNotification('❌ Erreur d\'initialisation Firebase', 'error');
             }
         }
 
         // Mise à jour de l'affichage du statut Firebase
-        function updateFirebaseStatusDisplay() {
+        function updateFirebaseStatusDisplay(success = null) {
+            if (success === null) {
+                success = window.firebaseReady;
+            }
+            
+            isFirebaseReady = success;
+            isAnalyticsReady = window.analyticsReady || false;
+            
             // Dashboard
             const dashboardStatus = document.getElementById('firebase-status-dashboard');
-            if (dashboardStatus && isFirebaseReady) {
-                dashboardStatus.className = 'sync-status';
-                dashboardStatus.innerHTML = '<div class="sync-indicator"></div><span>Firebase Connecté</span>';
+            const analyticsStatusText = document.getElementById('analytics-status-text');
+            const authStatusText = document.getElementById('auth-status-text');
+            const syncStatus = document.getElementById('sync-status-display');
+            const syncTimeText = document.getElementById('sync-time-text');
+            
+            if (dashboardStatus) {
+                if (success) {
+                    dashboardStatus.className = 'sync-status';
+                    dashboardStatus.innerHTML = '<div class="sync-indicator"></div><span>Firebase Connecté</span>';
+                } else {
+                    dashboardStatus.className = 'sync-status error';
+                    dashboardStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Firebase Erreur</span>';
+                }
             }
-
+            
+            if (analyticsStatusText) {
+                analyticsStatusText.textContent = isAnalyticsReady ? 'Actif' : 'Indisponible';
+                analyticsStatusText.style.color = isAnalyticsReady ? '#28a745' : '#ffc107';
+            }
+            
+            if (authStatusText) {
+                authStatusText.textContent = success ? 'Prêt' : 'Erreur';
+                authStatusText.style.color = success ? '#28a745' : '#dc3545';
+            }
+            
+            if (syncStatus) {
+                if (success) {
+                    syncStatus.className = 'sync-status';
+                    syncStatus.innerHTML = '<div class="sync-indicator"></div><span>Synchronisé</span>';
+                } else {
+                    syncStatus.className = 'sync-status error';
+                    syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Hors ligne</span>';
+                }
+            }
+            
+            if (syncTimeText) {
+                syncTimeText.textContent = success ? 'Connecté' : 'Déconnecté';
+            }
+            
             // Settings - Statut détaillé
-            const analyticsDetail = document.getElementById('analytics-status-detail');
-            if (analyticsDetail) {
-                if (isAnalyticsReady) {
-                    analyticsDetail.innerHTML = '✅ <strong>Analytics:</strong> Opérationnel';
+            const statusContainer = document.getElementById('firebase-status');
+            const statusDetails = document.getElementById('firebase-status-details');
+            const fullStatusDisplay = document.getElementById('full-status-display');
+            
+            if (statusContainer && statusDetails) {
+                if (success) {
+                    statusContainer.style.background = '#d4edda';
+                    statusContainer.style.borderColor = '#28a745';
+                    statusContainer.querySelector('strong').style.color = '#155724';
+                    statusContainer.querySelector('strong').innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i> Firebase - Opérationnel';
+                    statusDetails.style.color = '#155724';
+                    
+                    statusDetails.innerHTML = `
+                        <div>✅ <strong>App:</strong> Initialisé</div>
+                        <div>✅ <strong>Auth:</strong> ${currentUser ? `Connecté (${currentUser.email})` : 'Prêt'}</div>
+                        <div>✅ <strong>Firestore:</strong> Opérationnel</div>
+                        <div>✅ <strong>Storage:</strong> Disponible</div>
+                        <div>${isAnalyticsReady ? '✅' : '⚠️'} <strong>Analytics:</strong> ${isAnalyticsReady ? 'Opérationnel' : 'Indisponible'}</div>
+                        <div style="margin-top: 0.5rem;"><strong>Projet:</strong> synergia-app-f27e7</div>
+                    `;
                 } else {
-                    analyticsDetail.innerHTML = '⚠️ <strong>Analytics:</strong> Indisponible (CSP)';
+                    statusContainer.style.background = '#f8d7da';
+                    statusContainer.style.borderColor = '#dc3545';
+                    statusContainer.querySelector('strong').style.color = '#721c24';
+                    statusContainer.querySelector('strong').innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Firebase - Erreur';
+                    statusDetails.style.color = '#721c24';
+                    
+                    statusDetails.innerHTML = `
+                        <div>❌ <strong>App:</strong> Erreur d'initialisation</div>
+                        <div>❌ <strong>Auth:</strong> Non disponible</div>
+                        <div>❌ <strong>Firestore:</strong> Hors ligne</div>
+                        <div>❌ <strong>Storage:</strong> Indisponible</div>
+                        <div>❌ <strong>Analytics:</strong> Non configuré</div>
+                        <div style="margin-top: 0.5rem;"><strong>Statut:</strong> Mode démo</div>
+                    `;
                 }
             }
-
-            // Status de configuration Analytics
-            const analyticsConfigStatus = document.getElementById('analytics-config-status');
-            if (analyticsConfigStatus) {
-                if (isAnalyticsReady) {
-                    analyticsConfigStatus.style.background = '#d4edda';
-                    analyticsConfigStatus.style.borderColor = '#28a745';
-                    analyticsConfigStatus.style.color = '#155724';
-                    analyticsConfigStatus.innerHTML = '<i class="fas fa-check-circle"></i> Analytics opérationnel';
-                } else {
-                    analyticsConfigStatus.style.background = '#fff3cd';
-                    analyticsConfigStatus.style.borderColor = '#ffc107';
-                    analyticsConfigStatus.style.color = '#856404';
-                    analyticsConfigStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Analytics indisponible (CSP/Bloqueur pub)';
-                }
+            
+            if (fullStatusDisplay) {
+                const status = {
+                    firebase: success,
+                    analytics: isAnalyticsReady,
+                    user: currentUser ? currentUser.email : null,
+                    timestamp: new Date().toISOString(),
+                    project: 'synergia-app-f27e7'
+                };
+                fullStatusDisplay.textContent = JSON.stringify(status, null, 2);
             }
         }
 
-        // Mise à jour du statut Analytics
-        function updateAnalyticsStatus() {
-            const dashboardAnalyticsStatus = document.getElementById('analytics-status-text');
-            const authStatus = document.getElementById('auth-status-text');
+        // Activer les boutons après l'initialisation
+        function enableButtons() {
+            const buttons = [
+                'firebase-details-btn',
+                'analytics-btn', 
+                'sync-btn',
+                'save-settings-btn',
+                'test-firebase-btn',
+                'init-data-btn',
+                'test-analytics-btn'
+            ];
             
-            if (dashboardAnalyticsStatus) {
-                dashboardAnalyticsStatus.textContent = isAnalyticsReady ? 'Actif' : 'Indisponible';
-                dashboardAnalyticsStatus.style.color = isAnalyticsReady ? '#28a745' : '#ffc107';
-            }
-
-            if (authStatus) {
-                authStatus.textContent = currentUser ? 'Connecté' : 'Non connecté';
-                authStatus.style.color = currentUser ? '#28a745' : '#dc3545';
-            }
+            buttons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = false;
+                    
+                    // Mettre à jour le texte des boutons
+                    if (id === 'firebase-details-btn') {
+                        btn.innerHTML = '<i class="fas fa-database"></i> Détails Firebase';
+                    } else if (id === 'analytics-btn') {
+                        const span = btn.querySelector('span');
+                        if (span) span.textContent = isAnalyticsReady ? 'Voir Analytics' : 'Analytics indisponible';
+                    } else if (id === 'sync-btn') {
+                        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Synchroniser';
+                    }
+                }
+            });
         }
 
         // Configuration de l'authentification Firebase
@@ -842,14 +919,12 @@
                     currentUser = user;
                     console.log(`👤 Utilisateur connecté: ${user.email}`);
                     document.getElementById('user-name').textContent = user.displayName || user.email.split('@')[0];
-                    updateAnalyticsStatus();
-                    
-                    // Mettre à jour les activités
-                    updateRecentActivities('Utilisateur connecté: ' + user.email);
+                    updateFirebaseStatusDisplay();
+                    updateRecentActivities(`Utilisateur connecté: ${user.email}`);
                 } else {
                     console.log('👤 Aucun utilisateur connecté');
                     currentUser = null;
-                    updateAnalyticsStatus();
+                    updateFirebaseStatusDisplay();
                 }
             });
         }
@@ -863,27 +938,28 @@
 
             showNotification('🔍 Test de connexion Firebase...', 'info');
             
-            // Test d'écriture dans Firestore
             const testDoc = {
                 test: true,
                 timestamp: window.firebase.serverTimestamp(),
-                message: 'Test de connexion SYNERGIA v3.0',
-                user: currentUser ? currentUser.email : 'anonyme'
+                message: 'Test connexion SYNERGIA v3.0',
+                user: currentUser ? currentUser.email : 'anonyme',
+                userAgent: navigator.userAgent.substring(0, 100)
             };
             
             window.firebase.addDoc(
-                window.firebase.collection(window.db, 'tests'), 
+                window.firebase.collection(window.db, 'connection-tests'), 
                 testDoc
             ).then((docRef) => {
-                showNotification('✅ Connexion Firebase et Firestore réussie!', 'success');
+                showNotification('✅ Test Firebase réussi!', 'success');
                 console.log('📝 Document test créé:', docRef.id);
+                updateRecentActivities('Test de connexion Firebase réussi');
                 
-                // Supprimer le document test après 5 secondes
+                // Supprimer le document test après 10 secondes
                 setTimeout(() => {
-                    window.firebase.deleteDoc(window.firebase.doc(window.db, 'tests', docRef.id))
+                    window.firebase.deleteDoc(window.firebase.doc(window.db, 'connection-tests', docRef.id))
                         .then(() => console.log('🧹 Document test supprimé'))
                         .catch(e => console.log('⚠️ Erreur suppression test:', e));
-                }, 5000);
+                }, 10000);
                 
             }).catch((error) => {
                 showNotification('❌ Erreur test Firestore: ' + error.message, 'error');
@@ -891,30 +967,28 @@
             });
         }
 
-        // Test Analytics (si disponible)
+        // Test Analytics
         function testAnalytics() {
             if (isAnalyticsReady && window.analytics) {
                 showNotification('📊 Test Analytics...', 'info');
                 
-                try {
-                    // Importer et utiliser logEvent
-                    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
-                        .then(({ logEvent }) => {
-                            logEvent(window.analytics, 'synergia_test_event', {
-                                event_category: 'test',
-                                event_label: 'manual_test',
-                                value: 1
-                            });
-                            showNotification('✅ Événement Analytics envoyé!', 'success');
-                        })
-                        .catch(error => {
-                            showNotification('❌ Erreur test Analytics: ' + error.message, 'error');
+                import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
+                    .then(({ logEvent }) => {
+                        logEvent(window.analytics, 'synergia_test_analytics', {
+                            event_category: 'system_test',
+                            event_label: 'manual_analytics_test',
+                            value: 1,
+                            custom_parameter: 'test_from_settings'
                         });
-                } catch (error) {
-                    showNotification('❌ Analytics non disponible: ' + error.message, 'error');
-                }
+                        showNotification('✅ Événement Analytics envoyé!', 'success');
+                        updateRecentActivities('Test Analytics exécuté');
+                        console.log('📊 Événement Analytics test envoyé');
+                    })
+                    .catch(error => {
+                        showNotification('❌ Erreur Analytics: ' + error.message, 'error');
+                    });
             } else {
-                showNotification('⚠️ Analytics non disponible (CSP ou bloqueur)', 'warning');
+                showNotification('⚠️ Analytics non disponible', 'warning');
             }
         }
 
@@ -923,18 +997,20 @@
             if (isAnalyticsReady && window.analytics) {
                 import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
                     .then(({ logEvent }) => {
-                        logEvent(window.analytics, 'dashboard_analytics_view', {
-                            event_category: 'engagement',
-                            event_label: 'dashboard_widget',
-                            user_id: currentUser ? currentUser.uid : 'anonymous'
+                        logEvent(window.analytics, 'dashboard_interaction', {
+                            event_category: 'user_engagement',
+                            event_label: 'analytics_widget_click',
+                            user_id: currentUser ? currentUser.uid : 'anonymous',
+                            page_title: 'Dashboard'
                         });
-                        showNotification('📊 Événement Analytics enregistré', 'success');
+                        showNotification('📊 Interaction Analytics enregistrée', 'success');
                     })
                     .catch(error => {
                         console.warn('Analytics error:', error);
+                        showNotification('📊 Simulation Analytics (service indisponible)', 'info');
                     });
             } else {
-                showNotification('📊 Simulation événement Analytics (non disponible)', 'info');
+                showNotification('📊 Simulation événement Analytics', 'info');
             }
         }
 
@@ -945,9 +1021,9 @@
                 return;
             }
             
-            showNotification('🚀 Initialisation des données Firebase...', 'info');
+            showNotification('🚀 Initialisation des données...', 'info');
             
-            const collections = ['users', 'teams', 'projects', 'missions', 'events'];
+            const collections = ['users', 'teams', 'projects', 'missions', 'events', 'analytics-events'];
             let initialized = 0;
             
             collections.forEach(async (collectionName) => {
@@ -956,7 +1032,12 @@
                         initialized: true,
                         createdAt: window.firebase.serverTimestamp(),
                         version: '3.0',
-                        createdBy: currentUser ? currentUser.email : 'system'
+                        createdBy: currentUser ? currentUser.email : 'system',
+                        collectionType: collectionName,
+                        metadata: {
+                            purpose: `Collection ${collectionName} pour SYNERGIA v3.0`,
+                            features: ['sync', 'realtime', 'backup']
+                        }
                     };
                     
                     await window.firebase.addDoc(
@@ -969,7 +1050,7 @@
                     
                     if (initialized === collections.length) {
                         showNotification('✅ Toutes les collections initialisées!', 'success');
-                        updateRecentActivities('Collections Firebase initialisées');
+                        updateRecentActivities(`${collections.length} collections Firebase créées`);
                     }
                 } catch (error) {
                     console.error(`❌ Erreur initialisation ${collectionName}:`, error);
@@ -978,16 +1059,27 @@
             });
         }
 
-        // Forcer la synchronisation des données
+        // Forcer la synchronisation
         function forceSyncData() {
             showNotification('🔄 Synchronisation forcée...', 'info');
             
-            // Simuler la synchronisation
             setTimeout(() => {
                 const now = new Date();
-                document.getElementById('last-sync-time').textContent = 'À l\'instant';
+                document.getElementById('sync-time-text').textContent = 'À l\'instant';
                 showNotification('✅ Synchronisation terminée!', 'success');
-                updateRecentActivities('Synchronisation des données forcée');
+                updateRecentActivities('Synchronisation manuelle exécutée');
+                
+                // Log Analytics si disponible
+                if (isAnalyticsReady && window.analytics) {
+                    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
+                        .then(({ logEvent }) => {
+                            logEvent(window.analytics, 'force_sync', {
+                                event_category: 'user_action',
+                                sync_time: now.toISOString()
+                            });
+                        })
+                        .catch(e => console.log('Analytics sync error:', e));
+                }
             }, 2000);
         }
 
@@ -998,13 +1090,16 @@
             if (isFirebaseReady && currentUser) {
                 const settings = {
                     userId: currentUser.uid,
-                    firebaseConfig: {
+                    userEmail: currentUser.email,
+                    systemConfig: {
                         projectId: 'synergia-app-f27e7',
-                        analyticsEnabled: isAnalyticsReady
+                        analyticsEnabled: isAnalyticsReady,
+                        version: '3.0'
                     },
                     userPreferences: {
                         debugMode: isDebugMode,
-                        lastSave: new Date().toISOString()
+                        lastSave: new Date().toISOString(),
+                        browser: navigator.userAgent.substring(0, 100)
                     },
                     updatedAt: window.firebase.serverTimestamp()
                 };
@@ -1013,20 +1108,20 @@
                     window.firebase.doc(window.db, 'user-settings', currentUser.uid),
                     settings
                 ).then(() => {
-                    showNotification('✅ Paramètres sauvegardés dans Firebase!', 'success');
+                    showNotification('✅ Paramètres sauvegardés!', 'success');
                     updateRecentActivities('Paramètres utilisateur sauvegardés');
                 }).catch((error) => {
                     showNotification('❌ Erreur sauvegarde: ' + error.message, 'error');
                 });
             } else {
-                // Sauvegarde locale
                 const localSettings = {
                     saved: true,
                     timestamp: new Date().toISOString(),
-                    debugMode: isDebugMode
+                    debugMode: isDebugMode,
+                    version: '3.0'
                 };
                 localStorage.setItem('synergia-settings', JSON.stringify(localSettings));
-                showNotification('✅ Paramètres sauvegardés localement!', 'success');
+                showNotification('✅ Sauvegarde locale réussie!', 'success');
             }
         }
 
@@ -1042,9 +1137,14 @@
                 },
                 configuration: {
                     projectId: 'synergia-app-f27e7',
-                    debugMode: isDebugMode
+                    version: '3.0',
+                    initializationComplete: initializationComplete
                 },
-                version: '3.0'
+                systemInfo: {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform
+                }
             };
             
             const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
@@ -1056,88 +1156,19 @@
             URL.revokeObjectURL(url);
             
             showNotification('📥 Configuration exportée!', 'success');
-        }
-
-        // Export de toutes les données
-        function exportAllData() {
-            showNotification('📦 Export des données en cours...', 'info');
-            
-            // Simuler l'export
-            setTimeout(() => {
-                const data = {
-                    exportDate: new Date().toISOString(),
-                    userData: {
-                        email: currentUser ? currentUser.email : null,
-                        level: 5,
-                        xp: 1250
-                    },
-                    stats: {
-                        teamCount: 3,
-                        activeQuests: 5,
-                        eventsToday: 2
-                    },
-                    systemInfo: {
-                        firebase: isFirebaseReady,
-                        analytics: isAnalyticsReady,
-                        version: '3.0'
-                    }
-                };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `synergia_data_export_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                showNotification('✅ Données exportées!', 'success');
-            }, 1500);
-        }
-
-        // Toggle mode debug
-        function toggleDebugMode() {
-            isDebugMode = !isDebugMode;
-            const btn = document.getElementById('debug-btn-text');
-            btn.textContent = isDebugMode ? 'Désactiver Debug' : 'Activer Debug';
-            
-            if (isDebugMode) {
-                console.log('🐛 Mode debug activé');
-                showNotification('🐛 Mode debug activé', 'info');
-                // Afficher plus d'infos dans la console
-                console.log('📊 État Firebase:', { isFirebaseReady, isAnalyticsReady });
-                console.log('👤 Utilisateur:', currentUser);
-            } else {
-                console.log('🐛 Mode debug désactivé');
-                showNotification('Mode debug désactivé', 'info');
-            }
-        }
-
-        // Afficher les logs de la console
-        function showConsoleLogs() {
-            showNotification('🖥️ Consultez la console du navigateur (F12)', 'info');
-            console.log('📝 === SYNERGIA v3.0 DEBUG LOGS ===');
-            console.log('🔧 Firebase Status:', {
-                ready: isFirebaseReady,
-                analytics: isAnalyticsReady,
-                user: currentUser ? currentUser.email : null,
-                timestamp: new Date().toISOString()
-            });
-            console.log('🌐 Browser Info:', {
-                userAgent: navigator.userAgent,
-                language: navigator.language,
-                cookieEnabled: navigator.cookieEnabled
-            });
-            console.log('📊 App State:', {
-                debugMode: isDebugMode,
-                currentSection: document.querySelector('.nav-link.active')?.textContent?.trim()
-            });
+            updateRecentActivities('Configuration système exportée');
         }
 
         // Mettre à jour les activités récentes
         function updateRecentActivities(activity) {
             const activitiesContainer = document.getElementById('recent-activities');
             if (!activitiesContainer) return;
+            
+            // Supprimer le loader s'il existe
+            const loader = activitiesContainer.querySelector('.loading-spinner');
+            if (loader && loader.parentElement) {
+                loader.parentElement.remove();
+            }
             
             const activityElement = document.createElement('div');
             activityElement.className = 'activity-item';
@@ -1147,7 +1178,6 @@
                 <small style="margin-left: auto; color: #666;">À l'instant</small>
             `;
             
-            // Ajouter en premier
             activitiesContainer.insertBefore(activityElement, activitiesContainer.firstChild);
             
             // Garder seulement les 5 dernières activités
@@ -1159,11 +1189,9 @@
 
         // Actualisation du dashboard
         function refreshDashboard() {
-            showNotification('🔄 Actualisation du dashboard...', 'info');
+            showNotification('🔄 Actualisation...', 'info');
             
-            // Simuler le chargement de nouvelles données
             setTimeout(() => {
-                // Mise à jour des statistiques avec des valeurs aléatoires
                 const newTeamCount = Math.floor(Math.random() * 10) + 1;
                 const newQuestCount = Math.floor(Math.random() * 15) + 1;
                 const newEventCount = Math.floor(Math.random() * 5) + 1;
@@ -1172,30 +1200,24 @@
                 document.getElementById('active-quests').textContent = newQuestCount;
                 document.getElementById('events-today').textContent = newEventCount;
                 
-                // Mettre à jour l'heure de dernière sync
-                document.getElementById('last-sync-time').textContent = 'À l\'instant';
-                
                 showNotification('✅ Dashboard actualisé!', 'success');
-                updateRecentActivities('Dashboard actualisé avec nouvelles données');
+                updateRecentActivities('Dashboard actualisé');
                 
-                // Tracker l'événement si Analytics disponible
                 if (isAnalyticsReady && window.analytics) {
                     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
                         .then(({ logEvent }) => {
                             logEvent(window.analytics, 'dashboard_refresh', {
-                                event_category: 'user_action',
-                                value: 1
+                                event_category: 'user_action'
                             });
                         })
-                        .catch(e => console.log('Analytics log error:', e));
+                        .catch(e => console.log('Analytics refresh error:', e));
                 }
             }, 1500);
         }
 
-        // Système de notifications amélioré
+        // Système de notifications
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
@@ -1251,7 +1273,6 @@
                     if (targetSection) {
                         targetSection.classList.add('active');
                         
-                        // Tracker la navigation si Analytics disponible
                         if (isAnalyticsReady && window.analytics) {
                             import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
                                 .then(({ logEvent }) => {
@@ -1260,32 +1281,28 @@
                                         page_location: window.location.href + '#' + targetId
                                     });
                                 })
-                                .catch(e => console.log('Analytics navigation error:', e));
+                                .catch(e => console.log('Analytics nav error:', e));
                         }
                     }
                 });
             });
         }
 
+        // Placeholder functions
+        function showFirebaseDetails() {
+            showNotification('🔧 Détails Firebase: Console du navigateur (F12)', 'info');
+            console.log('=== FIREBASE DETAILS ===');
+            console.log('Ready:', isFirebaseReady);
+            console.log('Analytics:', isAnalyticsReady);
+            console.log('User:', currentUser);
+            console.log('App:', window.firebaseApp);
+        }
+
         // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initialisation SYNERGIA v3.0...');
-            
+        document.addEventListener('DOMContentLoaded', async function() {
             setupNavigation();
-            checkFirebaseStatus();
             
-            // Event listeners
-            document.getElementById('refresh-dashboard')?.addEventListener('click', refreshDashboard);
-            document.getElementById('logout-btn')?.addEventListener('click', () => {
-                if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                    if (window.firebase && window.auth) {
-                        window.firebase.signOut(window.auth);
-                    }
-                    showNotification('👋 À bientôt !', 'info');
-                }
-            });
-            
-            // Styles d'animation pour les notifications
+            // Styles d'animation
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes slideInRight {
@@ -1299,31 +1316,22 @@
             `;
             document.head.appendChild(style);
             
-            // Message de bienvenue après un délai
-            setTimeout(() => {
-                showNotification('🎉 SYNERGIA v3.0 initialisé avec Firebase!', 'success');
-                updateRecentActivities('Application SYNERGIA v3.0 démarrée');
-            }, 1000);
-            
-            // Mise à jour périodique du statut
-            setInterval(() => {
-                if (isFirebaseReady) {
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString('fr-FR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                    // Mise à jour discrète de l'heure (optionnel)
+            // Event listeners
+            document.getElementById('refresh-dashboard')?.addEventListener('click', refreshDashboard);
+            document.getElementById('logout-btn')?.addEventListener('click', () => {
+                if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                    if (window.firebase && window.auth) {
+                        window.firebase.signOut(window.auth);
+                    }
+                    showNotification('👋 À bientôt !', 'info');
                 }
-            }, 60000); // Toutes les minutes
+            });
+            
+            // Attendre l'initialisation Firebase
+            await waitForFirebaseInit();
             
             console.log('✅ SYNERGIA v3.0 prêt !');
         });
-
-        // Modal Firebase (placeholder)
-        function showFirebaseModal() {
-            showNotification('🔧 Modal Firebase en développement', 'info');
-        }
     </script>
 </body>
 </html>

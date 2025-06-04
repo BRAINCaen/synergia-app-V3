@@ -1919,7 +1919,8 @@
                     <label for="event-participants">
                         <i class="fas fa-users"></i> Participants
                     </label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; background: #f8f9fa;">
+                    <fieldset style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; background: #f8f9fa;">
+                        <legend style="display: none;">Sélection des participants</legend>
                         <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
                             <input type="checkbox" value="all" checked> Toute l'équipe
                         </label>
@@ -1932,7 +1933,7 @@
                         <label style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
                             <input type="checkbox" value="marie"> Marie Dubois
                         </label>
-                    </div>
+                    </fieldset>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="document.getElementById('add-event-modal').style.display='none'">

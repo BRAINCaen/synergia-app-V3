@@ -83,6 +83,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            overflow-x: hidden;
         }
 
         .navbar {
@@ -151,9 +152,12 @@
         .main-content {
             max-width: 1200px;
             margin: 2rem auto;
-            padding: 0 2rem;
+            padding: 0 2rem 4rem 2rem;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Masquer tout contenu qui pourrait déborder */
         .content-section {
             display: none;
             background: white;
@@ -161,10 +165,38 @@
             padding: 2rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
         }
 
         .content-section.active {
             display: block;
+        }
+
+        /* Footer padding pour éviter que le contenu touche le bas */
+        .main-content::after {
+            content: '';
+            display: block;
+            height: 2rem;
+        }
+
+        /* Masquer le debug text qui peut apparaître */
+        body > div:last-child:not(.main-content):not(.navbar):not(#toast-container) {
+            display: none !important;
+        }
+
+        /* Style pour masquer le contenu de debug potentiel */
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(to top, rgba(102, 126, 234, 1), transparent);
+            pointer-events: none;
+            z-index: 5;
         }
 
         .section-header {
@@ -4846,6 +4878,27 @@
         setInterval(() => {
             updateDashboardStats();
         }, 30000); // Toutes les 30 secondes
+
+        // Nettoyage du contenu de debug potentiel
+        document.addEventListener('DOMContentLoaded', function() {
+            // Nettoyer tout texte qui pourrait apparaître en dehors des containers
+            setTimeout(() => {
+                const bodyChildren = document.body.children;
+                for (let i = bodyChildren.length - 1; i >= 0; i--) {
+                    const child = bodyChildren[i];
+                    if (child.nodeType === Node.TEXT_NODE || 
+                        (child.tagName && !['NAV', 'MAIN', 'DIV'].includes(child.tagName) && 
+                         !child.classList.contains('modal') && 
+                         !child.classList.contains('notification') &&
+                         child.id !== 'toast-container')) {
+                        // Vérifier si c'est du contenu de debug
+                        if (child.textContent && child.textContent.includes('demo')) {
+                            child.style.display = 'none';
+                        }
+                    }
+                }
+            }, 1000);
+        });
 
     </script>
 </body>

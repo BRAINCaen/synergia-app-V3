@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYNERGIA v3.0 - Gestion d'équipe</title>
     
+    <!-- Politique de sécurité du contenu mise à jour pour Analytics -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+            https://www.gstatic.com 
+            https://www.googleapis.com 
+            https://cdn.jsdelivr.net 
+            https://www.googletagmanager.com;
+        style-src 'self' 'unsafe-inline' 
+            https://cdnjs.cloudflare.com 
+            https://fonts.googleapis.com;
+        font-src 'self' 
+            https://cdnjs.cloudflare.com 
+            https://fonts.gstatic.com;
+        connect-src 'self' 
+            https://www.gstatic.com 
+            https://www.googleapis.com 
+            https://firestore.googleapis.com 
+            https://www.google-analytics.com
+            https://analytics.google.com;
+        img-src 'self' data: https:;
+    ">
+    
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -15,9 +38,8 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
-        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
 
-        // Configuration Firebase - Mise à jour avec vos vraies clés
+        // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
             authDomain: "synergia-app-f27e7.firebaseapp.com",
@@ -30,16 +52,25 @@
 
         // Initialisation Firebase
         let app;
-        let analytics;
+        let analytics = null;
         try {
             app = initializeApp(firebaseConfig);
-            analytics = getAnalytics(app);
             
             window.firebaseApp = app;
             window.auth = getAuth(app);
             window.db = getFirestore(app);
             window.storage = getStorage(app);
-            window.analytics = analytics;
+            
+            // Initialisation conditionnelle d'Analytics
+            try {
+                const { getAnalytics } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js');
+                analytics = getAnalytics(app);
+                window.analytics = analytics;
+                console.log('📊 Analytics activé avec succès');
+            } catch (analyticsError) {
+                console.warn('⚠️ Analytics non disponible (CSP ou autre):', analyticsError.message);
+                console.log('📊 Application fonctionnelle sans Analytics');
+            }
             
             // Rendre les fonctions Firebase disponibles globalement
             window.firebase = {
@@ -50,12 +81,14 @@
             };
             
             console.log('✅ Firebase initialisé avec succès');
-            console.log('📊 Analytics activé');
             window.firebaseReady = true;
+            window.analyticsReady = analytics !== null;
+            
         } catch (error) {
             console.error('❌ Erreur d\'initialisation Firebase:', error);
             console.log('⚠️ Activation du mode démo');
             window.firebaseReady = false;
+            window.analyticsReady = false;
         }
     </script>
     
@@ -281,22 +314,7 @@
             border-bottom: none;
         }
 
-        /* Autres styles... (continu avec le reste du CSS du document original) */
-        
-        /* Google Calendar styles */
-        .google-auth-section {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .google-connected {
-            background: #e8f5e8;
-            border: 1px solid #28a745;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-
+        /* Status indicators */
         .sync-status {
             display: inline-flex;
             align-items: center;
@@ -308,10 +326,19 @@
             font-size: 0.9rem;
         }
 
+        .sync-status.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .sync-status.error {
+            background: #dc3545;
+        }
+
         .sync-indicator {
             width: 8px;
             height: 8px;
-            background: #28a745;
+            background: currentColor;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -494,31 +521,67 @@
                         </div>
                         <div class="activity-item">
                             <i class="fab fa-google" style="color: #4285f4;"></i>
-                            <span>Configuration Firebase active</span>
+                            <span>Authentification Firebase active</span>
                             <small style="margin-left: auto; color: #666;">Il y a 2 minutes</small>
                         </div>
                         <div class="activity-item">
                             <i class="fas fa-users" style="color: #28a745;"></i>
-                            <span>Équipe chargée (3 membres)</span>
+                            <span>Utilisateur connecté: allan.boehme61@gmail.com</span>
                             <small style="margin-left: auto; color: #666;">Il y a 5 minutes</small>
                         </div>
                     </div>
                 </div>
 
                 <div class="dashboard-widget">
-                    <h3><i class="fab fa-google"></i> Firebase Status</h3>
+                    <h3><i class="fas fa-database"></i> Statut Firebase</h3>
                     <div style="text-align: center; padding: 1rem;">
-                        <div id="google-status" class="sync-status" style="margin-bottom: 1rem;">
+                        <div id="firebase-status-dashboard" class="sync-status" style="margin-bottom: 1rem;">
                             <div class="sync-indicator"></div>
                             <span>Firebase Connecté</span>
                         </div>
                         <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
-                            Projet: synergia-app-f27e7<br>
-                            Analytics: Actif
+                            <div>Projet: <strong>synergia-app-f27e7</strong></div>
+                            <div id="analytics-status-dashboard">Analytics: <span id="analytics-status-text">Chargement...</span></div>
+                            <div>Auth: <span id="auth-status-text">Actif</span></div>
                         </div>
                         <button onclick="showFirebaseModal()" class="btn btn-primary">
                             <i class="fas fa-database"></i>
                             Gérer Firebase
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-widget">
+                    <h3><i class="fas fa-chart-line"></i> Analytics & Métriques</h3>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 1.5rem; color: #667eea; margin-bottom: 0.5rem;">1,250</div>
+                            <div style="color: #666; font-size: 0.9rem;">Points d'expérience totaux</div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 1.2rem; color: #28a745; margin-bottom: 0.5rem;">87%</div>
+                            <div style="color: #666; font-size: 0.9rem;">Taux de completion missions</div>
+                        </div>
+                        <button onclick="trackCustomEvent()" class="btn btn-secondary">
+                            <i class="fas fa-chart-bar"></i>
+                            Voir Analytics
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-widget">
+                    <h3><i class="fas fa-cloud"></i> Synchronisation Cloud</h3>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div id="sync-status-display" class="sync-status" style="margin-bottom: 1rem;">
+                            <div class="sync-indicator"></div>
+                            <span>Données synchronisées</span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+                            Dernière sync: <span id="last-sync-time">Il y a 2 minutes</span>
+                        </div>
+                        <button onclick="forceSyncData()" class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i>
+                            Forcer la sync
                         </button>
                     </div>
                 </div>
@@ -534,20 +597,27 @@
                         <i class="fas fa-save"></i>
                         Sauvegarder
                     </button>
+                    <button onclick="exportSettings()" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Exporter
+                    </button>
                 </div>
             </div>
 
-            <!-- Statut Firebase -->
+            <!-- Statut Firebase Détaillé -->
             <div id="firebase-status" style="background: #e8f5e8; border: 1px solid #28a745; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                     <i class="fas fa-database" style="color: #28a745;"></i>
                     <strong style="color: #155724;">Statut Firebase</strong>
                 </div>
-                <p style="color: #155724; margin: 0;">
-                    <span id="firebase-status-text">✅ Connecté et configuré</span>
-                    <br><small>Projet: <span id="firebase-project">synergia-app-f27e7</span></small>
-                    <br><small>Analytics: <span id="firebase-analytics">Actif</span></small>
-                </p>
+                <div id="firebase-status-details" style="color: #155724; font-size: 0.9rem;">
+                    <div>✅ <strong>App:</strong> Initialisé</div>
+                    <div>✅ <strong>Auth:</strong> Connecté (alan.boehme61@gmail.com)</div>
+                    <div>✅ <strong>Firestore:</strong> Opérationnel</div>
+                    <div>✅ <strong>Storage:</strong> Disponible</div>
+                    <div id="analytics-status-detail">⚠️ <strong>Analytics:</strong> Chargement...</div>
+                    <div style="margin-top: 0.5rem;"><strong>Projet:</strong> synergia-app-f27e7</div>
+                </div>
             </div>
 
             <!-- Configuration Firebase -->
@@ -558,33 +628,39 @@
                     <div>
                         <div class="form-group">
                             <label>API Key</label>
-                            <input type="password" id="firebase-api-key" value="AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8">
+                            <input type="password" id="firebase-api-key" value="AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8" readonly>
                         </div>
                         <div class="form-group">
                             <label>Auth Domain</label>
-                            <input type="text" id="firebase-auth-domain" value="synergia-app-f27e7.firebaseapp.com">
+                            <input type="text" id="firebase-auth-domain" value="synergia-app-f27e7.firebaseapp.com" readonly>
                         </div>
                         <div class="form-group">
                             <label>Project ID</label>
-                            <input type="text" id="firebase-project-id" value="synergia-app-f27e7">
+                            <input type="text" id="firebase-project-id" value="synergia-app-f27e7" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Storage Bucket</label>
+                            <input type="text" id="firebase-storage-bucket" value="synergia-app-f27e7.firebasestorage.app" readonly>
                         </div>
                     </div>
                     <div>
                         <div class="form-group">
-                            <label>Storage Bucket</label>
-                            <input type="text" id="firebase-storage-bucket" value="synergia-app-f27e7.firebasestorage.app">
-                        </div>
-                        <div class="form-group">
                             <label>Messaging Sender ID</label>
-                            <input type="text" id="firebase-messaging-sender-id" value="201912738922">
+                            <input type="text" id="firebase-messaging-sender-id" value="201912738922" readonly>
                         </div>
                         <div class="form-group">
                             <label>App ID</label>
-                            <input type="text" id="firebase-app-id" value="1:201912738922:web:2fcc1e49293bb632899613">
+                            <input type="text" id="firebase-app-id" value="1:201912738922:web:2fcc1e49293bb632899613" readonly>
                         </div>
                         <div class="form-group">
-                            <label>Measurement ID</label>
-                            <input type="text" id="firebase-measurement-id" value="G-EGJ79SCMWX">
+                            <label>Measurement ID (Analytics)</label>
+                            <input type="text" id="firebase-measurement-id" value="G-EGJ79SCMWX" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Statut Analytics</label>
+                            <div id="analytics-config-status" style="padding: 0.75rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; color: #856404;">
+                                <i class="fas fa-exclamation-triangle"></i> Vérification en cours...
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -596,8 +672,89 @@
                     <button onclick="initializeFirebaseData()" class="btn btn-secondary">
                         <i class="fas fa-database"></i> Initialiser les données
                     </button>
+                    <button onclick="testAnalytics()" class="btn btn-secondary">
+                        <i class="fas fa-chart-bar"></i> Tester Analytics
+                    </button>
                 </div>
             </div>
+
+            <!-- Outils de développement -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-tools"></i> Outils de Développement</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-console" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+                        <h4>Console Logs</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Voir les logs de débogage</p>
+                        <button onclick="showConsoleLogs()" class="btn btn-secondary">
+                            <i class="fas fa-terminal"></i> Ouvrir Console
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-bug" style="font-size: 2rem; color: #28a745; margin-bottom: 1rem;"></i>
+                        <h4>Mode Debug</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Activer le mode débogage</p>
+                        <button onclick="toggleDebugMode()" class="btn btn-secondary">
+                            <i class="fas fa-bug"></i> <span id="debug-btn-text">Activer Debug</span>
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; border: 1px solid #e9ecef; border-radius: 8px;">
+                        <i class="fas fa-download" style="font-size: 2rem; color: #ffc107; margin-bottom: 1rem;"></i>
+                        <h4>Export Données</h4>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Exporter toutes les données</p>
+                        <button onclick="exportAllData()" class="btn btn-secondary">
+                            <i class="fas fa-file-export"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team (placeholder) -->
+        <section id="team" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Ajouter membre
+                    </button>
+                </div>
+            </div>
+            <p>Section équipe en développement...</p>
+        </section>
+
+        <!-- Planning (placeholder) -->
+        <section id="planning" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-calendar"></i> Planning</h1>
+                <div class="section-actions">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Nouvel événement
+                    </button>
+                </div>
+            </div>
+            <p>Section planning en développement...</p>
+        </section>
+
+        <!-- Chat (placeholder) -->
+        <section id="chat" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-comments"></i> Chat d'équipe</h1>
+            </div>
+            <p>Section chat en développement...</p>
+        </section>
+
+        <!-- Quests (placeholder) -->
+        <section id="quests" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-trophy"></i> Missions & Récompenses</h1>
+            </div>
+            <p>Section missions en développement...</p>
         </section>
     </main>
 
@@ -605,13 +762,18 @@
         // Variables globales
         let currentUser = null;
         let isFirebaseReady = false;
+        let isAnalyticsReady = false;
+        let isDebugMode = false;
 
-        // Vérification de l'état Firebase
+        // Vérification de l'état Firebase et Analytics
         function checkFirebaseStatus() {
             if (window.firebaseReady) {
                 console.log('✅ Firebase prêt et configuré');
                 isFirebaseReady = true;
+                isAnalyticsReady = window.analyticsReady || false;
+                
                 updateFirebaseStatusDisplay();
+                updateAnalyticsStatus();
                 setupFirebaseAuth();
             } else {
                 console.log('❌ Firebase non disponible');
@@ -621,18 +783,53 @@
 
         // Mise à jour de l'affichage du statut Firebase
         function updateFirebaseStatusDisplay() {
-            const statusElement = document.getElementById('firebase-status-text');
-            const projectElement = document.getElementById('firebase-project');
-            const analyticsElement = document.getElementById('firebase-analytics');
+            // Dashboard
+            const dashboardStatus = document.getElementById('firebase-status-dashboard');
+            if (dashboardStatus && isFirebaseReady) {
+                dashboardStatus.className = 'sync-status';
+                dashboardStatus.innerHTML = '<div class="sync-indicator"></div><span>Firebase Connecté</span>';
+            }
+
+            // Settings - Statut détaillé
+            const analyticsDetail = document.getElementById('analytics-status-detail');
+            if (analyticsDetail) {
+                if (isAnalyticsReady) {
+                    analyticsDetail.innerHTML = '✅ <strong>Analytics:</strong> Opérationnel';
+                } else {
+                    analyticsDetail.innerHTML = '⚠️ <strong>Analytics:</strong> Indisponible (CSP)';
+                }
+            }
+
+            // Status de configuration Analytics
+            const analyticsConfigStatus = document.getElementById('analytics-config-status');
+            if (analyticsConfigStatus) {
+                if (isAnalyticsReady) {
+                    analyticsConfigStatus.style.background = '#d4edda';
+                    analyticsConfigStatus.style.borderColor = '#28a745';
+                    analyticsConfigStatus.style.color = '#155724';
+                    analyticsConfigStatus.innerHTML = '<i class="fas fa-check-circle"></i> Analytics opérationnel';
+                } else {
+                    analyticsConfigStatus.style.background = '#fff3cd';
+                    analyticsConfigStatus.style.borderColor = '#ffc107';
+                    analyticsConfigStatus.style.color = '#856404';
+                    analyticsConfigStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Analytics indisponible (CSP/Bloqueur pub)';
+                }
+            }
+        }
+
+        // Mise à jour du statut Analytics
+        function updateAnalyticsStatus() {
+            const dashboardAnalyticsStatus = document.getElementById('analytics-status-text');
+            const authStatus = document.getElementById('auth-status-text');
             
-            if (isFirebaseReady) {
-                statusElement.textContent = '✅ Connecté et configuré';
-                projectElement.textContent = 'synergia-app-f27e7';
-                analyticsElement.textContent = 'Actif';
-            } else {
-                statusElement.textContent = '❌ Non connecté';
-                projectElement.textContent = 'Non configuré';
-                analyticsElement.textContent = 'Inactif';
+            if (dashboardAnalyticsStatus) {
+                dashboardAnalyticsStatus.textContent = isAnalyticsReady ? 'Actif' : 'Indisponible';
+                dashboardAnalyticsStatus.style.color = isAnalyticsReady ? '#28a745' : '#ffc107';
+            }
+
+            if (authStatus) {
+                authStatus.textContent = currentUser ? 'Connecté' : 'Non connecté';
+                authStatus.style.color = currentUser ? '#28a745' : '#dc3545';
             }
         }
 
@@ -644,43 +841,100 @@
                 if (user) {
                     currentUser = user;
                     console.log(`👤 Utilisateur connecté: ${user.email}`);
-                    document.getElementById('user-name').textContent = user.displayName || user.email;
+                    document.getElementById('user-name').textContent = user.displayName || user.email.split('@')[0];
+                    updateAnalyticsStatus();
+                    
+                    // Mettre à jour les activités
+                    updateRecentActivities('Utilisateur connecté: ' + user.email);
                 } else {
                     console.log('👤 Aucun utilisateur connecté');
-                    showLoginForm();
+                    currentUser = null;
+                    updateAnalyticsStatus();
                 }
             });
         }
 
-        // Afficher le formulaire de connexion
-        function showLoginForm() {
-            // Simulation - en production, afficher une vraie modal de connexion
-            console.log('🔑 Formulaire de connexion requis');
-        }
-
         // Test de connexion Firebase
         function testFirebaseConnection() {
-            if (isFirebaseReady) {
-                showNotification('✅ Connexion Firebase réussie!', 'success');
-                
-                // Test d'écriture dans Firestore
-                const testDoc = {
-                    test: true,
-                    timestamp: window.firebase.serverTimestamp(),
-                    message: 'Test de connexion SYNERGIA v3.0'
-                };
-                
-                window.firebase.addDoc(
-                    window.firebase.collection(window.db, 'tests'), 
-                    testDoc
-                ).then(() => {
-                    showNotification('📝 Test d\'écriture Firestore réussi!', 'success');
-                }).catch((error) => {
-                    showNotification('❌ Erreur test Firestore: ' + error.message, 'error');
-                });
-                
-            } else {
+            if (!isFirebaseReady) {
                 showNotification('❌ Firebase non disponible', 'error');
+                return;
+            }
+
+            showNotification('🔍 Test de connexion Firebase...', 'info');
+            
+            // Test d'écriture dans Firestore
+            const testDoc = {
+                test: true,
+                timestamp: window.firebase.serverTimestamp(),
+                message: 'Test de connexion SYNERGIA v3.0',
+                user: currentUser ? currentUser.email : 'anonyme'
+            };
+            
+            window.firebase.addDoc(
+                window.firebase.collection(window.db, 'tests'), 
+                testDoc
+            ).then((docRef) => {
+                showNotification('✅ Connexion Firebase et Firestore réussie!', 'success');
+                console.log('📝 Document test créé:', docRef.id);
+                
+                // Supprimer le document test après 5 secondes
+                setTimeout(() => {
+                    window.firebase.deleteDoc(window.firebase.doc(window.db, 'tests', docRef.id))
+                        .then(() => console.log('🧹 Document test supprimé'))
+                        .catch(e => console.log('⚠️ Erreur suppression test:', e));
+                }, 5000);
+                
+            }).catch((error) => {
+                showNotification('❌ Erreur test Firestore: ' + error.message, 'error');
+                console.error('❌ Erreur test:', error);
+            });
+        }
+
+        // Test Analytics (si disponible)
+        function testAnalytics() {
+            if (isAnalyticsReady && window.analytics) {
+                showNotification('📊 Test Analytics...', 'info');
+                
+                try {
+                    // Importer et utiliser logEvent
+                    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
+                        .then(({ logEvent }) => {
+                            logEvent(window.analytics, 'synergia_test_event', {
+                                event_category: 'test',
+                                event_label: 'manual_test',
+                                value: 1
+                            });
+                            showNotification('✅ Événement Analytics envoyé!', 'success');
+                        })
+                        .catch(error => {
+                            showNotification('❌ Erreur test Analytics: ' + error.message, 'error');
+                        });
+                } catch (error) {
+                    showNotification('❌ Analytics non disponible: ' + error.message, 'error');
+                }
+            } else {
+                showNotification('⚠️ Analytics non disponible (CSP ou bloqueur)', 'warning');
+            }
+        }
+
+        // Suivre un événement personnalisé
+        function trackCustomEvent() {
+            if (isAnalyticsReady && window.analytics) {
+                import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
+                    .then(({ logEvent }) => {
+                        logEvent(window.analytics, 'dashboard_analytics_view', {
+                            event_category: 'engagement',
+                            event_label: 'dashboard_widget',
+                            user_id: currentUser ? currentUser.uid : 'anonymous'
+                        });
+                        showNotification('📊 Événement Analytics enregistré', 'success');
+                    })
+                    .catch(error => {
+                        console.warn('Analytics error:', error);
+                    });
+            } else {
+                showNotification('📊 Simulation événement Analytics (non disponible)', 'info');
             }
         }
 
@@ -693,15 +947,16 @@
             
             showNotification('🚀 Initialisation des données Firebase...', 'info');
             
-            // Créer les collections de base
-            const collections = ['users', 'teams', 'projects', 'missions'];
+            const collections = ['users', 'teams', 'projects', 'missions', 'events'];
+            let initialized = 0;
             
             collections.forEach(async (collectionName) => {
                 try {
                     const initDoc = {
                         initialized: true,
                         createdAt: window.firebase.serverTimestamp(),
-                        version: '3.0'
+                        version: '3.0',
+                        createdBy: currentUser ? currentUser.email : 'system'
                     };
                     
                     await window.firebase.addDoc(
@@ -709,14 +964,30 @@
                         initDoc
                     );
                     
+                    initialized++;
                     console.log(`✅ Collection ${collectionName} initialisée`);
+                    
+                    if (initialized === collections.length) {
+                        showNotification('✅ Toutes les collections initialisées!', 'success');
+                        updateRecentActivities('Collections Firebase initialisées');
+                    }
                 } catch (error) {
                     console.error(`❌ Erreur initialisation ${collectionName}:`, error);
+                    showNotification(`❌ Erreur ${collectionName}: ${error.message}`, 'error');
                 }
             });
+        }
+
+        // Forcer la synchronisation des données
+        function forceSyncData() {
+            showNotification('🔄 Synchronisation forcée...', 'info');
             
+            // Simuler la synchronisation
             setTimeout(() => {
-                showNotification('✅ Données Firebase initialisées!', 'success');
+                const now = new Date();
+                document.getElementById('last-sync-time').textContent = 'À l\'instant';
+                showNotification('✅ Synchronisation terminée!', 'success');
+                updateRecentActivities('Synchronisation des données forcée');
             }, 2000);
         }
 
@@ -724,40 +995,204 @@
         function saveAllSettings() {
             showNotification('💾 Sauvegarde des paramètres...', 'info');
             
-            if (isFirebaseReady) {
-                // Sauvegarder dans Firebase
+            if (isFirebaseReady && currentUser) {
                 const settings = {
+                    userId: currentUser.uid,
                     firebaseConfig: {
-                        apiKey: document.getElementById('firebase-api-key').value,
-                        authDomain: document.getElementById('firebase-auth-domain').value,
-                        projectId: document.getElementById('firebase-project-id').value,
-                        storageBucket: document.getElementById('firebase-storage-bucket').value,
-                        messagingSenderId: document.getElementById('firebase-messaging-sender-id').value,
-                        appId: document.getElementById('firebase-app-id').value,
-                        measurementId: document.getElementById('firebase-measurement-id').value
+                        projectId: 'synergia-app-f27e7',
+                        analyticsEnabled: isAnalyticsReady
+                    },
+                    userPreferences: {
+                        debugMode: isDebugMode,
+                        lastSave: new Date().toISOString()
                     },
                     updatedAt: window.firebase.serverTimestamp()
                 };
                 
                 window.firebase.setDoc(
-                    window.firebase.doc(window.db, 'settings', 'app-config'),
+                    window.firebase.doc(window.db, 'user-settings', currentUser.uid),
                     settings
                 ).then(() => {
                     showNotification('✅ Paramètres sauvegardés dans Firebase!', 'success');
+                    updateRecentActivities('Paramètres utilisateur sauvegardés');
                 }).catch((error) => {
                     showNotification('❌ Erreur sauvegarde: ' + error.message, 'error');
                 });
             } else {
                 // Sauvegarde locale
-                localStorage.setItem('synergia-settings', JSON.stringify({
+                const localSettings = {
                     saved: true,
-                    timestamp: new Date().toISOString()
-                }));
+                    timestamp: new Date().toISOString(),
+                    debugMode: isDebugMode
+                };
+                localStorage.setItem('synergia-settings', JSON.stringify(localSettings));
                 showNotification('✅ Paramètres sauvegardés localement!', 'success');
             }
         }
 
-        // Système de notifications
+        // Export des paramètres
+        function exportSettings() {
+            const settings = {
+                exportDate: new Date().toISOString(),
+                firebaseStatus: {
+                    ready: isFirebaseReady,
+                    analyticsReady: isAnalyticsReady,
+                    userConnected: !!currentUser,
+                    userEmail: currentUser ? currentUser.email : null
+                },
+                configuration: {
+                    projectId: 'synergia-app-f27e7',
+                    debugMode: isDebugMode
+                },
+                version: '3.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `synergia_config_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('📥 Configuration exportée!', 'success');
+        }
+
+        // Export de toutes les données
+        function exportAllData() {
+            showNotification('📦 Export des données en cours...', 'info');
+            
+            // Simuler l'export
+            setTimeout(() => {
+                const data = {
+                    exportDate: new Date().toISOString(),
+                    userData: {
+                        email: currentUser ? currentUser.email : null,
+                        level: 5,
+                        xp: 1250
+                    },
+                    stats: {
+                        teamCount: 3,
+                        activeQuests: 5,
+                        eventsToday: 2
+                    },
+                    systemInfo: {
+                        firebase: isFirebaseReady,
+                        analytics: isAnalyticsReady,
+                        version: '3.0'
+                    }
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `synergia_data_export_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showNotification('✅ Données exportées!', 'success');
+            }, 1500);
+        }
+
+        // Toggle mode debug
+        function toggleDebugMode() {
+            isDebugMode = !isDebugMode;
+            const btn = document.getElementById('debug-btn-text');
+            btn.textContent = isDebugMode ? 'Désactiver Debug' : 'Activer Debug';
+            
+            if (isDebugMode) {
+                console.log('🐛 Mode debug activé');
+                showNotification('🐛 Mode debug activé', 'info');
+                // Afficher plus d'infos dans la console
+                console.log('📊 État Firebase:', { isFirebaseReady, isAnalyticsReady });
+                console.log('👤 Utilisateur:', currentUser);
+            } else {
+                console.log('🐛 Mode debug désactivé');
+                showNotification('Mode debug désactivé', 'info');
+            }
+        }
+
+        // Afficher les logs de la console
+        function showConsoleLogs() {
+            showNotification('🖥️ Consultez la console du navigateur (F12)', 'info');
+            console.log('📝 === SYNERGIA v3.0 DEBUG LOGS ===');
+            console.log('🔧 Firebase Status:', {
+                ready: isFirebaseReady,
+                analytics: isAnalyticsReady,
+                user: currentUser ? currentUser.email : null,
+                timestamp: new Date().toISOString()
+            });
+            console.log('🌐 Browser Info:', {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled
+            });
+            console.log('📊 App State:', {
+                debugMode: isDebugMode,
+                currentSection: document.querySelector('.nav-link.active')?.textContent?.trim()
+            });
+        }
+
+        // Mettre à jour les activités récentes
+        function updateRecentActivities(activity) {
+            const activitiesContainer = document.getElementById('recent-activities');
+            if (!activitiesContainer) return;
+            
+            const activityElement = document.createElement('div');
+            activityElement.className = 'activity-item';
+            activityElement.innerHTML = `
+                <i class="fas fa-info-circle" style="color: #667eea;"></i>
+                <span>${activity}</span>
+                <small style="margin-left: auto; color: #666;">À l'instant</small>
+            `;
+            
+            // Ajouter en premier
+            activitiesContainer.insertBefore(activityElement, activitiesContainer.firstChild);
+            
+            // Garder seulement les 5 dernières activités
+            const activities = activitiesContainer.children;
+            if (activities.length > 5) {
+                activitiesContainer.removeChild(activities[activities.length - 1]);
+            }
+        }
+
+        // Actualisation du dashboard
+        function refreshDashboard() {
+            showNotification('🔄 Actualisation du dashboard...', 'info');
+            
+            // Simuler le chargement de nouvelles données
+            setTimeout(() => {
+                // Mise à jour des statistiques avec des valeurs aléatoires
+                const newTeamCount = Math.floor(Math.random() * 10) + 1;
+                const newQuestCount = Math.floor(Math.random() * 15) + 1;
+                const newEventCount = Math.floor(Math.random() * 5) + 1;
+                
+                document.getElementById('team-count').textContent = newTeamCount;
+                document.getElementById('active-quests').textContent = newQuestCount;
+                document.getElementById('events-today').textContent = newEventCount;
+                
+                // Mettre à jour l'heure de dernière sync
+                document.getElementById('last-sync-time').textContent = 'À l\'instant';
+                
+                showNotification('✅ Dashboard actualisé!', 'success');
+                updateRecentActivities('Dashboard actualisé avec nouvelles données');
+                
+                // Tracker l'événement si Analytics disponible
+                if (isAnalyticsReady && window.analytics) {
+                    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
+                        .then(({ logEvent }) => {
+                            logEvent(window.analytics, 'dashboard_refresh', {
+                                event_category: 'user_action',
+                                value: 1
+                            });
+                        })
+                        .catch(e => console.log('Analytics log error:', e));
+                }
+            }, 1500);
+        }
+
+        // Système de notifications amélioré
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
@@ -770,13 +1205,21 @@
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                 z-index: 3000;
-                border-left: 4px solid ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#667eea'};
+                border-left: 4px solid ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#667eea'};
                 animation: slideInRight 0.3s ease;
+                max-width: 350px;
             `;
+            
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-triangle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
             
             notification.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                    <i class="fas fa-${icons[type]}"></i>
                     <span>${message}</span>
                 </div>
             `;
@@ -784,7 +1227,8 @@
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.remove();
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
 
@@ -806,23 +1250,21 @@
                     const targetSection = document.getElementById(targetId);
                     if (targetSection) {
                         targetSection.classList.add('active');
+                        
+                        // Tracker la navigation si Analytics disponible
+                        if (isAnalyticsReady && window.analytics) {
+                            import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js')
+                                .then(({ logEvent }) => {
+                                    logEvent(window.analytics, 'page_view', {
+                                        page_title: targetId,
+                                        page_location: window.location.href + '#' + targetId
+                                    });
+                                })
+                                .catch(e => console.log('Analytics navigation error:', e));
+                        }
                     }
                 });
             });
-        }
-
-        // Actualisation du dashboard
-        function refreshDashboard() {
-            showNotification('🔄 Actualisation du dashboard...', 'info');
-            
-            // Simuler le chargement de nouvelles données
-            setTimeout(() => {
-                document.getElementById('team-count').textContent = Math.floor(Math.random() * 10) + 1;
-                document.getElementById('active-quests').textContent = Math.floor(Math.random() * 15) + 1;
-                document.getElementById('events-today').textContent = Math.floor(Math.random() * 5) + 1;
-                
-                showNotification('✅ Dashboard actualisé!', 'success');
-            }, 1500);
         }
 
         // Initialisation
@@ -833,26 +1275,55 @@
             checkFirebaseStatus();
             
             // Event listeners
-            document.getElementById('refresh-dashboard').addEventListener('click', refreshDashboard);
+            document.getElementById('refresh-dashboard')?.addEventListener('click', refreshDashboard);
+            document.getElementById('logout-btn')?.addEventListener('click', () => {
+                if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                    if (window.firebase && window.auth) {
+                        window.firebase.signOut(window.auth);
+                    }
+                    showNotification('👋 À bientôt !', 'info');
+                }
+            });
             
-            // Animation CSS pour les notifications
+            // Styles d'animation pour les notifications
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes slideInRight {
-                    from {
-                        opacity: 0;
-                        transform: translateX(100px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0);
-                    }
+                    from { opacity: 0; transform: translateX(100px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes slideOutRight {
+                    from { opacity: 1; transform: translateX(0); }
+                    to { opacity: 0; transform: translateX(100px); }
                 }
             `;
             document.head.appendChild(style);
             
-            showNotification('🎉 SYNERGIA v3.0 initialisé avec Firebase!', 'success');
+            // Message de bienvenue après un délai
+            setTimeout(() => {
+                showNotification('🎉 SYNERGIA v3.0 initialisé avec Firebase!', 'success');
+                updateRecentActivities('Application SYNERGIA v3.0 démarrée');
+            }, 1000);
+            
+            // Mise à jour périodique du statut
+            setInterval(() => {
+                if (isFirebaseReady) {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    // Mise à jour discrète de l'heure (optionnel)
+                }
+            }, 60000); // Toutes les minutes
+            
+            console.log('✅ SYNERGIA v3.0 prêt !');
         });
+
+        // Modal Firebase (placeholder)
+        function showFirebaseModal() {
+            showNotification('🔧 Modal Firebase en développement', 'info');
+        }
     </script>
 </body>
 </html>

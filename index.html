@@ -2996,8 +2996,9 @@
                 }, 5000);
             }
 
-            // NOUVEAU CODE CORRIGÉ :
-console.warn('Impossible de sauvegarder l\'historique de présence');
+// CODE CORRIGÉ :
+                } catch (error) {
+                    console.warn('Impossible de sauvegarder l\'historique de présence');
                 }
             }
 

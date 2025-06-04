@@ -18,14 +18,13 @@
 
         // Configuration Firebase - REMPLACEZ PAR VOS VRAIES CLÉS
         const firebaseConfig = {
-          apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
-          authDomain: "synergia-app-f27e7.firebaseapp.com",
-          projectId: "synergia-app-f27e7",
-          storageBucket: "synergia-app-f27e7.firebasestorage.app",
-          messagingSenderId: "201912738922",
-          appId: "1:201912738922:web:2fcc1e49293bb632899613",
-          measurementId: "G-EGJ79SCMWX"
-};
+            apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            authDomain: "synergia-v3.firebaseapp.com",
+            projectId: "synergia-v3",
+            storageBucket: "synergia-v3.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789012345678"
+        };
 
         // Initialisation Firebase
         let app;
@@ -595,57 +594,633 @@
             }
         }
 
-        /* Responsive */
+        /* Mobile-First Responsive Design */
+        
+        /* Responsive breakpoints */
+        @media (max-width: 1024px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Tablet */
         @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 0;
+            }
+
             .nav-container {
                 flex-direction: column;
                 gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .nav-logo {
+                font-size: 1.25rem;
             }
 
             .nav-menu {
-                flex-wrap: wrap;
-                justify-content: center;
+                display: none; /* Caché par défaut sur mobile */
+                flex-direction: column;
+                width: 100%;
+                background: white;
+                border-radius: 8px;
+                padding: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+
+            .nav-menu.mobile-open {
+                display: flex;
+            }
+
+            .nav-link {
+                padding: 1rem;
+                border-radius: 8px;
+                justify-content: flex-start;
+                font-size: 1rem;
+            }
+
+            .nav-user {
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            /* Menu hamburger */
+            .mobile-menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #667eea;
+                cursor: pointer;
+                padding: 0.5rem;
             }
 
             .main-content {
-                padding: 0 1rem;
+                padding: 1rem;
+                margin-top: 1rem;
             }
 
             .content-section {
                 padding: 1rem;
+                border-radius: 12px;
             }
 
             .section-header {
                 flex-direction: column;
                 gap: 1rem;
                 align-items: flex-start;
+                text-align: left;
+            }
+
+            .section-header h1 {
+                font-size: 1.5rem;
             }
 
             .section-actions {
                 width: 100%;
-                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.5rem;
             }
 
+            .section-actions input[type="text"] {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Dashboard mobile */
             .dashboard-stats {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                flex-direction: row;
+            }
+
+            .stat-card i {
+                font-size: 1.5rem;
+            }
+
+            .stat-info h3 {
+                font-size: 1.5rem;
             }
 
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
 
+            .dashboard-widget {
+                padding: 1rem;
+            }
+
+            /* Team mobile */
             .team-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .team-member-card {
+                padding: 1rem;
+            }
+
+            .member-avatar {
+                width: 50px;
+                height: 50px;
+            }
+
+            /* Chat mobile */
+            .chat-container {
+                grid-template-columns: 1fr;
+                height: 70vh;
+                margin: 0 -1rem;
+                border-radius: 0;
+            }
+
+            .chat-sidebar {
+                display: none; /* Caché par défaut sur mobile */
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2000;
+                background: rgba(0, 0, 0, 0.5);
+            }
+
+            .chat-sidebar.mobile-open {
+                display: block;
+            }
+
+            .chat-sidebar > div:first-child {
+                background: white;
+                width: 280px;
+                height: 100%;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .chat-main {
+                height: 70vh;
+            }
+
+            .messages-area {
+                padding: 0.5rem;
+            }
+
+            /* Analytics mobile */
+            .analytics-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .analytics-card {
+                padding: 1rem;
+            }
+
+            /* Analytics Pro mobile */
+            .analytics-pro-container > div:first-child {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .analytics-pro-container > div:first-child > div {
+                padding: 1rem;
+            }
+
+            .analytics-pro-container > div:nth-child(2) {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            /* Planning mobile */
+            .calendar-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .calendar-navigation {
+                justify-content: center;
+            }
+
+            /* Planning grid mobile */
+            div[style*="grid-template-columns: 2fr 1fr"] {
+                display: block !important;
+            }
+
+            div[style*="grid-template-columns: 2fr 1fr"] > div:first-child {
+                margin-bottom: 1rem;
+            }
+
+            /* Quests mobile */
+            .user-progress {
+                padding: 1rem;
+            }
+
+            .level-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .xp-bar {
+                width: 100%;
+            }
+
+            .quests-tabs {
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+
+            .quest-tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+            }
+
+            .quests-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .quest-card {
+                padding: 1rem;
+            }
+
+            /* Settings mobile */
+            .content-section#settings > div:nth-child(3) {
+                display: block !important;
+                gap: 0 !important;
+            }
+
+            .content-section#settings > div:nth-child(3) > div {
+                margin-bottom: 1.5rem;
+            }
+
+            /* Settings grids mobile */
+            .content-section#settings div[style*="grid-template-columns: 1fr 1fr"] {
+                display: block !important;
+            }
+
+            .content-section#settings div[style*="grid-template-columns: 1fr 1fr"] > div {
+                margin-bottom: 1rem;
+            }
+
+            /* Settings grid layouts */
+            .content-section#settings div[style*="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Form controls mobile */
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Buttons mobile */
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                min-height: 44px; /* Touch-friendly */
+            }
+
+            .btn-icon {
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Modal mobile */
+            .modal-content {
+                margin: 0;
+                width: 100%;
+                height: 100vh;
+                max-width: none;
+                border-radius: 0;
+                overflow-y: auto;
+            }
+
+            .modal-content h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Touch-friendly spacing */
+            .activity-item {
+                padding: 1rem 0;
+                min-height: 60px;
+            }
+
+            /* Responsive text */
+            .stat-info p {
+                font-size: 0.9rem;
+            }
+
+            /* Hide desktop-only elements */
+            .desktop-only {
+                display: none !important;
+            }
+        }
+
+        /* Mobile phones */
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.25rem 0;
+            }
+
+            .nav-container {
+                padding: 0 0.5rem;
+            }
+
+            .nav-logo {
+                font-size: 1.1rem;
+            }
+
+            .nav-logo span {
+                display: none; /* Cacher "SYNERGIA v3.0" sur très petit écran */
+            }
+
+            .main-content {
+                padding: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .content-section {
+                padding: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .section-header h1 {
+                font-size: 1.25rem;
+            }
+
+            /* Stats cards très compactes */
+            .stat-card {
+                padding: 0.75rem;
+            }
+
+            .stat-card i {
+                font-size: 1.25rem;
+            }
+
+            .stat-info h3 {
+                font-size: 1.25rem;
+            }
+
+            .stat-info p {
+                font-size: 0.8rem;
+            }
+
+            /* Dashboard widgets compacts */
+            .dashboard-widget {
+                padding: 0.75rem;
+            }
+
+            .dashboard-widget h3 {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            /* Team cards compactes */
+            .team-member-card {
+                padding: 0.75rem;
+            }
+
+            .member-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            /* Chat mobile très compact */
+            .messages-area {
+                padding: 0.25rem;
+                font-size: 0.9rem;
+            }
+
+            .message-input-container {
+                padding: 0.5rem;
+            }
+
+            /* Quest cards compactes */
+            .quest-card {
+                padding: 0.75rem;
+            }
+
+            .quest-tab {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            /* User progress compact */
+            .user-progress {
+                padding: 0.75rem;
+            }
+
+            /* Analytics compact */
+            .analytics-pro-container > div:first-child {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .analytics-pro-container > div:first-child > div {
+                padding: 0.75rem;
+            }
+
+            /* Settings forms compact */
+            .form-group {
+                margin-bottom: 0.75rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+
+            /* Modal pour mobile très petit */
+            .modal-content {
+                padding: 1rem;
+            }
+
+            /* Buttons plus compacts */
+            .btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            /* Responsive utilities */
+            .mobile-only {
+                display: block !important;
+            }
+
+            .mobile-hidden {
+                display: none !important;
+            }
+
+            /* Touch improvements */
+            .btn-icon {
+                min-width: 40px;
+                min-height: 40px;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .nav-container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .nav-menu {
+                display: flex;
+                flex-direction: row;
+                position: relative;
+                background: none;
+                box-shadow: none;
+                padding: 0;
+                gap: 1rem;
+            }
+
+            .nav-menu.mobile-open {
+                display: flex;
+            }
+
+            .mobile-menu-toggle {
+                display: none;
+            }
+
+            .nav-user {
+                flex-direction: row;
+                width: auto;
             }
 
             .chat-container {
-                grid-template-columns: 1fr;
-                height: auto;
+                grid-template-columns: 300px 1fr;
+                height: 50vh;
+            }
+        }
+
+        /* Desktop utilities */
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none;
             }
 
-            .modal-content {
-                margin: 10% auto;
-                width: 95%;
+            .mobile-only {
+                display: none !important;
+            }
+
+            .desktop-only {
+                display: block !important;
+            }
+
+            .nav-menu {
+                display: flex !important;
+            }
+        }
+
+        /* PWA & Mobile app styles */
+        @media (display-mode: standalone) {
+            .navbar {
+                padding-top: env(safe-area-inset-top, 1rem);
+            }
+
+            .main-content {
+                padding-bottom: env(safe-area-inset-bottom, 2rem);
+            }
+        }
+
+        /* High DPI screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .stat-card i,
+            .dashboard-widget i {
+                -webkit-font-smoothing: antialiased;
+            }
+        }
+
+        /* Touch and hover states */
+        @media (hover: hover) {
+            .btn:hover,
+            .nav-link:hover,
+            .team-member-card:hover {
+                /* Hover effects only on devices that support hover */
+            }
+        }
+
+        @media (hover: none) {
+            .btn:active,
+            .nav-link:active,
+            .team-member-card:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+        }
+
+        /* Accessibility improvements for mobile */
+        @media (max-width: 768px) {
+            /* Larger touch targets */
+            .activity-item,
+            .nav-link,
+            .btn,
+            .btn-icon {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+
+            /* Better contrast on small screens */
+            .stat-info p,
+            .activity-item small {
+                color: #555;
+            }
+
+            /* Improved readability */
+            body {
+                font-size: 16px;
+                line-height: 1.6;
+            }
+
+            /* Prevent horizontal scroll */
+            body, html {
+                overflow-x: hidden;
+            }
+
+            /* Better form accessibility */
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {
+                outline: 2px solid #667eea;
+                outline-offset: 2px;
             }
         }
 
@@ -762,7 +1337,13 @@
                 <i class="fas fa-bolt"></i>
                 <span>SYNERGIA v3.0</span>
             </div>
-            <div class="nav-menu">
+            
+            <!-- Menu hamburger pour mobile -->
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-menu" id="nav-menu">
                 <a href="#dashboard" class="nav-link active">
                     <i class="fas fa-tachometer-alt"></i>
                     Dashboard
@@ -783,11 +1364,11 @@
                     <i class="fas fa-trophy"></i>
                     Missions
                 </a>
-                <a href="#analytics" class="nav-link">
+                <a href="#analytics" class="nav-link desktop-only">
                     <i class="fas fa-chart-bar"></i>
                     Analytics
                 </a>
-                <a href="#analytics-pro" class="nav-link">
+                <a href="#analytics-pro" class="nav-link desktop-only">
                     <i class="fas fa-chart-line"></i>
                     Analytics Pro
                 </a>
@@ -1437,14 +2018,14 @@
             <div class="section-header">
                 <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
                 <div class="section-actions">
-                    <input type="text" id="team-search" placeholder="Rechercher un membre..." style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; width: 300px;">
+                    <input type="text" id="team-search" placeholder="Rechercher..." style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; width: 100%; max-width: 300px;">
                     <button id="add-member-btn" class="btn btn-primary">
                         <i class="fas fa-user-plus"></i>
-                        Ajouter
+                        <span class="desktop-only">Ajouter</span>
                     </button>
                     <button id="export-team-btn" class="btn btn-secondary">
                         <i class="fas fa-download"></i>
-                        Exporter
+                        <span class="desktop-only">Exporter</span>
                     </button>
                 </div>
             </div>
@@ -1459,17 +2040,18 @@
         <!-- Planning -->
         <section id="planning" class="content-section">
             <div class="section-header">
-                <h1><i class="fas fa-calendar"></i> Planning & Google Calendar</h1>
+                <h1><i class="fas fa-calendar"></i> Planning</h1>
                 <div class="section-actions">
                     <button id="add-event-btn" class="btn btn-primary">
                         <i class="fas fa-plus"></i>
-                        Nouvel événement
+                        <span class="desktop-only">Nouvel événement</span>
+                        <span class="mobile-only">Nouveau</span>
                     </button>
                     <button id="google-sync-btn" class="btn btn-secondary">
                         <i class="fab fa-google"></i>
-                        Sync Google
+                        <span class="desktop-only">Sync Google</span>
                     </button>
-                    <button id="export-schedule-btn" class="btn btn-secondary">
+                    <button id="export-schedule-btn" class="btn btn-secondary desktop-only">
                         <i class="fas fa-download"></i>
                         Exporter
                     </button>
@@ -1489,11 +2071,12 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-                <div>
-                    <div id="calendar" style="background: white; border-radius: 12px; padding: 2rem; min-height: 400px; border: 1px solid #e9ecef;">
-                        <div style="text-align: center; color: #666; padding: 3rem;">
-                            <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem; color: #ccc;"></i>
+            <div style="display: block;">
+                <!-- Calendrier principal -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div id="calendar" style="background: white; border-radius: 12px; padding: 1.5rem; min-height: 300px; border: 1px solid #e9ecef;">
+                        <div style="text-align: center; color: #666; padding: 2rem;">
+                            <i class="fas fa-calendar-alt" style="font-size: 2.5rem; margin-bottom: 1rem; color: #ccc;"></i>
                             <h3>Calendrier interactif</h3>
                             <p>Vue Juin 2025</p>
                             <div style="margin-top: 1rem;">
@@ -1506,6 +2089,7 @@
                     </div>
                 </div>
 
+                <!-- Événements à venir -->
                 <div>
                     <h3><i class="fas fa-list"></i> Événements à venir</h3>
                     <div id="events-container" style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e9ecef;">
@@ -1564,9 +2148,13 @@
             </div>
 
             <div class="chat-container">
-                <div class="chat-sidebar">
-                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef;">
+                <!-- Sidebar avec bouton mobile -->
+                <div class="chat-sidebar" id="chat-sidebar">
+                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
                         <h3>Conversations</h3>
+                        <button class="btn-icon mobile-only" onclick="toggleChatSidebar()">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <div style="padding: 1rem;">
                         <div class="activity-item" style="cursor: pointer; padding: 0.5rem; border-radius: 8px;">
@@ -1581,11 +2169,26 @@
                 </div>
 
                 <div class="chat-main">
-                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef; background: white;">
-                        <h3>Équipe Générale</h3>
-                        <span style="color: #28a745; font-size: 0.9rem;">
-                            <i class="fas fa-circle"></i> 3 membres en ligne
-                        </span>
+                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef; background: white; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <button class="btn-icon mobile-only" onclick="toggleChatSidebar()" style="margin-right: 0.5rem;">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <span>
+                                <h3 style="display: inline;">Équipe Générale</h3>
+                                <br><span style="color: #28a745; font-size: 0.9rem;">
+                                    <i class="fas fa-circle"></i> 3 membres en ligne
+                                </span>
+                            </span>
+                        </div>
+                        <div class="desktop-only">
+                            <button class="btn-icon" title="Appel vidéo">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="btn-icon" title="Appel audio">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="messages-area">
@@ -3571,7 +4174,171 @@
             });
         });
 
+        // Navigation mobile
+        function setupMobileNavigation() {
+            const mobileToggle = document.getElementById('mobile-menu-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            
+            if (mobileToggle && navMenu) {
+                mobileToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('mobile-open');
+                    
+                    // Changer l'icône
+                    const icon = mobileToggle.querySelector('i');
+                    if (navMenu.classList.contains('mobile-open')) {
+                        icon.className = 'fas fa-times';
+                    } else {
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+
+                // Fermer le menu en cliquant sur un lien
+                const navLinks = navMenu.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth <= 768) {
+                            navMenu.classList.remove('mobile-open');
+                            mobileToggle.querySelector('i').className = 'fas fa-bars';
+                        }
+                    });
+                });
+
+                // Fermer le menu en cliquant à l'extérieur
+                document.addEventListener('click', function(event) {
+                    if (window.innerWidth <= 768 && 
+                        !navMenu.contains(event.target) && 
+                        !mobileToggle.contains(event.target) &&
+                        navMenu.classList.contains('mobile-open')) {
+                        navMenu.classList.remove('mobile-open');
+                        mobileToggle.querySelector('i').className = 'fas fa-bars';
+                    }
+                });
+            }
+        }
+
+        // Chat sidebar mobile
+        function toggleChatSidebar() {
+            const sidebar = document.getElementById('chat-sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('mobile-open');
+            }
+        }
+
         // Gestion responsive
+        function handleResize() {
+            const width = window.innerWidth;
+            const navMenu = document.getElementById('nav-menu');
+            const mobileToggle = document.getElementById('mobile-menu-toggle');
+            
+            if (width > 768) {
+                // Mode desktop
+                if (navMenu) {
+                    navMenu.classList.remove('mobile-open');
+                }
+                if (mobileToggle) {
+                    mobileToggle.querySelector('i').className = 'fas fa-bars';
+                }
+                
+                // Réinitialiser le chat sidebar
+                const chatSidebar = document.getElementById('chat-sidebar');
+                if (chatSidebar) {
+                    chatSidebar.classList.remove('mobile-open');
+                }
+            }
+        }
+
+        // Optimisations mobiles
+        function initMobileOptimizations() {
+            // Prévenir le zoom sur les inputs iOS
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                const inputs = document.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.style.fontSize = '16px';
+                });
+            }
+
+            // Améliorer les performances de scroll sur mobile
+            if ('scrollBehavior' in document.documentElement.style) {
+                document.documentElement.style.scrollBehavior = 'smooth';
+            }
+
+            // Touch gestures pour les cartes
+            const cards = document.querySelectorAll('.team-member-card, .quest-card, .dashboard-widget');
+            cards.forEach(card => {
+                card.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                }, { passive: true });
+                
+                card.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                }, { passive: true });
+            });
+
+            // Optimiser les animations sur mobile
+            const mediaQuery = window.matchMedia('(max-width: 768px)');
+            if (mediaQuery.matches) {
+                // Réduire les animations sur mobile pour de meilleures performances
+                const style = document.createElement('style');
+                style.textContent = `
+                    .animate-slide-up, .animate-fade-in {
+                        animation: none !important;
+                    }
+                    .team-member-card:hover, .quest-card:hover {
+                        transform: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Keyboard navigation pour mobile
+        function initKeyboardNavigation() {
+            // Navigation au clavier améliorée
+            document.addEventListener('keydown', function(e) {
+                // Escape pour fermer les menus mobiles
+                if (e.key === 'Escape') {
+                    const navMenu = document.getElementById('nav-menu');
+                    const chatSidebar = document.getElementById('chat-sidebar');
+                    
+                    if (navMenu && navMenu.classList.contains('mobile-open')) {
+                        navMenu.classList.remove('mobile-open');
+                        document.getElementById('mobile-menu-toggle').querySelector('i').className = 'fas fa-bars';
+                    }
+                    
+                    if (chatSidebar && chatSidebar.classList.contains('mobile-open')) {
+                        chatSidebar.classList.remove('mobile-open');
+                    }
+                }
+            });
+        }
+
+        // Swipe gestures (optionnel)
+        function initSwipeGestures() {
+            let startX, startY, distX, distY;
+            const threshold = 150; // Distance minimale pour un swipe
+            
+            document.addEventListener('touchstart', function(e) {
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function(e) {
+                if (!startX || !startY) return;
+                
+                const touch = e.changedTouches[0];
+                distX = touch.clientX - startX;
+                distY = touch.clientY - startY;
+                
+                // Swipe horizontal pour navigation (si activé)
+                if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > threshold) {
+                    // Implémentation optionnelle de navigation par swipe
+                    console.log('Swipe détecté:', distX > 0 ? 'droite' : 'gauche');
+                }
+                
+                startX = startY = null;
+            }, { passive: true });
+        }
         function handleResize() {
             const width = window.innerWidth;
             

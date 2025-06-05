@@ -2372,7 +2372,10 @@
                     snapshot.forEach(doc => {
                         this.completedQuests.push({ id: doc.id, ...doc.data() });
                     });
-                    this.updateQuestsDisplay(); // Mettre à jour l'affichage des missions
+                    // Force la mise à jour de l'affichage
+                    setTimeout(() => {
+                        this.updateQuestsDisplay();
+                    }, 100);
                 });
 
                 // Écouter les événements
@@ -2466,7 +2469,10 @@
                     snapshot.forEach(doc => {
                         this.questRequests.push({ id: doc.id, ...doc.data() });
                     });
-                    this.updateQuestsDisplay(); // Mettre à jour l'affichage
+                    // Force la mise à jour de l'affichage
+                    setTimeout(() => {
+                        this.updateQuestsDisplay();
+                    }, 100);
                 });
 
                 // Stocker les unsubscribers pour les nettoyer plus tard
@@ -3654,6 +3660,12 @@
 
                     this.showToast(`🎉 Mission complétée ! +${quest.xp} XP`, 'success');
                     
+                    // Forcer la mise à jour de l'affichage
+                    setTimeout(() => {
+                        this.updateQuestsDisplay();
+                        this.updateUserProgress();
+                    }, 500);
+                    
                 } catch (error) {
                     console.error('Erreur completion mission:', error);
                     this.showToast('Erreur lors de la completion de la mission', 'error');
@@ -4025,13 +4037,18 @@
                             userName: currentUser.displayName || currentUser.email,
                             userEmail: currentUser.email,
                             companyId: currentCompany.id,
-                            status: 'pending', // pending, approved, rejected
-                            message: '', // Message optionnel de l'utilisateur
+                            status: 'pending',
+                            message: '',
                             requestedAt: window.firebase.serverTimestamp()
                         }
                     );
 
                     this.showToast('📋 Demande envoyée à l\'administrateur', 'success');
+                    
+                    // Forcer la mise à jour de l'affichage
+                    setTimeout(() => {
+                        this.updateQuestsDisplay();
+                    }, 500);
                     
                 } catch (error) {
                     console.error('Erreur demande mission:', error);
@@ -4349,6 +4366,18 @@
             refreshDashboard() {
                 this.showToast('Dashboard actualisé', 'success');
                 this.updateDashboardStats();
+                this.updateQuestsDisplay();
+                this.updateUserProgress();
+                console.log('🔄 Dashboard refresh:', {
+                    completedQuests: this.completedQuests.length,
+                    questRequests: this.questRequests.length,
+                    quests: this.quests.length
+                });
+            }
+
+            updateUserProgress() {
+                // Recharger les données utilisateur depuis Firebase
+                this.loadUserProgress();
             }
 
             // Méthode publique pour ouvrir le portefeuille

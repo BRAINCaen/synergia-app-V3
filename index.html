@@ -2043,6 +2043,7 @@
                 this.storeItems = [];
                 this.transactions = [];
                 this.transfers = [];
+                this.completedQuests = []; // Ajouter le tracking des missions complétées
                 this.unsubscribers = [];
                 
                 this.init();
@@ -2350,6 +2351,21 @@
                     this.updateDashboardStats();
                 });
 
+                // Écouter les completions de missions de l'utilisateur
+                const questCompletionsQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'quest_completions'),
+                    window.firebase.where('userId', '==', currentUser.uid),
+                    window.firebase.where('companyId', '==', currentCompany.id)
+                );
+                
+                const unsubQuestCompletions = window.firebase.onSnapshot(questCompletionsQuery, (snapshot) => {
+                    this.completedQuests = [];
+                    snapshot.forEach(doc => {
+                        this.completedQuests.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateQuestsDisplay(); // Mettre à jour l'affichage des missions
+                });
+
                 // Écouter les événements
                 const eventsQuery = window.firebase.query(
                     window.firebase.collection(window.db, 'events'),
@@ -2430,7 +2446,7 @@
                 });
 
                 // Stocker les unsubscribers pour les nettoyer plus tard
-                this.unsubscribers = [unsubUsers, unsubQuests, unsubEvents, unsubMessages, unsubStore, unsubTransactions, unsubTransfers];
+                this.unsubscribers = [unsubUsers, unsubQuests, unsubQuestCompletions, unsubEvents, unsubMessages, unsubStore, unsubTransactions, unsubTransfers];
             }
 
             setupEventListeners() {
@@ -3574,11 +3590,30 @@
                 const quest = this.quests.find(q => q.id === questId);
                 if (!quest) return;
 
+                // Vérifier si la mission n'est pas déjà complétée
+                const isAlreadyCompleted = this.completedQuests.some(completion => completion.questId === questId);
+                if (isAlreadyCompleted) {
+                    this.showToast('Cette mission a déjà été complétée !', 'warning');
+                    return;
+                }
+
                 try {
-                    // Ajouter l'XP à l'utilisateur
-                    await this.addXP(quest.xp);
+                    // Vérifier à nouveau dans la base de données (au cas où)
+                    const existingCompletionQuery = window.firebase.query(
+                        window.firebase.collection(window.db, 'quest_completions'),
+                        window.firebase.where('questId', '==', questId),
+                        window.firebase.where('userId', '==', currentUser.uid),
+                        window.firebase.where('companyId', '==', currentCompany.id)
+                    );
                     
-                    // Enregistrer la completion de la mission
+                    const existingCompletions = await window.firebase.getDocs(existingCompletionQuery);
+                    
+                    if (!existingCompletions.empty) {
+                        this.showToast('Cette mission a déjà été complétée !', 'warning');
+                        return;
+                    }
+
+                    // Enregistrer la completion AVANT d'ajouter l'XP
                     await window.firebase.addDoc(
                         window.firebase.collection(window.db, 'quest_completions'),
                         {
@@ -3589,6 +3624,9 @@
                             completedAt: window.firebase.serverTimestamp()
                         }
                     );
+
+                    // Puis ajouter l'XP à l'utilisateur
+                    await this.addXP(quest.xp);
 
                     this.showToast(`🎉 Mission complétée ! +${quest.xp} XP`, 'success');
                     

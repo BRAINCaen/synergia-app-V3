@@ -1773,65 +1773,238 @@
                 </div>
             </div>
 
-            <!-- Gestion des missions -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                <h3><i class="fas fa-tasks"></i> Gestion des missions</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div>
-                        <h4>Créer une nouvelle mission</h4>
-                        <form id="quest-form">
-                            <div class="form-group">
-                                <label>Titre</label>
-                                <input type="text" id="quest-title" placeholder="Titre de la mission" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea id="quest-description" placeholder="Description de la mission" rows="3"></textarea>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
-                                <div class="form-group">
-                                    <label>Type</label>
-                                    <select id="quest-type">
-                                        <option value="daily">Quotidienne</option>
-                                        <option value="weekly">Hebdomadaire</option>
-                                        <option value="special">Spéciale</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>XP</label>
-                                    <input type="number" id="quest-xp" value="50" min="1" max="1000">
-                                </div>
-                                <div class="form-group">
-                                    <label>Difficulté</label>
-                                    <select id="quest-difficulty">
-                                        <option value="easy">Facile</option>
-                                        <option value="medium">Moyen</option>
-                                        <option value="hard">Difficile</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Créer la mission
-                            </button>
-                        </form>
-                    </div>
-                    <div>
-                        <h4>Missions existantes</h4>
-                        <div id="admin-quests-list" style="max-height: 300px; overflow-y: auto;">
-                            <!-- Liste des missions -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <!-- 1. REMPLACER LA SECTION ADMIN DANS LES PARAMÈTRES (lignes ~2850-2920) -->
 
-            <!-- Section admin : Gestion des demandes de missions spéciales -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                <h3><i class="fas fa-clipboard-check"></i> Demandes de missions spéciales</h3>
-                <div id="special-quest-requests" style="margin-top: 1rem;">
-                    <!-- Demandes générées dynamiquement -->
+<!-- Gestion des missions avancée -->
+<div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+    <h3><i class="fas fa-tasks"></i> Gestion des missions avancée</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div>
+            <h4>Créer une nouvelle mission</h4>
+            <form id="quest-form">
+                <div class="form-group">
+                    <label>Titre *</label>
+                    <input type="text" id="quest-title" placeholder="Titre de la mission" required>
                 </div>
+                
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="quest-description" placeholder="Description détaillée de la mission" rows="3" required></textarea>
+                </div>
+
+                <!-- Sélecteur d'icône -->
+                <div class="form-group">
+                    <label>Icône de la mission</label>
+                    <div id="icon-selector" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                        <button type="button" class="icon-option active" data-icon="🎯">🎯</button>
+                        <button type="button" class="icon-option" data-icon="📝">📝</button>
+                        <button type="button" class="icon-option" data-icon="💻">💻</button>
+                        <button type="button" class="icon-option" data-icon="📞">📞</button>
+                        <button type="button" class="icon-option" data-icon="🤝">🤝</button>
+                        <button type="button" class="icon-option" data-icon="📊">📊</button>
+                        <button type="button" class="icon-option" data-icon="🎨">🎨</button>
+                        <button type="button" class="icon-option" data-icon="⚡">⚡</button>
+                        <button type="button" class="icon-option" data-icon="🚀">🚀</button>
+                        <button type="button" class="icon-option" data-icon="💡">💡</button>
+                        <button type="button" class="icon-option" data-icon="🏆">🏆</button>
+                        <button type="button" class="icon-option" data-icon="⭐">⭐</button>
+                        <button type="button" class="icon-option" data-icon="🎁">🎁</button>
+                        <button type="button" class="icon-option" data-icon="🔥">🔥</button>
+                        <button type="button" class="icon-option" data-icon="💎">💎</button>
+                        <button type="button" class="icon-option" data-icon="🌟">🌟</button>
+                    </div>
+                    <input type="text" id="quest-icon-custom" placeholder="Ou tapez votre propre emoji" style="width: 100px;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div class="form-group">
+                        <label>Type de mission *</label>
+                        <select id="quest-type" required>
+                            <option value="daily">📅 Quotidienne</option>
+                            <option value="weekly">🗓️ Hebdomadaire</option>
+                            <option value="monthly">📆 Mensuelle</option>
+                            <option value="special">🎁 Spéciale (validation requise)</option>
+                            <option value="urgent">🚨 Urgente</option>
+                            <option value="team">👥 Équipe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Difficulté</label>
+                        <select id="quest-difficulty">
+                            <option value="easy">😊 Facile (25-50 XP)</option>
+                            <option value="medium" selected>😐 Moyen (75-150 XP)</option>
+                            <option value="hard">😤 Difficile (200-500 XP)</option>
+                            <option value="expert">🔥 Expert (600+ XP)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div class="form-group">
+                        <label>Récompense XP *</label>
+                        <input type="number" id="quest-xp" value="100" min="1" max="2000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gains bonus</label>
+                        <input type="number" id="quest-bonus-coins" value="0" min="0" max="1000" placeholder="Gains supplémentaires">
+                    </div>
+                </div>
+
+                <!-- Assignation spécifique -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="quest-specific-user" style="margin-right: 0.5rem;">
+                        Assigner à un membre spécifique
+                    </label>
+                    <select id="quest-assigned-user" style="display: none; margin-top: 0.5rem;">
+                        <option value="">Sélectionner un membre</option>
+                        <!-- Options générées dynamiquement -->
+                    </select>
+                </div>
+
+                <!-- Paramètres avancés -->
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="quest-repeatable" style="margin-right: 0.5rem;">
+                        Mission répétable (peut être refaite)
+                    </label>
+                </div>
+
+                <div class="form-group" id="quest-deadline-group" style="display: none;">
+                    <label>Date limite (pour missions spéciales)</label>
+                    <input type="date" id="quest-deadline">
+                </div>
+
+                <div class="form-group">
+                    <label>Instructions spéciales</label>
+                    <textarea id="quest-instructions" placeholder="Instructions particulières, liens, contacts..." rows="2"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-plus"></i>
+                    Créer la mission
+                </button>
+            </form>
+        </div>
+
+        <div>
+            <h4>Missions existantes</h4>
+            <div style="margin-bottom: 1rem;">
+                <select id="admin-quest-filter" style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px; width: 100%;">
+                    <option value="all">Toutes les missions</option>
+                    <option value="active">Actives</option>
+                    <option value="draft">Brouillons</option>
+                    <option value="special">Spéciales</option>
+                    <option value="assigned">Assignées</option>
+                </select>
             </div>
+            <div id="admin-quests-list" style="max-height: 400px; overflow-y: auto;">
+                <!-- Liste des missions -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section admin : Gestion des demandes de missions spéciales -->
+<div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+    <h3><i class="fas fa-clipboard-check"></i> Demandes de missions spéciales</h3>
+    <div style="margin-bottom: 1rem;">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <select id="request-filter" style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                <option value="pending">⏳ En attente</option>
+                <option value="approved">✅ Approuvées</option>
+                <option value="rejected">❌ Rejetées</option>
+                <option value="all">Toutes</option>
+            </select>
+            <span id="pending-count" class="badge" style="background: #ffc107; color: white; padding: 0.25rem 0.75rem; border-radius: 12px;">0 en attente</span>
+        </div>
+    </div>
+    <div id="special-quest-requests" style="margin-top: 1rem;">
+        <!-- Demandes générées dynamiquement -->
+    </div>
+</div>
+
+<style>
+/* Styles pour le sélecteur d'icônes */
+.icon-option {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-option:hover {
+    border-color: #667eea;
+    transform: scale(1.1);
+}
+
+.icon-option.active {
+    border-color: #667eea;
+    background: #667eea;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.badge {
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Styles pour les cartes de demandes */
+.request-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.request-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.request-card.pending {
+    border-left: 4px solid #ffc107;
+}
+
+.request-card.approved {
+    border-left: 4px solid #28a745;
+    background: #f8fff9;
+}
+
+.request-card.rejected {
+    border-left: 4px solid #dc3545;
+    background: #fff8f8;
+}
+
+/* Styles pour les missions admin */
+.admin-quest-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.admin-quest-item:hover {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-quest-item.inactive {
+    opacity: 0.6;
+}
+</style>
         </section>
     </main>
 

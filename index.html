@@ -184,7 +184,7 @@
                 
                 // Analytics
                 logEvent
-            async createDefaultStoreItems() {
+            createDefaultStoreItems() {
                 const defaultStoreItems = [
                     // Temps libre
                     {
@@ -294,12 +294,14 @@
                     }
                 ];
 
-                for (const item of defaultStoreItems) {
-                    await window.firebase.addDoc(
+                const promises = defaultStoreItems.map(item => 
+                    window.firebase.addDoc(
                         window.firebase.collection(window.db, 'store_items'),
                         item
-                    );
-                }
+                    )
+                );
+
+                return Promise.all(promises);
             };
             
             isFirebaseReady = true;
@@ -2326,25 +2328,28 @@
             }
 
             setupAuth() {
-                window.firebase.onAuthStateChanged(window.auth, async (user) => {
+                window.firebase.onAuthStateChanged(window.auth, (user) => {
                     if (user) {
                         currentUser = user;
                         console.log(`✅ Utilisateur connecté: ${user.email}`);
                         
                         // Charger les données utilisateur
-                        await this.loadUserData();
-                        
-                        // Configurer les listeners en temps réel
-                        this.setupRealtimeListeners();
-                        
-                        // Masquer le modal d'auth et afficher l'interface
-                        this.hideAuthModal();
-                        this.showMainInterface();
-                        
-                        // Mettre à jour l'interface utilisateur
-                        this.updateUserInterface();
-                        
-                        this.showToast(`Bienvenue ${user.displayName || user.email} !`, 'success');
+                        this.loadUserData().then(() => {
+                            // Configurer les listeners en temps réel
+                            this.setupRealtimeListeners();
+                            
+                            // Masquer le modal d'auth et afficher l'interface
+                            this.hideAuthModal();
+                            this.showMainInterface();
+                            
+                            // Mettre à jour l'interface utilisateur
+                            this.updateUserInterface();
+                            
+                            this.showToast(`Bienvenue ${user.displayName || user.email} !`, 'success');
+                        }).catch(error => {
+                            console.error('Erreur chargement données utilisateur:', error);
+                            this.showToast('Erreur lors du chargement des données', 'error');
+                        });
                         
                     } else {
                         currentUser = null;
@@ -2355,30 +2360,34 @@
                 });
             }
 
-            async loadUserData() {
-                try {
-                    // Charger ou créer le profil utilisateur
-                    const userDoc = await window.firebase.getDoc(
-                        window.firebase.doc(window.db, 'users', currentUser.uid)
-                    );
-                    
-                    if (!userDoc.exists()) {
-                        // Première connexion - créer le profil
-                        await this.createUserProfile();
+            loadUserData() {
+                return new Promise((resolve, reject) => {
+                    try {
+                        // Charger ou créer le profil utilisateur
+                        window.firebase.getDoc(
+                            window.firebase.doc(window.db, 'users', currentUser.uid)
+                        ).then(userDoc => {
+                            if (!userDoc.exists()) {
+                                // Première connexion - créer le profil
+                                return this.createUserProfile();
+                            }
+                            return Promise.resolve();
+                        }).then(() => {
+                            // Charger ou créer l'entreprise
+                            return this.loadOrCreateCompany();
+                        }).then(() => {
+                            console.log('✅ Données utilisateur chargées');
+                            resolve();
+                        }).catch(reject);
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur chargement données:', error);
+                        reject(error);
                     }
-                    
-                    // Charger ou créer l'entreprise
-                    await this.loadOrCreateCompany();
-                    
-                    console.log('✅ Données utilisateur chargées');
-                    
-                } catch (error) {
-                    console.error('❌ Erreur chargement données:', error);
-                    this.showToast('Erreur lors du chargement des données', 'error');
-                }
+                });
             }
 
-            async createUserProfile() {
+            createUserProfile() {
                 const userData = {
                     email: currentUser.email,
                     displayName: currentUser.displayName || currentUser.email.split('@')[0],
@@ -2393,35 +2402,35 @@
                     status: 'online'
                 };
                 
-                await window.firebase.setDoc(
+                return window.firebase.setDoc(
                     window.firebase.doc(window.db, 'users', currentUser.uid),
                     userData
-                );
-                
-                console.log('✅ Profil utilisateur créé');
+                ).then(() => {
+                    console.log('✅ Profil utilisateur créé');
+                });
             }
 
-            async loadOrCreateCompany() {
+            loadOrCreateCompany() {
                 // Vérifier si l'utilisateur appartient à une entreprise
                 const userCompaniesQuery = window.firebase.query(
                     window.firebase.collection(window.db, 'companies'),
                     window.firebase.where('members', 'array-contains', currentUser.uid)
                 );
                 
-                const companiesSnapshot = await window.firebase.getDocs(userCompaniesQuery);
-                
-                if (!companiesSnapshot.empty) {
-                    // Utilisateur appartient à une entreprise existante
-                    currentCompany = { id: companiesSnapshot.docs[0].id, ...companiesSnapshot.docs[0].data() };
-                } else {
-                    // Créer une nouvelle entreprise
-                    await this.createCompany();
-                }
-                
-                console.log('✅ Entreprise configurée:', currentCompany.name);
+                return window.firebase.getDocs(userCompaniesQuery).then(companiesSnapshot => {
+                    if (!companiesSnapshot.empty) {
+                        // Utilisateur appartient à une entreprise existante
+                        currentCompany = { id: companiesSnapshot.docs[0].id, ...companiesSnapshot.docs[0].data() };
+                        console.log('✅ Entreprise configurée:', currentCompany.name);
+                        return Promise.resolve();
+                    } else {
+                        // Créer une nouvelle entreprise
+                        return this.createCompany();
+                    }
+                });
             }
 
-            async createCompany() {
+            createCompany() {
                 const companyName = prompt('Nom de votre entreprise:', 'Mon Entreprise') || 'Mon Entreprise';
                 
                 const companyData = {
@@ -2436,23 +2445,23 @@
                     }
                 };
                 
-                const companyRef = await window.firebase.addDoc(
+                return window.firebase.addDoc(
                     window.firebase.collection(window.db, 'companies'),
                     companyData
-                );
-                
-                currentCompany = { id: companyRef.id, ...companyData };
-                
-                // Créer les missions par défaut
-                await this.createDefaultQuests();
-                
-                // Créer les avantages par défaut de la boutique
-                await this.createDefaultStoreItems();
-                
-                console.log('✅ Entreprise créée:', companyName);
+                ).then(companyRef => {
+                    currentCompany = { id: companyRef.id, ...companyData };
+                    
+                    // Créer les missions par défaut
+                    return this.createDefaultQuests();
+                }).then(() => {
+                    // Créer les avantages par défaut de la boutique
+                    return this.createDefaultStoreItems();
+                }).then(() => {
+                    console.log('✅ Entreprise créée:', companyName);
+                });
             }
 
-            async createDefaultQuests() {
+            createDefaultQuests() {
                 const defaultQuests = [
                     {
                         title: 'Première connexion',
@@ -2500,12 +2509,14 @@
                     }
                 ];
 
-                for (const quest of defaultQuests) {
-                    await window.firebase.addDoc(
+                const promises = defaultQuests.map(quest => 
+                    window.firebase.addDoc(
                         window.firebase.collection(window.db, 'quests'),
                         quest
-                    );
-                }
+                    )
+                );
+
+                return Promise.all(promises);
             }
 
             setupRealtimeListeners() {
@@ -2760,41 +2771,49 @@
                 });
             }
 
-            async setupGoogleCalendar() {
-                try {
-                    this.updateLoadingStatus('Configuration Google Calendar...');
-                    
-                    // Charger l'API Google
-                    await this.loadGoogleAPI();
-                    
-                    // Initialiser le token client
-                    tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: GOOGLE_CONFIG.clientId,
-                        scope: GOOGLE_CONFIG.scopes,
-                        callback: (response) => this.handleGoogleCalendarAuth(response)
-                    });
-                    
-                    console.log('✅ Google Calendar API prête');
-                    
-                } catch (error) {
-                    console.error('❌ Erreur Google Calendar:', error);
-                    this.showToast('Google Calendar non disponible', 'warning');
-                }
+            setupGoogleCalendar() {
+                return new Promise((resolve, reject) => {
+                    try {
+                        this.updateLoadingStatus('Configuration Google Calendar...');
+                        
+                        // Charger l'API Google
+                        this.loadGoogleAPI().then(() => {
+                            // Initialiser le token client
+                            if (typeof google !== 'undefined' && google.accounts) {
+                                tokenClient = google.accounts.oauth2.initTokenClient({
+                                    client_id: GOOGLE_CONFIG.clientId,
+                                    scope: GOOGLE_CONFIG.scopes,
+                                    callback: (response) => this.handleGoogleCalendarAuth(response)
+                                });
+                                
+                                console.log('✅ Google Calendar API prête');
+                                resolve();
+                            } else {
+                                console.warn('⚠️ Google Identity Services non disponible');
+                                resolve(); // Continue sans erreur
+                            }
+                        }).catch(error => {
+                            console.error('❌ Erreur Google Calendar:', error);
+                            this.showToast('Google Calendar non disponible', 'warning');
+                            resolve(); // Continue sans erreur
+                        });
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur Google Calendar:', error);
+                        this.showToast('Google Calendar non disponible', 'warning');
+                        resolve(); // Continue sans erreur
+                    }
+                });
             }
 
             loadGoogleAPI() {
                 return new Promise((resolve, reject) => {
                     if (typeof gapi !== 'undefined') {
-                        gapi.load('client', async () => {
-                            try {
-                                await gapi.client.init({
-                                    apiKey: GOOGLE_CONFIG.apiKey,
-                                    discoveryDocs: [GOOGLE_CONFIG.discoveryDoc]
-                                });
-                                resolve();
-                            } catch (error) {
-                                reject(error);
-                            }
+                        gapi.load('client', () => {
+                            gapi.client.init({
+                                apiKey: GOOGLE_CONFIG.apiKey,
+                                discoveryDocs: [GOOGLE_CONFIG.discoveryDoc]
+                            }).then(resolve).catch(reject);
                         });
                     } else {
                         reject(new Error('Google API non chargée'));

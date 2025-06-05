@@ -3,7 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGIA v3.0 - Application Complète</title>
+    <title>SYNERGIA v3.0 - Production Firebase</title>
+    
+    <!-- Politique de sécurité du contenu optimisée pour Firebase -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+            https://www.gstatic.com 
+            https://www.googleapis.com 
+            https://apis.google.com
+            https://accounts.google.com
+            https://cdn.jsdelivr.net 
+            https://cdnjs.cloudflare.com
+            https://www.googletagmanager.com;
+        style-src 'self' 'unsafe-inline' 
+            https://cdnjs.cloudflare.com 
+            https://fonts.googleapis.com;
+        font-src 'self' 
+            https://cdnjs.cloudflare.com 
+            https://fonts.gstatic.com;
+        connect-src 'self' 
+            https://www.gstatic.com 
+            https://www.googleapis.com 
+            https://firebase.googleapis.com
+            https://firestore.googleapis.com 
+            https://identitytoolkit.googleapis.com
+            https://securetoken.googleapis.com
+            https://www.google-analytics.com
+            https://analytics.google.com
+            https://stats.g.doubleclick.net
+            https://accounts.google.com;
+        img-src 'self' data: https:;
+        frame-src 'self' https: https://accounts.google.com;
+    ">
+    
+    <!-- CSS Framework & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Chart.js pour Analytics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Firebase SDK v9 Modular -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signOut, 
+            updateProfile,
+            signInWithPopup,
+            GoogleAuthProvider,
+            setPersistence,
+            browserLocalPersistence
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            getDocs, 
+            getDoc, 
+            onSnapshot, 
+            setDoc, 
+            query, 
+            where, 
+            orderBy, 
+            limit, 
+            serverTimestamp,
+            writeBatch,
+            enableNetwork,
+            disableNetwork
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytes, 
+            getDownloadURL,
+            deleteObject
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { 
+            getAnalytics,
+            logEvent 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+        // Configuration Firebase - VOS VRAIES CLÉS
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+            authDomain: "synergia-app-f27e7.firebaseapp.com",
+            projectId: "synergia-app-f27e7",
+            storageBucket: "synergia-app-f27e7.firebasestorage.app",
+            messagingSenderId: "201912738922",
+            appId: "1:201912738922:web:2fcc1e49293bb632899613",
+            measurementId: "G-EGJ79SCMWX"
+        };
+
+        // Initialisation Firebase
+        let app, auth, db, storage, analytics;
+        let isFirebaseReady = false;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            storage = getStorage(app);
+            analytics = getAnalytics(app);
+            
+            // Activer la persistance
+            await setPersistence(auth, browserLocalPersistence);
+            
+            // Exposer globalement
+            window.firebaseApp = app;
+            window.auth = auth;
+            window.db = db;
+            window.storage = storage;
+            window.analytics = analytics;
+            
+            // Exposer les fonctions Firebase
+            window.firebase = {
+                // Auth
+                onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+                signOut, updateProfile, signInWithPopup, GoogleAuthProvider,
+                
+                // Firestore
+                collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, 
+                onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp,
+                writeBatch, enableNetwork, disableNetwork,
+                
+                // Storage
+                ref, uploadBytes, getDownloadURL, deleteObject,
+                
+                // Analytics
+                logEvent
+            };
+            
+            isFirebaseReady = true;
+            window.firebaseReady = true;
+            
+            console.log('✅ Firebase initialisé avec succès en mode production');
+            
+            // Événement personnalisé pour signaler que Firebase est prêt
+            window.dispatchEvent(new CustomEvent('firebaseReady'));
+            
+        } catch (error) {
+            console.error('❌ Erreur initialisation Firebase:', error);
+            window.firebaseReady = false;
+            
+            // Afficher une erreur critique
+            setTimeout(() => {
+                document.body.innerHTML = `
+                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #f8f9fa; font-family: Arial, sans-serif;">
+                        <div style="text-align: center; max-width: 600px; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                            <h1 style="color: #dc3545; margin-bottom: 1rem;">Erreur de Configuration Firebase</h1>
+                            <p style="color: #666; margin-bottom: 2rem;">Impossible de se connecter à Firebase. Veuillez vérifier votre configuration.</p>
+                            <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: left; font-size: 0.9rem; color: #dc3545;">${error.message}</pre>
+                            <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Réessayer
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }, 1000);
+        }
+    </script>
+    
+    <!-- Google APIs pour Calendar -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     
     <style>
         * {
@@ -17,6 +188,48 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .loading-status {
+            font-size: 1rem;
+            opacity: 0.8;
         }
 
         /* Navigation */
@@ -87,6 +300,13 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         /* Layout principal */
@@ -172,6 +392,24 @@
             background: #e9ecef;
         }
 
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
         .btn-icon {
             padding: 0.5rem;
             border: none;
@@ -228,30 +466,50 @@
             border-left: 4px solid #667eea;
         }
 
-        /* Google Calendar */
-        .google-status {
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Status Indicators */
+        .status-online { color: #28a745; }
+        .status-away { color: #ffc107; }
+        .status-offline { color: #6c757d; }
+        .status-busy { color: #dc3545; }
+
+        .connection-status {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
-            margin: 1rem 0;
+            font-weight: 500;
         }
 
-        .google-status.connected {
-            background: #28a745;
-            color: white;
+        .connection-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
-        .google-status.disconnected {
-            background: #dc3545;
-            color: white;
+        .connection-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        .google-status.connecting {
-            background: #ffc107;
-            color: #212529;
+        .connection-status.connecting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
 
         /* Équipe */
@@ -287,18 +545,17 @@
         }
 
         .member-avatar {
+            position: relative;
             width: 60px;
             height: 60px;
-            border-radius: 50%;
-            background: #667eea;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
             margin-bottom: 1rem;
-            position: relative;
+        }
+
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .status-indicator {
@@ -314,38 +571,77 @@
         .status-indicator.online { background: #28a745; }
         .status-indicator.away { background: #ffc107; }
         .status-indicator.offline { background: #6c757d; }
+        .status-indicator.busy { background: #dc3545; }
 
-        /* Events */
-        .event-item {
+        /* Missions */
+        .user-progress {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .level-info {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
-            border: 1px solid #e9ecef;
+        }
+
+        .xp-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .quests-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quest-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f8f9fa;
+            color: #666;
             border-radius: 8px;
-            margin-bottom: 0.5rem;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .event-item:hover {
-            background: #f8f9fa;
-            transform: translateX(4px);
-        }
-
-        .event-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #4285f4;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .event-icon.synergia {
+        .quest-tab.active,
+        .quest-tab:hover {
             background: #667eea;
+            color: white;
+        }
+
+        .quests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .quest-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .quest-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         /* Chat */
@@ -394,84 +690,138 @@
             outline: none;
         }
 
-        /* Planning */
-        .calendar-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+        .message-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
         }
 
-        /* Missions */
-        .user-progress {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            color: white;
-            margin-bottom: 2rem;
-        }
-
-        .level-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .xp-bar {
-            flex: 1;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .xp-fill {
-            height: 100%;
-            background: white;
-            border-radius: 4px;
-            width: 60%;
-            transition: width 0.3s ease;
-        }
-
-        .quests-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .quest-tab {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            background: #f8f9fa;
-            color: #666;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .quest-tab.active,
-        .quest-tab:hover {
+        .message-bubble.own {
             background: #667eea;
             color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
         }
 
-        .quests-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+        .message-bubble.other {
+            background: #e9ecef;
+            color: #333;
+            border-bottom-left-radius: 4px;
         }
 
-        .quest-card {
-            background: white;
-            border: 1px solid #e9ecef;
+        /* Modales */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
             border-radius: 12px;
-            padding: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            text-align: center;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
         }
 
-        .quest-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .auth-tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #667eea;
         }
 
         /* Notifications */
@@ -486,6 +836,7 @@
             z-index: 3000;
             animation: slideInRight 0.3s ease;
             border-left: 4px solid #667eea;
+            max-width: 400px;
         }
 
         .notification.success {
@@ -494,6 +845,14 @@
 
         .notification.error {
             border-left-color: #dc3545;
+        }
+
+        .notification.warning {
+            border-left-color: #ffc107;
+        }
+
+        .notification.info {
+            border-left-color: #17a2b8;
         }
 
         @keyframes slideInRight {
@@ -505,24 +864,6 @@
                 opacity: 1;
                 transform: translateX(0);
             }
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
         }
 
         /* Responsive */
@@ -556,157 +897,291 @@
             .quests-grid {
                 grid-template-columns: 1fr;
             }
+
+            .modal-content {
+                margin: 0;
+                width: 100%;
+                height: 100vh;
+                max-width: none;
+                border-radius: 0;
+            }
+        }
+
+        /* Animations */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pulse animation */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Real-time indicator */
+        .realtime-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .realtime-dot {
+            width: 6px;
+            height: 6px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">SYNERGIA v3.0</div>
+        <div class="loading-status" id="loading-status">Initialisation Firebase...</div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content auth-modal">
+            <h2><i class="fas fa-user-shield"></i> Authentification SYNERGIA</h2>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Connexion</button>
+                <button class="auth-tab" data-tab="register">Inscription</button>
+            </div>
+
+            <!-- Onglet Connexion -->
+            <div id="login-tab" class="auth-tab-content">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="login-email" required placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="login-password" required placeholder="Mot de passe">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+                
+                <div style="margin: 1rem 0; text-align: center; color: #666;">ou</div>
+                
+                <button id="google-login-btn" class="btn btn-secondary" style="width: 100%; background: #4285f4; color: white; border: none;">
+                    <i class="fab fa-google"></i> Connexion avec Google
+                </button>
+            </div>
+
+            <!-- Onglet Inscription -->
+            <div id="register-tab" class="auth-tab-content" style="display: none;">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nom complet</label>
+                        <input type="text" id="register-name" required placeholder="Votre nom complet">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="register-email" required placeholder="votre@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="register-password" required placeholder="Mot de passe (min. 6 caractères)">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> Nom de l'entreprise</label>
+                        <input type="text" id="register-company" required placeholder="Nom de votre entreprise">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-user-plus"></i> Créer le compte
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" style="display: none;">
         <div class="nav-container">
             <div class="nav-logo">
-                ⚡ SYNERGIA v3.0
+                <i class="fas fa-bolt"></i>
+                SYNERGIA v3.0
+                <span class="realtime-indicator">
+                    <span class="realtime-dot"></span>
+                    Live
+                </span>
             </div>
             
             <div class="nav-menu">
                 <div class="nav-link active" data-section="dashboard">
-                    🏠 Dashboard
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
                 </div>
                 <div class="nav-link" data-section="team">
-                    👥 Équipe
+                    <i class="fas fa-users"></i>
+                    Équipe
                 </div>
                 <div class="nav-link" data-section="planning">
-                    📅 Planning
-                </div>
-                <div class="nav-link" data-section="google-calendar">
-                    📱 Google Calendar
+                    <i class="fas fa-calendar"></i>
+                    Planning
                 </div>
                 <div class="nav-link" data-section="chat">
-                    💬 Chat
+                    <i class="fas fa-comments"></i>
+                    Chat
                 </div>
                 <div class="nav-link" data-section="quests">
-                    🏆 Missions
+                    <i class="fas fa-trophy"></i>
+                    Missions
+                </div>
+                <div class="nav-link" data-section="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </div>
+                <div class="nav-link" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    Paramètres
                 </div>
             </div>
             
             <div class="nav-user">
-                <div class="user-avatar">A</div>
-                <span>Allan Boehme</span>
-                <button class="btn-icon">🚪</button>
+                <div class="user-avatar" id="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span id="user-name">Utilisateur</span>
+                <button id="logout-btn" class="btn-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
     </nav>
 
     <!-- Contenu principal -->
-    <main class="main-content">
+    <main class="main-content" style="display: none;">
         <!-- Dashboard -->
         <section id="dashboard" class="content-section active">
             <div class="section-header">
-                <h1>🏠 Dashboard</h1>
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
                 <div class="section-actions">
-                    <button class="btn btn-secondary" onclick="refreshDashboard()">
-                        🔄 Actualiser
+                    <div class="connection-status connected" id="firebase-status">
+                        <i class="fas fa-database"></i>
+                        Firebase connecté
+                    </div>
+                    <button id="refresh-dashboard" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
                     </button>
                 </div>
             </div>
 
             <div class="dashboard-stats">
-                <div class="stat-card">
-                    <span style="font-size: 2rem;">👥</span>
+                <div class="stat-card animate-slide-up">
+                    <i class="fas fa-users"></i>
                     <div class="stat-info">
-                        <h3 id="team-count">3</h3>
+                        <h3 id="team-count">0</h3>
                         <p>Membres d'équipe</p>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <span style="font-size: 2rem;">📱</span>
+                <div class="stat-card animate-slide-up">
+                    <i class="fas fa-tasks"></i>
                     <div class="stat-info">
-                        <h3 id="google-events-count">0</h3>
-                        <p>Événements Google</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <span style="font-size: 2rem;">🏆</span>
-                    <div class="stat-info">
-                        <h3 id="active-quests">5</h3>
+                        <h3 id="active-quests">0</h3>
                         <p>Missions actives</p>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <span style="font-size: 2rem;">🔄</span>
+                <div class="stat-card animate-slide-up">
+                    <i class="fas fa-calendar-check"></i>
                     <div class="stat-info">
-                        <h3 id="sync-status-text">Déconnecté</h3>
-                        <p>Synchronisation Google</p>
+                        <h3 id="events-today">0</h3>
+                        <p>Événements aujourd'hui</p>
+                    </div>
+                </div>
+                <div class="stat-card animate-slide-up">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-info">
+                        <h3 id="user-level">1</h3>
+                        <p>Niveau actuel</p>
                     </div>
                 </div>
             </div>
 
             <div class="dashboard-grid">
-                <div class="dashboard-widget">
-                    <h3>📱 Google Calendar Status</h3>
-                    <div style="text-align: center; padding: 2rem;">
-                        <div id="dashboard-google-status" class="google-status disconnected">
-                            ❌ Non connecté
-                        </div>
-                        <div style="margin-top: 1rem;">
-                            <button class="btn btn-primary" onclick="goToGoogleCalendar()">
-                                📱 Gérer Google Calendar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-widget">
-                    <h3>📈 Dernières activités</h3>
+                <div class="dashboard-widget animate-slide-up">
+                    <h3><i class="fas fa-history"></i> Dernières activités</h3>
                     <div id="recent-activities">
                         <div class="activity-item">
-                            <span style="color: #667eea; font-size: 1.2rem;">🚀</span>
-                            <span>SYNERGIA v3.0 avec Google Calendar activé</span>
+                            <i class="fas fa-rocket status-online"></i>
+                            <span>Application initialisée</span>
                             <small style="margin-left: auto; color: #666;">Maintenant</small>
                         </div>
-                        <div class="activity-item">
-                            <span style="color: #4285f4; font-size: 1.2rem;">📱</span>
-                            <span>Google Calendar configuré</span>
-                            <small style="margin-left: auto; color: #666;">Il y a 2 minutes</small>
-                        </div>
-                        <div class="activity-item">
-                            <span style="color: #28a745; font-size: 1.2rem;">👥</span>
-                            <span>Équipe chargée (3 membres)</span>
-                            <small style="margin-left: auto; color: #666;">Il y a 5 minutes</small>
-                        </div>
                     </div>
                 </div>
 
-                <div class="dashboard-widget">
-                    <h3>🏆 Missions du jour</h3>
+                <div class="dashboard-widget animate-slide-up">
+                    <h3><i class="fas fa-tasks"></i> Missions du jour</h3>
                     <div id="daily-quests-preview">
                         <div class="activity-item">
-                            <span style="color: #ffc107; font-size: 1.2rem;">⏰</span>
-                            <span>Pointer son arrivée</span>
-                            <small style="margin-left: auto; color: #667eea; font-weight: bold;">50 XP</small>
-                        </div>
-                        <div class="activity-item">
-                            <span style="color: #28a745; font-size: 1.2rem;">💬</span>
-                            <span>Message d'équipe</span>
-                            <small style="margin-left: auto; color: #667eea; font-weight: bold;">30 XP</small>
-                        </div>
-                        <div class="activity-item">
-                            <span style="color: #4285f4; font-size: 1.2rem;">📱</span>
-                            <span>Sync Google Calendar</span>
-                            <small style="margin-left: auto; color: #667eea; font-weight: bold;">75 XP</small>
+                            <i class="fas fa-clock" style="color: #ffc107;"></i>
+                            <span>Connectez-vous pour voir vos missions</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="dashboard-widget">
-                    <h3>📊 Progression XP</h3>
+                <div class="dashboard-widget animate-slide-up">
+                    <h3><i class="fab fa-google"></i> Google Calendar</h3>
+                    <div style="text-align: center; padding: 1rem;">
+                        <div id="google-calendar-status" class="connection-status disconnected">
+                            <i class="fas fa-times"></i>
+                            Non connecté
+                        </div>
+                        <button id="setup-google-calendar" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fab fa-google"></i>
+                            Configurer Google Calendar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-widget animate-slide-up">
+                    <h3><i class="fas fa-chart-line"></i> Progression XP</h3>
                     <div style="text-align: center; padding: 2rem;">
-                        <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;">1,250</div>
+                        <div style="font-size: 2rem; color: #667eea; margin-bottom: 0.5rem;" id="user-xp">0</div>
                         <div style="color: #666;">XP Total</div>
                         <div style="margin-top: 1rem;">
                             <div class="xp-bar" style="background: #e9ecef;">
-                                <div class="xp-fill" style="width: 60%; background: #667eea;"></div>
+                                <div class="xp-fill" id="xp-progress" style="width: 0%; background: #667eea;"></div>
                             </div>
-                            <small style="color: #666;">Niveau 5 - 60% vers niveau 6</small>
+                            <small style="color: #666;" id="level-progress">Niveau 1 - 0% vers niveau 2</small>
                         </div>
                     </div>
                 </div>
@@ -716,188 +1191,53 @@
         <!-- Équipe -->
         <section id="team" class="content-section">
             <div class="section-header">
-                <h1>👥 Gestion d'équipe</h1>
+                <h1><i class="fas fa-users"></i> Gestion d'équipe</h1>
                 <div class="section-actions">
-                    <input type="text" placeholder="Rechercher..." style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; width: 300px;">
-                    <button class="btn btn-primary">
-                        ➕ Ajouter membre
+                    <input type="text" id="team-search" placeholder="Rechercher..." style="padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; width: 300px;">
+                    <button id="add-member-btn" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Ajouter membre
                     </button>
-                    <button class="btn btn-secondary">
-                        📊 Export équipe
+                    <button id="export-team-btn" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Exporter
                     </button>
                 </div>
             </div>
 
-            <div class="team-grid">
-                <div class="team-member-card">
-                    <div class="member-avatar">
-                        A
-                        <div class="status-indicator online"></div>
-                    </div>
-                    <div class="member-info">
-                        <h3>Allan Boehme</h3>
-                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">Administrateur</p>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">brain.caen@gmail.com</p>
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau 5</span>
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">1,250 XP</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                            <button class="btn-icon" title="Message">💬</button>
-                            <button class="btn-icon" title="Profil">👤</button>
-                            <button class="btn-icon" title="Assigner mission">🎯</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-member-card">
-                    <div class="member-avatar">
-                        P
-                        <div class="status-indicator online"></div>
-                    </div>
-                    <div class="member-info">
-                        <h3>Polar Caron</h3>
-                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">Développeur</p>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">polar.caron@synergia.com</p>
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau 4</span>
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">980 XP</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                            <button class="btn-icon" title="Message">💬</button>
-                            <button class="btn-icon" title="Profil">👤</button>
-                            <button class="btn-icon" title="Assigner mission">🎯</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-member-card">
-                    <div class="member-avatar">
-                        M
-                        <div class="status-indicator away"></div>
-                    </div>
-                    <div class="member-info">
-                        <h3>Marie Dubois</h3>
-                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">Designer</p>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">marie.dubois@synergia.com</p>
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau 3</span>
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">750 XP</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                            <button class="btn-icon" title="Message">💬</button>
-                            <button class="btn-icon" title="Profil">👤</button>
-                            <button class="btn-icon" title="Assigner mission">🎯</button>
-                        </div>
-                    </div>
-                </div>
+            <div id="team-members-list" class="team-grid">
+                <!-- Membres générés dynamiquement -->
             </div>
         </section>
 
         <!-- Planning -->
         <section id="planning" class="content-section">
             <div class="section-header">
-                <h1>📅 Planning</h1>
+                <h1><i class="fas fa-calendar"></i> Planning</h1>
                 <div class="section-actions">
-                    <button class="btn btn-primary">
-                        ➕ Nouvel événement
+                    <button id="add-event-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Nouvel événement
                     </button>
-                    <button class="btn btn-secondary">
-                        📱 Sync Google
-                    </button>
-                    <button class="btn btn-secondary">
-                        📊 Export planning
+                    <button id="sync-google-calendar" class="btn btn-secondary">
+                        <i class="fab fa-google"></i>
+                        Sync Google
                     </button>
                 </div>
             </div>
 
-            <div class="calendar-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 12px;">
-                    <h3>📅 Planning Équipe</h3>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <button class="btn-icon">⬅️</button>
-                        <h4>Juin 2025</h4>
-                        <button class="btn-icon">➡️</button>
-                    </div>
-                </div>
-
+            <div id="calendar-container" style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
                 <div style="text-align: center; padding: 2rem; color: #666;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                    <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                     <h3>Calendrier SYNERGIA</h3>
-                    <p>Vue planning de l'équipe</p>
-                    <div style="margin-top: 1rem;">
-                        <div class="google-status connected">
-                            ✅ Synchronisé avec Google Calendar
-                        </div>
-                    </div>
+                    <p>Vos événements et rendez-vous</p>
                 </div>
             </div>
 
-            <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e9ecef;">
-                <h3>📋 Événements à venir</h3>
-                <div style="margin-top: 1rem;">
-                    <div class="event-item">
-                        <div class="event-icon">👥</div>
-                        <div style="flex: 1;">
-                            <strong>Réunion équipe</strong>
-                            <br><small style="color: #666;">Point hebdomadaire</small>
-                            <br><small style="color: #28a745; font-weight: bold;">Aujourd'hui 10:00</small>
-                            <br><small style="color: #4285f4;">📱 Depuis Google Calendar</small>
-                        </div>
-                    </div>
-                    
-                    <div class="event-item">
-                        <div class="event-icon synergia">🎓</div>
-                        <div style="flex: 1;">
-                            <strong>Formation SYNERGIA</strong>
-                            <br><small style="color: #666;">Nouvelles fonctionnalités</small>
-                            <br><small style="color: #666;">Vendredi 14:00</small>
-                        </div>
-                    </div>
-                    
-                    <div class="event-item">
-                        <div class="event-icon" style="background: #e83e8c;">🎂</div>
-                        <div style="flex: 1;">
-                            <strong>Anniversaire Marie</strong>
-                            <br><small style="color: #666;">Célébration d'équipe</small>
-                            <br><small style="color: #666;">Lundi 12:00</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Google Calendar -->
-        <section id="google-calendar" class="content-section">
-            <div class="section-header">
-                <h1>📱 Google Calendar</h1>
-                <div class="section-actions">
-                    <button id="sync-calendar" class="btn btn-primary" disabled>
-                        🔄 Synchroniser
-                    </button>
-                    <button class="btn btn-secondary">
-                        ➕ Nouvel événement
-                    </button>
-                </div>
-            </div>
-            
-            <div id="connection-status" class="google-status disconnected">
-                ❌ Non connecté à Google Calendar
-            </div>
-            
-            <div style="margin: 2rem 0;">
-                <button id="connect-google" class="btn btn-primary">
-                    📱 Se connecter à Google Calendar
-                </button>
-            </div>
-
-            <div id="api-status" style="padding: 1rem; background: #f8f9fa; border-radius: 8px; margin: 1rem 0;">
-                🔄 Chargement des APIs Google...
-            </div>
-
-            <div id="events-container" class="events-container">
-                <div class="loading">
-                    📅 Connectez-vous pour voir vos événements Google Calendar
+            <div style="background: white; border-radius: 12px; padding: 1.5rem;">
+                <h3><i class="fas fa-list"></i> Événements à venir</h3>
+                <div id="events-list">
+                    <!-- Événements générés dynamiquement -->
                 </div>
             </div>
         </section>
@@ -905,75 +1245,53 @@
         <!-- Chat -->
         <section id="chat" class="content-section">
             <div class="section-header">
-                <h1>💬 Chat d'équipe</h1>
+                <h1><i class="fas fa-comments"></i> Chat d'équipe</h1>
                 <div class="section-actions">
-                    <select style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
-                        <option>🟢 En ligne</option>
-                        <option>🟡 Absent</option>
-                        <option>🔴 Occupé</option>
-                    </select>
-                    <button class="btn btn-secondary">
-                        ⚙️ Paramètres
-                    </button>
+                    <div class="connection-status connected">
+                        <i class="fas fa-circle status-online"></i>
+                        En ligne
+                    </div>
                 </div>
             </div>
 
             <div class="chat-container">
                 <div class="chat-sidebar">
                     <div style="padding: 1rem; border-bottom: 1px solid #e9ecef;">
-                        <h3>💬 Conversations</h3>
+                        <h3>Conversations</h3>
                     </div>
                     <div style="padding: 1rem;">
-                        <div class="activity-item" style="cursor: pointer; padding: 0.5rem; border-radius: 8px;">
-                            <span style="color: #667eea; font-size: 1.2rem;">👥</span>
+                        <div class="activity-item" style="cursor: pointer; padding: 0.5rem; border-radius: 8px; background: rgba(102, 126, 234, 0.1);">
+                            <i class="fas fa-users" style="color: #667eea;"></i>
                             <div style="flex: 1;">
                                 <strong>Équipe Générale</strong>
-                                <br><small style="color: #666;">Bonne journée à tous!</small>
+                                <br><small style="color: #666;">Messages de l'équipe</small>
                             </div>
-                            <small style="color: #28a745;">🟢</small>
+                            <span class="realtime-dot"></span>
                         </div>
                     </div>
                 </div>
 
                 <div class="chat-main">
-                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef; background: white; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>👥 Équipe Générale</h3>
-                            <span style="color: #28a745; font-size: 0.9rem;">
-                                🟢 3 membres en ligne
-                            </span>
-                        </div>
-                        <div>
-                            <button class="btn-icon" title="Appel vidéo">📹</button>
-                            <button class="btn-icon" title="Appel audio">📞</button>
-                        </div>
+                    <div style="padding: 1rem; border-bottom: 1px solid #e9ecef; background: white;">
+                        <h3><i class="fas fa-users"></i> Équipe Générale</h3>
+                        <span style="color: #28a745; font-size: 0.9rem;">
+                            <i class="fas fa-circle"></i> En ligne
+                        </span>
                     </div>
 
-                    <div class="messages-area">
-                        <div style="text-align: center; padding: 1rem; color: #666; border-bottom: 1px solid #eee;">
-                            <small>Conversation démarrée le 15 décembre 2024</small>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem; padding: 1rem;">
-                            <div class="user-avatar" style="width: 40px; height: 40px; font-size: 1rem;">A</div>
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                                    <strong>Allan Boehme</strong>
-                                    <small style="color: #666;">10:30</small>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 12px;">
-                                    Bonne journée ! Google Calendar intégré avec succès 🎉
-                                </div>
-                            </div>
+                    <div class="messages-area" id="messages-area">
+                        <div style="text-align: center; padding: 2rem; color: #666;">
+                            <i class="fas fa-comments" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                            <p>Bienvenue dans le chat d'équipe SYNERGIA !</p>
                         </div>
                     </div>
 
                     <div class="message-input-container">
                         <div class="message-input">
-                            <button class="btn-icon">😊</button>
-                            <input type="text" placeholder="Tapez votre message...">
-                            <button style="padding: 0.75rem 1rem; background: #667eea; color: white; border: none; border-radius: 8px;">
-                                📤
+                            <button class="btn-icon"><i class="fas fa-smile"></i></button>
+                            <input type="text" id="message-input" placeholder="Tapez votre message...">
+                            <button id="send-message-btn" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
@@ -984,17 +1302,14 @@
         <!-- Missions -->
         <section id="quests" class="content-section">
             <div class="section-header">
-                <h1>🏆 Missions & Récompenses</h1>
+                <h1><i class="fas fa-trophy"></i> Missions & Récompenses</h1>
                 <div class="section-actions">
-                    <select style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
-                        <option>📋 Toutes les missions</option>
-                        <option>✅ Disponibles</option>
-                        <option>⏳ En cours</option>
-                        <option>🎯 Terminées</option>
+                    <select id="quest-filter" style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                        <option value="all">Toutes les missions</option>
+                        <option value="available">Disponibles</option>
+                        <option value="in-progress">En cours</option>
+                        <option value="completed">Terminées</option>
                     </select>
-                    <button class="btn btn-secondary">
-                        📈 Historique
-                    </button>
                 </div>
             </div>
 
@@ -1002,77 +1317,286 @@
                 <div class="level-info">
                     <div style="text-align: center; margin-right: 1rem;">
                         <div style="font-size: 2rem; margin-bottom: 0.25rem;">⭐</div>
-                        <span>Niveau 5</span>
+                        <span id="user-level-display">Niveau 1</span>
                     </div>
                     <div class="xp-bar">
-                        <div class="xp-fill" style="width: 60%;"></div>
+                        <div class="xp-fill" id="quest-xp-progress" style="width: 0%;"></div>
                     </div>
                     <div style="text-align: center; margin-left: 1rem;">
-                        <span>1,250 XP</span>
-                        <div style="font-size: 0.8rem; opacity: 0.8;">750 XP vers niveau 6</div>
+                        <span id="user-xp-display">0 XP</span>
+                        <div style="font-size: 0.8rem; opacity: 0.8;" id="next-level-info">100 XP vers niveau 2</div>
                     </div>
                 </div>
             </div>
 
             <div class="quests-tabs">
-                <button class="quest-tab active">
-                    ☀️ Quotidiennes
+                <button class="quest-tab active" data-type="daily">
+                    <i class="fas fa-sun"></i> Quotidiennes
                 </button>
-                <button class="quest-tab">
-                    📅 Hebdomadaires
+                <button class="quest-tab" data-type="weekly">
+                    <i class="fas fa-calendar-week"></i> Hebdomadaires
                 </button>
-                <button class="quest-tab">
-                    ⭐ Spéciales
+                <button class="quest-tab" data-type="special">
+                    <i class="fas fa-star"></i> Spéciales
                 </button>
             </div>
 
-            <div class="quests-grid">
-                <div class="quest-card">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">⏰</div>
-                    <h3>Pointer son arrivée</h3>
-                    <p style="color: #666; margin-bottom: 1rem;">Pointer votre arrivée avant 9h30</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">50 XP</span>
-                        <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Quotidienne</span>
-                    </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="acceptQuest('daily_checkin')">
-                        ✅ Accepter
+            <div id="quests-list" class="quests-grid">
+                <!-- Missions générées dynamiquement -->
+            </div>
+        </section>
+
+        <!-- Analytics -->
+        <section id="analytics" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-bar"></i> Analytics</h1>
+                <div class="section-actions">
+                    <select style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                        <option>Cette semaine</option>
+                        <option>Ce mois</option>
+                        <option>Cette année</option>
+                    </select>
+                    <button id="refresh-analytics" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
                     </button>
                 </div>
-
-                <div class="quest-card">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">💬</div>
-                    <h3>Message d'équipe</h3>
-                    <p style="color: #666; margin-bottom: 1rem;">Envoyer un message dans le chat</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">30 XP</span>
-                        <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Quotidienne</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                    <h3><i class="fas fa-users"></i> Activité équipe</h3>
+                    <div style="text-align: center; padding: 2rem;">
+                        <canvas id="team-activity-chart" width="300" height="200"></canvas>
                     </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="acceptQuest('daily_message')">
-                        ✅ Accepter
-                    </button>
                 </div>
 
-                <div class="quest-card">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">📱</div>
-                    <h3>Synchronisation Google</h3>
-                    <p style="color: #666; margin-bottom: 1rem;">Connecter et synchroniser Google Calendar</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">75 XP</span>
-                        <span style="background: #4285f4; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Google</span>
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem;">
+                    <h3><i class="fas fa-trophy"></i> Missions complétées</h3>
+                    <div style="text-align: center; padding: 2rem;">
+                        <canvas id="missions-chart" width="300" height="200"></canvas>
                     </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="acceptQuest('google_sync')">
-                        ✅ Accepter
+                </div>
+            </div>
+        </section>
+
+        <!-- Paramètres -->
+        <section id="settings" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-cog"></i> Paramètres</h1>
+                <div class="section-actions">
+                    <button id="export-settings" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Exporter
                     </button>
+                    <button id="save-settings" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Sauvegarder
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                <!-- Profil utilisateur -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-user"></i> Profil utilisateur</h3>
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label>Nom complet</label>
+                            <input type="text" id="profile-name" placeholder="Votre nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profile-email" placeholder="votre@email.com" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Entreprise</label>
+                            <input type="text" id="profile-company" placeholder="Nom de l'entreprise">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Mettre à jour le profil
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Configuration Google Calendar -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fab fa-google"></i> Google Calendar</h3>
+                    <div id="google-calendar-config">
+                        <div class="connection-status disconnected" id="google-status">
+                            <i class="fas fa-times"></i>
+                            Non connecté
+                        </div>
+                        <div style="margin: 1rem 0;">
+                            <p style="color: #666; font-size: 0.9rem;">
+                                Connectez votre Google Calendar pour synchroniser vos événements automatiquement.
+                            </p>
+                        </div>
+                        <button id="connect-google-calendar" class="btn btn-primary">
+                            <i class="fab fa-google"></i>
+                            Connecter Google Calendar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestion des missions -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-tasks"></i> Gestion des missions</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4>Créer une nouvelle mission</h4>
+                        <form id="quest-form">
+                            <div class="form-group">
+                                <label>Titre</label>
+                                <input type="text" id="quest-title" placeholder="Titre de la mission" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="quest-description" placeholder="Description de la mission" rows="3"></textarea>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select id="quest-type">
+                                        <option value="daily">Quotidienne</option>
+                                        <option value="weekly">Hebdomadaire</option>
+                                        <option value="special">Spéciale</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>XP</label>
+                                    <input type="number" id="quest-xp" value="50" min="1" max="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Difficulté</label>
+                                    <select id="quest-difficulty">
+                                        <option value="easy">Facile</option>
+                                        <option value="medium">Moyen</option>
+                                        <option value="hard">Difficile</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Créer la mission
+                            </button>
+                        </form>
+                    </div>
+                    <div>
+                        <h4>Missions existantes</h4>
+                        <div id="admin-quests-list" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Liste des missions -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <div id="toast-container"></div>
+    <!-- Modal Ajout Événement -->
+    <div id="add-event-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-event-modal')">&times;</span>
+            <h2><i class="fas fa-calendar-plus"></i> Nouvel événement</h2>
+            <form id="event-form">
+                <div class="form-group">
+                    <label>Titre</label>
+                    <input type="text" id="event-title" required placeholder="Ex: Réunion équipe">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="event-description" placeholder="Description de l'événement..."></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="event-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Heure</label>
+                        <input type="time" id="event-time" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="event-type" required>
+                        <option value="">Sélectionner un type</option>
+                        <option value="meeting">🏢 Réunion</option>
+                        <option value="training">🎓 Formation</option>
+                        <option value="event">🎉 Événement</option>
+                        <option value="social">☕ Social</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('add-event-modal')" class="btn btn-secondary">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i>
+                        Créer l'événement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ajout Membre -->
+    <div id="add-member-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-member-modal')">&times;</span>
+            <h2><i class="fas fa-user-plus"></i> Ajouter un membre</h2>
+            <form id="member-form">
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" id="member-name" required placeholder="Nom du membre">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="member-email" required placeholder="email@exemple.com">
+                </div>
+                <div class="form-group">
+                    <label>Rôle</label>
+                    <select id="member-role" required>
+                        <option value="">Sélectionner un rôle</option>
+                        <option value="admin">Administrateur</option>
+                        <option value="manager">Manager</option>
+                        <option value="developer">Développeur</option>
+                        <option value="designer">Designer</option>
+                        <option value="employee">Employé</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Département</label>
+                    <select id="member-department">
+                        <option value="">Sélectionner un département</option>
+                        <option value="direction">Direction</option>
+                        <option value="it">Informatique</option>
+                        <option value="design">Design</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="rh">Ressources Humaines</option>
+                        <option value="finance">Finance</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('add-member-modal')" class="btn btn-secondary">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Ajouter le membre
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Container pour notifications -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
 
     <script>
-        // Configuration Google Calendar - TES VRAIES CLÉS
+        // Configuration Google Calendar
         const GOOGLE_CONFIG = {
             apiKey: 'AIzaSyCScckTMndwRM1USdc381Jz64oOjojEseY',
             clientId: '187598928508-q8h0j0almvtl1lfv9741p3bfu8hvhga1.apps.googleusercontent.com',
@@ -1080,273 +1604,1374 @@
             scopes: 'https://www.googleapis.com/auth/calendar'
         };
 
-        let isGoogleSignedIn = false;
+        // Variables globales
+        let currentUser = null;
+        let currentCompany = null;
+        let isGoogleCalendarConnected = false;
         let tokenClient = null;
-        let events = [];
+        let synergia = null;
 
+        // Classe principale SYNERGIA
         class SynergiaApp {
             constructor() {
+                this.users = [];
                 this.events = [];
+                this.quests = [];
+                this.messages = [];
+                this.userProgress = { level: 1, xp: 0 };
+                this.unsubscribers = [];
+                
                 this.init();
             }
 
             async init() {
-                console.log('🚀 Initialisation SYNERGIA v3.0 Complet');
+                console.log('🚀 Initialisation SYNERGIA v3.0 Production');
                 
-                // Setup navigation
-                this.setupNavigation();
-                
-                // Setup event listeners
-                this.setupEventListeners();
-                
-                // Charger Google APIs
-                await this.loadGoogleAPIs();
+                // Attendre Firebase
+                if (window.firebaseReady) {
+                    this.onFirebaseReady();
+                } else {
+                    window.addEventListener('firebaseReady', () => this.onFirebaseReady());
+                }
             }
 
-            setupNavigation() {
-                const navLinks = document.querySelectorAll('.nav-link');
-                const sections = document.querySelectorAll('.content-section');
+            async onFirebaseReady() {
+                this.updateLoadingStatus('Firebase connecté, configuration de l\'authentification...');
+                
+                // Configurer l'authentification
+                this.setupAuth();
+                
+                // Configurer les event listeners
+                this.setupEventListeners();
+                
+                // Configurer Google Calendar
+                await this.setupGoogleCalendar();
+                
+                this.updateLoadingStatus('Prêt !');
+                
+                setTimeout(() => {
+                    this.hideLoadingScreen();
+                }, 1000);
+            }
 
-                navLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        const targetSection = link.dataset.section;
+            setupAuth() {
+                window.firebase.onAuthStateChanged(window.auth, async (user) => {
+                    if (user) {
+                        currentUser = user;
+                        console.log(`✅ Utilisateur connecté: ${user.email}`);
                         
-                        // Retirer active de tous les liens
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
+                        // Charger les données utilisateur
+                        await this.loadUserData();
                         
-                        // Retirer active de toutes les sections
-                        sections.forEach(section => section.classList.remove('active'));
+                        // Configurer les listeners en temps réel
+                        this.setupRealtimeListeners();
                         
-                        // Activer la section cible
-                        const targetElement = document.getElementById(targetSection);
-                        if (targetElement) {
-                            targetElement.classList.add('active');
-                        }
-                    });
+                        // Masquer le modal d'auth et afficher l'interface
+                        this.hideAuthModal();
+                        this.showMainInterface();
+                        
+                        // Mettre à jour l'interface utilisateur
+                        this.updateUserInterface();
+                        
+                        this.showToast(`Bienvenue ${user.displayName || user.email} !`, 'success');
+                        
+                    } else {
+                        currentUser = null;
+                        console.log('❌ Aucun utilisateur connecté');
+                        this.showAuthModal();
+                        this.hideMainInterface();
+                    }
                 });
+            }
+
+            async loadUserData() {
+                try {
+                    // Charger ou créer le profil utilisateur
+                    const userDoc = await window.firebase.getDoc(
+                        window.firebase.doc(window.db, 'users', currentUser.uid)
+                    );
+                    
+                    if (!userDoc.exists()) {
+                        // Première connexion - créer le profil
+                        await this.createUserProfile();
+                    }
+                    
+                    // Charger ou créer l'entreprise
+                    await this.loadOrCreateCompany();
+                    
+                    console.log('✅ Données utilisateur chargées');
+                    
+                } catch (error) {
+                    console.error('❌ Erreur chargement données:', error);
+                    this.showToast('Erreur lors du chargement des données', 'error');
+                }
+            }
+
+            async createUserProfile() {
+                const userData = {
+                    email: currentUser.email,
+                    displayName: currentUser.displayName || currentUser.email.split('@')[0],
+                    photoURL: currentUser.photoURL || null,
+                    level: 1,
+                    xp: 0,
+                    joinedAt: window.firebase.serverTimestamp(),
+                    lastLogin: window.firebase.serverTimestamp(),
+                    status: 'online'
+                };
+                
+                await window.firebase.setDoc(
+                    window.firebase.doc(window.db, 'users', currentUser.uid),
+                    userData
+                );
+                
+                console.log('✅ Profil utilisateur créé');
+            }
+
+            async loadOrCreateCompany() {
+                // Vérifier si l'utilisateur appartient à une entreprise
+                const userCompaniesQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'companies'),
+                    window.firebase.where('members', 'array-contains', currentUser.uid)
+                );
+                
+                const companiesSnapshot = await window.firebase.getDocs(userCompaniesQuery);
+                
+                if (!companiesSnapshot.empty) {
+                    // Utilisateur appartient à une entreprise existante
+                    currentCompany = { id: companiesSnapshot.docs[0].id, ...companiesSnapshot.docs[0].data() };
+                } else {
+                    // Créer une nouvelle entreprise
+                    await this.createCompany();
+                }
+                
+                console.log('✅ Entreprise configurée:', currentCompany.name);
+            }
+
+            async createCompany() {
+                const companyName = prompt('Nom de votre entreprise:', 'Mon Entreprise') || 'Mon Entreprise';
+                
+                const companyData = {
+                    name: companyName,
+                    owner: currentUser.uid,
+                    members: [currentUser.uid],
+                    createdAt: window.firebase.serverTimestamp(),
+                    settings: {
+                        timezone: 'Europe/Paris',
+                        workingHours: { start: '09:00', end: '17:00' },
+                        googleCalendarEnabled: false
+                    }
+                };
+                
+                const companyRef = await window.firebase.addDoc(
+                    window.firebase.collection(window.db, 'companies'),
+                    companyData
+                );
+                
+                currentCompany = { id: companyRef.id, ...companyData };
+                
+                // Créer les missions par défaut
+                await this.createDefaultQuests();
+                
+                console.log('✅ Entreprise créée:', companyName);
+            }
+
+            async createDefaultQuests() {
+                const defaultQuests = [
+                    {
+                        title: 'Première connexion',
+                        description: 'Connectez-vous à SYNERGIA pour la première fois',
+                        type: 'special',
+                        xp: 100,
+                        difficulty: 'easy',
+                        icon: '🚀',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        title: 'Pointage quotidien',
+                        description: 'Marquez votre présence chaque jour',
+                        type: 'daily',
+                        xp: 50,
+                        difficulty: 'easy',
+                        icon: '⏰',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        title: 'Message d\'équipe',
+                        description: 'Envoyez un message dans le chat d\'équipe',
+                        type: 'daily',
+                        xp: 30,
+                        difficulty: 'easy',
+                        icon: '💬',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        title: 'Configuration Google Calendar',
+                        description: 'Connectez et configurez Google Calendar',
+                        type: 'special',
+                        xp: 150,
+                        difficulty: 'medium',
+                        icon: '📅',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    }
+                ];
+
+                for (const quest of defaultQuests) {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'quests'),
+                        quest
+                    );
+                }
+            }
+
+            setupRealtimeListeners() {
+                if (!currentCompany) return;
+
+                // Écouter les utilisateurs de l'entreprise
+                const usersQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'users'),
+                    window.firebase.where('companyId', '==', currentCompany.id)
+                );
+                
+                const unsubUsers = window.firebase.onSnapshot(usersQuery, (snapshot) => {
+                    this.users = [];
+                    snapshot.forEach(doc => {
+                        this.users.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateTeamDisplay();
+                    this.updateDashboardStats();
+                });
+
+                // Écouter les missions
+                const questsQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'quests'),
+                    window.firebase.where('companyId', '==', currentCompany.id),
+                    window.firebase.where('active', '==', true)
+                );
+                
+                const unsubQuests = window.firebase.onSnapshot(questsQuery, (snapshot) => {
+                    this.quests = [];
+                    snapshot.forEach(doc => {
+                        this.quests.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateQuestsDisplay();
+                    this.updateDashboardStats();
+                });
+
+                // Écouter les événements
+                const eventsQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'events'),
+                    window.firebase.where('companyId', '==', currentCompany.id),
+                    window.firebase.orderBy('date', 'asc')
+                );
+                
+                const unsubEvents = window.firebase.onSnapshot(eventsQuery, (snapshot) => {
+                    this.events = [];
+                    snapshot.forEach(doc => {
+                        this.events.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateEventsDisplay();
+                    this.updateDashboardStats();
+                });
+
+                // Écouter les messages du chat
+                const messagesQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'messages'),
+                    window.firebase.where('companyId', '==', currentCompany.id),
+                    window.firebase.orderBy('timestamp', 'asc'),
+                    window.firebase.limit(50)
+                );
+                
+                const unsubMessages = window.firebase.onSnapshot(messagesQuery, (snapshot) => {
+                    this.messages = [];
+                    snapshot.forEach(doc => {
+                        this.messages.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateChatDisplay();
+                });
+
+                // Stocker les unsubscribers pour les nettoyer plus tard
+                this.unsubscribers = [unsubUsers, unsubQuests, unsubEvents, unsubMessages];
             }
 
             setupEventListeners() {
-                // Google Calendar
-                const connectBtn = document.getElementById('connect-google');
-                if (connectBtn) {
-                    connectBtn.addEventListener('click', () => this.connectToGoogle());
-                }
+                // Navigation
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.switchSection(link.dataset.section);
+                    });
+                });
 
-                const syncBtn = document.getElementById('sync-calendar');
-                if (syncBtn) {
-                    syncBtn.addEventListener('click', () => this.syncCalendar());
-                }
+                // Auth tabs
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchAuthTab(tab.dataset.tab);
+                    });
+                });
+
+                // Forms
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                document.getElementById('register-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleRegister();
+                });
+
+                document.getElementById('google-login-btn').addEventListener('click', () => {
+                    this.handleGoogleLogin();
+                });
+
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.handleLogout();
+                });
+
+                // Événements
+                document.getElementById('add-event-btn').addEventListener('click', () => {
+                    this.showModal('add-event-modal');
+                });
+
+                document.getElementById('event-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createEvent();
+                });
+
+                // Membres
+                document.getElementById('add-member-btn').addEventListener('click', () => {
+                    this.showModal('add-member-modal');
+                });
+
+                document.getElementById('member-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addMember();
+                });
+
+                // Missions
+                document.getElementById('quest-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createQuest();
+                });
+
+                document.querySelectorAll('.quest-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.filterQuests(tab.dataset.type);
+                    });
+                });
+
+                // Chat
+                document.getElementById('send-message-btn').addEventListener('click', () => {
+                    this.sendMessage();
+                });
+
+                document.getElementById('message-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+
+                // Profil
+                document.getElementById('profile-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.updateProfile();
+                });
+
+                // Google Calendar
+                document.getElementById('connect-google-calendar').addEventListener('click', () => {
+                    this.connectGoogleCalendar();
+                });
+
+                // Refresh buttons
+                document.getElementById('refresh-dashboard').addEventListener('click', () => {
+                    this.refreshDashboard();
+                });
+
+                // Fermeture des modales
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        this.closeModal(e.target.id);
+                    }
+                });
             }
 
-            async loadGoogleAPIs() {
+            async setupGoogleCalendar() {
                 try {
-                    this.updateStatus('🔄 Chargement Google APIs...');
+                    this.updateLoadingStatus('Configuration Google Calendar...');
                     
-                    // Charger gapi
-                    await this.loadScript('https://apis.google.com/js/api.js');
-                    await this.waitForGapi();
+                    // Charger l'API Google
+                    await this.loadGoogleAPI();
                     
-                    // Charger client
-                    await new Promise(resolve => gapi.load('client', resolve));
-                    
-                    // Initialiser client
-                    await gapi.client.init({
-                        apiKey: GOOGLE_CONFIG.apiKey,
-                        discoveryDocs: [GOOGLE_CONFIG.discoveryDoc]
-                    });
-                    
-                    // Charger Google Identity Services
-                    await this.loadScript('https://accounts.google.com/gsi/client');
-                    await this.waitForGoogleAccounts();
-                    
-                    // Initialiser token client
+                    // Initialiser le token client
                     tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: GOOGLE_CONFIG.clientId,
                         scope: GOOGLE_CONFIG.scopes,
-                        callback: (response) => this.handleAuthSuccess(response)
+                        callback: (response) => this.handleGoogleCalendarAuth(response)
                     });
                     
-                    this.updateStatus('✅ APIs Google prêtes !');
-                    document.getElementById('connect-google').disabled = false;
+                    console.log('✅ Google Calendar API prête');
                     
                 } catch (error) {
-                    console.error('❌ Erreur chargement APIs:', error);
-                    this.updateStatus('❌ Erreur de chargement des APIs Google');
+                    console.error('❌ Erreur Google Calendar:', error);
+                    this.showToast('Google Calendar non disponible', 'warning');
                 }
             }
 
-            loadScript(src) {
+            loadGoogleAPI() {
                 return new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.src = src;
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.head.appendChild(script);
+                    if (typeof gapi !== 'undefined') {
+                        gapi.load('client', async () => {
+                            try {
+                                await gapi.client.init({
+                                    apiKey: GOOGLE_CONFIG.apiKey,
+                                    discoveryDocs: [GOOGLE_CONFIG.discoveryDoc]
+                                });
+                                resolve();
+                            } catch (error) {
+                                reject(error);
+                            }
+                        });
+                    } else {
+                        reject(new Error('Google API non chargée'));
+                    }
                 });
             }
 
-            waitForGapi() {
-                return new Promise(resolve => {
-                    const check = () => {
-                        if (typeof gapi !== 'undefined') {
-                            resolve();
-                        } else {
-                            setTimeout(check, 100);
-                        }
-                    };
-                    check();
-                });
-            }
+            // Méthodes d'authentification
+            async handleLogin() {
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
 
-            waitForGoogleAccounts() {
-                return new Promise(resolve => {
-                    const check = () => {
-                        if (typeof google !== 'undefined' && google.accounts) {
-                            resolve();
-                        } else {
-                            setTimeout(check, 100);
-                        }
-                    };
-                    check();
-                });
-            }
-
-            connectToGoogle() {
-                if (!tokenClient) {
-                    this.showToast('APIs Google non initialisées', 'error');
-                    return;
-                }
-
-                this.showToast('Connexion à Google...', 'info');
-                this.updateConnectionStatus('connecting', '🔄 Connexion en cours...');
-                
-                tokenClient.requestAccessToken();
-            }
-
-            async handleAuthSuccess(response) {
-                console.log('✅ Authentification réussie');
-                isGoogleSignedIn = true;
-                
-                this.updateConnectionStatus('connected', '✅ Connecté à Google Calendar');
-                this.updateDashboardGoogleStatus('connected', '✅ Connecté');
-                document.getElementById('sync-calendar').disabled = false;
-                
-                this.showToast('Connecté avec succès !', 'success');
-                
-                // Auto-sync
-                await this.syncCalendar();
-                
-                // Mettre à jour les stats dashboard
-                this.updateDashboardStats();
-            }
-
-            async syncCalendar() {
-                if (!isGoogleSignedIn) {
-                    this.showToast('Connectez-vous d\'abord', 'error');
+                if (!email || !password) {
+                    this.showToast('Veuillez remplir tous les champs', 'error');
                     return;
                 }
 
                 try {
-                    this.showToast('Synchronisation...', 'info');
+                    this.updateLoadingStatus('Connexion en cours...');
+                    this.showLoadingScreen();
                     
+                    await window.firebase.signInWithEmailAndPassword(window.auth, email, password);
+                    
+                } catch (error) {
+                    this.hideLoadingScreen();
+                    console.error('Erreur de connexion:', error);
+                    
+                    let message = 'Erreur de connexion';
+                    if (error.code === 'auth/user-not-found') {
+                        message = 'Aucun compte trouvé avec cet email';
+                    } else if (error.code === 'auth/wrong-password') {
+                        message = 'Mot de passe incorrect';
+                    } else if (error.code === 'auth/invalid-email') {
+                        message = 'Email invalide';
+                    }
+                    
+                    this.showToast(message, 'error');
+                }
+            }
+
+            async handleRegister() {
+                const name = document.getElementById('register-name').value.trim();
+                const email = document.getElementById('register-email').value.trim();
+                const password = document.getElementById('register-password').value;
+                const company = document.getElementById('register-company').value.trim();
+
+                if (!name || !email || !password || !company) {
+                    this.showToast('Veuillez remplir tous les champs', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showToast('Le mot de passe doit contenir au moins 6 caractères', 'error');
+                    return;
+                }
+
+                try {
+                    this.updateLoadingStatus('Création du compte...');
+                    this.showLoadingScreen();
+                    
+                    const userCredential = await window.firebase.createUserWithEmailAndPassword(window.auth, email, password);
+                    
+                    // Mettre à jour le profil
+                    await window.firebase.updateProfile(userCredential.user, {
+                        displayName: name
+                    });
+                    
+                    console.log('✅ Compte créé avec succès');
+                    
+                } catch (error) {
+                    this.hideLoadingScreen();
+                    console.error('Erreur inscription:', error);
+                    
+                    let message = 'Erreur lors de la création du compte';
+                    if (error.code === 'auth/email-already-in-use') {
+                        message = 'Cet email est déjà utilisé';
+                    } else if (error.code === 'auth/weak-password') {
+                        message = 'Le mot de passe est trop faible';
+                    } else if (error.code === 'auth/invalid-email') {
+                        message = 'Email invalide';
+                    }
+                    
+                    this.showToast(message, 'error');
+                }
+            }
+
+            async handleGoogleLogin() {
+                try {
+                    this.updateLoadingStatus('Connexion avec Google...');
+                    this.showLoadingScreen();
+                    
+                    const provider = new window.firebase.GoogleAuthProvider();
+                    provider.addScope('profile');
+                    provider.addScope('email');
+                    
+                    await window.firebase.signInWithPopup(window.auth, provider);
+                    
+                } catch (error) {
+                    this.hideLoadingScreen();
+                    console.error('Erreur connexion Google:', error);
+                    
+                    if (error.code !== 'auth/popup-closed-by-user') {
+                        this.showToast('Erreur de connexion avec Google', 'error');
+                    }
+                }
+            }
+
+            async handleLogout() {
+                if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+                    try {
+                        // Nettoyer les listeners
+                        this.unsubscribers.forEach(unsubscribe => unsubscribe());
+                        this.unsubscribers = [];
+                        
+                        await window.firebase.signOut(window.auth);
+                        
+                        this.showToast('Déconnexion réussie', 'success');
+                        
+                    } catch (error) {
+                        console.error('Erreur déconnexion:', error);
+                        this.showToast('Erreur lors de la déconnexion', 'error');
+                    }
+                }
+            }
+
+            // Méthodes de gestion des données
+            async createEvent() {
+                const title = document.getElementById('event-title').value.trim();
+                const description = document.getElementById('event-description').value.trim();
+                const date = document.getElementById('event-date').value;
+                const time = document.getElementById('event-time').value;
+                const type = document.getElementById('event-type').value;
+
+                if (!title || !date || !time || !type) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                try {
+                    const eventData = {
+                        title,
+                        description,
+                        date: new Date(`${date}T${time}`),
+                        type,
+                        companyId: currentCompany.id,
+                        createdBy: currentUser.uid,
+                        createdAt: window.firebase.serverTimestamp()
+                    };
+
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'events'),
+                        eventData
+                    );
+
+                    this.closeModal('add-event-modal');
+                    this.showToast(`Événement "${title}" créé avec succès`, 'success');
+                    
+                    // Réinitialiser le formulaire
+                    document.getElementById('event-form').reset();
+                    
+                    // Marquer la mission "Créer un événement" comme complétée
+                    this.completeQuest('create-event');
+                    
+                } catch (error) {
+                    console.error('Erreur création événement:', error);
+                    this.showToast('Erreur lors de la création de l\'événement', 'error');
+                }
+            }
+
+            async addMember() {
+                const name = document.getElementById('member-name').value.trim();
+                const email = document.getElementById('member-email').value.trim();
+                const role = document.getElementById('member-role').value;
+                const department = document.getElementById('member-department').value;
+
+                if (!name || !email || !role) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                try {
+                    const memberData = {
+                        name,
+                        email,
+                        role,
+                        department,
+                        companyId: currentCompany.id,
+                        level: 1,
+                        xp: 0,
+                        status: 'offline',
+                        joinedAt: window.firebase.serverTimestamp()
+                    };
+
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'users'),
+                        memberData
+                    );
+
+                    this.closeModal('add-member-modal');
+                    this.showToast(`Membre "${name}" ajouté avec succès`, 'success');
+                    
+                    // Réinitialiser le formulaire
+                    document.getElementById('member-form').reset();
+                    
+                } catch (error) {
+                    console.error('Erreur ajout membre:', error);
+                    this.showToast('Erreur lors de l\'ajout du membre', 'error');
+                }
+            }
+
+            async createQuest() {
+                const title = document.getElementById('quest-title').value.trim();
+                const description = document.getElementById('quest-description').value.trim();
+                const type = document.getElementById('quest-type').value;
+                const xp = parseInt(document.getElementById('quest-xp').value);
+                const difficulty = document.getElementById('quest-difficulty').value;
+
+                if (!title || !description || !xp) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                try {
+                    const questData = {
+                        title,
+                        description,
+                        type,
+                        xp,
+                        difficulty,
+                        icon: this.getQuestIcon(type),
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdBy: currentUser.uid,
+                        createdAt: window.firebase.serverTimestamp()
+                    };
+
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'quests'),
+                        questData
+                    );
+
+                    this.showToast(`Mission "${title}" créée avec succès`, 'success');
+                    
+                    // Réinitialiser le formulaire
+                    document.getElementById('quest-form').reset();
+                    
+                } catch (error) {
+                    console.error('Erreur création mission:', error);
+                    this.showToast('Erreur lors de la création de la mission', 'error');
+                }
+            }
+
+            async sendMessage() {
+                const messageText = document.getElementById('message-input').value.trim();
+                
+                if (!messageText) return;
+
+                try {
+                    const messageData = {
+                        text: messageText,
+                        userId: currentUser.uid,
+                        userName: currentUser.displayName || currentUser.email,
+                        userPhoto: currentUser.photoURL,
+                        companyId: currentCompany.id,
+                        timestamp: window.firebase.serverTimestamp()
+                    };
+
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'messages'),
+                        messageData
+                    );
+
+                    document.getElementById('message-input').value = '';
+                    
+                    // Marquer la mission "Message d'équipe" comme complétée
+                    this.completeQuest('team-message');
+                    
+                } catch (error) {
+                    console.error('Erreur envoi message:', error);
+                    this.showToast('Erreur lors de l\'envoi du message', 'error');
+                }
+            }
+
+            async updateProfile() {
+                const name = document.getElementById('profile-name').value.trim();
+                const company = document.getElementById('profile-company').value.trim();
+
+                try {
+                    // Mettre à jour le profil Firebase Auth
+                    if (name && name !== currentUser.displayName) {
+                        await window.firebase.updateProfile(currentUser, {
+                            displayName: name
+                        });
+                    }
+
+                    // Mettre à jour le document utilisateur
+                    await window.firebase.updateDoc(
+                        window.firebase.doc(window.db, 'users', currentUser.uid),
+                        {
+                            displayName: name,
+                            lastUpdated: window.firebase.serverTimestamp()
+                        }
+                    );
+
+                    // Mettre à jour l'entreprise si nécessaire
+                    if (company && company !== currentCompany.name) {
+                        await window.firebase.updateDoc(
+                            window.firebase.doc(window.db, 'companies', currentCompany.id),
+                            {
+                                name: company,
+                                lastUpdated: window.firebase.serverTimestamp()
+                            }
+                        );
+                        currentCompany.name = company;
+                    }
+
+                    this.showToast('Profil mis à jour avec succès', 'success');
+                    this.updateUserInterface();
+                    
+                } catch (error) {
+                    console.error('Erreur mise à jour profil:', error);
+                    this.showToast('Erreur lors de la mise à jour du profil', 'error');
+                }
+            }
+
+            async completeQuest(questType) {
+                // Logique pour compléter une mission et gagner de l'XP
+                try {
+                    const quest = this.quests.find(q => q.type === questType);
+                    if (!quest) return;
+
+                    // Ajouter l'XP à l'utilisateur
+                    await this.addXP(quest.xp);
+                    
+                    // Enregistrer la completion de la mission
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'quest_completions'),
+                        {
+                            questId: quest.id,
+                            userId: currentUser.uid,
+                            companyId: currentCompany.id,
+                            xpGained: quest.xp,
+                            completedAt: window.firebase.serverTimestamp()
+                        }
+                    );
+
+                    this.showToast(`🎉 Mission complétée ! +${quest.xp} XP`, 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur completion mission:', error);
+                }
+            }
+
+            async addXP(amount) {
+                try {
+                    const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const userDoc = await window.firebase.getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        const currentXP = userDoc.data().xp || 0;
+                        const currentLevel = userDoc.data().level || 1;
+                        
+                        const newXP = currentXP + amount;
+                        const newLevel = Math.floor(newXP / 100) + 1; // 100 XP par niveau
+                        
+                        await window.firebase.updateDoc(userRef, {
+                            xp: newXP,
+                            level: newLevel
+                        });
+                        
+                        this.userProgress = { level: newLevel, xp: newXP };
+                        this.updateProgressDisplay();
+                        
+                        if (newLevel > currentLevel) {
+                            this.showToast(`🎊 Niveau ${newLevel} atteint !`, 'success');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur ajout XP:', error);
+                }
+            }
+
+            // Méthodes Google Calendar
+            async connectGoogleCalendar() {
+                if (!tokenClient) {
+                    this.showToast('Google Calendar non disponible', 'error');
+                    return;
+                }
+
+                try {
+                    this.showToast('Connexion à Google Calendar...', 'info');
+                    tokenClient.requestAccessToken();
+                    
+                } catch (error) {
+                    console.error('Erreur Google Calendar:', error);
+                    this.showToast('Erreur de connexion à Google Calendar', 'error');
+                }
+            }
+
+            async handleGoogleCalendarAuth(response) {
+                if (response.error) {
+                    console.error('Erreur auth Google Calendar:', response.error);
+                    return;
+                }
+
+                try {
+                    isGoogleCalendarConnected = true;
+                    
+                    // Mettre à jour l'interface
+                    this.updateGoogleCalendarStatus();
+                    
+                    // Synchroniser les événements
+                    await this.syncGoogleCalendar();
+                    
+                    this.showToast('Google Calendar connecté avec succès !', 'success');
+                    
+                    // Marquer la mission Google Calendar comme complétée
+                    this.completeQuest('google-calendar');
+                    
+                } catch (error) {
+                    console.error('Erreur traitement auth Google:', error);
+                }
+            }
+
+            async syncGoogleCalendar() {
+                if (!isGoogleCalendarConnected) return;
+
+                try {
                     const now = new Date();
                     const timeMin = now.toISOString();
                     const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
-                    
+
                     const response = await gapi.client.calendar.events.list({
-                        'calendarId': 'primary',
-                        'timeMin': timeMin,
-                        'timeMax': timeMax,
-                        'showDeleted': false,
-                        'singleEvents': true,
-                        'orderBy': 'startTime'
+                        calendarId: 'primary',
+                        timeMin: timeMin,
+                        timeMax: timeMax,
+                        showDeleted: false,
+                        singleEvents: true,
+                        orderBy: 'startTime'
                     });
-                    
-                    this.events = response.result.items || [];
-                    this.renderEvents();
-                    this.updateDashboardStats();
-                    
-                    this.showToast(`${this.events.length} événements synchronisés`, 'success');
+
+                    const googleEvents = response.result.items || [];
+                    console.log(`📅 ${googleEvents.length} événements Google Calendar trouvés`);
+
+                    // Sauvegarder les événements dans Firebase
+                    for (const event of googleEvents) {
+                        await this.saveGoogleEvent(event);
+                    }
+
+                    this.showToast(`${googleEvents.length} événements synchronisés`, 'success');
                     
                 } catch (error) {
-                    console.error('❌ Erreur sync:', error);
+                    console.error('Erreur sync Google Calendar:', error);
                     this.showToast('Erreur de synchronisation', 'error');
                 }
             }
 
-            renderEvents() {
-                const container = document.getElementById('events-container');
+            async saveGoogleEvent(googleEvent) {
+                try {
+                    const eventData = {
+                        title: googleEvent.summary || 'Sans titre',
+                        description: googleEvent.description || '',
+                        date: new Date(googleEvent.start?.dateTime || googleEvent.start?.date),
+                        type: 'google',
+                        source: 'google_calendar',
+                        googleEventId: googleEvent.id,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    };
+
+                    // Vérifier si l'événement existe déjà
+                    const existingQuery = window.firebase.query(
+                        window.firebase.collection(window.db, 'events'),
+                        window.firebase.where('googleEventId', '==', googleEvent.id),
+                        window.firebase.where('companyId', '==', currentCompany.id)
+                    );
+                    
+                    const existingDocs = await window.firebase.getDocs(existingQuery);
+                    
+                    if (existingDocs.empty) {
+                        await window.firebase.addDoc(
+                            window.firebase.collection(window.db, 'events'),
+                            eventData
+                        );
+                    }
+                    
+                } catch (error) {
+                    console.error('Erreur sauvegarde événement Google:', error);
+                }
+            }
+
+            // Méthodes d'interface
+            updateLoadingStatus(status) {
+                const statusElement = document.getElementById('loading-status');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                }
+            }
+
+            showLoadingScreen() {
+                document.getElementById('loading-screen').style.display = 'flex';
+            }
+
+            hideLoadingScreen() {
+                document.getElementById('loading-screen').style.display = 'none';
+            }
+
+            showAuthModal() {
+                document.getElementById('auth-modal').style.display = 'flex';
+            }
+
+            hideAuthModal() {
+                document.getElementById('auth-modal').style.display = 'none';
+            }
+
+            showMainInterface() {
+                document.querySelector('.navbar').style.display = 'block';
+                document.querySelector('.main-content').style.display = 'block';
+            }
+
+            hideMainInterface() {
+                document.querySelector('.navbar').style.display = 'none';
+                document.querySelector('.main-content').style.display = 'none';
+            }
+
+            updateUserInterface() {
+                if (currentUser) {
+                    document.getElementById('user-name').textContent = currentUser.displayName || currentUser.email;
+                    
+                    // Mettre à jour l'avatar
+                    const avatar = document.getElementById('user-avatar');
+                    if (currentUser.photoURL) {
+                        avatar.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar">`;
+                    } else {
+                        const initial = (currentUser.displayName || currentUser.email).charAt(0).toUpperCase();
+                        avatar.innerHTML = initial;
+                    }
+                    
+                    // Mettre à jour les champs du profil
+                    document.getElementById('profile-name').value = currentUser.displayName || '';
+                    document.getElementById('profile-email').value = currentUser.email || '';
+                    document.getElementById('profile-company').value = currentCompany?.name || '';
+                }
+            }
+
+            switchSection(sectionId) {
+                // Masquer toutes les sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
                 
-                if (this.events.length === 0) {
-                    container.innerHTML = '<div class="loading">📅 Aucun événement dans les 30 prochains jours</div>';
-                    return;
+                // Retirer l'active de tous les liens de nav
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Activer la section demandée
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
                 }
                 
-                container.innerHTML = '<h3>📅 Vos événements Google Calendar:</h3>';
+                // Activer le lien de nav correspondant
+                const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            switchAuthTab(tabName) {
+                // Masquer tous les contenus d'onglets
+                document.querySelectorAll('.auth-tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
                 
-                this.events.forEach(event => {
-                    const startTime = new Date(event.start?.dateTime || event.start?.date);
-                    const eventElement = document.createElement('div');
-                    eventElement.className = 'event-item';
-                    eventElement.innerHTML = `
-                        <div class="event-icon">📅</div>
-                        <div style="flex: 1;">
-                            <h4>${event.summary || 'Sans titre'}</h4>
-                            <p style="color: #666; margin: 0.25rem 0;">${event.description || 'Aucune description'}</p>
-                            <small style="color: #4285f4; font-weight: bold;">
-                                ${startTime.toLocaleDateString('fr-FR')} à ${startTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
-                            </small>
-                        </div>
-                    `;
-                    container.appendChild(eventElement);
+                // Retirer l'active de tous les onglets
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activer l'onglet demandé
+                document.getElementById(`${tabName}-tab`).style.display = 'block';
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            }
+
+            showModal(modalId) {
+                document.getElementById(modalId).style.display = 'flex';
+            }
+
+            closeModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+
+            updateTeamDisplay() {
+                const container = document.getElementById('team-members-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                this.users.forEach(user => {
+                    const memberCard = this.createMemberCard(user);
+                    container.appendChild(memberCard);
                 });
             }
 
-            updateConnectionStatus(status, text) {
-                const statusEl = document.getElementById('connection-status');
-                if (statusEl) {
-                    statusEl.className = `google-status ${status}`;
-                    statusEl.textContent = text;
-                }
+            createMemberCard(user) {
+                const card = document.createElement('div');
+                card.className = 'team-member-card animate-slide-up';
+                
+                const statusClass = user.status || 'offline';
+                const roleColor = this.getRoleColor(user.role);
+                
+                card.innerHTML = `
+                    <div class="member-avatar">
+                        ${user.photoURL 
+                            ? `<img src="${user.photoURL}" alt="${user.name}">`
+                            : `<div style="width: 60px; height: 60px; border-radius: 50%; background: ${roleColor}; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">${(user.name || user.displayName || user.email).charAt(0).toUpperCase()}</div>`
+                        }
+                        <div class="status-indicator ${statusClass}"></div>
+                    </div>
+                    <div class="member-info">
+                        <h3>${user.name || user.displayName || user.email}</h3>
+                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">${user.role || 'Membre'}</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">${user.email}</p>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau ${user.level || 1}</span>
+                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">${user.xp || 0} XP</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                            <button class="btn-icon" onclick="synergia.sendDirectMessage('${user.id}')" title="Message">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="btn-icon" onclick="synergia.viewProfile('${user.id}')" title="Profil">
+                                <i class="fas fa-user"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                return card;
             }
 
-            updateDashboardGoogleStatus(status, text) {
-                const statusEl = document.getElementById('dashboard-google-status');
-                if (statusEl) {
-                    statusEl.className = `google-status ${status}`;
-                    statusEl.textContent = text;
-                }
+            updateQuestsDisplay() {
+                const container = document.getElementById('quests-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                // Filtrer les missions selon l'onglet actif
+                const activeTab = document.querySelector('.quest-tab.active');
+                const filterType = activeTab ? activeTab.dataset.type : 'daily';
+                
+                const filteredQuests = this.quests.filter(quest => quest.type === filterType);
+                
+                filteredQuests.forEach(quest => {
+                    const questCard = this.createQuestCard(quest);
+                    container.appendChild(questCard);
+                });
             }
 
-            updateStatus(message) {
-                const statusEl = document.getElementById('api-status');
-                if (statusEl) {
-                    statusEl.innerHTML = message;
+            createQuestCard(quest) {
+                const card = document.createElement('div');
+                card.className = 'quest-card animate-slide-up';
+                
+                const difficultyColor = this.getDifficultyColor(quest.difficulty);
+                const typeLabel = this.getTypeLabel(quest.type);
+                
+                card.innerHTML = `
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
+                    <h3>${quest.title}</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
+                        <span style="background: ${difficultyColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${typeLabel}</span>
+                    </div>
+                    <button onclick="synergia.acceptQuest('${quest.id}')" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-check"></i>
+                        Accepter
+                    </button>
+                `;
+                
+                return card;
+            }
+
+            updateEventsDisplay() {
+                const container = document.getElementById('events-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.events.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucun événement à afficher</p>';
+                    return;
                 }
+                
+                // Trier les événements par date
+                const sortedEvents = this.events.sort((a, b) => new Date(a.date.seconds * 1000) - new Date(b.date.seconds * 1000));
+                
+                sortedEvents.slice(0, 5).forEach(event => {
+                    const eventItem = this.createEventItem(event);
+                    container.appendChild(eventItem);
+                });
+            }
+
+            createEventItem(event) {
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                
+                const date = new Date(event.date.seconds * 1000);
+                const typeIcon = this.getEventIcon(event.type);
+                const isGoogleEvent = event.source === 'google_calendar';
+                
+                item.innerHTML = `
+                    <i class="fas ${typeIcon}" style="color: ${isGoogleEvent ? '#4285f4' : '#667eea'};"></i>
+                    <div style="flex: 1;">
+                        <strong>${event.title}</strong>
+                        ${event.description ? `<br><small style="color: #666;">${event.description}</small>` : ''}
+                        <br><small style="color: #28a745; font-weight: bold;">${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</small>
+                        ${isGoogleEvent ? '<br><small style="color: #4285f4;"><i class="fab fa-google"></i> Google Calendar</small>' : ''}
+                    </div>
+                `;
+                
+                return item;
+            }
+
+            updateChatDisplay() {
+                const container = document.getElementById('messages-area');
+                if (!container) return;
+
+                // Garder les premiers messages (bienvenue)
+                const welcomeMessage = container.querySelector('div[style*="text-align: center"]');
+                container.innerHTML = '';
+                
+                if (welcomeMessage && this.messages.length === 0) {
+                    container.appendChild(welcomeMessage);
+                }
+                
+                this.messages.forEach(message => {
+                    const messageElement = this.createMessageElement(message);
+                    container.appendChild(messageElement);
+                });
+                
+                // Scroll vers le bas
+                container.scrollTop = container.scrollHeight;
+            }
+
+            createMessageElement(message) {
+                const messageDiv = document.createElement('div');
+                const isOwnMessage = message.userId === currentUser.uid;
+                const timestamp = new Date(message.timestamp.seconds * 1000);
+                
+                messageDiv.style.cssText = `display: flex; gap: 1rem; padding: 0.5rem 1rem; margin-bottom: 0.5rem; ${isOwnMessage ? 'flex-direction: row-reverse;' : ''}`;
+                
+                messageDiv.innerHTML = `
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden;">
+                        ${message.userPhoto 
+                            ? `<img src="${message.userPhoto}" style="width: 100%; height: 100%; object-fit: cover;">`
+                            : message.userName.charAt(0).toUpperCase()
+                        }
+                    </div>
+                    <div style="${isOwnMessage ? 'text-align: right;' : ''}">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; ${isOwnMessage ? 'flex-direction: row-reverse;' : ''}">
+                            <strong>${isOwnMessage ? 'Vous' : message.userName}</strong>
+                            <small style="color: #666;">${timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</small>
+                        </div>
+                        <div class="message-bubble ${isOwnMessage ? 'own' : 'other'}">
+                            ${message.text}
+                        </div>
+                    </div>
+                `;
+                
+                return messageDiv;
             }
 
             updateDashboardStats() {
-                // Mettre à jour les stats dans le dashboard
-                const googleEventsEl = document.getElementById('google-events-count');
-                const syncStatusEl = document.getElementById('sync-status-text');
+                document.getElementById('team-count').textContent = this.users.length;
+                document.getElementById('active-quests').textContent = this.quests.length;
+                document.getElementById('events-today').textContent = this.getTodayEventsCount();
+                document.getElementById('user-level').textContent = this.userProgress.level;
+                document.getElementById('user-xp').textContent = this.userProgress.xp;
                 
-                if (googleEventsEl) {
-                    googleEventsEl.textContent = this.events.length;
-                }
+                this.updateProgressDisplay();
+            }
+
+            updateProgressDisplay() {
+                const xpInCurrentLevel = this.userProgress.xp % 100;
+                const progressPercentage = xpInCurrentLevel;
                 
-                if (syncStatusEl) {
-                    syncStatusEl.textContent = isGoogleSignedIn ? 'Connecté' : 'Déconnecté';
+                document.getElementById('xp-progress').style.width = `${progressPercentage}%`;
+                document.getElementById('level-progress').textContent = `Niveau ${this.userProgress.level} - ${progressPercentage}% vers niveau ${this.userProgress.level + 1}`;
+                
+                // Mettre à jour aussi dans les missions
+                document.getElementById('user-level-display').textContent = `Niveau ${this.userProgress.level}`;
+                document.getElementById('user-xp-display').textContent = `${this.userProgress.xp} XP`;
+                document.getElementById('quest-xp-progress').style.width = `${progressPercentage}%`;
+                document.getElementById('next-level-info').textContent = `${100 - xpInCurrentLevel} XP vers niveau ${this.userProgress.level + 1}`;
+            }
+
+            updateGoogleCalendarStatus() {
+                const statusElements = [
+                    document.getElementById('google-calendar-status'),
+                    document.getElementById('google-status')
+                ];
+                
+                statusElements.forEach(element => {
+                    if (element) {
+                        if (isGoogleCalendarConnected) {
+                            element.className = 'connection-status connected';
+                            element.innerHTML = '<i class="fas fa-check"></i> Connecté';
+                        } else {
+                            element.className = 'connection-status disconnected';
+                            element.innerHTML = '<i class="fas fa-times"></i> Non connecté';
+                        }
+                    }
+                });
+                
+                // Mettre à jour le bouton
+                const connectBtn = document.getElementById('connect-google-calendar');
+                if (connectBtn) {
+                    if (isGoogleCalendarConnected) {
+                        connectBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Synchroniser';
+                        connectBtn.onclick = () => this.syncGoogleCalendar();
+                    } else {
+                        connectBtn.innerHTML = '<i class="fab fa-google"></i> Connecter Google Calendar';
+                        connectBtn.onclick = () => this.connectGoogleCalendar();
+                    }
                 }
             }
 
-            showToast(message, type = 'info') {
+            // Méthodes utilitaires
+            getTodayEventsCount() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                return this.events.filter(event => {
+                    const eventDate = new Date(event.date.seconds * 1000);
+                    return eventDate >= today && eventDate < tomorrow;
+                }).length;
+            }
+
+            getRoleColor(role) {
+                const colors = {
+                    admin: '#dc3545',
+                    manager: '#28a745',
+                    developer: '#007bff',
+                    designer: '#e83e8c',
+                    employee: '#6c757d'
+                };
+                return colors[role] || '#667eea';
+            }
+
+            getDifficultyColor(difficulty) {
+                const colors = {
+                    easy: '#28a745',
+                    medium: '#ffc107',
+                    hard: '#dc3545'
+                };
+                return colors[difficulty] || '#6c757d';
+            }
+
+            getTypeLabel(type) {
+                const labels = {
+                    daily: 'Quotidienne',
+                    weekly: 'Hebdomadaire',
+                    special: 'Spéciale'
+                };
+                return labels[type] || type;
+            }
+
+            getEventIcon(type) {
+                const icons = {
+                    meeting: 'fa-users',
+                    training: 'fa-graduation-cap',
+                    event: 'fa-calendar-star',
+                    social: 'fa-coffee',
+                    google: 'fa-calendar'
+                };
+                return icons[type] || 'fa-calendar';
+            }
+
+            getQuestIcon(type) {
+                const icons = {
+                    daily: '⭐',
+                    weekly: '🗓️',
+                    special: '🎁'
+                };
+                return icons[type] || '🎯';
+            }
+
+            // Méthodes publiques pour les événements onclick
+            acceptQuest(questId) {
+                const quest = this.quests.find(q => q.id === questId);
+                if (quest) {
+                    this.completeQuest(quest.type);
+                }
+            }
+
+            filterQuests(type) {
+                // Retirer l'active de tous les onglets
+                document.querySelectorAll('.quest-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activer l'onglet cliqué
+                document.querySelector(`[data-type="${type}"]`).classList.add('active');
+                
+                // Mettre à jour l'affichage
+                this.updateQuestsDisplay();
+            }
+
+            sendDirectMessage(userId) {
+                this.showToast('Fonctionnalité de message direct en développement', 'info');
+            }
+
+            viewProfile(userId) {
+                this.showToast('Fonctionnalité de profil en développement', 'info');
+            }
+
+            refreshDashboard() {
+                this.showToast('Dashboard actualisé', 'success');
+                this.updateDashboardStats();
+            }
+
+            showToast(message, type = 'info', duration = 3000) {
                 const toast = document.createElement('div');
                 toast.className = `notification ${type}`;
+                
+                const icon = type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation' : 'info';
+                
                 toast.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                        <i class="fas fa-${icon}"></i>
                         <span>${message}</span>
                     </div>
                 `;
@@ -1355,43 +2980,24 @@
                 
                 setTimeout(() => {
                     toast.remove();
-                }, 3000);
+                }, duration);
             }
         }
 
-        // Fonctions globales
-        function goToGoogleCalendar() {
-            // Aller à l'onglet Google Calendar
-            document.querySelector('[data-section="google-calendar"]').click();
+        // Fermeture des modales (fonction globale)
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
-        function refreshDashboard() {
-            app.showToast('Dashboard actualisé', 'success');
-            app.updateDashboardStats();
-        }
-
-        function acceptQuest(questId) {
-            const quests = {
-                'daily_checkin': 'Pointer son arrivée',
-                'daily_message': 'Message d\'équipe',
-                'google_sync': 'Synchronisation Google'
-            };
-            
-            const questName = quests[questId] || questId;
-            app.showToast(`Mission "${questName}" acceptée! +50 XP`, 'success');
-        }
-
-        // Initialisation
-        let app;
-        
+        // Initialisation de l'application
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Démarrage SYNERGIA v3.0 Complet');
-            app = new SynergiaApp();
+            console.log('🚀 Démarrage SYNERGIA v3.0 Production Firebase');
             
-            // Message de bienvenue
-            setTimeout(() => {
-                app.showToast('🎉 SYNERGIA v3.0 avec Google Calendar prêt!', 'success');
-            }, 2000);
+            // Créer l'instance globale
+            synergia = new SynergiaApp();
+            
+            // Rendre accessible globalement pour les événements onclick
+            window.synergia = synergia;
         });
     </script>
 </body>

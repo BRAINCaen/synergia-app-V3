@@ -2822,7 +2822,7 @@
             }
 
             // Méthodes d'authentification
-            async handleLogin() {
+            handleLogin() {
                 const email = document.getElementById('login-email').value.trim();
                 const password = document.getElementById('login-password').value;
 
@@ -2831,13 +2831,12 @@
                     return;
                 }
 
-                try {
-                    this.updateLoadingStatus('Connexion en cours...');
-                    this.showLoadingScreen();
-                    
-                    await window.firebase.signInWithEmailAndPassword(window.auth, email, password);
-                    
-                } catch (error) {
+                this.updateLoadingStatus('Connexion en cours...');
+                this.showLoadingScreen();
+                
+                window.firebase.signInWithEmailAndPassword(window.auth, email, password).then(() => {
+                    // Connexion réussie, l'event handler se chargera du reste
+                }).catch(error => {
                     this.hideLoadingScreen();
                     console.error('Erreur de connexion:', error);
                     
@@ -2851,10 +2850,10 @@
                     }
                     
                     this.showToast(message, 'error');
-                }
+                });
             }
 
-            async handleRegister() {
+            handleRegister() {
                 const name = document.getElementById('register-name').value.trim();
                 const email = document.getElementById('register-email').value.trim();
                 const password = document.getElementById('register-password').value;
@@ -2870,20 +2869,17 @@
                     return;
                 }
 
-                try {
-                    this.updateLoadingStatus('Création du compte...');
-                    this.showLoadingScreen();
-                    
-                    const userCredential = await window.firebase.createUserWithEmailAndPassword(window.auth, email, password);
-                    
+                this.updateLoadingStatus('Création du compte...');
+                this.showLoadingScreen();
+                
+                window.firebase.createUserWithEmailAndPassword(window.auth, email, password).then(userCredential => {
                     // Mettre à jour le profil
-                    await window.firebase.updateProfile(userCredential.user, {
+                    return window.firebase.updateProfile(userCredential.user, {
                         displayName: name
                     });
-                    
+                }).then(() => {
                     console.log('✅ Compte créé avec succès');
-                    
-                } catch (error) {
+                }).catch(error => {
                     this.hideLoadingScreen();
                     console.error('Erreur inscription:', error);
                     
@@ -2897,50 +2893,46 @@
                     }
                     
                     this.showToast(message, 'error');
-                }
+                });
             }
 
-            async handleGoogleLogin() {
-                try {
-                    this.updateLoadingStatus('Connexion avec Google...');
-                    this.showLoadingScreen();
-                    
-                    const provider = new window.firebase.GoogleAuthProvider();
-                    provider.addScope('profile');
-                    provider.addScope('email');
-                    
-                    await window.firebase.signInWithPopup(window.auth, provider);
-                    
-                } catch (error) {
+            handleGoogleLogin() {
+                this.updateLoadingStatus('Connexion avec Google...');
+                this.showLoadingScreen();
+                
+                const provider = new window.firebase.GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+                
+                window.firebase.signInWithPopup(window.auth, provider).then(() => {
+                    // Connexion réussie, l'event handler se chargera du reste
+                }).catch(error => {
                     this.hideLoadingScreen();
                     console.error('Erreur connexion Google:', error);
                     
                     if (error.code !== 'auth/popup-closed-by-user') {
                         this.showToast('Erreur de connexion avec Google', 'error');
                     }
-                }
+                });
             }
 
-            async handleLogout() {
+            handleLogout() {
                 if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                    try {
-                        // Nettoyer les listeners
-                        this.unsubscribers.forEach(unsubscribe => unsubscribe());
-                        this.unsubscribers = [];
-                        
-                        await window.firebase.signOut(window.auth);
-                        
+                    // Nettoyer les listeners
+                    this.unsubscribers.forEach(unsubscribe => unsubscribe());
+                    this.unsubscribers = [];
+                    
+                    window.firebase.signOut(window.auth).then(() => {
                         this.showToast('Déconnexion réussie', 'success');
-                        
-                    } catch (error) {
+                    }).catch(error => {
                         console.error('Erreur déconnexion:', error);
                         this.showToast('Erreur lors de la déconnexion', 'error');
-                    }
+                    });
                 }
             }
 
             // Méthodes de gestion des données
-            async createEvent() {
+            createEvent() {
                 const title = document.getElementById('event-title').value.trim();
                 const description = document.getElementById('event-description').value.trim();
                 const date = document.getElementById('event-date').value;
@@ -2952,22 +2944,20 @@
                     return;
                 }
 
-                try {
-                    const eventData = {
-                        title,
-                        description,
-                        date: new Date(`${date}T${time}`),
-                        type,
-                        companyId: currentCompany.id,
-                        createdBy: currentUser.uid,
-                        createdAt: window.firebase.serverTimestamp()
-                    };
+                const eventData = {
+                    title,
+                    description,
+                    date: new Date(`${date}T${time}`),
+                    type,
+                    companyId: currentCompany.id,
+                    createdBy: currentUser.uid,
+                    createdAt: window.firebase.serverTimestamp()
+                };
 
-                    await window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'events'),
-                        eventData
-                    );
-
+                window.firebase.addDoc(
+                    window.firebase.collection(window.db, 'events'),
+                    eventData
+                ).then(() => {
                     this.closeModal('add-event-modal');
                     this.showToast(`Événement "${title}" créé avec succès`, 'success');
                     
@@ -2976,14 +2966,13 @@
                     
                     // Marquer la mission "Créer un événement" comme complétée
                     this.completeQuest('create-event');
-                    
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur création événement:', error);
                     this.showToast('Erreur lors de la création de l\'événement', 'error');
-                }
+                });
             }
 
-            async addMember() {
+            addMember() {
                 const name = document.getElementById('member-name').value.trim();
                 const email = document.getElementById('member-email').value.trim();
                 const role = document.getElementById('member-role').value;
@@ -2994,37 +2983,34 @@
                     return;
                 }
 
-                try {
-                    const memberData = {
-                        name,
-                        email,
-                        role,
-                        department,
-                        companyId: currentCompany.id,
-                        level: 1,
-                        xp: 0,
-                        status: 'offline',
-                        joinedAt: window.firebase.serverTimestamp()
-                    };
+                const memberData = {
+                    name,
+                    email,
+                    role,
+                    department,
+                    companyId: currentCompany.id,
+                    level: 1,
+                    xp: 0,
+                    status: 'offline',
+                    joinedAt: window.firebase.serverTimestamp()
+                };
 
-                    await window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'users'),
-                        memberData
-                    );
-
+                window.firebase.addDoc(
+                    window.firebase.collection(window.db, 'users'),
+                    memberData
+                ).then(() => {
                     this.closeModal('add-member-modal');
                     this.showToast(`Membre "${name}" ajouté avec succès`, 'success');
                     
                     // Réinitialiser le formulaire
                     document.getElementById('member-form').reset();
-                    
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur ajout membre:', error);
                     this.showToast('Erreur lors de l\'ajout du membre', 'error');
-                }
+                });
             }
 
-            async createQuest() {
+            createQuest() {
                 const title = document.getElementById('quest-title').value.trim();
                 const description = document.getElementById('quest-description').value.trim();
                 const type = document.getElementById('quest-type').value;
@@ -3036,120 +3022,119 @@
                     return;
                 }
 
-                try {
-                    const questData = {
-                        title,
-                        description,
-                        type,
-                        xp,
-                        difficulty,
-                        icon: this.getQuestIcon(type),
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdBy: currentUser.uid,
-                        createdAt: window.firebase.serverTimestamp()
-                    };
+                const questData = {
+                    title,
+                    description,
+                    type,
+                    xp,
+                    difficulty,
+                    icon: this.getQuestIcon(type),
+                    active: true,
+                    companyId: currentCompany.id,
+                    createdBy: currentUser.uid,
+                    createdAt: window.firebase.serverTimestamp()
+                };
 
-                    await window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'quests'),
-                        questData
-                    );
-
+                window.firebase.addDoc(
+                    window.firebase.collection(window.db, 'quests'),
+                    questData
+                ).then(() => {
                     this.showToast(`Mission "${title}" créée avec succès`, 'success');
                     
                     // Réinitialiser le formulaire
                     document.getElementById('quest-form').reset();
-                    
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur création mission:', error);
                     this.showToast('Erreur lors de la création de la mission', 'error');
-                }
+                });
             }
 
-            async sendMessage() {
+            sendMessage() {
                 const messageText = document.getElementById('message-input').value.trim();
                 
                 if (!messageText) return;
 
-                try {
-                    const messageData = {
-                        text: messageText,
-                        userId: currentUser.uid,
-                        userName: currentUser.displayName || currentUser.email,
-                        userPhoto: currentUser.photoURL,
-                        companyId: currentCompany.id,
-                        timestamp: window.firebase.serverTimestamp()
-                    };
+                const messageData = {
+                    text: messageText,
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || currentUser.email,
+                    userPhoto: currentUser.photoURL,
+                    companyId: currentCompany.id,
+                    timestamp: window.firebase.serverTimestamp()
+                };
 
-                    await window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'messages'),
-                        messageData
-                    );
-
+                window.firebase.addDoc(
+                    window.firebase.collection(window.db, 'messages'),
+                    messageData
+                ).then(() => {
                     document.getElementById('message-input').value = '';
                     
                     // Marquer la mission "Message d'équipe" comme complétée
                     this.completeQuest('team-message');
-                    
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur envoi message:', error);
                     this.showToast('Erreur lors de l\'envoi du message', 'error');
-                }
+                });
             }
 
-            async updateProfile() {
+            updateProfile() {
                 const name = document.getElementById('profile-name').value.trim();
                 const company = document.getElementById('profile-company').value.trim();
 
-                try {
-                    // Mettre à jour le profil Firebase Auth
-                    if (name && name !== currentUser.displayName) {
-                        await window.firebase.updateProfile(currentUser, {
-                            displayName: name
-                        });
-                    }
+                const updatePromises = [];
 
-                    // Mettre à jour le document utilisateur
-                    await window.firebase.updateDoc(
+                // Mettre à jour le profil Firebase Auth
+                if (name && name !== currentUser.displayName) {
+                    updatePromises.push(
+                        window.firebase.updateProfile(currentUser, {
+                            displayName: name
+                        })
+                    );
+                }
+
+                // Mettre à jour le document utilisateur
+                updatePromises.push(
+                    window.firebase.updateDoc(
                         window.firebase.doc(window.db, 'users', currentUser.uid),
                         {
                             displayName: name,
                             lastUpdated: window.firebase.serverTimestamp()
                         }
-                    );
+                    )
+                );
 
-                    // Mettre à jour l'entreprise si nécessaire
-                    if (company && company !== currentCompany.name) {
-                        await window.firebase.updateDoc(
+                // Mettre à jour l'entreprise si nécessaire
+                if (company && company !== currentCompany.name) {
+                    updatePromises.push(
+                        window.firebase.updateDoc(
                             window.firebase.doc(window.db, 'companies', currentCompany.id),
                             {
                                 name: company,
                                 lastUpdated: window.firebase.serverTimestamp()
                             }
-                        );
-                        currentCompany.name = company;
-                    }
+                        )
+                    );
+                    currentCompany.name = company;
+                }
 
+                Promise.all(updatePromises).then(() => {
                     this.showToast('Profil mis à jour avec succès', 'success');
                     this.updateUserInterface();
-                    
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur mise à jour profil:', error);
                     this.showToast('Erreur lors de la mise à jour du profil', 'error');
-                }
+                });
             }
 
-            async completeQuest(questType) {
+            completeQuest(questType) {
                 // Logique pour compléter une mission et gagner de l'XP
-                try {
-                    const quest = this.quests.find(q => q.type === questType);
-                    if (!quest) return;
+                const quest = this.quests.find(q => q.type === questType);
+                if (!quest) return;
 
-                    // Ajouter l'XP à l'utilisateur
-                    await this.addXP(quest.xp);
-                    
+                // Ajouter l'XP à l'utilisateur
+                this.addXP(quest.xp).then(() => {
                     // Enregistrer la completion de la mission
-                    await window.firebase.addDoc(
+                    return window.firebase.addDoc(
                         window.firebase.collection(window.db, 'quest_completions'),
                         {
                             questId: quest.id,
@@ -3159,19 +3144,17 @@
                             completedAt: window.firebase.serverTimestamp()
                         }
                     );
-
+                }).then(() => {
                     this.showToast(`🎉 Mission complétée ! +${quest.xp} XP`, 'success');
-                    
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur completion mission:', error);
-                }
+                });
             }
 
-            async addXP(amount) {
-                try {
-                    const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
-                    const userDoc = await window.firebase.getDoc(userRef);
-                    
+            addXP(amount) {
+                const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                
+                return window.firebase.getDoc(userRef).then(userDoc => {
                     if (userDoc.exists()) {
                         const currentXP = userDoc.data().xp || 0;
                         const currentLevel = userDoc.data().level || 1;
@@ -3183,31 +3166,32 @@
                         const newCoins = currentCoins + amount; // 1 XP = 1 gain
                         const newTotalCoinsEarned = totalCoinsEarned + amount;
                         
-                        await window.firebase.updateDoc(userRef, {
+                        return window.firebase.updateDoc(userRef, {
                             xp: newXP,
                             level: newLevel,
                             coins: newCoins,
                             totalCoinsEarned: newTotalCoinsEarned
+                        }).then(() => {
+                            // Enregistrer la transaction
+                            return this.recordTransaction('quest_reward', amount, `Mission complétée: +${amount} XP/gains`);
+                        }).then(() => {
+                            this.userProgress = { level: newLevel, xp: newXP, coins: newCoins };
+                            this.updateProgressDisplay();
+                            this.updateCoinsDisplay();
+                            
+                            // Animations et notifications
+                            this.animateCoinsGain(amount);
+                            
+                            if (newLevel > currentLevel) {
+                                this.showToast(`🎊 Niveau ${newLevel} atteint !`, 'success');
+                                this.showLevelUpAnimation();
+                            }
                         });
-                        
-                        // Enregistrer la transaction
-                        await this.recordTransaction('quest_reward', amount, `Mission complétée: +${amount} XP/gains`);
-                        
-                        this.userProgress = { level: newLevel, xp: newXP, coins: newCoins };
-                        this.updateProgressDisplay();
-                        this.updateCoinsDisplay();
-                        
-                        // Animations et notifications
-                        this.animateCoinsGain(amount);
-                        
-                        if (newLevel > currentLevel) {
-                            this.showToast(`🎊 Niveau ${newLevel} atteint !`, 'success');
-                            this.showLevelUpAnimation();
-                        }
                     }
-                } catch (error) {
+                }).catch(error => {
                     console.error('Erreur ajout XP:', error);
-                }
+                    throw error;
+                });
             }
 
             // Nouvelles méthodes pour la boutique et les gains

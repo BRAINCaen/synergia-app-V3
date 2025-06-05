@@ -3050,36 +3050,103 @@
                 });
             }
 
-            updateQuestsDisplay() {
-                const container = document.getElementById('quests-list');
-                if (!container) return;
+           // REMPLACEZ la méthode updateQuestsDisplay() existante (lignes 2059-2089) par ceci :
 
-                container.innerHTML = '';
-                
-                if (this.quests.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucune mission disponible</p>';
-                    return;
-                }
-                
-                this.quests.forEach(quest => {
-                    const card = document.createElement('div');
-                    card.className = 'quest-card animate-slide-up';
-                    card.innerHTML = `
-                        <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
-                        <h3>${quest.title}</h3>
-                        <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
-                            <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.type}</span>
-                        </div>
-                        <button onclick="window.synergia?.acceptQuest?.('${quest.id}')" class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-check"></i>
-                            Accepter
-                        </button>
-                    `;
-                    container.appendChild(card);
-                });
-            }
+updateQuestsDisplay() {
+    const container = document.getElementById('quests-list');
+    if (!container) return;
+
+    container.innerHTML = '';
+    
+    if (this.quests.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucune mission disponible</p>';
+        return;
+    }
+    
+    // 🔥 NOUVEAU : Récupérer les IDs des missions complétées
+    const completedQuestIds = this.completedQuests.map(completion => completion.questId);
+    
+    // 🔥 NOUVEAU : Récupérer les IDs des missions avec demandes en cours
+    const requestedQuestIds = this.questRequests
+        .filter(request => request.status === 'pending')
+        .map(request => request.questId);
+    
+    this.quests.forEach(quest => {
+        const isCompleted = completedQuestIds.includes(quest.id);
+        const isRequested = requestedQuestIds.includes(quest.id);
+        
+        const card = document.createElement('div');
+        card.className = 'quest-card animate-slide-up';
+        
+        // 🔥 NOUVEAU : Interface différente selon le statut
+        if (isCompleted) {
+            // Mission déjà complétée
+            card.style.opacity = '0.6';
+            card.style.background = '#f8f9fa';
+            card.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
+                <h3>${quest.title}</h3>
+                <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
+                    <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.type}</span>
+                </div>
+                <button class="btn btn-success" style="width: 100%;" disabled>
+                    <i class="fas fa-check-circle"></i>
+                    ✅ Complétée
+                </button>
+            `;
+        } else if (isRequested) {
+            // Mission avec demande en cours
+            card.style.background = '#fff3cd';
+            card.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
+                <h3>${quest.title}</h3>
+                <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
+                    <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.type}</span>
+                </div>
+                <button class="btn btn-secondary" style="width: 100%;" disabled>
+                    <i class="fas fa-clock"></i>
+                    📋 Demande en cours
+                </button>
+            `;
+        } else if (quest.type === 'special') {
+            // Mission spéciale : nécessite une demande
+            card.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
+                <h3>${quest.title}</h3>
+                <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
+                    <span style="background: #fd7e14; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Spéciale</span>
+                </div>
+                <button onclick="window.synergia?.requestSpecialQuest?.('${quest.id}')" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);">
+                    <i class="fas fa-paper-plane"></i>
+                    📋 Demander validation
+                </button>
+            `;
+        } else {
+            // Mission normale disponible
+            card.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
+                <h3>${quest.title}</h3>
+                <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
+                    <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.type}</span>
+                </div>
+                <button onclick="window.synergia?.acceptQuest?.('${quest.id}')" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-check"></i>
+                    Accepter
+                </button>
+            `;
+        }
+        
+        container.appendChild(card);
+    });
+}
 
             updateEventsDisplay() {
                 const container = document.getElementById('events-list');

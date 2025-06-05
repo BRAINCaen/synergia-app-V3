@@ -83,36 +83,7 @@
     <title>SYNERGIA v3.0 - Production Firebase</title>
     
     <!-- Politique de sécurité du contenu optimisée pour Firebase -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-            https://www.gstatic.com 
-            https://www.googleapis.com 
-            https://apis.google.com
-            https://accounts.google.com
-            https://cdn.jsdelivr.net 
-            https://cdnjs.cloudflare.com
-            https://www.googletagmanager.com;
-        style-src 'self' 'unsafe-inline' 
-            https://cdnjs.cloudflare.com 
-            https://fonts.googleapis.com;
-        font-src 'self' 
-            https://cdnjs.cloudflare.com 
-            https://fonts.gstatic.com;
-        connect-src 'self' 
-            https://www.gstatic.com 
-            https://www.googleapis.com 
-            https://firebase.googleapis.com
-            https://firestore.googleapis.com 
-            https://identitytoolkit.googleapis.com
-            https://securetoken.googleapis.com
-            https://www.google-analytics.com
-            https://analytics.google.com
-            https://stats.g.doubleclick.net
-            https://accounts.google.com;
-        img-src 'self' data: https:;
-        frame-src 'self' https: https://accounts.google.com;
-    ">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; connect-src 'self' https://www.gstatic.com https://www.googleapis.com https://firebase.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://accounts.google.com; img-src 'self' data: https:; frame-src 'self' https: https://accounts.google.com;">
     
     <!-- CSS Framework & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -4451,14 +4422,25 @@
         }
 
         // Initialisation de l'application
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Démarrage SYNERGIA v3.0 Production Firebase');
             
-            // Créer l'instance globale
-            synergia = new SynergiaApp();
+            // Attendre que Firebase soit prêt
+            function initializeApp() {
+                if (window.firebaseReady) {
+                    // Créer l'instance globale
+                    window.synergia = new SynergiaApp();
+                    console.log('✅ SYNERGIA initialisé avec Firebase');
+                } else {
+                    // Attendre Firebase
+                    window.addEventListener('firebaseReady', function() {
+                        window.synergia = new SynergiaApp();
+                        console.log('✅ SYNERGIA initialisé après Firebase');
+                    });
+                }
+            }
             
-            // Rendre accessible globalement pour les événements onclick
-            window.synergia = synergia;
+            initializeApp();
         });
     </script>
 </body>

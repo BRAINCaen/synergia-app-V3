@@ -1,4 +1,81 @@
-<!DOCTYPE html>
+            updateProgressDisplay() {
+                const xpInCurrentLevel = this.userProgress.xp % 100;
+                const progressPercentage = xpInCurrentLevel;
+                
+                document.getElementById('xp-progress').style.width = `${progressPercentage}%`;
+                document.getElementById('level-progress').textContent = `Niveau ${this.userProgress.level} - ${progressPercentage}% vers niveau ${this.userProgress.level + 1}`;
+                
+                // Mettre à jour aussi dans les missions
+                document.getElementById('user-level-display').textContent = `Niveau ${this.userProgress.level}`;
+                document.getElementById('user-xp-display').textContent = `${this.userProgress.xp} XP`;
+                document.getElementById('quest-xp-progress').style.width = `${progressPercentage}%`;
+                document.getElementById('next-level-info').textContent = `${100 - xpInCurrentLevel} XP vers niveau ${this.userProgress.level + 1}`;
+                
+                // Mettre à jour les gains
+                document.getElementById('quest-coins-display').textContent = `${this.userProgress.coins} gains`;
+            }
+
+            updateCoinsDisplay() {
+                // Mettre à jour tous les affichages de gains
+                const coinsElements = [
+                    'user-coins',
+                    'user-coins-dashboard', 
+                    'store-coins',
+                    'wallet-total-coins',
+                    'available-coins'
+                ];
+                
+                coinsElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.textContent = this.userProgress.coins || 0;
+                    }
+                });
+            }
+
+            updateStoreDisplay() {
+                const container = document.getElementById('store-items');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                // Filtrer selon la catégorie active
+                const activeTab = document.querySelector('.store-tab.active');
+                const filterCategory = activeTab ? activeTab.dataset.category : 'all';
+                
+                let filteredItems = this.storeItems;
+                if (filterCategory !== 'all') {
+                    filteredItems = this.storeItems.filter(item => item.category === filterCategory);
+                }
+                
+                if (filteredItems.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">Aucun avantage disponible dans cette catégorie</p>';
+                    return;
+                }
+                
+                filteredItems.forEach(item => {
+                    const itemCard = this.createStoreItemCard(item);
+                    container.appendChild(itemCard);
+                });
+            }
+
+            createStoreItemCard(item) {
+                const card = document.createElement('div');
+                card.className = 'store-item-card animate-slide-up';
+                
+                if (item.stock <= 0) {
+                    card.classList.add('out-of-stock');
+                }
+                
+                const canAfford = this.userProgress.coins >= item.price;
+                const buttonClass = canAfford && item.stock > 0 ? 'btn-primary' : 'btn-secondary';
+                const buttonText = item.stock <= 0 ? 'Rupture de stock' : !canAfford ? 'Gains insuffisants' : 'Acheter';
+                const buttonDisabled = !canAfford || item.stock <= 0;
+                
+                card.innerHTML = `
+                    <div class="store-item-icon">${item.icon}</div>
+                    <h3>${item.name}</h3>
+                    <p style="color: #666; margin-bottom<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -139,6 +216,122 @@
                 
                 // Analytics
                 logEvent
+            async createDefaultStoreItems() {
+                const defaultStoreItems = [
+                    // Temps libre
+                    {
+                        name: 'Demi-journée libre',
+                        description: 'Prenez une demi-journée de congé supplémentaire',
+                        price: 500,
+                        category: 'time',
+                        icon: '🌅',
+                        stock: 10,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Journée télétravail',
+                        description: 'Travaillez depuis chez vous pendant une journée',
+                        price: 300,
+                        category: 'time',
+                        icon: '🏠',
+                        stock: 20,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Pause déjeuner prolongée',
+                        description: 'Profitez d\'une pause déjeuner de 2h',
+                        price: 150,
+                        category: 'time',
+                        icon: '🍽️',
+                        stock: 30,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    
+                    // Avantages
+                    {
+                        name: 'Place de parking VIP',
+                        description: 'Réservez la meilleure place de parking pour un mois',
+                        price: 400,
+                        category: 'perks',
+                        icon: '🚗',
+                        stock: 5,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Accès salle de sport',
+                        description: 'Accès gratuit à la salle de sport partenaire pour 3 mois',
+                        price: 800,
+                        category: 'perks',
+                        icon: '💪',
+                        stock: 8,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    
+                    // Équipement
+                    {
+                        name: 'Écran supplémentaire',
+                        description: 'Demandez un deuxième écran pour votre poste',
+                        price: 600,
+                        category: 'equipment',
+                        icon: '🖥️',
+                        stock: 15,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Chaise ergonomique',
+                        description: 'Upgrade vers une chaise ergonomique premium',
+                        price: 1000,
+                        category: 'equipment',
+                        icon: '🪑',
+                        stock: 10,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    
+                    // Social
+                    {
+                        name: 'Café premium',
+                        description: 'Café premium gratuit pendant une semaine',
+                        price: 100,
+                        category: 'social',
+                        icon: '☕',
+                        stock: 50,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Déjeuner d\'équipe',
+                        description: 'Organisez un déjeuner d\'équipe aux frais de l\'entreprise',
+                        price: 750,
+                        category: 'social',
+                        icon: '🍕',
+                        stock: 12,
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    }
+                ];
+
+                for (const item of defaultStoreItems) {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'store_items'),
+                        item
+                    );
+                }
             };
             
             isFirebaseReady = true;
@@ -943,7 +1136,203 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* Real-time indicator */
+        /* Boutique et Portefeuille */
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .store-item-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .store-item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .store-item-card.purchased {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+
+        .store-item-card.out-of-stock {
+            opacity: 0.5;
+        }
+
+        .store-item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .store-item-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .store-item-price {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .store-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .store-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f8f9fa;
+            color: #666;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .store-tab.active,
+        .store-tab:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: #f8f9fa;
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .transaction-icon.income {
+            background: #28a745;
+        }
+
+        .transaction-icon.expense {
+            background: #dc3545;
+        }
+
+        .transaction-icon.transfer {
+            background: #17a2b8;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item.top3 {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(253, 126, 20, 0.1) 100%);
+        }
+
+        .leaderboard-rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .leaderboard-rank.gold {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .leaderboard-rank.silver {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .leaderboard-rank.bronze {
+            background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%);
+        }
+
+        .user-wallet {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 193, 7, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            color: #856404;
+        }
+
+        /* Animations pour les gains */
+        .coins-animation {
+            animation: coinsGlow 0.5s ease;
+        }
+
+        @keyframes coinsGlow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 193, 7, 0.5); }
+            100% { transform: scale(1); }
+        }
+
+        /* Notifications spéciales pour XP/gains */
+        .xp-notification {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            animation: slideInRight 0.3s ease, pulse 1s ease 0.3s;
+        }
+
+        .coins-notification {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+            border: none;
+            animation: slideInRight 0.3s ease, coinsGlow 1s ease 0.3s;
+        }
         .realtime-indicator {
             display: inline-flex;
             align-items: center;
@@ -1069,6 +1458,14 @@
                     <i class="fas fa-chart-bar"></i>
                     Analytics
                 </div>
+                <div class="nav-link" data-section="store">
+                    <i class="fas fa-shopping-cart"></i>
+                    Boutique
+                </div>
+                <div class="nav-link" data-section="wallet">
+                    <i class="fas fa-wallet"></i>
+                    Portefeuille
+                </div>
                 <div class="nav-link" data-section="settings">
                     <i class="fas fa-cog"></i>
                     Paramètres
@@ -1076,6 +1473,11 @@
             </div>
             
             <div class="nav-user">
+                <div class="user-wallet" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(102, 126, 234, 0.1); padding: 0.5rem 1rem; border-radius: 20px; margin-right: 1rem;">
+                    <i class="fas fa-coins" style="color: #ffc107;"></i>
+                    <span id="user-coins" style="font-weight: bold; color: #667eea;">0</span>
+                    <small style="color: #667eea;">gains</small>
+                </div>
                 <div class="user-avatar" id="user-avatar">
                     <i class="fas fa-user"></i>
                 </div>
@@ -1125,6 +1527,13 @@
                     <div class="stat-info">
                         <h3 id="events-today">0</h3>
                         <p>Événements aujourd'hui</p>
+                    </div>
+                </div>
+                <div class="stat-card animate-slide-up">
+                    <i class="fas fa-coins" style="color: #ffc107;"></i>
+                    <div class="stat-info">
+                        <h3 id="user-coins-dashboard">0</h3>
+                        <p>Gains personnels</p>
                     </div>
                 </div>
                 <div class="stat-card animate-slide-up">
@@ -1184,9 +1593,79 @@
                             <small style="color: #666;" id="level-progress">Niveau 1 - 0% vers niveau 2</small>
                         </div>
                     </div>
+                <!-- Configuration de la boutique (Admin seulement) -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;" id="store-admin-section">
+                    <h3><i class="fas fa-store"></i> Gestion de la boutique (Admin)</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <h4>Créer un nouvel avantage</h4>
+                            <form id="store-item-form">
+                                <div class="form-group">
+                                    <label>Nom de l'avantage</label>
+                                    <input type="text" id="item-name" placeholder="Ex: Demi-journée libre" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea id="item-description" placeholder="Description de l'avantage" rows="3"></textarea>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+                                    <div class="form-group">
+                                        <label>Prix (gains)</label>
+                                        <input type="number" id="item-price" value="100" min="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Catégorie</label>
+                                        <select id="item-category" required>
+                                            <option value="time">Temps libre</option>
+                                            <option value="perks">Avantages</option>
+                                            <option value="equipment">Équipement</option>
+                                            <option value="social">Social</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Stock</label>
+                                        <input type="number" id="item-stock" value="10" min="1">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Icône (emoji)</label>
+                                    <input type="text" id="item-icon" placeholder="🎯" maxlength="2">
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Créer l'avantage
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div>
+                            <h4>Avantages existants</h4>
+                            <div id="admin-store-items" style="max-height: 300px; overflow-y: auto;">
+                                <!-- Liste des avantages -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques de la boutique -->
+                    <div style="margin-top: 2rem;">
+                        <h4>Statistiques de la boutique</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; color: #667eea; margin-bottom: 0.5rem;" id="total-items">0</div>
+                                <div style="color: #666; font-size: 0.9rem;">Avantages disponibles</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; color: #28a745; margin-bottom: 0.5rem;" id="total-purchases">0</div>
+                                <div style="color: #666; font-size: 0.9rem;">Achats ce mois</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 1.5rem; color: #ffc107; margin-bottom: 0.5rem;" id="total-revenue">0</div>
+                                <div style="color: #666; font-size: 0.9rem;">Gains échangés</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
         <!-- Équipe -->
         <section id="team" class="content-section">
@@ -1327,6 +1806,18 @@
                         <div style="font-size: 0.8rem; opacity: 0.8;" id="next-level-info">100 XP vers niveau 2</div>
                     </div>
                 </div>
+                
+                <!-- Gains du joueur -->
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <i class="fas fa-coins" style="color: #ffc107; font-size: 1.5rem;"></i>
+                        <span style="margin-left: 0.5rem; font-size: 1.2rem; font-weight: bold;" id="quest-coins-display">0 gains</span>
+                    </div>
+                    <button onclick="synergia.openWallet()" class="btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: none;">
+                        <i class="fas fa-wallet"></i>
+                        Portefeuille
+                    </button>
+                </div>
             </div>
 
             <div class="quests-tabs">
@@ -1380,7 +1871,129 @@
             </div>
         </section>
 
-        <!-- Paramètres -->
+        <!-- Boutique -->
+        <section id="store" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-shopping-cart"></i> Boutique des Avantages</h1>
+                <div class="section-actions">
+                    <div class="user-wallet">
+                        <i class="fas fa-coins" style="color: #ffc107;"></i>
+                        <span id="store-coins">0</span> gains disponibles
+                    </div>
+                    <select id="store-filter" style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                        <option value="all">Tous les avantages</option>
+                        <option value="available">Disponibles</option>
+                        <option value="purchased">Achetés</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Catégories de la boutique -->
+            <div class="store-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+                <button class="store-tab active" data-category="all">
+                    <i class="fas fa-th-large"></i> Tous
+                </button>
+                <button class="store-tab" data-category="time">
+                    <i class="fas fa-clock"></i> Temps libre
+                </button>
+                <button class="store-tab" data-category="perks">
+                    <i class="fas fa-star"></i> Avantages
+                </button>
+                <button class="store-tab" data-category="equipment">
+                    <i class="fas fa-laptop"></i> Équipement
+                </button>
+                <button class="store-tab" data-category="social">
+                    <i class="fas fa-coffee"></i> Social
+                </button>
+            </div>
+
+            <div id="store-items" class="store-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Articles générés dynamiquement -->
+            </div>
+
+            <!-- Historique des achats -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-history"></i> Historique des achats</h3>
+                <div id="purchase-history" style="margin-top: 1rem;">
+                    <!-- Historique généré dynamiquement -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Portefeuille & Échanges -->
+        <section id="wallet" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-wallet"></i> Portefeuille & Échanges</h1>
+                <div class="section-actions">
+                    <button id="request-transfer-btn" class="btn btn-primary">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        Demander des gains
+                    </button>
+                    <button id="send-transfer-btn" class="btn btn-secondary">
+                        <i class="fas fa-paper-plane"></i>
+                        Envoyer des gains
+                    </button>
+                </div>
+            </div>
+
+            <!-- Résumé du portefeuille -->
+            <div class="dashboard-stats">
+                <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                    <i class="fas fa-coins"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-total-coins">0</h3>
+                        <p>Gains totaux</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <i class="fas fa-arrow-up"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-earned-today">0</h3>
+                        <p>Gagnés aujourd'hui</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
+                    <i class="fas fa-exchange-alt"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-transfers">0</h3>
+                        <p>Échanges en cours</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-spent">0</h3>
+                        <p>Dépensés ce mois</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Transactions récentes -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-list"></i> Transactions récentes</h3>
+                    <div id="recent-transactions" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                        <!-- Transactions générées dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Échanges entre membres -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-users"></i> Échanges entre membres</h3>
+                    <div id="member-transfers" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                        <!-- Échanges générés dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classement des gains -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-trophy"></i> Classement de l'équipe</h3>
+                <div id="coins-leaderboard" style="margin-top: 1rem;">
+                    <!-- Classement généré dynamiquement -->
+                </div>
+            </div>
+        </section>
         <section id="settings" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-cog"></i> Paramètres</h1>
@@ -1592,7 +2205,94 @@
         </div>
     </div>
 
-    <!-- Container pour notifications -->
+    <!-- Modal Envoi de gains -->
+    <div id="send-transfer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('send-transfer-modal')">&times;</span>
+            <h2><i class="fas fa-paper-plane"></i> Envoyer des gains</h2>
+            <form id="send-transfer-form">
+                <div class="form-group">
+                    <label>Destinataire</label>
+                    <select id="transfer-recipient" required>
+                        <option value="">Sélectionner un membre</option>
+                        <!-- Options générées dynamiquement -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Montant</label>
+                    <input type="number" id="transfer-amount" min="1" required placeholder="Nombre de gains à envoyer">
+                    <small style="color: #666;">Gains disponibles: <span id="available-coins">0</span></small>
+                </div>
+                <div class="form-group">
+                    <label>Message (optionnel)</label>
+                    <textarea id="transfer-message" placeholder="Message pour le destinataire..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('send-transfer-modal')" class="btn btn-secondary">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Envoyer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Demande de gains -->
+    <div id="request-transfer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('request-transfer-modal')">&times;</span>
+            <h2><i class="fas fa-hand-holding-usd"></i> Demander des gains</h2>
+            <form id="request-transfer-form">
+                <div class="form-group">
+                    <label>Demander à</label>
+                    <select id="request-from" required>
+                        <option value="">Sélectionner un membre</option>
+                        <!-- Options générées dynamiquement -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Montant demandé</label>
+                    <input type="number" id="request-amount" min="1" required placeholder="Nombre de gains demandés">
+                </div>
+                <div class="form-group">
+                    <label>Raison de la demande</label>
+                    <textarea id="request-reason" required placeholder="Pourquoi demandez-vous ces gains ?"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal('request-transfer-modal')" class="btn btn-secondary">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        Envoyer la demande
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Confirmation d'achat -->
+    <div id="purchase-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('purchase-modal')">&times;</span>
+            <h2><i class="fas fa-shopping-cart"></i> Confirmer l'achat</h2>
+            <div id="purchase-details">
+                <!-- Détails de l'achat générés dynamiquement -->
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="closeModal('purchase-modal')" class="btn btn-secondary">
+                    Annuler
+                </button>
+                <button id="confirm-purchase-btn" class="btn btn-primary">
+                    <i class="fas fa-check"></i>
+                    Confirmer l'achat
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
 
     <script>
@@ -1618,7 +2318,10 @@
                 this.events = [];
                 this.quests = [];
                 this.messages = [];
-                this.userProgress = { level: 1, xp: 0 };
+                this.userProgress = { level: 1, xp: 0, coins: 0 };
+                this.storeItems = [];
+                this.transactions = [];
+                this.transfers = [];
                 this.unsubscribers = [];
                 
                 this.init();
@@ -1714,6 +2417,9 @@
                     photoURL: currentUser.photoURL || null,
                     level: 1,
                     xp: 0,
+                    coins: 0, // Nouveau : gains personnels
+                    totalCoinsEarned: 0, // Total des gains gagnés
+                    totalCoinsSpent: 0, // Total des gains dépensés
                     joinedAt: window.firebase.serverTimestamp(),
                     lastLogin: window.firebase.serverTimestamp(),
                     status: 'online'
@@ -1771,6 +2477,9 @@
                 
                 // Créer les missions par défaut
                 await this.createDefaultQuests();
+                
+                // Créer les avantages par défaut de la boutique
+                await this.createDefaultStoreItems();
                 
                 console.log('✅ Entreprise créée:', companyName);
             }
@@ -1897,8 +2606,55 @@
                     this.updateChatDisplay();
                 });
 
+                // Écouter les articles de la boutique
+                const storeQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'store_items'),
+                    window.firebase.where('companyId', '==', currentCompany.id),
+                    window.firebase.where('active', '==', true)
+                );
+                
+                const unsubStore = window.firebase.onSnapshot(storeQuery, (snapshot) => {
+                    this.storeItems = [];
+                    snapshot.forEach(doc => {
+                        this.storeItems.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateStoreDisplay();
+                });
+
+                // Écouter les transactions
+                const transactionsQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'transactions'),
+                    window.firebase.where('userId', '==', currentUser.uid),
+                    window.firebase.orderBy('timestamp', 'desc'),
+                    window.firebase.limit(20)
+                );
+                
+                const unsubTransactions = window.firebase.onSnapshot(transactionsQuery, (snapshot) => {
+                    this.transactions = [];
+                    snapshot.forEach(doc => {
+                        this.transactions.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateTransactionsDisplay();
+                });
+
+                // Écouter les transferts
+                const transfersQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'transfers'),
+                    window.firebase.where('participants', 'array-contains', currentUser.uid),
+                    window.firebase.orderBy('timestamp', 'desc'),
+                    window.firebase.limit(10)
+                );
+                
+                const unsubTransfers = window.firebase.onSnapshot(transfersQuery, (snapshot) => {
+                    this.transfers = [];
+                    snapshot.forEach(doc => {
+                        this.transfers.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateTransfersDisplay();
+                });
+
                 // Stocker les unsubscribers pour les nettoyer plus tard
-                this.unsubscribers = [unsubUsers, unsubQuests, unsubEvents, unsubMessages];
+                this.unsubscribers = [unsubUsers, unsubQuests, unsubEvents, unsubMessages, unsubStore, unsubTransactions, unsubTransfers];
             }
 
             setupEventListeners() {
@@ -1966,6 +2722,39 @@
                     tab.addEventListener('click', () => {
                         this.filterQuests(tab.dataset.type);
                     });
+                });
+
+                // Store
+                document.getElementById('store-item-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createStoreItem();
+                });
+
+                document.querySelectorAll('.store-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.filterStoreItems(tab.dataset.category);
+                    });
+                });
+
+                // Transfers
+                document.getElementById('send-transfer-btn').addEventListener('click', () => {
+                    this.showModal('send-transfer-modal');
+                    this.populateTransferOptions();
+                });
+
+                document.getElementById('request-transfer-btn').addEventListener('click', () => {
+                    this.showModal('request-transfer-modal');
+                    this.populateTransferOptions();
+                });
+
+                document.getElementById('send-transfer-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.sendTransfer();
+                });
+
+                document.getElementById('request-transfer-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.requestTransfer();
                 });
 
                 // Chat
@@ -2399,20 +3188,34 @@
                     if (userDoc.exists()) {
                         const currentXP = userDoc.data().xp || 0;
                         const currentLevel = userDoc.data().level || 1;
+                        const currentCoins = userDoc.data().coins || 0;
+                        const totalCoinsEarned = userDoc.data().totalCoinsEarned || 0;
                         
                         const newXP = currentXP + amount;
                         const newLevel = Math.floor(newXP / 100) + 1; // 100 XP par niveau
+                        const newCoins = currentCoins + amount; // 1 XP = 1 gain
+                        const newTotalCoinsEarned = totalCoinsEarned + amount;
                         
                         await window.firebase.updateDoc(userRef, {
                             xp: newXP,
-                            level: newLevel
+                            level: newLevel,
+                            coins: newCoins,
+                            totalCoinsEarned: newTotalCoinsEarned
                         });
                         
-                        this.userProgress = { level: newLevel, xp: newXP };
+                        // Enregistrer la transaction
+                        await this.recordTransaction('quest_reward', amount, `Mission complétée: +${amount} XP/gains`);
+                        
+                        this.userProgress = { level: newLevel, xp: newXP, coins: newCoins };
                         this.updateProgressDisplay();
+                        this.updateCoinsDisplay();
+                        
+                        // Animations et notifications
+                        this.animateCoinsGain(amount);
                         
                         if (newLevel > currentLevel) {
                             this.showToast(`🎊 Niveau ${newLevel} atteint !`, 'success');
+                            this.showLevelUpAnimation();
                         }
                     }
                 } catch (error) {
@@ -2420,7 +3223,252 @@
                 }
             }
 
-            // Méthodes Google Calendar
+            // Nouvelles méthodes pour la boutique et les gains
+            async createStoreItem() {
+                const name = document.getElementById('item-name').value.trim();
+                const description = document.getElementById('item-description').value.trim();
+                const price = parseInt(document.getElementById('item-price').value);
+                const category = document.getElementById('item-category').value;
+                const stock = parseInt(document.getElementById('item-stock').value);
+                const icon = document.getElementById('item-icon').value.trim();
+
+                if (!name || !price || !category) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                try {
+                    const itemData = {
+                        name,
+                        description,
+                        price,
+                        category,
+                        stock,
+                        icon: icon || '🎁',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdBy: currentUser.uid,
+                        createdAt: window.firebase.serverTimestamp()
+                    };
+
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'store_items'),
+                        itemData
+                    );
+
+                    this.showToast(`Avantage "${name}" créé avec succès`, 'success');
+                    document.getElementById('store-item-form').reset();
+                    
+                } catch (error) {
+                    console.error('Erreur création avantage:', error);
+                    this.showToast('Erreur lors de la création de l\'avantage', 'error');
+                }
+            }
+
+            async purchaseItem(itemId) {
+                const item = this.storeItems.find(i => i.id === itemId);
+                if (!item) return;
+
+                const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                const userDoc = await window.firebase.getDoc(userRef);
+                
+                if (!userDoc.exists()) return;
+                
+                const userCoins = userDoc.data().coins || 0;
+                
+                if (userCoins < item.price) {
+                    this.showToast('Gains insuffisants pour cet achat', 'error');
+                    return;
+                }
+
+                if (item.stock <= 0) {
+                    this.showToast('Article en rupture de stock', 'error');
+                    return;
+                }
+
+                // Afficher modal de confirmation
+                this.showPurchaseModal(item);
+            }
+
+            showPurchaseModal(item) {
+                const modal = document.getElementById('purchase-modal');
+                const details = document.getElementById('purchase-details');
+                
+                details.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">${item.icon}</div>
+                        <h3>${item.name}</h3>
+                        <p style="color: #666; margin: 1rem 0;">${item.description}</p>
+                        <div class="store-item-price" style="margin: 1rem auto;">
+                            <i class="fas fa-coins"></i>
+                            ${item.price} gains
+                        </div>
+                        <p style="font-size: 0.9rem; color: #666;">
+                            Gains disponibles: <strong>${this.userProgress.coins}</strong>
+                        </p>
+                    </div>
+                `;
+                
+                const confirmBtn = document.getElementById('confirm-purchase-btn');
+                confirmBtn.onclick = () => this.confirmPurchase(item.id);
+                
+                this.showModal('purchase-modal');
+            }
+
+            async confirmPurchase(itemId) {
+                try {
+                    const item = this.storeItems.find(i => i.id === itemId);
+                    if (!item) return;
+
+                    // Décrémenter les gains de l'utilisateur
+                    const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const userDoc = await window.firebase.getDoc(userRef);
+                    const currentCoins = userDoc.data().coins || 0;
+                    const totalSpent = userDoc.data().totalCoinsSpent || 0;
+                    
+                    await window.firebase.updateDoc(userRef, {
+                        coins: currentCoins - item.price,
+                        totalCoinsSpent: totalSpent + item.price
+                    });
+
+                    // Décrémenter le stock
+                    const itemRef = window.firebase.doc(window.db, 'store_items', itemId);
+                    await window.firebase.updateDoc(itemRef, {
+                        stock: item.stock - 1
+                    });
+
+                    // Enregistrer l'achat
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'purchases'),
+                        {
+                            userId: currentUser.uid,
+                            userName: currentUser.displayName || currentUser.email,
+                            itemId: itemId,
+                            itemName: item.name,
+                            price: item.price,
+                            companyId: currentCompany.id,
+                            status: 'pending', // En attente de validation admin
+                            timestamp: window.firebase.serverTimestamp()
+                        }
+                    );
+
+                    // Enregistrer la transaction
+                    await this.recordTransaction('purchase', -item.price, `Achat: ${item.name}`);
+
+                    this.userProgress.coins = currentCoins - item.price;
+                    this.updateCoinsDisplay();
+
+                    this.closeModal('purchase-modal');
+                    this.showToast(`🎉 "${item.name}" acheté avec succès !`, 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur achat:', error);
+                    this.showToast('Erreur lors de l\'achat', 'error');
+                }
+            }
+
+            async sendTransfer() {
+                const recipientId = document.getElementById('transfer-recipient').value;
+                const amount = parseInt(document.getElementById('transfer-amount').value);
+                const message = document.getElementById('transfer-message').value.trim();
+
+                if (!recipientId || !amount || amount <= 0) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                const userDoc = await window.firebase.getDoc(userRef);
+                const currentCoins = userDoc.data().coins || 0;
+
+                if (currentCoins < amount) {
+                    this.showToast('Gains insuffisants pour cet envoi', 'error');
+                    return;
+                }
+
+                try {
+                    // Créer le transfert
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'transfers'),
+                        {
+                            fromUserId: currentUser.uid,
+                            fromUserName: currentUser.displayName || currentUser.email,
+                            toUserId: recipientId,
+                            toUserName: this.users.find(u => u.id === recipientId)?.displayName || 'Utilisateur',
+                            amount: amount,
+                            message: message,
+                            status: 'pending',
+                            companyId: currentCompany.id,
+                            participants: [currentUser.uid, recipientId],
+                            timestamp: window.firebase.serverTimestamp()
+                        }
+                    );
+
+                    this.closeModal('send-transfer-modal');
+                    this.showToast('Demande de transfert envoyée', 'success');
+                    document.getElementById('send-transfer-form').reset();
+                    
+                } catch (error) {
+                    console.error('Erreur transfert:', error);
+                    this.showToast('Erreur lors du transfert', 'error');
+                }
+            }
+
+            async requestTransfer() {
+                const fromUserId = document.getElementById('request-from').value;
+                const amount = parseInt(document.getElementById('request-amount').value);
+                const reason = document.getElementById('request-reason').value.trim();
+
+                if (!fromUserId || !amount || !reason || amount <= 0) {
+                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                try {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'transfers'),
+                        {
+                            fromUserId: fromUserId,
+                            fromUserName: this.users.find(u => u.id === fromUserId)?.displayName || 'Utilisateur',
+                            toUserId: currentUser.uid,
+                            toUserName: currentUser.displayName || currentUser.email,
+                            amount: amount,
+                            message: reason,
+                            status: 'pending',
+                            type: 'request',
+                            companyId: currentCompany.id,
+                            participants: [currentUser.uid, fromUserId],
+                            timestamp: window.firebase.serverTimestamp()
+                        }
+                    );
+
+                    this.closeModal('request-transfer-modal');
+                    this.showToast('Demande de gains envoyée', 'success');
+                    document.getElementById('request-transfer-form').reset();
+                    
+                } catch (error) {
+                    console.error('Erreur demande:', error);
+                    this.showToast('Erreur lors de la demande', 'error');
+                }
+            }
+
+            async recordTransaction(type, amount, description) {
+                try {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'transactions'),
+                        {
+                            userId: currentUser.uid,
+                            type: type, // 'quest_reward', 'purchase', 'transfer_sent', 'transfer_received'
+                            amount: amount,
+                            description: description,
+                            companyId: currentCompany.id,
+                            timestamp: window.firebase.serverTimestamp()
+                        }
+                    );
+                } catch (error) {
+                    console.error('Erreur enregistrement transaction:', error);
+                }
+            }
             async connectGoogleCalendar() {
                 if (!tokenClient) {
                     this.showToast('Google Calendar non disponible', 'error');
@@ -2580,6 +3628,44 @@
                     document.getElementById('profile-name').value = currentUser.displayName || '';
                     document.getElementById('profile-email').value = currentUser.email || '';
                     document.getElementById('profile-company').value = currentCompany?.name || '';
+                    
+                    // Charger les données utilisateur pour les gains/XP
+                    this.loadUserProgress();
+                    
+                    // Afficher/masquer les sections admin
+                    this.updateAdminSections();
+                }
+            }
+
+            async loadUserProgress() {
+                try {
+                    const userDoc = await window.firebase.getDoc(
+                        window.firebase.doc(window.db, 'users', currentUser.uid)
+                    );
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        this.userProgress = {
+                            level: userData.level || 1,
+                            xp: userData.xp || 0,
+                            coins: userData.coins || 0
+                        };
+                        
+                        this.updateCoinsDisplay();
+                        this.updateProgressDisplay();
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement progression:', error);
+                }
+            }
+
+            updateAdminSections() {
+                // Vérifier si l'utilisateur est admin de l'entreprise
+                const isAdmin = currentCompany && currentCompany.owner === currentUser.uid;
+                
+                const adminSection = document.getElementById('store-admin-section');
+                if (adminSection) {
+                    adminSection.style.display = isAdmin ? 'block' : 'none';
                 }
             }
 
@@ -2822,18 +3908,393 @@
                 this.updateProgressDisplay();
             }
 
-            updateProgressDisplay() {
-                const xpInCurrentLevel = this.userProgress.xp % 100;
-                const progressPercentage = xpInCurrentLevel;
+            createStoreItemCard(item) {
+                const card = document.createElement('div');
+                card.className = 'store-item-card animate-slide-up';
                 
-                document.getElementById('xp-progress').style.width = `${progressPercentage}%`;
-                document.getElementById('level-progress').textContent = `Niveau ${this.userProgress.level} - ${progressPercentage}% vers niveau ${this.userProgress.level + 1}`;
+                if (item.stock <= 0) {
+                    card.classList.add('out-of-stock');
+                }
                 
-                // Mettre à jour aussi dans les missions
-                document.getElementById('user-level-display').textContent = `Niveau ${this.userProgress.level}`;
-                document.getElementById('user-xp-display').textContent = `${this.userProgress.xp} XP`;
-                document.getElementById('quest-xp-progress').style.width = `${progressPercentage}%`;
-                document.getElementById('next-level-info').textContent = `${100 - xpInCurrentLevel} XP vers niveau ${this.userProgress.level + 1}`;
+                const canAfford = this.userProgress.coins >= item.price;
+                const buttonClass = canAfford && item.stock > 0 ? 'btn-primary' : 'btn-secondary';
+                const buttonText = item.stock <= 0 ? 'Rupture de stock' : !canAfford ? 'Gains insuffisants' : 'Acheter';
+                const buttonDisabled = !canAfford || item.stock <= 0;
+                
+                card.innerHTML = `
+                    <div class="store-item-icon">${item.icon}</div>
+                    <h3>${item.name}</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">${item.description}</p>
+                    <div class="store-item-price">
+                        <i class="fas fa-coins"></i>
+                        ${item.price} gains
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+                        <span>Stock: ${item.stock}</span>
+                        <span>Catégorie: ${this.getCategoryLabel(item.category)}</span>
+                    </div>
+                    <button onclick="synergia.purchaseItem('${item.id}')" class="btn ${buttonClass}" style="width: 100%;" ${buttonDisabled ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i>
+                        ${buttonText}
+                    </button>
+                `;
+                
+                return card;
+            }
+
+            updateTransactionsDisplay() {
+                const container = document.getElementById('recent-transactions');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.transactions.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucune transaction récente</p>';
+                    return;
+                }
+                
+                this.transactions.slice(0, 10).forEach(transaction => {
+                    const transactionItem = this.createTransactionItem(transaction);
+                    container.appendChild(transactionItem);
+                });
+            }
+
+            createTransactionItem(transaction) {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                
+                const isIncome = transaction.amount > 0;
+                const iconClass = isIncome ? 'income' : 'expense';
+                const icon = this.getTransactionIcon(transaction.type);
+                const timestamp = new Date(transaction.timestamp.seconds * 1000);
+                
+                item.innerHTML = `
+                    <div class="transaction-icon ${iconClass}">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong>${transaction.description}</strong>
+                        <br><small style="color: #666;">${this.getTransactionTypeLabel(transaction.type)}</small>
+                        <br><small style="color: #666;">${timestamp.toLocaleDateString('fr-FR')} à ${timestamp.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong style="color: ${isIncome ? '#28a745' : '#dc3545'};">
+                            ${isIncome ? '+' : ''}${transaction.amount} gains
+                        </strong>
+                    </div>
+                `;
+                
+                return item;
+            }
+
+            updateTransfersDisplay() {
+                const container = document.getElementById('member-transfers');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.transfers.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucun échange en cours</p>';
+                    return;
+                }
+                
+                this.transfers.forEach(transfer => {
+                    const transferItem = this.createTransferItem(transfer);
+                    container.appendChild(transferItem);
+                });
+            }
+
+            createTransferItem(transfer) {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                
+                const isOutgoing = transfer.fromUserId === currentUser.uid;
+                const otherUser = isOutgoing ? transfer.toUserName : transfer.fromUserName;
+                const timestamp = new Date(transfer.timestamp.seconds * 1000);
+                
+                item.innerHTML = `
+                    <div class="transaction-icon transfer">
+                        <i class="fas ${isOutgoing ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong>${isOutgoing ? 'Envoyé à' : 'Reçu de'} ${otherUser}</strong>
+                        <br><small style="color: #666;">${transfer.message || 'Aucun message'}</small>
+                        <br><small style="color: #666;">${timestamp.toLocaleDateString('fr-FR')}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong style="color: ${transfer.status === 'completed' ? '#28a745' : '#ffc107'};">
+                            ${transfer.amount} gains
+                        </strong>
+                        <br><small style="color: #666;">${this.getTransferStatusLabel(transfer.status)}</small>
+                        ${transfer.status === 'pending' && !isOutgoing ? `
+                            <br><button onclick="synergia.acceptTransfer('${transfer.id}')" class="btn btn-success" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                Accepter
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                
+                return item;
+            }
+
+            updateLeaderboard() {
+                const container = document.getElementById('coins-leaderboard');
+                if (!container) return;
+
+                // Trier les utilisateurs par gains totaux
+                const sortedUsers = [...this.users].sort((a, b) => (b.totalCoinsEarned || 0) - (a.totalCoinsEarned || 0));
+                
+                container.innerHTML = '';
+                
+                sortedUsers.slice(0, 10).forEach((user, index) => {
+                    const leaderboardItem = this.createLeaderboardItem(user, index + 1);
+                    container.appendChild(leaderboardItem);
+                });
+            }
+
+            createLeaderboardItem(user, rank) {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                
+                if (rank <= 3) {
+                    item.classList.add('top3');
+                }
+                
+                const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                const currentUserClass = user.id === currentUser.uid ? 'style="background: rgba(102, 126, 234, 0.1);"' : '';
+                
+                item.innerHTML = `
+                    <div class="leaderboard-rank ${rankClass}">
+                        ${rank <= 3 ? (rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉') : rank}
+                    </div>
+                    <div style="flex: 1;" ${currentUserClass}>
+                        <strong>${user.displayName || user.name}</strong>
+                        <br><small style="color: #666;">Niveau ${user.level || 1}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong style="color: #667eea;">${user.totalCoinsEarned || 0} gains</strong>
+                        <br><small style="color: #666;">gagnés au total</small>
+                    </div>
+                `;
+                
+                return item;
+            }
+
+            populateTransferOptions() {
+                const recipientSelect = document.getElementById('transfer-recipient');
+                const requestFromSelect = document.getElementById('request-from');
+                
+                // Nettoyer les options existantes
+                if (recipientSelect) {
+                    recipientSelect.innerHTML = '<option value="">Sélectionner un membre</option>';
+                }
+                if (requestFromSelect) {
+                    requestFromSelect.innerHTML = '<option value="">Sélectionner un membre</option>';
+                }
+                
+                // Ajouter les autres membres de l'équipe
+                this.users.forEach(user => {
+                    if (user.id !== currentUser.uid) {
+                        const option = `<option value="${user.id}">${user.displayName || user.name}</option>`;
+                        if (recipientSelect) recipientSelect.innerHTML += option;
+                        if (requestFromSelect) requestFromSelect.innerHTML += option;
+                    }
+                });
+            }
+
+            async acceptTransfer(transferId) {
+                try {
+                    const transfer = this.transfers.find(t => t.id === transferId);
+                    if (!transfer || transfer.status !== 'pending') return;
+
+                    // Vérifier que l'expéditeur a assez de gains
+                    const senderRef = window.firebase.doc(window.db, 'users', transfer.fromUserId);
+                    const senderDoc = await window.firebase.getDoc(senderRef);
+                    const senderCoins = senderDoc.data().coins || 0;
+
+                    if (senderCoins < transfer.amount) {
+                        this.showToast('L\'expéditeur n\'a plus assez de gains', 'error');
+                        return;
+                    }
+
+                    // Effectuer le transfert
+                    const batch = window.firebase.writeBatch(window.db);
+
+                    // Décrémenter les gains de l'expéditeur
+                    batch.update(senderRef, {
+                        coins: senderCoins - transfer.amount
+                    });
+
+                    // Incrémenter les gains du destinataire
+                    const receiverRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const receiverDoc = await window.firebase.getDoc(receiverRef);
+                    const receiverCoins = receiverDoc.data().coins || 0;
+                    
+                    batch.update(receiverRef, {
+                        coins: receiverCoins + transfer.amount
+                    });
+
+                    // Marquer le transfert comme complété
+                    const transferRef = window.firebase.doc(window.db, 'transfers', transferId);
+                    batch.update(transferRef, {
+                        status: 'completed',
+                        completedAt: window.firebase.serverTimestamp()
+                    });
+
+                    await batch.commit();
+
+                    // Enregistrer les transactions
+                    await this.recordTransaction('transfer_received', transfer.amount, `Reçu de ${transfer.fromUserName}`);
+                    
+                    // Mettre à jour l'affichage local
+                    this.userProgress.coins = receiverCoins + transfer.amount;
+                    this.updateCoinsDisplay();
+
+                    this.showToast(`${transfer.amount} gains reçus de ${transfer.fromUserName}`, 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur acceptation transfert:', error);
+                    this.showToast('Erreur lors de l\'acceptation du transfert', 'error');
+                }
+            }
+
+            // Méthodes d'animation et d'effets visuels
+            animateCoinsGain(amount) {
+                // Animation des gains dans la navbar
+                const coinsElement = document.getElementById('user-coins');
+                if (coinsElement) {
+                    coinsElement.parentElement.classList.add('coins-animation');
+                    setTimeout(() => {
+                        coinsElement.parentElement.classList.remove('coins-animation');
+                    }, 500);
+                }
+
+                // Notification spéciale pour les gains
+                this.showCoinsNotification(`+${amount} gains gagnés !`);
+            }
+
+            showLevelUpAnimation() {
+                // Animation de montée de niveau
+                const levelElement = document.getElementById('user-level-display');
+                if (levelElement) {
+                    levelElement.style.animation = 'pulse 1s ease';
+                    setTimeout(() => {
+                        levelElement.style.animation = '';
+                    }, 1000);
+                }
+            }
+
+            showCoinsNotification(message) {
+                const toast = document.createElement('div');
+                toast.className = 'notification coins-notification';
+                
+                toast.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-coins"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.getElementById('toast-container').appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+
+            filterStoreItems(category) {
+                // Retirer l'active de tous les onglets
+                document.querySelectorAll('.store-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activer l'onglet cliqué
+                document.querySelector(`[data-category="${category}"]`).classList.add('active');
+                
+                // Mettre à jour l'affichage
+                this.updateStoreDisplay();
+            }
+
+            // Méthodes utilitaires pour les labels
+            getCategoryLabel(category) {
+                const labels = {
+                    time: 'Temps libre',
+                    perks: 'Avantages',
+                    equipment: 'Équipement',
+                    social: 'Social'
+                };
+                return labels[category] || category;
+            }
+
+            getTransactionIcon(type) {
+                const icons = {
+                    quest_reward: 'fa-trophy',
+                    purchase: 'fa-shopping-cart',
+                    transfer_sent: 'fa-arrow-up',
+                    transfer_received: 'fa-arrow-down'
+                };
+                return icons[type] || 'fa-coins';
+            }
+
+            getTransactionTypeLabel(type) {
+                const labels = {
+                    quest_reward: 'Récompense mission',
+                    purchase: 'Achat boutique',
+                    transfer_sent: 'Transfert envoyé',
+                    transfer_received: 'Transfert reçu'
+                };
+                return labels[type] || type;
+            }
+
+            getTransferStatusLabel(status) {
+                const labels = {
+                    pending: 'En attente',
+                    completed: 'Terminé',
+                    cancelled: 'Annulé'
+                };
+                return labels[status] || status;
+            }
+
+            // Méthode publique pour ouvrir le portefeuille
+            openWallet() {
+                this.switchSection('wallet');
+                this.updateLeaderboard();
+            }
+
+            updateDashboardStats() {
+                document.getElementById('team-count').textContent = this.users.length;
+                document.getElementById('active-quests').textContent = this.quests.length;
+                document.getElementById('events-today').textContent = this.getTodayEventsCount();
+                document.getElementById('user-level').textContent = this.userProgress.level;
+                document.getElementById('user-xp').textContent = this.userProgress.xp;
+                document.getElementById('user-coins-dashboard').textContent = this.userProgress.coins;
+                
+                this.updateProgressDisplay();
+                this.updateCoinsDisplay();
+                
+                // Mettre à jour les stats du portefeuille
+                const today = new Date();
+                const todayTransactions = this.transactions.filter(t => {
+                    const transactionDate = new Date(t.timestamp.seconds * 1000);
+                    return transactionDate.toDateString() === today.toDateString() && t.amount > 0;
+                });
+                
+                const todayEarned = todayTransactions.reduce((sum, t) => sum + t.amount, 0);
+                document.getElementById('wallet-earned-today').textContent = todayEarned;
+                
+                const pendingTransfers = this.transfers.filter(t => t.status === 'pending').length;
+                document.getElementById('wallet-transfers').textContent = pendingTransfers;
+                
+                const thisMonth = new Date();
+                thisMonth.setDate(1);
+                const monthlySpent = this.transactions
+                    .filter(t => {
+                        const transactionDate = new Date(t.timestamp.seconds * 1000);
+                        return transactionDate >= thisMonth && t.amount < 0;
+                    })
+                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                
+                document.getElementById('wallet-spent').textContent = monthlySpent;
             }
 
             updateGoogleCalendarStatus() {

@@ -3,6 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+            https://www.gstatic.com 
+            https://www.googleapis.com 
+            https://apis.google.com 
+            https://accounts.google.com 
+            https://cdn.jsdelivr.net 
+            https://cdnjs.cloudflare.com
+            https://www.googletagmanager.com;
+        connect-src 'self' 
+            https://*.googleapis.com 
+            https://*.google.com 
+            https://*.firebaseapp.com 
+            https://*.cloudfunctions.net
+            https://identitytoolkit.googleapis.com
+            https://securetoken.googleapis.com
+            https://firebase.googleapis.com
+            wss://*.firebaseio.com;
+        style-src 'self' 'unsafe-inline' 
+            https://fonts.googleapis.com 
+            https://cdnjs.cloudflare.com;
+        font-src 'self' 
+            https://fonts.gstatic.com 
+            https://cdnjs.cloudflare.com;
+        img-src 'self' data: 
+            https://*.googleapis.com 
+            https://*.google.com 
+            https://*.firebaseapp.com;
+    ">
     <title>SYNERGIA v3.0 - Production Firebase</title>
     
     <!-- CSS Framework & Icons -->
@@ -1688,7 +1718,7 @@
                         <option>Ce mois</option>
                         <option>Cette année</option>
                     </select>
-                      <button id="refresh-analytics" class="btn btn-secondary">
+                    <button id="refresh-analytics" class="btn btn-secondary">
                         <i class="fas fa-sync-alt"></i>
                         Actualiser
                     </button>
@@ -1712,129 +1742,7 @@
             </div>
         </section>
 
-        <!-- Boutique -->
-        <section id="store" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-shopping-cart"></i> Boutique des Avantages</h1>
-                <div class="section-actions">
-                    <div class="user-wallet">
-                        <i class="fas fa-coins" style="color: #ffc107;"></i>
-                        <span id="store-coins">0</span> gains disponibles
-                    </div>
-                    <select id="store-filter" style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
-                        <option value="all">Tous les avantages</option>
-                        <option value="available">Disponibles</option>
-                        <option value="purchased">Achetés</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Catégories de la boutique -->
-            <div class="store-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
-                <button class="store-tab active" data-category="all">
-                    <i class="fas fa-th-large"></i> Tous
-                </button>
-                <button class="store-tab" data-category="time">
-                    <i class="fas fa-clock"></i> Temps libre
-                </button>
-                <button class="store-tab" data-category="perks">
-                    <i class="fas fa-star"></i> Avantages
-                </button>
-                <button class="store-tab" data-category="equipment">
-                    <i class="fas fa-laptop"></i> Équipement
-                </button>
-                <button class="store-tab" data-category="social">
-                    <i class="fas fa-coffee"></i> Social
-                </button>
-            </div>
-
-            <div id="store-items" class="store-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-                <!-- Articles générés dynamiquement -->
-            </div>
-
-            <!-- Historique des achats -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                <h3><i class="fas fa-history"></i> Historique des achats</h3>
-                <div id="purchase-history" style="margin-top: 1rem;">
-                    <!-- Historique généré dynamiquement -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Portefeuille & Échanges -->
-        <section id="wallet" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-wallet"></i> Portefeuille & Échanges</h1>
-                <div class="section-actions">
-                    <button id="request-transfer-btn" class="btn btn-primary">
-                        <i class="fas fa-hand-holding-usd"></i>
-                        Demander des gains
-                    </button>
-                    <button id="send-transfer-btn" class="btn btn-secondary">
-                        <i class="fas fa-paper-plane"></i>
-                        Envoyer des gains
-                    </button>
-                </div>
-            </div>
-
-            <!-- Résumé du portefeuille -->
-            <div class="dashboard-stats">
-                <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
-                    <i class="fas fa-coins"></i>
-                    <div class="stat-info">
-                        <h3 id="wallet-total-coins">0</h3>
-                        <p>Gains totaux</p>
-                    </div>
-                </div>
-                <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                    <i class="fas fa-arrow-up"></i>
-                    <div class="stat-info">
-                        <h3 id="wallet-earned-today">0</h3>
-                        <p>Gagnés aujourd'hui</p>
-                    </div>
-                </div>
-                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
-                    <i class="fas fa-exchange-alt"></i>
-                    <div class="stat-info">
-                        <h3 id="wallet-transfers">0</h3>
-                        <p>Échanges en cours</p>
-                    </div>
-                </div>
-                <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
-                    <i class="fas fa-shopping-cart"></i>
-                    <div class="stat-info">
-                        <h3 id="wallet-spent">0</h3>
-                        <p>Dépensés ce mois</p>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                <!-- Transactions récentes -->
-                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
-                    <h3><i class="fas fa-list"></i> Transactions récentes</h3>
-                    <div id="recent-transactions" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
-                        <!-- Transactions générées dynamiquement -->
-                    </div>
-                </div>
-
-                <!-- Échanges entre membres -->
-                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
-                    <h3><i class="fas fa-users"></i> Échanges entre membres</h3>
-                    <div id="member-transfers" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
-                        <!-- Échanges générés dynamiquement -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Classement des gains -->
-            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-                <h3><i class="fas fa-trophy"></i> Classement de l'équipe</h3>
-                <div id="coins-leaderboard" style="margin-top: 1rem;">
-                    <!-- Classement généré dynamiquement -->
-                </div>
-            </div>
-        </section>
+        <!-- Paramètres -->
         <section id="settings" class="content-section">
             <div class="section-header">
                 <h1><i class="fas fa-cog"></i> Paramètres</h1>
@@ -2134,6 +2042,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Container pour les notifications -->
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
 
     <script>
@@ -2231,77 +2141,76 @@
                 });
             }
 
-            loadUserData() {
-                return new Promise((resolve, reject) => {
-                    try {
-                        // Charger ou créer le profil utilisateur
-                        window.firebase.getDoc(
-                            window.firebase.doc(window.db, 'users', currentUser.uid)
-                        ).then(userDoc => {
-                            if (!userDoc.exists()) {
-                                // Première connexion - créer le profil
-                                return this.createUserProfile();
-                            }
-                            return Promise.resolve();
-                        }).then(() => {
-                            // Charger ou créer l'entreprise
-                            return this.loadOrCreateCompany();
-                        }).then(() => {
-                            console.log('✅ Données utilisateur chargées');
-                            resolve();
-                        }).catch(reject);
-                        
-                    } catch (error) {
-                        console.error('❌ Erreur chargement données:', error);
-                        reject(error);
+            async loadUserData() {
+                try {
+                    if (!window.db || !currentUser) {
+                        throw new Error('Firebase non initialisé ou utilisateur non connecté');
                     }
-                });
+
+                    // Charger ou créer le profil utilisateur
+                    const userDoc = await window.firebase.getDoc(
+                        window.firebase.doc(window.db, 'users', currentUser.uid)
+                    );
+                    
+                    if (!userDoc.exists()) {
+                        // Première connexion - créer le profil
+                        await this.createUserProfile();
+                    }
+                    
+                    // Charger ou créer l'entreprise
+                    await this.loadOrCreateCompany();
+                    
+                    console.log('✅ Données utilisateur chargées');
+                } catch (error) {
+                    console.error('❌ Erreur chargement données:', error);
+                    this.showToast('Erreur lors du chargement des données', 'error');
+                    throw error;
+                }
             }
 
-            createUserProfile() {
+            async createUserProfile() {
                 const userData = {
                     email: currentUser.email,
                     displayName: currentUser.displayName || currentUser.email.split('@')[0],
                     photoURL: currentUser.photoURL || null,
                     level: 1,
                     xp: 0,
-                    coins: 0, // Nouveau : gains personnels
-                    totalCoinsEarned: 0, // Total des gains gagnés
-                    totalCoinsSpent: 0, // Total des gains dépensés
+                    coins: 0,
+                    totalCoinsEarned: 0,
+                    totalCoinsSpent: 0,
                     joinedAt: window.firebase.serverTimestamp(),
                     lastLogin: window.firebase.serverTimestamp(),
                     status: 'online'
                 };
                 
-                return window.firebase.setDoc(
+                await window.firebase.setDoc(
                     window.firebase.doc(window.db, 'users', currentUser.uid),
                     userData
-                ).then(() => {
-                    console.log('✅ Profil utilisateur créé');
-                });
+                );
+                
+                console.log('✅ Profil utilisateur créé');
             }
 
-            loadOrCreateCompany() {
+            async loadOrCreateCompany() {
                 // Vérifier si l'utilisateur appartient à une entreprise
                 const userCompaniesQuery = window.firebase.query(
                     window.firebase.collection(window.db, 'companies'),
                     window.firebase.where('members', 'array-contains', currentUser.uid)
                 );
                 
-                return window.firebase.getDocs(userCompaniesQuery).then(companiesSnapshot => {
-                    if (!companiesSnapshot.empty) {
-                        // Utilisateur appartient à une entreprise existante
-                        currentCompany = { id: companiesSnapshot.docs[0].id, ...companiesSnapshot.docs[0].data() };
-                        console.log('✅ Entreprise configurée:', currentCompany.name);
-                        return Promise.resolve();
-                    } else {
-                        // Créer une nouvelle entreprise
-                        return this.createCompany();
-                    }
-                });
+                const companiesSnapshot = await window.firebase.getDocs(userCompaniesQuery);
+                
+                if (!companiesSnapshot.empty) {
+                    // Utilisateur appartient à une entreprise existante
+                    currentCompany = { id: companiesSnapshot.docs[0].id, ...companiesSnapshot.docs[0].data() };
+                    console.log('✅ Entreprise configurée:', currentCompany.name);
+                } else {
+                    // Créer une nouvelle entreprise
+                    await this.createCompany();
+                }
             }
 
-            createCompany() {
+            async createCompany() {
                 const companyName = prompt('Nom de votre entreprise:', 'Mon Entreprise') || 'Mon Entreprise';
                 
                 const companyData = {
@@ -2316,23 +2225,23 @@
                     }
                 };
                 
-                return window.firebase.addDoc(
+                const companyRef = await window.firebase.addDoc(
                     window.firebase.collection(window.db, 'companies'),
                     companyData
-                ).then(companyRef => {
-                    currentCompany = { id: companyRef.id, ...companyData };
-                    
-                    // Créer les missions par défaut
-                    return this.createDefaultQuests();
-                }).then(() => {
-                    // Créer les avantages par défaut de la boutique
-                    return this.createDefaultStoreItems();
-                }).then(() => {
-                    console.log('✅ Entreprise créée:', companyName);
-                });
+                );
+                
+                currentCompany = { id: companyRef.id, ...companyData };
+                
+                // Créer les missions par défaut
+                await this.createDefaultQuests();
+                
+                // Créer les avantages par défaut de la boutique
+                await this.createDefaultStoreItems();
+                
+                console.log('✅ Entreprise créée:', companyName);
             }
 
-            createDefaultQuests() {
+            async createDefaultQuests() {
                 const defaultQuests = [
                     {
                         title: 'Première connexion',
@@ -2387,7 +2296,54 @@
                     )
                 );
 
-                return Promise.all(promises);
+                await Promise.all(promises);
+            }
+
+            async createDefaultStoreItems() {
+                const defaultItems = [
+                    {
+                        name: 'Heure de pause supplémentaire',
+                        description: 'Bénéficiez d\'une heure de pause en plus',
+                        price: 100,
+                        category: 'time',
+                        stock: 50,
+                        icon: '⏰',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Place de parking VIP',
+                        description: 'Place de parking réservée près de l\'entrée',
+                        price: 200,
+                        category: 'perks',
+                        stock: 5,
+                        icon: '🚗',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    },
+                    {
+                        name: 'Café premium',
+                        description: 'Café de qualité supérieure à la machine',
+                        price: 50,
+                        category: 'social',
+                        stock: 100,
+                        icon: '☕',
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdAt: window.firebase.serverTimestamp()
+                    }
+                ];
+
+                const promises = defaultItems.map(item => 
+                    window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'store_items'),
+                        item
+                    )
+                );
+
+                await Promise.all(promises);
             }
 
             setupRealtimeListeners() {
@@ -2395,8 +2351,7 @@
 
                 // Écouter les utilisateurs de l'entreprise
                 const usersQuery = window.firebase.query(
-                    window.firebase.collection(window.db, 'users'),
-                    window.firebase.where('companyId', '==', currentCompany.id)
+                    window.firebase.collection(window.db, 'users')
                 );
                 
                 const unsubUsers = window.firebase.onSnapshot(usersQuery, (snapshot) => {
@@ -2406,6 +2361,7 @@
                     });
                     this.updateTeamDisplay();
                     this.updateDashboardStats();
+                    this.updateLeaderboard();
                 });
 
                 // Écouter les missions
@@ -2508,131 +2464,192 @@
             }
 
             setupEventListeners() {
-                // Navigation
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.addEventListener('click', (e) => {
+                // Navigation - vérifier existence
+                const navLinks = document.querySelectorAll('.nav-link');
+                if (navLinks.length > 0) {
+                    navLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.switchSection(link.dataset.section);
+                        });
+                    });
+                }
+
+                // Auth tabs - vérifier existence
+                const authTabs = document.querySelectorAll('.auth-tab');
+                if (authTabs.length > 0) {
+                    authTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            this.switchAuthTab(tab.dataset.tab);
+                        });
+                    });
+                }
+
+                // Forms avec vérification
+                const loginForm = document.getElementById('login-form');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => {
                         e.preventDefault();
-                        this.switchSection(link.dataset.section);
+                        this.handleLogin();
                     });
-                });
+                }
 
-                // Auth tabs
-                document.querySelectorAll('.auth-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        this.switchAuthTab(tab.dataset.tab);
+                const registerForm = document.getElementById('register-form');
+                if (registerForm) {
+                    registerForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleRegister();
                     });
-                });
+                }
 
-                // Forms
-                document.getElementById('login-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.handleLogin();
-                });
+                const googleLoginBtn = document.getElementById('google-login-btn');
+                if (googleLoginBtn) {
+                    googleLoginBtn.addEventListener('click', () => {
+                        this.handleGoogleLogin();
+                    });
+                }
 
-                document.getElementById('register-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.handleRegister();
-                });
-
-                document.getElementById('google-login-btn').addEventListener('click', () => {
-                    this.handleGoogleLogin();
-                });
-
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    this.handleLogout();
-                });
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.handleLogout();
+                    });
+                }
 
                 // Événements
-                document.getElementById('add-event-btn').addEventListener('click', () => {
-                    this.showModal('add-event-modal');
-                });
+                const addEventBtn = document.getElementById('add-event-btn');
+                if (addEventBtn) {
+                    addEventBtn.addEventListener('click', () => {
+                        this.showModal('add-event-modal');
+                    });
+                }
 
-                document.getElementById('event-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createEvent();
-                });
+                const eventForm = document.getElementById('event-form');
+                if (eventForm) {
+                    eventForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.createEvent();
+                    });
+                }
 
                 // Membres
-                document.getElementById('add-member-btn').addEventListener('click', () => {
-                    this.showModal('add-member-modal');
-                });
+                const addMemberBtn = document.getElementById('add-member-btn');
+                if (addMemberBtn) {
+                    addMemberBtn.addEventListener('click', () => {
+                        this.showModal('add-member-modal');
+                    });
+                }
 
-                document.getElementById('member-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.addMember();
-                });
+                const memberForm = document.getElementById('member-form');
+                if (memberForm) {
+                    memberForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.addMember();
+                    });
+                }
 
                 // Missions
-                document.getElementById('quest-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createQuest();
-                });
-
-                document.querySelectorAll('.quest-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        this.filterQuests(tab.dataset.type);
+                const questForm = document.getElementById('quest-form');
+                if (questForm) {
+                    questForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.createQuest();
                     });
-                });
+                }
+
+                const questTabs = document.querySelectorAll('.quest-tab');
+                if (questTabs.length > 0) {
+                    questTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            this.filterQuests(tab.dataset.type);
+                        });
+                    });
+                }
 
                 // Store
-                document.getElementById('store-item-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createStoreItem();
-                });
-
-                document.querySelectorAll('.store-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        this.filterStoreItems(tab.dataset.category);
+                const storeTabs = document.querySelectorAll('.store-tab');
+                if (storeTabs.length > 0) {
+                    storeTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            this.filterStoreItems(tab.dataset.category);
+                        });
                     });
-                });
+                }
 
                 // Transfers
-                document.getElementById('send-transfer-btn').addEventListener('click', () => {
-                    this.showModal('send-transfer-modal');
-                    this.populateTransferOptions();
-                });
+                const sendTransferBtn = document.getElementById('send-transfer-btn');
+                if (sendTransferBtn) {
+                    sendTransferBtn.addEventListener('click', () => {
+                        this.showModal('send-transfer-modal');
+                        this.populateTransferOptions();
+                    });
+                }
 
-                document.getElementById('request-transfer-btn').addEventListener('click', () => {
-                    this.showModal('request-transfer-modal');
-                    this.populateTransferOptions();
-                });
+                const requestTransferBtn = document.getElementById('request-transfer-btn');
+                if (requestTransferBtn) {
+                    requestTransferBtn.addEventListener('click', () => {
+                        this.showModal('request-transfer-modal');
+                        this.populateTransferOptions();
+                    });
+                }
 
-                document.getElementById('send-transfer-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.sendTransfer();
-                });
+                const sendTransferForm = document.getElementById('send-transfer-form');
+                if (sendTransferForm) {
+                    sendTransferForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.sendTransfer();
+                    });
+                }
 
-                document.getElementById('request-transfer-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.requestTransfer();
-                });
+                const requestTransferForm = document.getElementById('request-transfer-form');
+                if (requestTransferForm) {
+                    requestTransferForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.requestTransfer();
+                    });
+                }
 
                 // Chat
-                document.getElementById('send-message-btn').addEventListener('click', () => {
-                    this.sendMessage();
-                });
-
-                document.getElementById('message-input').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
+                const sendMessageBtn = document.getElementById('send-message-btn');
+                if (sendMessageBtn) {
+                    sendMessageBtn.addEventListener('click', () => {
                         this.sendMessage();
-                    }
-                });
+                    });
+                }
+
+                const messageInput = document.getElementById('message-input');
+                if (messageInput) {
+                    messageInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.sendMessage();
+                        }
+                    });
+                }
 
                 // Profil
-                document.getElementById('profile-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.updateProfile();
-                });
+                const profileForm = document.getElementById('profile-form');
+                if (profileForm) {
+                    profileForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.updateProfile();
+                    });
+                }
 
                 // Google Calendar
-                document.getElementById('connect-google-calendar').addEventListener('click', () => {
-                    this.connectGoogleCalendar();
-                });
+                const connectGoogleCalendarBtn = document.getElementById('connect-google-calendar');
+                if (connectGoogleCalendarBtn) {
+                    connectGoogleCalendarBtn.addEventListener('click', () => {
+                        this.connectGoogleCalendar();
+                    });
+                }
 
                 // Refresh buttons
-                document.getElementById('refresh-dashboard').addEventListener('click', () => {
-                    this.refreshDashboard();
-                });
+                const refreshDashboardBtn = document.getElementById('refresh-dashboard');
+                if (refreshDashboardBtn) {
+                    refreshDashboardBtn.addEventListener('click', () => {
+                        this.refreshDashboard();
+                    });
+                }
 
                 // Fermeture des modales
                 document.addEventListener('click', (e) => {
@@ -2642,42 +2659,32 @@
                 });
             }
 
-            setupGoogleCalendar() {
-                return new Promise((resolve, reject) => {
-                    try {
-                        this.updateLoadingStatus('Configuration Google Calendar...');
-                        
-                        // Charger l'API Google
-                        this.loadGoogleAPI().then(() => {
-                            // Initialiser le token client
-                            if (typeof google !== 'undefined' && google.accounts) {
-                                tokenClient = google.accounts.oauth2.initTokenClient({
-                                    client_id: GOOGLE_CONFIG.clientId,
-                                    scope: GOOGLE_CONFIG.scopes,
-                                    callback: (response) => this.handleGoogleCalendarAuth(response)
-                                });
-                                
-                                console.log('✅ Google Calendar API prête');
-                                resolve();
-                            } else {
-                                console.warn('⚠️ Google Identity Services non disponible');
-                                resolve(); // Continue sans erreur
-                            }
-                        }).catch(error => {
-                            console.error('❌ Erreur Google Calendar:', error);
-                            this.showToast('Google Calendar non disponible', 'warning');
-                            resolve(); // Continue sans erreur
+            async setupGoogleCalendar() {
+                try {
+                    this.updateLoadingStatus('Configuration Google Calendar...');
+                    
+                    // Charger l'API Google
+                    await this.loadGoogleAPI();
+                    
+                    // Initialiser le token client
+                    if (typeof google !== 'undefined' && google.accounts) {
+                        tokenClient = google.accounts.oauth2.initTokenClient({
+                            client_id: GOOGLE_CONFIG.clientId,
+                            scope: GOOGLE_CONFIG.scopes,
+                            callback: (response) => this.handleGoogleCalendarAuth(response)
                         });
                         
-                    } catch (error) {
-                        console.error('❌ Erreur Google Calendar:', error);
-                        this.showToast('Google Calendar non disponible', 'warning');
-                        resolve(); // Continue sans erreur
+                        console.log('✅ Google Calendar API prête');
+                    } else {
+                        console.warn('⚠️ Google Identity Services non disponible');
                     }
-                });
+                } catch (error) {
+                    console.error('❌ Erreur Google Calendar:', error);
+                    this.showToast('Google Calendar non disponible', 'warning');
+                }
             }
 
-            loadGoogleAPI() {
+            async loadGoogleAPI() {
                 return new Promise((resolve, reject) => {
                     if (typeof gapi !== 'undefined') {
                         gapi.load('client', () => {
@@ -2802,8 +2809,589 @@
                 }
             }
 
-            // Méthodes de gestion des données
-            createEvent() {
+            // Méthodes de gestion de l'interface
+            updateLoadingStatus(status) {
+                const statusElement = document.getElementById('loading-status');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                }
+            }
+
+            showLoadingScreen() {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'flex';
+                }
+            }
+
+            hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
+            }
+
+            showAuthModal() {
+                const authModal = document.getElementById('auth-modal');
+                if (authModal) {
+                    authModal.style.display = 'flex';
+                }
+            }
+
+            hideAuthModal() {
+                const authModal = document.getElementById('auth-modal');
+                if (authModal) {
+                    authModal.style.display = 'none';
+                }
+            }
+
+            showMainInterface() {
+                const navbar = document.querySelector('.navbar');
+                const mainContent = document.querySelector('.main-content');
+                if (navbar) navbar.style.display = 'block';
+                if (mainContent) mainContent.style.display = 'block';
+            }
+
+            hideMainInterface() {
+                const navbar = document.querySelector('.navbar');
+                const mainContent = document.querySelector('.main-content');
+                if (navbar) navbar.style.display = 'none';
+                if (mainContent) mainContent.style.display = 'none';
+            }
+
+            updateUserInterface() {
+                if (currentUser) {
+                    const userNameElement = document.getElementById('user-name');
+                    if (userNameElement) {
+                        userNameElement.textContent = currentUser.displayName || currentUser.email;
+                    }
+                    
+                    // Mettre à jour l'avatar
+                    const avatar = document.getElementById('user-avatar');
+                    if (avatar) {
+                        if (currentUser.photoURL) {
+                            avatar.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar">`;
+                        } else {
+                            const initial = (currentUser.displayName || currentUser.email).charAt(0).toUpperCase();
+                            avatar.innerHTML = initial;
+                        }
+                    }
+                    
+                    // Mettre à jour les champs du profil
+                    const profileName = document.getElementById('profile-name');
+                    const profileEmail = document.getElementById('profile-email');
+                    const profileCompany = document.getElementById('profile-company');
+                    
+                    if (profileName) profileName.value = currentUser.displayName || '';
+                    if (profileEmail) profileEmail.value = currentUser.email || '';
+                    if (profileCompany) profileCompany.value = currentCompany?.name || '';
+                    
+                    // Charger les données utilisateur pour les gains/XP
+                    this.loadUserProgress();
+                }
+            }
+
+            async loadUserProgress() {
+                try {
+                    const userDoc = await window.firebase.getDoc(
+                        window.firebase.doc(window.db, 'users', currentUser.uid)
+                    );
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        this.userProgress = {
+                            level: userData.level || 1,
+                            xp: userData.xp || 0,
+                            coins: userData.coins || 0
+                        };
+                        
+                        this.updateCoinsDisplay();
+                        this.updateProgressDisplay();
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement progression:', error);
+                }
+            }
+
+            updateCoinsDisplay() {
+                const elements = [
+                    'user-coins',
+                    'user-coins-dashboard',
+                    'store-coins',
+                    'quest-coins-display',
+                    'wallet-total-coins'
+                ];
+                
+                elements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = this.userProgress.coins;
+                    }
+                });
+            }
+
+            updateProgressDisplay() {
+                const levelElement = document.getElementById('user-level-display');
+                const xpElement = document.getElementById('user-xp-display');
+                const xpProgressElement = document.getElementById('quest-xp-progress');
+                const levelProgressElement = document.getElementById('next-level-info');
+                
+                if (levelElement) levelElement.textContent = `Niveau ${this.userProgress.level}`;
+                if (xpElement) xpElement.textContent = `${this.userProgress.xp} XP`;
+                
+                const nextLevelXP = this.userProgress.level * 100;
+                const currentLevelXP = (this.userProgress.level - 1) * 100;
+                const progressPercent = ((this.userProgress.xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+                
+                if (xpProgressElement) xpProgressElement.style.width = `${Math.min(progressPercent, 100)}%`;
+                if (levelProgressElement) levelProgressElement.textContent = `${nextLevelXP - this.userProgress.xp} XP vers niveau ${this.userProgress.level + 1}`;
+            }
+
+            switchSection(sectionId) {
+                // Masquer toutes les sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Retirer l'active de tous les liens de nav
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Activer la section demandée
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+                
+                // Activer le lien de nav correspondant
+                const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            switchAuthTab(tabName) {
+                // Masquer tous les contenus d'onglets
+                document.querySelectorAll('.auth-tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Retirer l'active de tous les onglets
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activer l'onglet demandé
+                const targetTab = document.getElementById(`${tabName}-tab`);
+                if (targetTab) targetTab.style.display = 'block';
+                
+                const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+                if (activeTab) activeTab.classList.add('active');
+            }
+
+            showModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            }
+
+            closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+            // Méthodes de mise à jour de l'affichage (simplifiées pour éviter les erreurs)
+            updateTeamDisplay() {
+                const container = document.getElementById('team-members-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.users.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucun membre à afficher</p>';
+                    return;
+                }
+                
+                this.users.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = 'team-member-card animate-slide-up';
+                    card.innerHTML = `
+                        <div class="member-avatar">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                                ${(user.displayName || user.email).charAt(0).toUpperCase()}
+                            </div>
+                        </div>
+                        <div>
+                            <h3>${user.displayName || user.email}</h3>
+                            <p style="color: #666;">Niveau ${user.level || 1} - ${user.xp || 0} XP</p>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            updateQuestsDisplay() {
+                const container = document.getElementById('quests-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.quests.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucune mission disponible</p>';
+                    return;
+                }
+                
+                this.quests.forEach(quest => {
+                    const card = document.createElement('div');
+                    card.className = 'quest-card animate-slide-up';
+                    card.innerHTML = `
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
+                        <h3>${quest.title}</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
+                            <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.type}</span>
+                        </div>
+                        <button onclick="synergia.acceptQuest('${quest.id}')" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-check"></i>
+                            Accepter
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            updateEventsDisplay() {
+                const container = document.getElementById('events-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.events.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucun événement à afficher</p>';
+                    return;
+                }
+                
+                this.events.slice(0, 5).forEach(event => {
+                    const item = document.createElement('div');
+                    item.className = 'activity-item';
+                    
+                    let date;
+                    if (event.date && event.date.seconds) {
+                        date = new Date(event.date.seconds * 1000);
+                    } else {
+                        date = new Date();
+                    }
+                    
+                    item.innerHTML = `
+                        <i class="fas fa-calendar" style="color: #667eea;"></i>
+                        <div style="flex: 1;">
+                            <strong>${event.title}</strong>
+                            <br><small style="color: #666;">${event.description || ''}</small>
+                            <br><small style="color: #28a745; font-weight: bold;">${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</small>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            updateChatDisplay() {
+                const container = document.getElementById('messages-area');
+                if (!container) return;
+
+                // Garder les premiers messages (bienvenue)
+                const welcomeMessage = container.querySelector('div[style*="text-align: center"]');
+                container.innerHTML = '';
+                
+                if (welcomeMessage && this.messages.length === 0) {
+                    container.appendChild(welcomeMessage);
+                }
+                
+                this.messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    const isOwnMessage = message.userId === currentUser.uid;
+                    let timestamp;
+                    
+                    if (message.timestamp && message.timestamp.seconds) {
+                        timestamp = new Date(message.timestamp.seconds * 1000);
+                    } else {
+                        timestamp = new Date();
+                    }
+                    
+                    messageDiv.style.cssText = `display: flex; gap: 1rem; padding: 0.5rem 1rem; margin-bottom: 0.5rem; ${isOwnMessage ? 'flex-direction: row-reverse;' : ''}`;
+                    
+                    messageDiv.innerHTML = `
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                            ${message.userName.charAt(0).toUpperCase()}
+                        </div>
+                        <div style="${isOwnMessage ? 'text-align: right;' : ''}">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; ${isOwnMessage ? 'flex-direction: row-reverse;' : ''}">
+                                <strong>${isOwnMessage ? 'Vous' : message.userName}</strong>
+                                <small style="color: #666;">${timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</small>
+                            </div>
+                            <div class="message-bubble ${isOwnMessage ? 'own' : 'other'}">
+                                ${message.text}
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(messageDiv);
+                });
+                
+                // Scroll vers le bas
+                container.scrollTop = container.scrollHeight;
+            }
+
+            updateStoreDisplay() {
+                const container = document.getElementById('store-items');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.storeItems.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucun article disponible</p>';
+                    return;
+                }
+                
+                this.storeItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'store-item-card animate-slide-up';
+                    
+                    const canAfford = this.userProgress.coins >= item.price;
+                    const buttonClass = canAfford && item.stock > 0 ? 'btn-primary' : 'btn-secondary';
+                    const buttonText = item.stock <= 0 ? 'Rupture de stock' : !canAfford ? 'Gains insuffisants' : 'Acheter';
+                    const buttonDisabled = !canAfford || item.stock <= 0;
+                    
+                    card.innerHTML = `
+                        <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">${item.icon}</div>
+                        <h3>${item.name}</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">${item.description}</p>
+                        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; margin-bottom: 1rem;">
+                            <i class="fas fa-coins"></i>
+                            ${item.price} gains
+                        </div>
+                        <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+                            Stock: ${item.stock}
+                        </div>
+                        <button onclick="synergia.purchaseItem('${item.id}')" class="btn ${buttonClass}" style="width: 100%;" ${buttonDisabled ? 'disabled' : ''}>
+                            <i class="fas fa-shopping-cart"></i>
+                            ${buttonText}
+                        </button>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            }
+
+            updateTransactionsDisplay() {
+                const container = document.getElementById('recent-transactions');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.transactions.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucune transaction récente</p>';
+                    return;
+                }
+                
+                this.transactions.slice(0, 10).forEach(transaction => {
+                    const item = document.createElement('div');
+                    item.className = 'transaction-item';
+                    
+                    const isIncome = transaction.amount > 0;
+                    const iconClass = isIncome ? 'income' : 'expense';
+                    
+                    let timestamp;
+                    if (transaction.timestamp && transaction.timestamp.seconds) {
+                        timestamp = new Date(transaction.timestamp.seconds * 1000);
+                    } else {
+                        timestamp = new Date();
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="transaction-icon ${iconClass}">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <strong>${transaction.description}</strong>
+                            <br><small style="color: #666;">${transaction.type || 'Transaction'}</small>
+                            <br><small style="color: #666;">${timestamp.toLocaleDateString('fr-FR')} à ${timestamp.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong style="color: ${isIncome ? '#28a745' : '#dc3545'};">
+                                ${isIncome ? '+' : ''}${transaction.amount} gains
+                            </strong>
+                        </div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+
+            updateTransfersDisplay() {
+                const container = document.getElementById('member-transfers');
+                if (!container) return;
+
+                container.innerHTML = '';
+                
+                if (this.transfers.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucun échange en cours</p>';
+                    return;
+                }
+                
+                this.transfers.forEach(transfer => {
+                    const item = document.createElement('div');
+                    item.className = 'transaction-item';
+                    
+                    const isOutgoing = transfer.fromUserId === currentUser.uid;
+                    const otherUser = isOutgoing ? transfer.toUserName : transfer.fromUserName;
+                    
+                    let timestamp;
+                    if (transfer.timestamp && transfer.timestamp.seconds) {
+                        timestamp = new Date(transfer.timestamp.seconds * 1000);
+                    } else {
+                        timestamp = new Date();
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="transaction-icon transfer">
+                            <i class="fas ${isOutgoing ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <strong>${isOutgoing ? 'Envoyé à' : 'Reçu de'} ${otherUser}</strong>
+                            <br><small style="color: #666;">${transfer.message || 'Aucun message'}</small>
+                            <br><small style="color: #666;">${timestamp.toLocaleDateString('fr-FR')}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong style="color: ${transfer.status === 'completed' ? '#28a745' : '#ffc107'};">
+                                ${transfer.amount} gains
+                            </strong>
+                            <br><small style="color: #666;">${transfer.status === 'pending' ? 'En attente' : 'Terminé'}</small>
+                            ${transfer.status === 'pending' && !isOutgoing ? `
+                                <br><button onclick="synergia.acceptTransfer('${transfer.id}')" class="btn btn-success" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                    Accepter
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+
+            updateLeaderboard() {
+                const container = document.getElementById('coins-leaderboard');
+                if (!container) return;
+
+                // Trier les utilisateurs par gains totaux
+                const sortedUsers = [...this.users].sort((a, b) => (b.totalCoinsEarned || 0) - (a.totalCoinsEarned || 0));
+                
+                container.innerHTML = '';
+                
+                if (sortedUsers.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucun classement disponible</p>';
+                    return;
+                }
+                
+                sortedUsers.slice(0, 10).forEach((user, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    
+                    const rank = index + 1;
+                    if (rank <= 3) {
+                        item.classList.add('top3');
+                    }
+                    
+                    const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                    const currentUserClass = user.id === currentUser.uid ? 'style="background: rgba(102, 126, 234, 0.1);"' : '';
+                    
+                    item.innerHTML = `
+                        <div class="leaderboard-rank ${rankClass}">
+                            ${rank <= 3 ? (rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉') : rank}
+                        </div>
+                        <div style="flex: 1;" ${currentUserClass}>
+                            <strong>${user.displayName || user.email}</strong>
+                            <br><small style="color: #666;">Niveau ${user.level || 1}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong style="color: #667eea;">${user.totalCoinsEarned || 0} gains</strong>
+                            <br><small style="color: #666;">gagnés au total</small>
+                        </div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+
+            updateDashboardStats() {
+                const elements = {
+                    'team-count': this.users.length,
+                    'active-quests': this.quests.length,
+                    'events-today': this.getTodayEventsCount(),
+                    'user-level': this.userProgress.level,
+                    'user-xp': this.userProgress.xp,
+                    'user-coins-dashboard': this.userProgress.coins
+                };
+                
+                Object.entries(elements).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    }
+                });
+                
+                this.updateProgressDisplay();
+                this.updateCoinsDisplay();
+                
+                // Mettre à jour les stats du portefeuille
+                const today = new Date();
+                const todayTransactions = this.transactions.filter(t => {
+                    if (!t.timestamp || !t.timestamp.seconds) return false;
+                    const transactionDate = new Date(t.timestamp.seconds * 1000);
+                    return transactionDate.toDateString() === today.toDateString() && t.amount > 0;
+                });
+                
+                const todayEarned = todayTransactions.reduce((sum, t) => sum + t.amount, 0);
+                const walletEarnedElement = document.getElementById('wallet-earned-today');
+                if (walletEarnedElement) walletEarnedElement.textContent = todayEarned;
+                
+                const pendingTransfers = this.transfers.filter(t => t.status === 'pending').length;
+                const walletTransfersElement = document.getElementById('wallet-transfers');
+                if (walletTransfersElement) walletTransfersElement.textContent = pendingTransfers;
+                
+                const thisMonth = new Date();
+                thisMonth.setDate(1);
+                const monthlySpent = this.transactions
+                    .filter(t => {
+                        if (!t.timestamp || !t.timestamp.seconds) return false;
+                        const transactionDate = new Date(t.timestamp.seconds * 1000);
+                        return transactionDate >= thisMonth && t.amount < 0;
+                    })
+                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                
+                const walletSpentElement = document.getElementById('wallet-spent');
+                if (walletSpentElement) walletSpentElement.textContent = monthlySpent;
+            }
+
+            getTodayEventsCount() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                return this.events.filter(event => {
+                    if (!event.date || !event.date.seconds) return false;
+                    const eventDate = new Date(event.date.seconds * 1000);
+                    return eventDate >= today && eventDate < tomorrow;
+                }).length;
+            }
+
+            // Méthodes d'actions
+            async createEvent() {
                 const title = document.getElementById('event-title').value.trim();
                 const description = document.getElementById('event-description').value.trim();
                 const date = document.getElementById('event-date').value;
@@ -2815,35 +3403,36 @@
                     return;
                 }
 
-                const eventData = {
-                    title,
-                    description,
-                    date: new Date(`${date}T${time}`),
-                    type,
-                    companyId: currentCompany.id,
-                    createdBy: currentUser.uid,
-                    createdAt: window.firebase.serverTimestamp()
-                };
+                try {
+                    const eventData = {
+                        title,
+                        description,
+                        date: new Date(`${date}T${time}`),
+                        type,
+                        companyId: currentCompany.id,
+                        createdBy: currentUser.uid,
+                        createdAt: window.firebase.serverTimestamp()
+                    };
 
-                window.firebase.addDoc(
-                    window.firebase.collection(window.db, 'events'),
-                    eventData
-                ).then(() => {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'events'),
+                        eventData
+                    );
+
                     this.closeModal('add-event-modal');
                     this.showToast(`Événement "${title}" créé avec succès`, 'success');
                     
                     // Réinitialiser le formulaire
-                    document.getElementById('event-form').reset();
+                    const eventForm = document.getElementById('event-form');
+                    if (eventForm) eventForm.reset();
                     
-                    // Marquer la mission "Créer un événement" comme complétée
-                    this.completeQuest('create-event');
-                }).catch(error => {
+                } catch (error) {
                     console.error('Erreur création événement:', error);
                     this.showToast('Erreur lors de la création de l\'événement', 'error');
-                });
+                }
             }
 
-            addMember() {
+            async addMember() {
                 const name = document.getElementById('member-name').value.trim();
                 const email = document.getElementById('member-email').value.trim();
                 const role = document.getElementById('member-role').value;
@@ -2854,34 +3443,38 @@
                     return;
                 }
 
-                const memberData = {
-                    name,
-                    email,
-                    role,
-                    department,
-                    companyId: currentCompany.id,
-                    level: 1,
-                    xp: 0,
-                    status: 'offline',
-                    joinedAt: window.firebase.serverTimestamp()
-                };
+                try {
+                    const memberData = {
+                        name,
+                        email,
+                        role,
+                        department,
+                        companyId: currentCompany.id,
+                        level: 1,
+                        xp: 0,
+                        status: 'offline',
+                        joinedAt: window.firebase.serverTimestamp()
+                    };
 
-                window.firebase.addDoc(
-                    window.firebase.collection(window.db, 'users'),
-                    memberData
-                ).then(() => {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'users'),
+                        memberData
+                    );
+
                     this.closeModal('add-member-modal');
                     this.showToast(`Membre "${name}" ajouté avec succès`, 'success');
                     
                     // Réinitialiser le formulaire
-                    document.getElementById('member-form').reset();
-                }).catch(error => {
+                    const memberForm = document.getElementById('member-form');
+                    if (memberForm) memberForm.reset();
+                    
+                } catch (error) {
                     console.error('Erreur ajout membre:', error);
                     this.showToast('Erreur lors de l\'ajout du membre', 'error');
-                });
+                }
             }
 
-            createQuest() {
+            async createQuest() {
                 const title = document.getElementById('quest-title').value.trim();
                 const description = document.getElementById('quest-description').value.trim();
                 const type = document.getElementById('quest-type').value;
@@ -2893,119 +3486,130 @@
                     return;
                 }
 
-                const questData = {
-                    title,
-                    description,
-                    type,
-                    xp,
-                    difficulty,
-                    icon: this.getQuestIcon(type),
-                    active: true,
-                    companyId: currentCompany.id,
-                    createdBy: currentUser.uid,
-                    createdAt: window.firebase.serverTimestamp()
-                };
+                try {
+                    const questData = {
+                        title,
+                        description,
+                        type,
+                        xp,
+                        difficulty,
+                        icon: this.getQuestIcon(type),
+                        active: true,
+                        companyId: currentCompany.id,
+                        createdBy: currentUser.uid,
+                        createdAt: window.firebase.serverTimestamp()
+                    };
 
-                window.firebase.addDoc(
-                    window.firebase.collection(window.db, 'quests'),
-                    questData
-                ).then(() => {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'quests'),
+                        questData
+                    );
+
                     this.showToast(`Mission "${title}" créée avec succès`, 'success');
                     
                     // Réinitialiser le formulaire
-                    document.getElementById('quest-form').reset();
-                }).catch(error => {
+                    const questForm = document.getElementById('quest-form');
+                    if (questForm) questForm.reset();
+                    
+                } catch (error) {
                     console.error('Erreur création mission:', error);
                     this.showToast('Erreur lors de la création de la mission', 'error');
-                });
+                }
             }
 
-            sendMessage() {
-                const messageText = document.getElementById('message-input').value.trim();
+            async sendMessage() {
+                const messageInput = document.getElementById('message-input');
+                if (!messageInput) return;
+                
+                const messageText = messageInput.value.trim();
                 
                 if (!messageText) return;
 
-                const messageData = {
-                    text: messageText,
-                    userId: currentUser.uid,
-                    userName: currentUser.displayName || currentUser.email,
-                    userPhoto: currentUser.photoURL,
-                    companyId: currentCompany.id,
-                    timestamp: window.firebase.serverTimestamp()
-                };
+                try {
+                    const messageData = {
+                        text: messageText,
+                        userId: currentUser.uid,
+                        userName: currentUser.displayName || currentUser.email,
+                        userPhoto: currentUser.photoURL,
+                        companyId: currentCompany.id,
+                        timestamp: window.firebase.serverTimestamp()
+                    };
 
-                window.firebase.addDoc(
-                    window.firebase.collection(window.db, 'messages'),
-                    messageData
-                ).then(() => {
-                    document.getElementById('message-input').value = '';
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'messages'),
+                        messageData
+                    );
+
+                    messageInput.value = '';
                     
-                    // Marquer la mission "Message d'équipe" comme complétée
-                    this.completeQuest('team-message');
-                }).catch(error => {
+                } catch (error) {
                     console.error('Erreur envoi message:', error);
                     this.showToast('Erreur lors de l\'envoi du message', 'error');
-                });
+                }
             }
 
-            updateProfile() {
+            async updateProfile() {
                 const name = document.getElementById('profile-name').value.trim();
                 const company = document.getElementById('profile-company').value.trim();
 
-                const updatePromises = [];
+                try {
+                    const updatePromises = [];
 
-                // Mettre à jour le profil Firebase Auth
-                if (name && name !== currentUser.displayName) {
-                    updatePromises.push(
-                        window.firebase.updateProfile(currentUser, {
-                            displayName: name
-                        })
-                    );
-                }
+                    // Mettre à jour le profil Firebase Auth
+                    if (name && name !== currentUser.displayName) {
+                        updatePromises.push(
+                            window.firebase.updateProfile(currentUser, {
+                                displayName: name
+                            })
+                        );
+                    }
 
-                // Mettre à jour le document utilisateur
-                updatePromises.push(
-                    window.firebase.updateDoc(
-                        window.firebase.doc(window.db, 'users', currentUser.uid),
-                        {
-                            displayName: name,
-                            lastUpdated: window.firebase.serverTimestamp()
-                        }
-                    )
-                );
-
-                // Mettre à jour l'entreprise si nécessaire
-                if (company && company !== currentCompany.name) {
+                    // Mettre à jour le document utilisateur
                     updatePromises.push(
                         window.firebase.updateDoc(
-                            window.firebase.doc(window.db, 'companies', currentCompany.id),
+                            window.firebase.doc(window.db, 'users', currentUser.uid),
                             {
-                                name: company,
+                                displayName: name,
                                 lastUpdated: window.firebase.serverTimestamp()
                             }
                         )
                     );
-                    currentCompany.name = company;
-                }
 
-                Promise.all(updatePromises).then(() => {
+                    // Mettre à jour l'entreprise si nécessaire
+                    if (company && company !== currentCompany.name) {
+                        updatePromises.push(
+                            window.firebase.updateDoc(
+                                window.firebase.doc(window.db, 'companies', currentCompany.id),
+                                {
+                                    name: company,
+                                    lastUpdated: window.firebase.serverTimestamp()
+                                }
+                            )
+                        );
+                        currentCompany.name = company;
+                    }
+
+                    await Promise.all(updatePromises);
+
                     this.showToast('Profil mis à jour avec succès', 'success');
                     this.updateUserInterface();
-                }).catch(error => {
+                    
+                } catch (error) {
                     console.error('Erreur mise à jour profil:', error);
                     this.showToast('Erreur lors de la mise à jour du profil', 'error');
-                });
+                }
             }
 
-            completeQuest(questType) {
-                // Logique pour compléter une mission et gagner de l'XP
-                const quest = this.quests.find(q => q.type === questType);
+            async acceptQuest(questId) {
+                const quest = this.quests.find(q => q.id === questId);
                 if (!quest) return;
 
-                // Ajouter l'XP à l'utilisateur
-                this.addXP(quest.xp).then(() => {
+                try {
+                    // Ajouter l'XP à l'utilisateur
+                    await this.addXP(quest.xp);
+                    
                     // Enregistrer la completion de la mission
-                    return window.firebase.addDoc(
+                    await window.firebase.addDoc(
                         window.firebase.collection(window.db, 'quest_completions'),
                         {
                             questId: quest.id,
@@ -3015,17 +3619,20 @@
                             completedAt: window.firebase.serverTimestamp()
                         }
                     );
-                }).then(() => {
+
                     this.showToast(`🎉 Mission complétée ! +${quest.xp} XP`, 'success');
-                }).catch(error => {
+                    
+                } catch (error) {
                     console.error('Erreur completion mission:', error);
-                });
+                    this.showToast('Erreur lors de la completion de la mission', 'error');
+                }
             }
 
-            addXP(amount) {
-                const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
-                
-                return window.firebase.getDoc(userRef).then(userDoc => {
+            async addXP(amount) {
+                try {
+                    const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const userDoc = await window.firebase.getDoc(userRef);
+                    
                     if (userDoc.exists()) {
                         const currentXP = userDoc.data().xp || 0;
                         const currentLevel = userDoc.data().level || 1;
@@ -3037,73 +3644,48 @@
                         const newCoins = currentCoins + amount; // 1 XP = 1 gain
                         const newTotalCoinsEarned = totalCoinsEarned + amount;
                         
-                        return window.firebase.updateDoc(userRef, {
+                        await window.firebase.updateDoc(userRef, {
                             xp: newXP,
                             level: newLevel,
                             coins: newCoins,
                             totalCoinsEarned: newTotalCoinsEarned
-                        }).then(() => {
-                            // Enregistrer la transaction
-                            return this.recordTransaction('quest_reward', amount, `Mission complétée: +${amount} XP/gains`);
-                        }).then(() => {
-                            this.userProgress = { level: newLevel, xp: newXP, coins: newCoins };
-                            this.updateProgressDisplay();
-                            this.updateCoinsDisplay();
-                            
-                            // Animations et notifications
-                            this.animateCoinsGain(amount);
-                            
-                            if (newLevel > currentLevel) {
-                                this.showToast(`🎊 Niveau ${newLevel} atteint !`, 'success');
-                                this.showLevelUpAnimation();
-                            }
                         });
+
+                        // Enregistrer la transaction
+                        await this.recordTransaction('quest_reward', amount, `Mission complétée: +${amount} XP/gains`);
+
+                        this.userProgress = { level: newLevel, xp: newXP, coins: newCoins };
+                        this.updateProgressDisplay();
+                        this.updateCoinsDisplay();
+                        
+                        // Animations et notifications
+                        this.animateCoinsGain(amount);
+                        
+                        if (newLevel > currentLevel) {
+                            this.showToast(`🎊 Niveau ${newLevel} atteint !`, 'success');
+                        }
                     }
-                }).catch(error => {
+                } catch (error) {
                     console.error('Erreur ajout XP:', error);
                     throw error;
-                });
+                }
             }
 
-            // Nouvelles méthodes pour la boutique et les gains
-            async createStoreItem() {
-                const name = document.getElementById('item-name').value.trim();
-                const description = document.getElementById('item-description').value.trim();
-                const price = parseInt(document.getElementById('item-price').value);
-                const category = document.getElementById('item-category').value;
-                const stock = parseInt(document.getElementById('item-stock').value);
-                const icon = document.getElementById('item-icon').value.trim();
-
-                if (!name || !price || !category) {
-                    this.showToast('Veuillez remplir tous les champs obligatoires', 'error');
-                    return;
-                }
-
+            async recordTransaction(type, amount, description) {
                 try {
-                    const itemData = {
-                        name,
-                        description,
-                        price,
-                        category,
-                        stock,
-                        icon: icon || '🎁',
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdBy: currentUser.uid,
-                        createdAt: window.firebase.serverTimestamp()
-                    };
-
                     await window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'store_items'),
-                        itemData
+                        window.firebase.collection(window.db, 'transactions'),
+                        {
+                            userId: currentUser.uid,
+                            type: type,
+                            amount: amount,
+                            description: description,
+                            companyId: currentCompany.id,
+                            timestamp: window.firebase.serverTimestamp()
+                        }
                     );
-
-                    this.showToast(`Avantage "${name}" créé avec succès`, 'success');
-                    document.getElementById('store-item-form').reset();
-                    
                 } catch (error) {
-                    console.error('Erreur création avantage:', error);
-                    this.showToast('Erreur lors de la création de l\'avantage', 'error');
+                    console.error('Erreur enregistrement transaction:', error);
                 }
             }
 
@@ -3111,37 +3693,45 @@
                 const item = this.storeItems.find(i => i.id === itemId);
                 if (!item) return;
 
-                const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
-                const userDoc = await window.firebase.getDoc(userRef);
-                
-                if (!userDoc.exists()) return;
-                
-                const userCoins = userDoc.data().coins || 0;
-                
-                if (userCoins < item.price) {
-                    this.showToast('Gains insuffisants pour cet achat', 'error');
-                    return;
-                }
+                try {
+                    const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const userDoc = await window.firebase.getDoc(userRef);
+                    
+                    if (!userDoc.exists()) return;
+                    
+                    const userCoins = userDoc.data().coins || 0;
+                    
+                    if (userCoins < item.price) {
+                        this.showToast('Gains insuffisants pour cet achat', 'error');
+                        return;
+                    }
 
-                if (item.stock <= 0) {
-                    this.showToast('Article en rupture de stock', 'error');
-                    return;
-                }
+                    if (item.stock <= 0) {
+                        this.showToast('Article en rupture de stock', 'error');
+                        return;
+                    }
 
-                // Afficher modal de confirmation
-                this.showPurchaseModal(item);
+                    // Afficher modal de confirmation
+                    this.showPurchaseModal(item);
+                    
+                } catch (error) {
+                    console.error('Erreur achat:', error);
+                    this.showToast('Erreur lors de l\'achat', 'error');
+                }
             }
 
             showPurchaseModal(item) {
                 const modal = document.getElementById('purchase-modal');
                 const details = document.getElementById('purchase-details');
                 
+                if (!modal || !details) return;
+                
                 details.innerHTML = `
                     <div style="text-align: center; margin-bottom: 2rem;">
                         <div style="font-size: 4rem; margin-bottom: 1rem;">${item.icon}</div>
                         <h3>${item.name}</h3>
                         <p style="color: #666; margin: 1rem 0;">${item.description}</p>
-                        <div class="store-item-price" style="margin: 1rem auto;">
+                        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; margin: 1rem auto;">
                             <i class="fas fa-coins"></i>
                             ${item.price} gains
                         </div>
@@ -3152,7 +3742,9 @@
                 `;
                 
                 const confirmBtn = document.getElementById('confirm-purchase-btn');
-                confirmBtn.onclick = () => this.confirmPurchase(item.id);
+                if (confirmBtn) {
+                    confirmBtn.onclick = () => this.confirmPurchase(item.id);
+                }
                 
                 this.showModal('purchase-modal');
             }
@@ -3189,7 +3781,7 @@
                             itemName: item.name,
                             price: item.price,
                             companyId: currentCompany.id,
-                            status: 'pending', // En attente de validation admin
+                            status: 'pending',
                             timestamp: window.firebase.serverTimestamp()
                         }
                     );
@@ -3209,6 +3801,28 @@
                 }
             }
 
+            populateTransferOptions() {
+                const recipientSelect = document.getElementById('transfer-recipient');
+                const requestFromSelect = document.getElementById('request-from');
+                
+                // Nettoyer les options existantes
+                if (recipientSelect) {
+                    recipientSelect.innerHTML = '<option value="">Sélectionner un membre</option>';
+                }
+                if (requestFromSelect) {
+                    requestFromSelect.innerHTML = '<option value="">Sélectionner un membre</option>';
+                }
+                
+                // Ajouter les autres membres de l'équipe
+                this.users.forEach(user => {
+                    if (user.id !== currentUser.uid) {
+                        const option = `<option value="${user.id}">${user.displayName || user.email}</option>`;
+                        if (recipientSelect) recipientSelect.innerHTML += option;
+                        if (requestFromSelect) requestFromSelect.innerHTML += option;
+                    }
+                });
+            }
+
             async sendTransfer() {
                 const recipientId = document.getElementById('transfer-recipient').value;
                 const amount = parseInt(document.getElementById('transfer-amount').value);
@@ -3219,16 +3833,16 @@
                     return;
                 }
 
-                const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
-                const userDoc = await window.firebase.getDoc(userRef);
-                const currentCoins = userDoc.data().coins || 0;
-
-                if (currentCoins < amount) {
-                    this.showToast('Gains insuffisants pour cet envoi', 'error');
-                    return;
-                }
-
                 try {
+                    const userRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const userDoc = await window.firebase.getDoc(userRef);
+                    const currentCoins = userDoc.data().coins || 0;
+
+                    if (currentCoins < amount) {
+                        this.showToast('Gains insuffisants pour cet envoi', 'error');
+                        return;
+                    }
+
                     // Créer le transfert
                     await window.firebase.addDoc(
                         window.firebase.collection(window.db, 'transfers'),
@@ -3248,7 +3862,9 @@
 
                     this.closeModal('send-transfer-modal');
                     this.showToast('Demande de transfert envoyée', 'success');
-                    document.getElementById('send-transfer-form').reset();
+                    
+                    const sendTransferForm = document.getElementById('send-transfer-form');
+                    if (sendTransferForm) sendTransferForm.reset();
                     
                 } catch (error) {
                     console.error('Erreur transfert:', error);
@@ -3286,7 +3902,9 @@
 
                     this.closeModal('request-transfer-modal');
                     this.showToast('Demande de gains envoyée', 'success');
-                    document.getElementById('request-transfer-form').reset();
+                    
+                    const requestTransferForm = document.getElementById('request-transfer-form');
+                    if (requestTransferForm) requestTransferForm.reset();
                     
                 } catch (error) {
                     console.error('Erreur demande:', error);
@@ -3294,23 +3912,63 @@
                 }
             }
 
-            async recordTransaction(type, amount, description) {
+            async acceptTransfer(transferId) {
                 try {
-                    await window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'transactions'),
-                        {
-                            userId: currentUser.uid,
-                            type: type, // 'quest_reward', 'purchase', 'transfer_sent', 'transfer_received'
-                            amount: amount,
-                            description: description,
-                            companyId: currentCompany.id,
-                            timestamp: window.firebase.serverTimestamp()
-                        }
-                    );
+                    const transfer = this.transfers.find(t => t.id === transferId);
+                    if (!transfer || transfer.status !== 'pending') return;
+
+                    // Vérifier que l'expéditeur a assez de gains
+                    const senderRef = window.firebase.doc(window.db, 'users', transfer.fromUserId);
+                    const senderDoc = await window.firebase.getDoc(senderRef);
+                    const senderCoins = senderDoc.data().coins || 0;
+
+                    if (senderCoins < transfer.amount) {
+                        this.showToast('L\'expéditeur n\'a plus assez de gains', 'error');
+                        return;
+                    }
+
+                    // Effectuer le transfert
+                    const batch = window.firebase.writeBatch(window.db);
+
+                    // Décrémenter les gains de l'expéditeur
+                    batch.update(senderRef, {
+                        coins: senderCoins - transfer.amount
+                    });
+
+                    // Incrémenter les gains du destinataire
+                    const receiverRef = window.firebase.doc(window.db, 'users', currentUser.uid);
+                    const receiverDoc = await window.firebase.getDoc(receiverRef);
+                    const receiverCoins = receiverDoc.data().coins || 0;
+                    
+                    batch.update(receiverRef, {
+                        coins: receiverCoins + transfer.amount
+                    });
+
+                    // Marquer le transfert comme complété
+                    const transferRef = window.firebase.doc(window.db, 'transfers', transferId);
+                    batch.update(transferRef, {
+                        status: 'completed',
+                        completedAt: window.firebase.serverTimestamp()
+                    });
+
+                    await batch.commit();
+
+                    // Enregistrer les transactions
+                    await this.recordTransaction('transfer_received', transfer.amount, `Reçu de ${transfer.fromUserName}`);
+                    
+                    // Mettre à jour l'affichage local
+                    this.userProgress.coins = receiverCoins + transfer.amount;
+                    this.updateCoinsDisplay();
+
+                    this.showToast(`${transfer.amount} gains reçus de ${transfer.fromUserName}`, 'success');
+                    
                 } catch (error) {
-                    console.error('Erreur enregistrement transaction:', error);
+                    console.error('Erreur acceptation transfert:', error);
+                    this.showToast('Erreur lors de l\'acceptation du transfert', 'error');
                 }
             }
+
+            // Méthodes Google Calendar
             async connectGoogleCalendar() {
                 if (!tokenClient) {
                     this.showToast('Google Calendar non disponible', 'error');
@@ -3343,9 +4001,6 @@
                     await this.syncGoogleCalendar();
                     
                     this.showToast('Google Calendar connecté avec succès !', 'success');
-                    
-                    // Marquer la mission Google Calendar comme complétée
-                    this.completeQuest('google-calendar');
                     
                 } catch (error) {
                     console.error('Erreur traitement auth Google:', error);
@@ -3419,726 +4074,6 @@
                 }
             }
 
-            // Méthodes d'interface
-            updateLoadingStatus(status) {
-                const statusElement = document.getElementById('loading-status');
-                if (statusElement) {
-                    statusElement.textContent = status;
-                }
-            }
-
-            showLoadingScreen() {
-                document.getElementById('loading-screen').style.display = 'flex';
-            }
-
-            hideLoadingScreen() {
-                document.getElementById('loading-screen').style.display = 'none';
-            }
-
-            showAuthModal() {
-                document.getElementById('auth-modal').style.display = 'flex';
-            }
-
-            hideAuthModal() {
-                document.getElementById('auth-modal').style.display = 'none';
-            }
-
-            showMainInterface() {
-                document.querySelector('.navbar').style.display = 'block';
-                document.querySelector('.main-content').style.display = 'block';
-            }
-
-            hideMainInterface() {
-                document.querySelector('.navbar').style.display = 'none';
-                document.querySelector('.main-content').style.display = 'none';
-            }
-
-            updateUserInterface() {
-                if (currentUser) {
-                    document.getElementById('user-name').textContent = currentUser.displayName || currentUser.email;
-                    
-                    // Mettre à jour l'avatar
-                    const avatar = document.getElementById('user-avatar');
-                    if (currentUser.photoURL) {
-                        avatar.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar">`;
-                    } else {
-                        const initial = (currentUser.displayName || currentUser.email).charAt(0).toUpperCase();
-                        avatar.innerHTML = initial;
-                    }
-                    
-                    // Mettre à jour les champs du profil
-                    document.getElementById('profile-name').value = currentUser.displayName || '';
-                    document.getElementById('profile-email').value = currentUser.email || '';
-                    document.getElementById('profile-company').value = currentCompany?.name || '';
-                    
-                    // Charger les données utilisateur pour les gains/XP
-                    this.loadUserProgress();
-                    
-                    // Afficher/masquer les sections admin
-                    this.updateAdminSections();
-                }
-            }
-
-            async loadUserProgress() {
-                try {
-                    const userDoc = await window.firebase.getDoc(
-                        window.firebase.doc(window.db, 'users', currentUser.uid)
-                    );
-                    
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        this.userProgress = {
-                            level: userData.level || 1,
-                            xp: userData.xp || 0,
-                            coins: userData.coins || 0
-                        };
-                        
-                        this.updateCoinsDisplay();
-                        this.updateProgressDisplay();
-                    }
-                } catch (error) {
-                    console.error('Erreur chargement progression:', error);
-                }
-            }
-
-            updateAdminSections() {
-                // Vérifier si l'utilisateur est admin de l'entreprise
-                const isAdmin = currentCompany && currentCompany.owner === currentUser.uid;
-                
-                const adminSection = document.getElementById('store-admin-section');
-                if (adminSection) {
-                    adminSection.style.display = isAdmin ? 'block' : 'none';
-                }
-            }
-
-            switchSection(sectionId) {
-                // Masquer toutes les sections
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.classList.remove('active');
-                });
-                
-                // Retirer l'active de tous les liens de nav
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-                
-                // Activer la section demandée
-                const targetSection = document.getElementById(sectionId);
-                if (targetSection) {
-                    targetSection.classList.add('active');
-                }
-                
-                // Activer le lien de nav correspondant
-                const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
-            }
-
-            switchAuthTab(tabName) {
-                // Masquer tous les contenus d'onglets
-                document.querySelectorAll('.auth-tab-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                // Retirer l'active de tous les onglets
-                document.querySelectorAll('.auth-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Activer l'onglet demandé
-                document.getElementById(`${tabName}-tab`).style.display = 'block';
-                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            }
-
-            showModal(modalId) {
-                document.getElementById(modalId).style.display = 'flex';
-            }
-
-            closeModal(modalId) {
-                document.getElementById(modalId).style.display = 'none';
-            }
-
-            updateTeamDisplay() {
-                const container = document.getElementById('team-members-list');
-                if (!container) return;
-
-                container.innerHTML = '';
-                
-                this.users.forEach(user => {
-                    const memberCard = this.createMemberCard(user);
-                    container.appendChild(memberCard);
-                });
-            }
-
-            createMemberCard(user) {
-                const card = document.createElement('div');
-                card.className = 'team-member-card animate-slide-up';
-                
-                const statusClass = user.status || 'offline';
-                const roleColor = this.getRoleColor(user.role);
-                
-                card.innerHTML = `
-                    <div class="member-avatar">
-                        ${user.photoURL 
-                            ? `<img src="${user.photoURL}" alt="${user.name}">`
-                            : `<div style="width: 60px; height: 60px; border-radius: 50%; background: ${roleColor}; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">${(user.name || user.displayName || user.email).charAt(0).toUpperCase()}</div>`
-                        }
-                        <div class="status-indicator ${statusClass}"></div>
-                    </div>
-                    <div class="member-info">
-                        <h3>${user.name || user.displayName || user.email}</h3>
-                        <p style="color: #667eea; font-weight: 500; margin-bottom: 0.25rem;">${user.role || 'Membre'}</p>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">${user.email}</p>
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">Niveau ${user.level || 1}</span>
-                            <span style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem;">${user.xp || 0} XP</span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                            <button class="btn-icon" onclick="synergia.sendDirectMessage('${user.id}')" title="Message">
-                                <i class="fas fa-envelope"></i>
-                            </button>
-                            <button class="btn-icon" onclick="synergia.viewProfile('${user.id}')" title="Profil">
-                                <i class="fas fa-user"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                return card;
-            }
-
-            updateQuestsDisplay() {
-                const container = document.getElementById('quests-list');
-                if (!container) return;
-
-                container.innerHTML = '';
-                
-                // Filtrer les missions selon l'onglet actif
-                const activeTab = document.querySelector('.quest-tab.active');
-                const filterType = activeTab ? activeTab.dataset.type : 'daily';
-                
-                const filteredQuests = this.quests.filter(quest => quest.type === filterType);
-                
-                filteredQuests.forEach(quest => {
-                    const questCard = this.createQuestCard(quest);
-                    container.appendChild(questCard);
-                });
-            }
-
-            createQuestCard(quest) {
-                const card = document.createElement('div');
-                card.className = 'quest-card animate-slide-up';
-                
-                const difficultyColor = this.getDifficultyColor(quest.difficulty);
-                const typeLabel = this.getTypeLabel(quest.type);
-                
-                card.innerHTML = `
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">${quest.icon || '🎯'}</div>
-                    <h3>${quest.title}</h3>
-                    <p style="color: #666; margin-bottom: 1rem;">${quest.description}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
-                        <span style="background: ${difficultyColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${typeLabel}</span>
-                    </div>
-                    <button onclick="synergia.acceptQuest('${quest.id}')" class="btn btn-primary" style="width: 100%;">
-                        <i class="fas fa-check"></i>
-                        Accepter
-                    </button>
-                `;
-                
-                return card;
-            }
-
-            updateEventsDisplay() {
-                const container = document.getElementById('events-list');
-                if (!container) return;
-
-                container.innerHTML = '';
-                
-                if (this.events.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Aucun événement à afficher</p>';
-                    return;
-                }
-                
-                // Trier les événements par date
-                const sortedEvents = this.events.sort((a, b) => new Date(a.date.seconds * 1000) - new Date(b.date.seconds * 1000));
-                
-                sortedEvents.slice(0, 5).forEach(event => {
-                    const eventItem = this.createEventItem(event);
-                    container.appendChild(eventItem);
-                });
-            }
-
-            createEventItem(event) {
-                const item = document.createElement('div');
-                item.className = 'activity-item';
-                
-                const date = new Date(event.date.seconds * 1000);
-                const typeIcon = this.getEventIcon(event.type);
-                const isGoogleEvent = event.source === 'google_calendar';
-                
-                item.innerHTML = `
-                    <i class="fas ${typeIcon}" style="color: ${isGoogleEvent ? '#4285f4' : '#667eea'};"></i>
-                    <div style="flex: 1;">
-                        <strong>${event.title}</strong>
-                        ${event.description ? `<br><small style="color: #666;">${event.description}</small>` : ''}
-                        <br><small style="color: #28a745; font-weight: bold;">${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</small>
-                        ${isGoogleEvent ? '<br><small style="color: #4285f4;"><i class="fab fa-google"></i> Google Calendar</small>' : ''}
-                    </div>
-                `;
-                
-                return item;
-            }
-
-            updateChatDisplay() {
-                const container = document.getElementById('messages-area');
-                if (!container) return;
-
-                // Garder les premiers messages (bienvenue)
-                const welcomeMessage = container.querySelector('div[style*="text-align: center"]');
-                container.innerHTML = '';
-                
-                if (welcomeMessage && this.messages.length === 0) {
-                    container.appendChild(welcomeMessage);
-                }
-                
-                this.messages.forEach(message => {
-                    const messageElement = this.createMessageElement(message);
-                    container.appendChild(messageElement);
-                });
-                
-                // Scroll vers le bas
-                container.scrollTop = container.scrollHeight;
-            }
-
-            createMessageElement(message) {
-                const messageDiv = document.createElement('div');
-                const isOwnMessage = message.userId === currentUser.uid;
-                const timestamp = new Date(message.timestamp.seconds * 1000);
-                
-                messageDiv.style.cssText = `display: flex; gap: 1rem; padding: 0.5rem 1rem; margin-bottom: 0.5rem; ${isOwnMessage ? 'flex-direction: row-reverse;' : ''}`;
-                
-                messageDiv.innerHTML = `
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem; overflow: hidden;">
-                        ${message.userPhoto 
-                            ? `<img src="${message.userPhoto}" style="width: 100%; height: 100%; object-fit: cover;">`
-                            : message.userName.charAt(0).toUpperCase()
-                        }
-                    </div>
-                    <div style="${isOwnMessage ? 'text-align: right;' : ''}">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; ${isOwnMessage ? 'flex-direction: row-reverse;' : ''}">
-                            <strong>${isOwnMessage ? 'Vous' : message.userName}</strong>
-                            <small style="color: #666;">${timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</small>
-                        </div>
-                        <div class="message-bubble ${isOwnMessage ? 'own' : 'other'}">
-                            ${message.text}
-                        </div>
-                    </div>
-                `;
-                
-                return messageDiv;
-            }
-
-            updateDashboardStats() {
-                document.getElementById('team-count').textContent = this.users.length;
-                document.getElementById('active-quests').textContent = this.quests.length;
-                document.getElementById('events-today').textContent = this.getTodayEventsCount();
-                document.getElementById('user-level').textContent = this.userProgress.level;
-                document.getElementById('user-xp').textContent = this.userProgress.xp;
-                
-                this.updateProgressDisplay();
-            }
-
-            createStoreItemCard(item) {
-                const card = document.createElement('div');
-                card.className = 'store-item-card animate-slide-up';
-                
-                if (item.stock <= 0) {
-                    card.classList.add('out-of-stock');
-                }
-                
-                const canAfford = this.userProgress.coins >= item.price;
-                const buttonClass = canAfford && item.stock > 0 ? 'btn-primary' : 'btn-secondary';
-                const buttonText = item.stock <= 0 ? 'Rupture de stock' : !canAfford ? 'Gains insuffisants' : 'Acheter';
-                const buttonDisabled = !canAfford || item.stock <= 0;
-                
-                card.innerHTML = `
-                    <div class="store-item-icon">${item.icon}</div>
-                    <h3>${item.name}</h3>
-                    <p style="color: #666; margin-bottom: 1rem;">${item.description}</p>
-                    <div class="store-item-price">
-                        <i class="fas fa-coins"></i>
-                        ${item.price} gains
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-                        <span>Stock: ${item.stock}</span>
-                        <span>Catégorie: ${this.getCategoryLabel(item.category)}</span>
-                    </div>
-                    <button onclick="synergia.purchaseItem('${item.id}')" class="btn ${buttonClass}" style="width: 100%;" ${buttonDisabled ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i>
-                        ${buttonText}
-                    </button>
-                `;
-                
-                return card;
-            }
-
-            updateTransactionsDisplay() {
-                const container = document.getElementById('recent-transactions');
-                if (!container) return;
-
-                container.innerHTML = '';
-                
-                if (this.transactions.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucune transaction récente</p>';
-                    return;
-                }
-                
-                this.transactions.slice(0, 10).forEach(transaction => {
-                    const transactionItem = this.createTransactionItem(transaction);
-                    container.appendChild(transactionItem);
-                });
-            }
-
-            createTransactionItem(transaction) {
-                const item = document.createElement('div');
-                item.className = 'transaction-item';
-                
-                const isIncome = transaction.amount > 0;
-                const iconClass = isIncome ? 'income' : 'expense';
-                const icon = this.getTransactionIcon(transaction.type);
-                const timestamp = new Date(transaction.timestamp.seconds * 1000);
-                
-                item.innerHTML = `
-                    <div class="transaction-icon ${iconClass}">
-                        <i class="fas ${icon}"></i>
-                    </div>
-                    <div style="flex: 1;">
-                        <strong>${transaction.description}</strong>
-                        <br><small style="color: #666;">${this.getTransactionTypeLabel(transaction.type)}</small>
-                        <br><small style="color: #666;">${timestamp.toLocaleDateString('fr-FR')} à ${timestamp.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</small>
-                    </div>
-                    <div style="text-align: right;">
-                        <strong style="color: ${isIncome ? '#28a745' : '#dc3545'};">
-                            ${isIncome ? '+' : ''}${transaction.amount} gains
-                        </strong>
-                    </div>
-                `;
-                
-                return item;
-            }
-
-            updateTransfersDisplay() {
-                const container = document.getElementById('member-transfers');
-                if (!container) return;
-
-                container.innerHTML = '';
-                
-                if (this.transfers.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">Aucun échange en cours</p>';
-                    return;
-                }
-                
-                this.transfers.forEach(transfer => {
-                    const transferItem = this.createTransferItem(transfer);
-                    container.appendChild(transferItem);
-                });
-            }
-
-            createTransferItem(transfer) {
-                const item = document.createElement('div');
-                item.className = 'transaction-item';
-                
-                const isOutgoing = transfer.fromUserId === currentUser.uid;
-                const otherUser = isOutgoing ? transfer.toUserName : transfer.fromUserName;
-                const timestamp = new Date(transfer.timestamp.seconds * 1000);
-                
-                item.innerHTML = `
-                    <div class="transaction-icon transfer">
-                        <i class="fas ${isOutgoing ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-                    </div>
-                    <div style="flex: 1;">
-                        <strong>${isOutgoing ? 'Envoyé à' : 'Reçu de'} ${otherUser}</strong>
-                        <br><small style="color: #666;">${transfer.message || 'Aucun message'}</small>
-                        <br><small style="color: #666;">${timestamp.toLocaleDateString('fr-FR')}</small>
-                    </div>
-                    <div style="text-align: right;">
-                        <strong style="color: ${transfer.status === 'completed' ? '#28a745' : '#ffc107'};">
-                            ${transfer.amount} gains
-                        </strong>
-                        <br><small style="color: #666;">${this.getTransferStatusLabel(transfer.status)}</small>
-                        ${transfer.status === 'pending' && !isOutgoing ? `
-                            <br><button onclick="synergia.acceptTransfer('${transfer.id}')" class="btn btn-success" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">
-                                Accepter
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-                
-                return item;
-            }
-
-            updateLeaderboard() {
-                const container = document.getElementById('coins-leaderboard');
-                if (!container) return;
-
-                // Trier les utilisateurs par gains totaux
-                const sortedUsers = [...this.users].sort((a, b) => (b.totalCoinsEarned || 0) - (a.totalCoinsEarned || 0));
-                
-                container.innerHTML = '';
-                
-                sortedUsers.slice(0, 10).forEach((user, index) => {
-                    const leaderboardItem = this.createLeaderboardItem(user, index + 1);
-                    container.appendChild(leaderboardItem);
-                });
-            }
-
-            createLeaderboardItem(user, rank) {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                
-                if (rank <= 3) {
-                    item.classList.add('top3');
-                }
-                
-                const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
-                const currentUserClass = user.id === currentUser.uid ? 'style="background: rgba(102, 126, 234, 0.1);"' : '';
-                
-                item.innerHTML = `
-                    <div class="leaderboard-rank ${rankClass}">
-                        ${rank <= 3 ? (rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉') : rank}
-                    </div>
-                    <div style="flex: 1;" ${currentUserClass}>
-                        <strong>${user.displayName || user.name}</strong>
-                        <br><small style="color: #666;">Niveau ${user.level || 1}</small>
-                    </div>
-                    <div style="text-align: right;">
-                        <strong style="color: #667eea;">${user.totalCoinsEarned || 0} gains</strong>
-                        <br><small style="color: #666;">gagnés au total</small>
-                    </div>
-                `;
-                
-                return item;
-            }
-
-            populateTransferOptions() {
-                const recipientSelect = document.getElementById('transfer-recipient');
-                const requestFromSelect = document.getElementById('request-from');
-                
-                // Nettoyer les options existantes
-                if (recipientSelect) {
-                    recipientSelect.innerHTML = '<option value="">Sélectionner un membre</option>';
-                }
-                if (requestFromSelect) {
-                    requestFromSelect.innerHTML = '<option value="">Sélectionner un membre</option>';
-                }
-                
-                // Ajouter les autres membres de l'équipe
-                this.users.forEach(user => {
-                    if (user.id !== currentUser.uid) {
-                        const option = `<option value="${user.id}">${user.displayName || user.name}</option>`;
-                        if (recipientSelect) recipientSelect.innerHTML += option;
-                        if (requestFromSelect) requestFromSelect.innerHTML += option;
-                    }
-                });
-            }
-
-            async acceptTransfer(transferId) {
-                try {
-                    const transfer = this.transfers.find(t => t.id === transferId);
-                    if (!transfer || transfer.status !== 'pending') return;
-
-                    // Vérifier que l'expéditeur a assez de gains
-                    const senderRef = window.firebase.doc(window.db, 'users', transfer.fromUserId);
-                    const senderDoc = await window.firebase.getDoc(senderRef);
-                    const senderCoins = senderDoc.data().coins || 0;
-
-                    if (senderCoins < transfer.amount) {
-                        this.showToast('L\'expéditeur n\'a plus assez de gains', 'error');
-                        return;
-                    }
-
-                    // Effectuer le transfert
-                    const batch = window.firebase.writeBatch(window.db);
-
-                    // Décrémenter les gains de l'expéditeur
-                    batch.update(senderRef, {
-                        coins: senderCoins - transfer.amount
-                    });
-
-                    // Incrémenter les gains du destinataire
-                    const receiverRef = window.firebase.doc(window.db, 'users', currentUser.uid);
-                    const receiverDoc = await window.firebase.getDoc(receiverRef);
-                    const receiverCoins = receiverDoc.data().coins || 0;
-                    
-                    batch.update(receiverRef, {
-                        coins: receiverCoins + transfer.amount
-                    });
-
-                    // Marquer le transfert comme complété
-                    const transferRef = window.firebase.doc(window.db, 'transfers', transferId);
-                    batch.update(transferRef, {
-                        status: 'completed',
-                        completedAt: window.firebase.serverTimestamp()
-                    });
-
-                    await batch.commit();
-
-                    // Enregistrer les transactions
-                    await this.recordTransaction('transfer_received', transfer.amount, `Reçu de ${transfer.fromUserName}`);
-                    
-                    // Mettre à jour l'affichage local
-                    this.userProgress.coins = receiverCoins + transfer.amount;
-                    this.updateCoinsDisplay();
-
-                    this.showToast(`${transfer.amount} gains reçus de ${transfer.fromUserName}`, 'success');
-                    
-                } catch (error) {
-                    console.error('Erreur acceptation transfert:', error);
-                    this.showToast('Erreur lors de l\'acceptation du transfert', 'error');
-                }
-            }
-
-            // Méthodes d'animation et d'effets visuels
-            animateCoinsGain(amount) {
-                // Animation des gains dans la navbar
-                const coinsElement = document.getElementById('user-coins');
-                if (coinsElement) {
-                    coinsElement.parentElement.classList.add('coins-animation');
-                    setTimeout(() => {
-                        coinsElement.parentElement.classList.remove('coins-animation');
-                    }, 500);
-                }
-
-                // Notification spéciale pour les gains
-                this.showCoinsNotification(`+${amount} gains gagnés !`);
-            }
-
-            showLevelUpAnimation() {
-                // Animation de montée de niveau
-                const levelElement = document.getElementById('user-level-display');
-                if (levelElement) {
-                    levelElement.style.animation = 'pulse 1s ease';
-                    setTimeout(() => {
-                        levelElement.style.animation = '';
-                    }, 1000);
-                }
-            }
-
-            showCoinsNotification(message) {
-                const toast = document.createElement('div');
-                toast.className = 'notification coins-notification';
-                
-                toast.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-coins"></i>
-                        <span>${message}</span>
-                    </div>
-                `;
-                
-                document.getElementById('toast-container').appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.remove();
-                }, 3000);
-            }
-
-            filterStoreItems(category) {
-                // Retirer l'active de tous les onglets
-                document.querySelectorAll('.store-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Activer l'onglet cliqué
-                document.querySelector(`[data-category="${category}"]`).classList.add('active');
-                
-                // Mettre à jour l'affichage
-                this.updateStoreDisplay();
-            }
-
-            // Méthodes utilitaires pour les labels
-            getCategoryLabel(category) {
-                const labels = {
-                    time: 'Temps libre',
-                    perks: 'Avantages',
-                    equipment: 'Équipement',
-                    social: 'Social'
-                };
-                return labels[category] || category;
-            }
-
-            getTransactionIcon(type) {
-                const icons = {
-                    quest_reward: 'fa-trophy',
-                    purchase: 'fa-shopping-cart',
-                    transfer_sent: 'fa-arrow-up',
-                    transfer_received: 'fa-arrow-down'
-                };
-                return icons[type] || 'fa-coins';
-            }
-
-            getTransactionTypeLabel(type) {
-                const labels = {
-                    quest_reward: 'Récompense mission',
-                    purchase: 'Achat boutique',
-                    transfer_sent: 'Transfert envoyé',
-                    transfer_received: 'Transfert reçu'
-                };
-                return labels[type] || type;
-            }
-
-            getTransferStatusLabel(status) {
-                const labels = {
-                    pending: 'En attente',
-                    completed: 'Terminé',
-                    cancelled: 'Annulé'
-                };
-                return labels[status] || status;
-            }
-
-            // Méthode publique pour ouvrir le portefeuille
-            openWallet() {
-                this.switchSection('wallet');
-                this.updateLeaderboard();
-            }
-
-            updateDashboardStats() {
-                document.getElementById('team-count').textContent = this.users.length;
-                document.getElementById('active-quests').textContent = this.quests.length;
-                document.getElementById('events-today').textContent = this.getTodayEventsCount();
-                document.getElementById('user-level').textContent = this.userProgress.level;
-                document.getElementById('user-xp').textContent = this.userProgress.xp;
-                document.getElementById('user-coins-dashboard').textContent = this.userProgress.coins;
-                
-                this.updateProgressDisplay();
-                this.updateCoinsDisplay();
-                
-                // Mettre à jour les stats du portefeuille
-                const today = new Date();
-                const todayTransactions = this.transactions.filter(t => {
-                    const transactionDate = new Date(t.timestamp.seconds * 1000);
-                    return transactionDate.toDateString() === today.toDateString() && t.amount > 0;
-                });
-                
-                const todayEarned = todayTransactions.reduce((sum, t) => sum + t.amount, 0);
-                document.getElementById('wallet-earned-today').textContent = todayEarned;
-                
-                const pendingTransfers = this.transfers.filter(t => t.status === 'pending').length;
-                document.getElementById('wallet-transfers').textContent = pendingTransfers;
-                
-                const thisMonth = new Date();
-                thisMonth.setDate(1);
-                const monthlySpent = this.transactions
-                    .filter(t => {
-                        const transactionDate = new Date(t.timestamp.seconds * 1000);
-                        return transactionDate >= thisMonth && t.amount < 0;
-                    })
-                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-                
-                document.getElementById('wallet-spent').textContent = monthlySpent;
-            }
-
             updateGoogleCalendarStatus() {
                 const statusElements = [
                     document.getElementById('google-calendar-status'),
@@ -4171,56 +4106,67 @@
             }
 
             // Méthodes utilitaires
-            getTodayEventsCount() {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
+            animateCoinsGain(amount) {
+                // Animation des gains dans la navbar
+                const coinsElement = document.getElementById('user-coins');
+                if (coinsElement) {
+                    coinsElement.parentElement.classList.add('coins-animation');
+                    setTimeout(() => {
+                        coinsElement.parentElement.classList.remove('coins-animation');
+                    }, 500);
+                }
+
+                // Notification spéciale pour les gains
+                this.showCoinsNotification(`+${amount} gains gagnés !`);
+            }
+
+            showCoinsNotification(message) {
+                const toast = document.createElement('div');
+                toast.className = 'notification coins-notification';
                 
-                return this.events.filter(event => {
-                    const eventDate = new Date(event.date.seconds * 1000);
-                    return eventDate >= today && eventDate < tomorrow;
-                }).length;
+                toast.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-coins"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                const container = document.getElementById('toast-container');
+                if (container) {
+                    container.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 3000);
+                }
             }
 
-            getRoleColor(role) {
-                const colors = {
-                    admin: '#dc3545',
-                    manager: '#28a745',
-                    developer: '#007bff',
-                    designer: '#e83e8c',
-                    employee: '#6c757d'
-                };
-                return colors[role] || '#667eea';
+            filterStoreItems(category) {
+                // Retirer l'active de tous les onglets
+                document.querySelectorAll('.store-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activer l'onglet cliqué
+                const activeTab = document.querySelector(`[data-category="${category}"]`);
+                if (activeTab) activeTab.classList.add('active');
+                
+                // Mettre à jour l'affichage
+                this.updateStoreDisplay();
             }
 
-            getDifficultyColor(difficulty) {
-                const colors = {
-                    easy: '#28a745',
-                    medium: '#ffc107',
-                    hard: '#dc3545'
-                };
-                return colors[difficulty] || '#6c757d';
-            }
-
-            getTypeLabel(type) {
-                const labels = {
-                    daily: 'Quotidienne',
-                    weekly: 'Hebdomadaire',
-                    special: 'Spéciale'
-                };
-                return labels[type] || type;
-            }
-
-            getEventIcon(type) {
-                const icons = {
-                    meeting: 'fa-users',
-                    training: 'fa-graduation-cap',
-                    event: 'fa-calendar-star',
-                    social: 'fa-coffee',
-                    google: 'fa-calendar'
-                };
-                return icons[type] || 'fa-calendar';
+            filterQuests(type) {
+                // Retirer l'active de tous les onglets
+                document.querySelectorAll('.quest-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Activer l'onglet cliqué
+                const activeTab = document.querySelector(`[data-type="${type}"]`);
+                if (activeTab) activeTab.classList.add('active');
+                
+                // Mettre à jour l'affichage
+                this.updateQuestsDisplay();
             }
 
             getQuestIcon(type) {
@@ -4232,38 +4178,15 @@
                 return icons[type] || '🎯';
             }
 
-            // Méthodes publiques pour les événements onclick
-            acceptQuest(questId) {
-                const quest = this.quests.find(q => q.id === questId);
-                if (quest) {
-                    this.completeQuest(quest.type);
-                }
-            }
-
-            filterQuests(type) {
-                // Retirer l'active de tous les onglets
-                document.querySelectorAll('.quest-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Activer l'onglet cliqué
-                document.querySelector(`[data-type="${type}"]`).classList.add('active');
-                
-                // Mettre à jour l'affichage
-                this.updateQuestsDisplay();
-            }
-
-            sendDirectMessage(userId) {
-                this.showToast('Fonctionnalité de message direct en développement', 'info');
-            }
-
-            viewProfile(userId) {
-                this.showToast('Fonctionnalité de profil en développement', 'info');
-            }
-
             refreshDashboard() {
                 this.showToast('Dashboard actualisé', 'success');
                 this.updateDashboardStats();
+            }
+
+            // Méthode publique pour ouvrir le portefeuille
+            openWallet() {
+                this.switchSection('wallet');
+                this.updateLeaderboard();
             }
 
             showToast(message, type = 'info', duration = 3000) {
@@ -4279,17 +4202,23 @@
                     </div>
                 `;
                 
-                document.getElementById('toast-container').appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.remove();
-                }, duration);
+                const container = document.getElementById('toast-container');
+                if (container) {
+                    container.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.remove();
+                    }, duration);
+                }
             }
         }
 
         // Fermeture des modales (fonction globale)
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
 
         // Initialisation de l'application

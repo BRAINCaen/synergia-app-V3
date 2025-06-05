@@ -4373,6 +4373,12 @@
                     questRequests: this.questRequests.length,
                     quests: this.quests.length
                 });
+                
+                // Force refresh avec logs détaillés
+                console.log('🔄 Force refreshing quests display...');
+                setTimeout(() => {
+                    this.updateQuestsDisplay();
+                }, 100);
             }
 
             updateUserProgress() {

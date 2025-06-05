@@ -1,81 +1,4 @@
-            updateProgressDisplay() {
-                const xpInCurrentLevel = this.userProgress.xp % 100;
-                const progressPercentage = xpInCurrentLevel;
-                
-                document.getElementById('xp-progress').style.width = `${progressPercentage}%`;
-                document.getElementById('level-progress').textContent = `Niveau ${this.userProgress.level} - ${progressPercentage}% vers niveau ${this.userProgress.level + 1}`;
-                
-                // Mettre à jour aussi dans les missions
-                document.getElementById('user-level-display').textContent = `Niveau ${this.userProgress.level}`;
-                document.getElementById('user-xp-display').textContent = `${this.userProgress.xp} XP`;
-                document.getElementById('quest-xp-progress').style.width = `${progressPercentage}%`;
-                document.getElementById('next-level-info').textContent = `${100 - xpInCurrentLevel} XP vers niveau ${this.userProgress.level + 1}`;
-                
-                // Mettre à jour les gains
-                document.getElementById('quest-coins-display').textContent = `${this.userProgress.coins} gains`;
-            }
-
-            updateCoinsDisplay() {
-                // Mettre à jour tous les affichages de gains
-                const coinsElements = [
-                    'user-coins',
-                    'user-coins-dashboard', 
-                    'store-coins',
-                    'wallet-total-coins',
-                    'available-coins'
-                ];
-                
-                coinsElements.forEach(elementId => {
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        element.textContent = this.userProgress.coins || 0;
-                    }
-                });
-            }
-
-            updateStoreDisplay() {
-                const container = document.getElementById('store-items');
-                if (!container) return;
-
-                container.innerHTML = '';
-                
-                // Filtrer selon la catégorie active
-                const activeTab = document.querySelector('.store-tab.active');
-                const filterCategory = activeTab ? activeTab.dataset.category : 'all';
-                
-                let filteredItems = this.storeItems;
-                if (filterCategory !== 'all') {
-                    filteredItems = this.storeItems.filter(item => item.category === filterCategory);
-                }
-                
-                if (filteredItems.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem; grid-column: 1 / -1;">Aucun avantage disponible dans cette catégorie</p>';
-                    return;
-                }
-                
-                filteredItems.forEach(item => {
-                    const itemCard = this.createStoreItemCard(item);
-                    container.appendChild(itemCard);
-                });
-            }
-
-            createStoreItemCard(item) {
-                const card = document.createElement('div');
-                card.className = 'store-item-card animate-slide-up';
-                
-                if (item.stock <= 0) {
-                    card.classList.add('out-of-stock');
-                }
-                
-                const canAfford = this.userProgress.coins >= item.price;
-                const buttonClass = canAfford && item.stock > 0 ? 'btn-primary' : 'btn-secondary';
-                const buttonText = item.stock <= 0 ? 'Rupture de stock' : !canAfford ? 'Gains insuffisants' : 'Acheter';
-                const buttonDisabled = !canAfford || item.stock <= 0;
-                
-                card.innerHTML = `
-                    <div class="store-item-icon">${item.icon}</div>
-                    <h3>${item.name}</h3>
-                    <p style="color: #666; margin-bottom<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -91,6 +14,7 @@
     
     <!-- Firebase SDK v9 Modular -->
     <script type="module">
+        // Import des modules Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { 
             getAuth, 
@@ -147,192 +71,83 @@
             measurementId: "G-EGJ79SCMWX"
         };
 
-        // Initialisation Firebase
-        let app, auth, db, storage, analytics;
-        let isFirebaseReady = false;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            storage = getStorage(app);
-            analytics = getAnalytics(app);
-            
-            // Activer la persistance
-            await setPersistence(auth, browserLocalPersistence);
-            
-            // Exposer globalement
-            window.firebaseApp = app;
-            window.auth = auth;
-            window.db = db;
-            window.storage = storage;
-            window.analytics = analytics;
-            
-            // Exposer les fonctions Firebase
-            window.firebase = {
-                // Auth
-                onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-                signOut, updateProfile, signInWithPopup, GoogleAuthProvider,
-                
-                // Firestore
-                collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, 
-                onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp,
-                writeBatch, enableNetwork, disableNetwork,
-                
-                // Storage
-                ref, uploadBytes, getDownloadURL, deleteObject,
-                
-                // Analytics
-                logEvent
-            createDefaultStoreItems() {
-                const defaultStoreItems = [
-                    // Temps libre
-                    {
-                        name: 'Demi-journée libre',
-                        description: 'Prenez une demi-journée de congé supplémentaire',
-                        price: 500,
-                        category: 'time',
-                        icon: '🌅',
-                        stock: 10,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
-                    {
-                        name: 'Journée télétravail',
-                        description: 'Travaillez depuis chez vous pendant une journée',
-                        price: 300,
-                        category: 'time',
-                        icon: '🏠',
-                        stock: 20,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
-                    {
-                        name: 'Pause déjeuner prolongée',
-                        description: 'Profitez d\'une pause déjeuner de 2h',
-                        price: 150,
-                        category: 'time',
-                        icon: '🍽️',
-                        stock: 30,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
+        // Fonction d'initialisation Firebase
+        function initializeFirebase() {
+            return new Promise((resolve, reject) => {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    const auth = getAuth(app);
+                    const db = getFirestore(app);
+                    const storage = getStorage(app);
+                    const analytics = getAnalytics(app);
                     
-                    // Avantages
-                    {
-                        name: 'Place de parking VIP',
-                        description: 'Réservez la meilleure place de parking pour un mois',
-                        price: 400,
-                        category: 'perks',
-                        icon: '🚗',
-                        stock: 5,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
-                    {
-                        name: 'Accès salle de sport',
-                        description: 'Accès gratuit à la salle de sport partenaire pour 3 mois',
-                        price: 800,
-                        category: 'perks',
-                        icon: '💪',
-                        stock: 8,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
+                    // Configurer la persistance
+                    setPersistence(auth, browserLocalPersistence).then(() => {
+                        // Exposer globalement
+                        window.firebaseApp = app;
+                        window.auth = auth;
+                        window.db = db;
+                        window.storage = storage;
+                        window.analytics = analytics;
+                        
+                        // Exposer les fonctions Firebase
+                        window.firebase = {
+                            // Auth
+                            onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+                            signOut, updateProfile, signInWithPopup, GoogleAuthProvider,
+                            
+                            // Firestore
+                            collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, 
+                            onSnapshot, setDoc, query, where, orderBy, limit, serverTimestamp,
+                            writeBatch, enableNetwork, disableNetwork,
+                            
+                            // Storage
+                            ref, uploadBytes, getDownloadURL, deleteObject,
+                            
+                            // Analytics
+                            logEvent
+                        };
+                        
+                        window.firebaseReady = true;
+                        
+                        console.log('✅ Firebase initialisé avec succès en mode production');
+                        
+                        // Événement personnalisé pour signaler que Firebase est prêt
+                        window.dispatchEvent(new CustomEvent('firebaseReady'));
+                        
+                        resolve();
+                    }).catch(reject);
                     
-                    // Équipement
-                    {
-                        name: 'Écran supplémentaire',
-                        description: 'Demandez un deuxième écran pour votre poste',
-                        price: 600,
-                        category: 'equipment',
-                        icon: '🖥️',
-                        stock: 15,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
-                    {
-                        name: 'Chaise ergonomique',
-                        description: 'Upgrade vers une chaise ergonomique premium',
-                        price: 1000,
-                        category: 'equipment',
-                        icon: '🪑',
-                        stock: 10,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
+                } catch (error) {
+                    console.error('❌ Erreur initialisation Firebase:', error);
+                    window.firebaseReady = false;
                     
-                    // Social
-                    {
-                        name: 'Café premium',
-                        description: 'Café premium gratuit pendant une semaine',
-                        price: 100,
-                        category: 'social',
-                        icon: '☕',
-                        stock: 50,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    },
-                    {
-                        name: 'Déjeuner d\'équipe',
-                        description: 'Organisez un déjeuner d\'équipe aux frais de l\'entreprise',
-                        price: 750,
-                        category: 'social',
-                        icon: '🍕',
-                        stock: 12,
-                        active: true,
-                        companyId: currentCompany.id,
-                        createdAt: window.firebase.serverTimestamp()
-                    }
-                ];
-
-                const promises = defaultStoreItems.map(item => 
-                    window.firebase.addDoc(
-                        window.firebase.collection(window.db, 'store_items'),
-                        item
-                    )
-                );
-
-                return Promise.all(promises);
-            };
-            
-            isFirebaseReady = true;
-            window.firebaseReady = true;
-            
-            console.log('✅ Firebase initialisé avec succès en mode production');
-            
-            // Événement personnalisé pour signaler que Firebase est prêt
-            window.dispatchEvent(new CustomEvent('firebaseReady'));
-            
-        } catch (error) {
-            console.error('❌ Erreur initialisation Firebase:', error);
-            window.firebaseReady = false;
-            
-            // Afficher une erreur critique
-            setTimeout(() => {
-                document.body.innerHTML = `
-                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #f8f9fa; font-family: Arial, sans-serif;">
-                        <div style="text-align: center; max-width: 600px; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc3545; margin-bottom: 1rem;"></i>
-                            <h1 style="color: #dc3545; margin-bottom: 1rem;">Erreur de Configuration Firebase</h1>
-                            <p style="color: #666; margin-bottom: 2rem;">Impossible de se connecter à Firebase. Veuillez vérifier votre configuration.</p>
-                            <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: left; font-size: 0.9rem; color: #dc3545;">${error.message}</pre>
-                            <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Réessayer
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }, 1000);
+                    // Afficher une erreur critique
+                    setTimeout(() => {
+                        document.body.innerHTML = `
+                            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #f8f9fa; font-family: Arial, sans-serif;">
+                                <div style="text-align: center; max-width: 600px; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                                    <h1 style="color: #dc3545; margin-bottom: 1rem;">Erreur de Configuration Firebase</h1>
+                                    <p style="color: #666; margin-bottom: 2rem;">Impossible de se connecter à Firebase. Veuillez vérifier votre configuration.</p>
+                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: left; font-size: 0.9rem; color: #dc3545;">${error.message}</pre>
+                                    <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                        Réessayer
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }, 1000);
+                    
+                    reject(error);
+                }
+            });
         }
+
+        // Initialiser Firebase dès le chargement du module
+        initializeFirebase().catch(error => {
+            console.error('Échec initialisation Firebase:', error);
+        });
     </script>
     
     <!-- Google APIs pour Calendar -->
@@ -874,238 +689,6 @@
             border-bottom-left-radius: 4px;
         }
 
-        /* Modales */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .close {
-            position: absolute;
-            right: 1rem;
-            top: 1rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-        }
-
-        /* Auth Modal */
-        .auth-modal {
-            text-align: center;
-        }
-
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 2rem;
-        }
-
-        .auth-tab {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            background: #f8f9fa;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .auth-tab.active {
-            background: white;
-            border-bottom-color: #667eea;
-            color: #667eea;
-        }
-
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 3000;
-            animation: slideInRight 0.3s ease;
-            border-left: 4px solid #667eea;
-            max-width: 400px;
-        }
-
-        .notification.success {
-            border-left-color: #28a745;
-        }
-
-        .notification.error {
-            border-left-color: #dc3545;
-        }
-
-        .notification.warning {
-            border-left-color: #ffc107;
-        }
-
-        .notification.info {
-            border-left-color: #17a2b8;
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .main-content {
-                padding: 0 1rem;
-            }
-
-            .dashboard-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .team-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chat-container {
-                grid-template-columns: 1fr;
-                height: 70vh;
-            }
-
-            .quests-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-content {
-                margin: 0;
-                width: 100%;
-                height: 100vh;
-                max-width: none;
-                border-radius: 0;
-            }
-        }
-
-        /* Animations */
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Pulse animation */
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
         /* Boutique et Portefeuille */
         .store-grid {
             display: grid;
@@ -1303,6 +886,163 @@
             border: none;
             animation: slideInRight 0.3s ease, coinsGlow 1s ease 0.3s;
         }
+
+        /* Modales */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Auth Modal */
+        .auth-modal {
+            text-align: center;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 3000;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid #667eea;
+            max-width: 400px;
+        }
+
+        .notification.success {
+            border-left-color: #28a745;
+        }
+
+        .notification.error {
+            border-left-color: #dc3545;
+        }
+
+        .notification.warning {
+            border-left-color: #ffc107;
+        }
+
+        .notification.info {
+            border-left-color: #17a2b8;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Real-time indicator */
         .realtime-indicator {
             display: inline-flex;
             align-items: center;
@@ -1320,6 +1060,83 @@
             background: #28a745;
             border-radius: 50%;
             animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 0 1rem;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container {
+                grid-template-columns: 1fr;
+                height: 70vh;
+            }
+
+            .quests-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 0;
+                width: 100%;
+                height: 100vh;
+                max-width: none;
+                border-radius: 0;
+            }
+        }
+
+        /* Animations */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pulse animation */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
@@ -1424,10 +1241,6 @@
                     <i class="fas fa-trophy"></i>
                     Missions
                 </div>
-                <div class="nav-link" data-section="analytics">
-                    <i class="fas fa-chart-bar"></i>
-                    Analytics
-                </div>
                 <div class="nav-link" data-section="store">
                     <i class="fas fa-shopping-cart"></i>
                     Boutique
@@ -1435,6 +1248,10 @@
                 <div class="nav-link" data-section="wallet">
                     <i class="fas fa-wallet"></i>
                     Portefeuille
+                </div>
+                <div class="nav-link" data-section="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
                 </div>
                 <div class="nav-link" data-section="settings">
                     <i class="fas fa-cog"></i>
@@ -1563,79 +1380,9 @@
                             <small style="color: #666;" id="level-progress">Niveau 1 - 0% vers niveau 2</small>
                         </div>
                     </div>
-                <!-- Configuration de la boutique (Admin seulement) -->
-                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;" id="store-admin-section">
-                    <h3><i class="fas fa-store"></i> Gestion de la boutique (Admin)</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                        <div>
-                            <h4>Créer un nouvel avantage</h4>
-                            <form id="store-item-form">
-                                <div class="form-group">
-                                    <label>Nom de l'avantage</label>
-                                    <input type="text" id="item-name" placeholder="Ex: Demi-journée libre" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Description</label>
-                                    <textarea id="item-description" placeholder="Description de l'avantage" rows="3"></textarea>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
-                                    <div class="form-group">
-                                        <label>Prix (gains)</label>
-                                        <input type="number" id="item-price" value="100" min="1" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Catégorie</label>
-                                        <select id="item-category" required>
-                                            <option value="time">Temps libre</option>
-                                            <option value="perks">Avantages</option>
-                                            <option value="equipment">Équipement</option>
-                                            <option value="social">Social</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Stock</label>
-                                        <input type="number" id="item-stock" value="10" min="1">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Icône (emoji)</label>
-                                    <input type="text" id="item-icon" placeholder="🎯" maxlength="2">
-                                </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i>
-                                    Créer l'avantage
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <div>
-                            <h4>Avantages existants</h4>
-                            <div id="admin-store-items" style="max-height: 300px; overflow-y: auto;">
-                                <!-- Liste des avantages -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Statistiques de la boutique -->
-                    <div style="margin-top: 2rem;">
-                        <h4>Statistiques de la boutique</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; color: #667eea; margin-bottom: 0.5rem;" id="total-items">0</div>
-                                <div style="color: #666; font-size: 0.9rem;">Avantages disponibles</div>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; color: #28a745; margin-bottom: 0.5rem;" id="total-purchases">0</div>
-                                <div style="color: #666; font-size: 0.9rem;">Achats ce mois</div>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 1.5rem; color: #ffc107; margin-bottom: 0.5rem;" id="total-revenue">0</div>
-                                <div style="color: #666; font-size: 0.9rem;">Gains échangés</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+        </section>
 
         <!-- Équipe -->
         <section id="team" class="content-section">
@@ -1807,6 +1554,130 @@
             </div>
         </section>
 
+        <!-- Boutique -->
+        <section id="store" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-shopping-cart"></i> Boutique des Avantages</h1>
+                <div class="section-actions">
+                    <div class="user-wallet">
+                        <i class="fas fa-coins" style="color: #ffc107;"></i>
+                        <span id="store-coins">0</span> gains disponibles
+                    </div>
+                    <select id="store-filter" style="padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 6px;">
+                        <option value="all">Tous les avantages</option>
+                        <option value="available">Disponibles</option>
+                        <option value="purchased">Achetés</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Catégories de la boutique -->
+            <div class="store-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+                <button class="store-tab active" data-category="all">
+                    <i class="fas fa-th-large"></i> Tous
+                </button>
+                <button class="store-tab" data-category="time">
+                    <i class="fas fa-clock"></i> Temps libre
+                </button>
+                <button class="store-tab" data-category="perks">
+                    <i class="fas fa-star"></i> Avantages
+                </button>
+                <button class="store-tab" data-category="equipment">
+                    <i class="fas fa-laptop"></i> Équipement
+                </button>
+                <button class="store-tab" data-category="social">
+                    <i class="fas fa-coffee"></i> Social
+                </button>
+            </div>
+
+            <div id="store-items" class="store-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Articles générés dynamiquement -->
+            </div>
+
+            <!-- Historique des achats -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-history"></i> Historique des achats</h3>
+                <div id="purchase-history" style="margin-top: 1rem;">
+                    <!-- Historique généré dynamiquement -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Portefeuille & Échanges -->
+        <section id="wallet" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-wallet"></i> Portefeuille & Échanges</h1>
+                <div class="section-actions">
+                    <button id="request-transfer-btn" class="btn btn-primary">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        Demander des gains
+                    </button>
+                    <button id="send-transfer-btn" class="btn btn-secondary">
+                        <i class="fas fa-paper-plane"></i>
+                        Envoyer des gains
+                    </button>
+                </div>
+            </div>
+
+            <!-- Résumé du portefeuille -->
+            <div class="dashboard-stats">
+                <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                    <i class="fas fa-coins"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-total-coins">0</h3>
+                        <p>Gains totaux</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <i class="fas fa-arrow-up"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-earned-today">0</h3>
+                        <p>Gagnés aujourd'hui</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
+                    <i class="fas fa-exchange-alt"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-transfers">0</h3>
+                        <p>Échanges en cours</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="stat-info">
+                        <h3 id="wallet-spent">0</h3>
+                        <p>Dépensés ce mois</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Transactions récentes -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-list"></i> Transactions récentes</h3>
+                    <div id="recent-transactions" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                        <!-- Transactions générées dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Échanges entre membres -->
+                <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem;">
+                    <h3><i class="fas fa-users"></i> Échanges entre membres</h3>
+                    <div id="member-transfers" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                        <!-- Échanges générés dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classement des gains -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-trophy"></i> Classement de l'équipe</h3>
+                <div id="coins-leaderboard" style="margin-top: 1rem;">
+                    <!-- Classement généré dynamiquement -->
+                </div>
+            </div>
+        </section>
+
         <!-- Analytics -->
         <section id="analytics" class="content-section">
             <div class="section-header">
@@ -1817,7 +1688,7 @@
                         <option>Ce mois</option>
                         <option>Cette année</option>
                     </select>
-                    <button id="refresh-analytics" class="btn btn-secondary">
+                      <button id="refresh-analytics" class="btn btn-secondary">
                         <i class="fas fa-sync-alt"></i>
                         Actualiser
                     </button>

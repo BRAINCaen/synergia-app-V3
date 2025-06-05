@@ -1530,7 +1530,7 @@
                         <i class="fas fa-coins" style="color: #ffc107; font-size: 1.5rem;"></i>
                         <span style="margin-left: 0.5rem; font-size: 1.2rem; font-weight: bold;" id="quest-coins-display">0 gains</span>
                     </div>
-                    <button onclick="synergia.openWallet()" class="btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: none;">
+                    <button onclick="window.synergia?.openWallet?.()" class="btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: none;">
                         <i class="fas fa-wallet"></i>
                         Portefeuille
                     </button>
@@ -3026,7 +3026,7 @@
                             <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.xp} XP</span>
                             <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">${quest.type}</span>
                         </div>
-                        <button onclick="synergia.acceptQuest('${quest.id}')" class="btn btn-primary" style="width: 100%;">
+                        <button onclick="window.synergia?.acceptQuest?.('${quest.id}')" class="btn btn-primary" style="width: 100%;">
                             <i class="fas fa-check"></i>
                             Accepter
                         </button>
@@ -3147,7 +3147,7 @@
                         <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
                             Stock: ${item.stock}
                         </div>
-                        <button onclick="synergia.purchaseItem('${item.id}')" class="btn ${buttonClass}" style="width: 100%;" ${buttonDisabled ? 'disabled' : ''}>
+                        <button onclick="window.synergia?.purchaseItem?.('${item.id}')" class="btn ${buttonClass}" style="width: 100%;" ${buttonDisabled ? 'disabled' : ''}>
                             <i class="fas fa-shopping-cart"></i>
                             ${buttonText}
                         </button>
@@ -3242,7 +3242,7 @@
                             </strong>
                             <br><small style="color: #666;">${transfer.status === 'pending' ? 'En attente' : 'Terminé'}</small>
                             ${transfer.status === 'pending' && !isOutgoing ? `
-                                <br><button onclick="synergia.acceptTransfer('${transfer.id}')" class="btn btn-success" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                <br><button onclick="window.synergia?.acceptTransfer?.('${transfer.id}')" class="btn btn-success" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">
                                     Accepter
                                 </button>
                             ` : ''}

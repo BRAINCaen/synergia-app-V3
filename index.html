@@ -1824,6 +1824,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Section admin : Gestion des demandes de missions spéciales -->
+            <div style="background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3><i class="fas fa-clipboard-check"></i> Demandes de missions spéciales</h3>
+                <div id="special-quest-requests" style="margin-top: 1rem;">
+                    <!-- Demandes générées dynamiquement -->
+                </div>
+            </div>
         </section>
     </main>
 
@@ -2043,7 +2051,8 @@
                 this.storeItems = [];
                 this.transactions = [];
                 this.transfers = [];
-                this.completedQuests = []; // Ajouter le tracking des missions complétées
+                this.completedQuests = []; // Tracking des missions complétées
+                this.questRequests = []; // Tracking des demandes de missions spéciales
                 this.unsubscribers = [];
                 
                 this.init();
@@ -2445,8 +2454,23 @@
                     this.updateTransfersDisplay();
                 });
 
+                // Écouter les demandes de missions spéciales
+                const questRequestsQuery = window.firebase.query(
+                    window.firebase.collection(window.db, 'quest_requests'),
+                    window.firebase.where('userId', '==', currentUser.uid),
+                    window.firebase.where('companyId', '==', currentCompany.id)
+                );
+                
+                const unsubQuestRequests = window.firebase.onSnapshot(questRequestsQuery, (snapshot) => {
+                    this.questRequests = [];
+                    snapshot.forEach(doc => {
+                        this.questRequests.push({ id: doc.id, ...doc.data() });
+                    });
+                    this.updateQuestsDisplay(); // Mettre à jour l'affichage
+                });
+
                 // Stocker les unsubscribers pour les nettoyer plus tard
-                this.unsubscribers = [unsubUsers, unsubQuests, unsubQuestCompletions, unsubEvents, unsubMessages, unsubStore, unsubTransactions, unsubTransfers];
+                this.unsubscribers = [unsubUsers, unsubQuests, unsubQuestCompletions, unsubQuestRequests, unsubEvents, unsubMessages, unsubStore, unsubTransactions, unsubTransfers];
             }
 
             setupEventListeners() {
@@ -3976,7 +4000,143 @@
                 }
             }
 
-            // Méthodes Google Calendar
+            async requestSpecialQuest(questId) {
+                const quest = this.quests.find(q => q.id === questId);
+                if (!quest) return;
+
+                // Vérifier s'il y a déjà une demande en cours
+                const existingRequest = this.questRequests.find(request => 
+                    request.questId === questId && request.status === 'pending'
+                );
+                
+                if (existingRequest) {
+                    this.showToast('Une demande est déjà en cours pour cette mission', 'warning');
+                    return;
+                }
+
+                try {
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'quest_requests'),
+                        {
+                            questId: quest.id,
+                            questTitle: quest.title,
+                            questXp: quest.xp,
+                            userId: currentUser.uid,
+                            userName: currentUser.displayName || currentUser.email,
+                            userEmail: currentUser.email,
+                            companyId: currentCompany.id,
+                            status: 'pending', // pending, approved, rejected
+                            message: '', // Message optionnel de l'utilisateur
+                            requestedAt: window.firebase.serverTimestamp()
+                        }
+                    );
+
+                    this.showToast('📋 Demande envoyée à l\'administrateur', 'success');
+                    
+                } catch (error) {
+                    console.error('Erreur demande mission:', error);
+                    this.showToast('Erreur lors de la demande', 'error');
+                }
+            }
+
+            // Méthode pour les admins pour approuver/rejeter les demandes
+            async handleQuestRequest(requestId, action, adminMessage = '') {
+                try {
+                    const requestRef = window.firebase.doc(window.db, 'quest_requests', requestId);
+                    const requestDoc = await window.firebase.getDoc(requestRef);
+                    
+                    if (!requestDoc.exists()) return;
+                    
+                    const requestData = requestDoc.data();
+                    
+                    if (action === 'approve') {
+                        // Approuver et compléter automatiquement la mission
+                        await window.firebase.updateDoc(requestRef, {
+                            status: 'approved',
+                            adminMessage: adminMessage,
+                            approvedAt: window.firebase.serverTimestamp(),
+                            approvedBy: currentUser.uid
+                        });
+
+                        // Compléter la mission pour l'utilisateur
+                        await this.completeQuestForUser(requestData.questId, requestData.userId, requestData.questXp);
+                        
+                        this.showToast(`✅ Demande approuvée pour ${requestData.userName}`, 'success');
+                        
+                    } else if (action === 'reject') {
+                        await window.firebase.updateDoc(requestRef, {
+                            status: 'rejected',
+                            adminMessage: adminMessage,
+                            rejectedAt: window.firebase.serverTimestamp(),
+                            rejectedBy: currentUser.uid
+                        });
+                        
+                        this.showToast(`❌ Demande rejetée pour ${requestData.userName}`, 'info');
+                    }
+                    
+                } catch (error) {
+                    console.error('Erreur traitement demande:', error);
+                    this.showToast('Erreur lors du traitement de la demande', 'error');
+                }
+            }
+
+            async completeQuestForUser(questId, userId, xpAmount) {
+                try {
+                    // Enregistrer la completion
+                    await window.firebase.addDoc(
+                        window.firebase.collection(window.db, 'quest_completions'),
+                        {
+                            questId: questId,
+                            userId: userId,
+                            companyId: currentCompany.id,
+                            xpGained: xpAmount,
+                            completedAt: window.firebase.serverTimestamp(),
+                            approvedByAdmin: true
+                        }
+                    );
+
+                    // Mettre à jour l'XP et les gains de l'utilisateur
+                    const userRef = window.firebase.doc(window.db, 'users', userId);
+                    const userDoc = await window.firebase.getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        const currentData = userDoc.data();
+                        const currentXP = currentData.xp || 0;
+                        const currentLevel = currentData.level || 1;
+                        const currentCoins = currentData.coins || 0;
+                        const totalCoinsEarned = currentData.totalCoinsEarned || 0;
+                        
+                        const newXP = currentXP + xpAmount;
+                        const newLevel = Math.floor(newXP / 100) + 1;
+                        const newCoins = currentCoins + xpAmount;
+                        const newTotalCoinsEarned = totalCoinsEarned + xpAmount;
+                        
+                        await window.firebase.updateDoc(userRef, {
+                            xp: newXP,
+                            level: newLevel,
+                            coins: newCoins,
+                            totalCoinsEarned: newTotalCoinsEarned
+                        });
+
+                        // Enregistrer la transaction
+                        await window.firebase.addDoc(
+                            window.firebase.collection(window.db, 'transactions'),
+                            {
+                                userId: userId,
+                                type: 'special_quest_reward',
+                                amount: xpAmount,
+                                description: `Mission spéciale approuvée: +${xpAmount} XP/gains`,
+                                companyId: currentCompany.id,
+                                timestamp: window.firebase.serverTimestamp()
+                            }
+                        );
+                    }
+                    
+                } catch (error) {
+                    console.error('Erreur completion mission utilisateur:', error);
+                    throw error;
+                }
+            }
             async connectGoogleCalendar() {
                 if (!tokenClient) {
                     this.showToast('Google Calendar non disponible', 'error');

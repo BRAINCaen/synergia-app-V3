@@ -2,15 +2,13 @@
  * Main.js - Point d'entrée SYNERGIA v3.0
  */
 
-// Imports des modules existants
-import { FirebaseService } from './core/firebase-service.js';
-import { AuthManager } from './managers/AuthManager.js';
-import { BadgingManager } from './managers/badging-manager.js';
-import { TeamManager } from './managers/team-manager.js';
+// Imports des services de base
+import firebaseService from './core/firebase-service.js';
+import AuthManager from './managers/AuthManager.js';
+import BadgingManager from './managers/BadgingManager.js';
+import TeamManager from './managers/TeamManager.js';
 import { Router } from './core/router.js';
-
-// Import du nouveau module de pointage
-import { timeClockModule } from './modules/timeclock-init.js';
+import Logger from './core/logger.js';
 
 class SynergiaApp {
     constructor() {
@@ -27,7 +25,7 @@ class SynergiaApp {
             // 2. Initialiser les managers
             await this.initManagers();
             
-            // 3. Initialiser le router (qui va initialiser le module de pointage)
+            // 3. Initialiser le router
             await this.initRouter();
             
             // 4. Configuration finale
@@ -45,7 +43,7 @@ class SynergiaApp {
 
     async initFirebase() {
         try {
-            await FirebaseService.initialize();
+            await firebaseService.initialize();
             console.log('✅ Firebase initialisé');
         } catch (error) {
             console.error('❌ Erreur Firebase:', error);
@@ -79,7 +77,6 @@ class SynergiaApp {
 
     async initRouter() {
         try {
-            // Le router va automatiquement initialiser le module de pointage
             this.router = new Router();
             window.router = this.router;
             
@@ -93,12 +90,12 @@ class SynergiaApp {
     setupGlobalHandlers() {
         // Gestionnaire d'erreurs globales
         window.addEventListener('error', (event) => {
-            console.error('Erreur globale:', event.error);
+            Logger.error('Erreur globale:', event.error);
         });
 
         // Gestionnaire pour les promesses rejetées
         window.addEventListener('unhandledrejection', (event) => {
-            console.error('Promesse rejetée:', event.reason);
+            Logger.error('Promesse rejetée:', event.reason);
         });
 
         // Gestionnaire de connexion/déconnexion
@@ -161,6 +158,15 @@ class SynergiaApp {
         window.deleteMemberConfirm = (memberId) => {
             console.log('Suppression membre:', memberId);
         };
+
+        // Raccourcis clavier globaux
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Shift+P pour pointage rapide
+            if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                e.preventDefault();
+                window.router?.navigate('/pointage');
+            }
+        });
     }
 
     hideLoadingScreen() {
@@ -192,6 +198,57 @@ class SynergiaApp {
         `;
     }
 
+    // Système de notifications simple
+    showNotification(message, type = 'info', duration = 3000) {
+        // Créer le container de notifications s'il n'existe pas
+        let container = document.getElementById('notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notification-container';
+            container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            `;
+            document.body.appendChild(container);
+        }
+
+        // Créer la notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 300px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
+
+        container.appendChild(notification);
+
+        // Animation d'entrée
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+
+        // Suppression automatique
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, duration);
+    }
+
     // Méthodes utilitaires
     getManager(name) {
         return this.managers[name];
@@ -221,11 +278,6 @@ class SynergiaApp {
         // Nettoyer le router
         if (this.router && typeof this.router.destroy === 'function') {
             this.router.destroy();
-        }
-
-        // Nettoyer le module de pointage
-        if (timeClockModule && typeof timeClockModule.destroy === 'function') {
-            timeClockModule.destroy();
         }
 
         this.isInitialized = false;

@@ -1,107 +1,108 @@
 {
-  "name": "SYNERGIA v3.0 - Plateforme Collaborative",
+  "name": "SYNERGIA v3.0 - Gestion d'Équipe",
   "short_name": "SYNERGIA",
-  "description": "Plateforme collaborative de gestion d'équipe avec pointage, planning et communication",
-  "version": "3.0.0",
+  "description": "Application complète de gestion d'équipe avec badging, planning, chat et gamification",
   "start_url": "/",
   "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#1a1a2e",
   "orientation": "portrait-primary",
-  "theme_color": "#667eea",
-  "background_color": "#ffffff",
+  "categories": ["business", "productivity"],
   "lang": "fr",
+  "dir": "ltr",
   "scope": "/",
-  "categories": ["productivity", "business", "collaboration"],
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfmoA8L3RleHQ+PC9zdmc+",
+      "src": "./public/assets/icons/icon-72x72.png",
       "sizes": "72x72",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfmoA8L3RleHQ+PC9zdmc+",
+      "src": "./public/assets/icons/icon-96x96.png",
       "sizes": "96x96",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "src": "./public/assets/icons/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "src": "./public/assets/icons/icon-144x144.png",
       "sizes": "144x144",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUyIiBoZWlnaHQ9IjE1MiIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "src": "./public/assets/icons/icon-152x152.png",
       "sizes": "152x152",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "src": "./public/assets/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzg0IiBoZWlnaHQ9IjM4NCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "src": "./public/assets/icons/icon-384x384.png",
       "sizes": "384x384",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeT0iLjllbSIgZm9udC1zaXplPSI5MCI+8J+agDwvdGV4dD48L3N2Zz4=",
+      "src": "./public/assets/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
   "shortcuts": [
     {
-      "name": "Pointer",
-      "short_name": "Badge",
-      "description": "Accès rapide au pointage",
-      "url": "/#badging",
-      "icons": [
-        {
-          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPuKssDwvdGV4dD48L3N2Zz4=",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Accès direct au tableau de bord",
+      "url": "/#/dashboard",
+      "icons": [{ "src": "./public/assets/icons/shortcut-dashboard.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Badging",
+      "short_name": "Pointage",
+      "description": "Pointer rapidement",
+      "url": "/#/badging",
+      "icons": [{ "src": "./public/assets/icons/shortcut-badging.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Chat",
+      "short_name": "Messages",
+      "description": "Accès aux conversations",
+      "url": "/#/chat",
+      "icons": [{ "src": "./public/assets/icons/shortcut-chat.png", "sizes": "96x96" }]
     },
     {
       "name": "Planning",
-      "short_name": "Planning",
-      "description": "Voir le planning d'équipe",
-      "url": "/#planning",
-      "icons": [
-        {
-          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfk4U8L3RleHQ+PC9zdmc+",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Équipe",
-      "short_name": "Team",
-      "description": "Gestion d'équipe",
-      "url": "/#team",
-      "icons": [
-        {
-          "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHk9Ii45ZW0iIGZvbnQtc2l6ZT0iOTAiPvCfkqU8L3RleHQ+PC9zdmc+",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
+      "short_name": "Calendrier",
+      "description": "Voir le planning",
+      "url": "/#/planning",
+      "icons": [{ "src": "./public/assets/icons/shortcut-planning.png", "sizes": "96x96" }]
     }
   ],
-  "related_applications": [],
-  "prefer_related_applications": false
+  "screenshots": [
+    {
+      "src": "./public/assets/screenshots/dashboard-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "./public/assets/screenshots/dashboard-narrow.png",
+      "sizes": "360x640",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }

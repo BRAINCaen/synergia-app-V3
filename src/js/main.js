@@ -1,15 +1,43 @@
 // src/js/main.js
 // Point d'entrée principal SYNERGIA v3.0 avec Vite
 
-// Import Firebase ES6 (remplace les CDN)
+// Import Firebase ES6 avec chemins absolus
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { getAnalytics } from 'firebase/analytics'
 
-// Import des styles
-import '/src/styles/main.css'
+// Import Chart.js ES6
+import {
+    Chart,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement
+} from 'chart.js'
+
+// Registrer les composants Chart.js
+Chart.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+)
+
+// Exposer Chart globalement pour compatibilité
+window.Chart = Chart
+
+// Import des styles CSS
+import '../styles/main.css'
 
 // Configuration Firebase avec variables Vite
 const firebaseConfig = {

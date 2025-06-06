@@ -1,83 +1,45 @@
 /**
- * Service Firebase pour SYNERGIA v3.0
+ * Firebase Service - Gestionnaire Firebase pour SYNERGIA v3.0
  * Fichier: src/js/core/firebase-service.js
  */
+
 class FirebaseService {
     constructor() {
         this.app = null;
         this.auth = null;
-        this.firestore = null;
+        this.db = null;
         this.isInitialized = false;
-        this.initPromise = null;
-        
-        this.init();
+        this.currentUser = null;
     }
 
     /**
-     * Initialise Firebase
+     * Initialiser Firebase
      */
-    async init() {
-        if (this.initPromise) {
-            return this.initPromise;
-        }
-
-        this.initPromise = this._initialize();
-        return this.initPromise;
-    }
-
-    async _initialize() {
+    async initialize() {
         try {
-            console.log('🔥 Initialisation Firebase...');
+            // Configuration Firebase - À remplacer par votre config
+            const firebaseConfig = {
+                apiKey: "your-api-key",
+                authDomain: "your-project.firebaseapp.com",
+                projectId: "your-project-id",
+                storageBucket: "your-project.appspot.com",
+                messagingSenderId: "123456789",
+                appId: "your-app-id"
+            };
 
-            // Vérifier que Firebase est disponible
-            if (typeof firebase === 'undefined') {
-                throw new Error('Firebase SDK non chargé');
-            }
-
-            // Vérifier la configuration
-            if (!window.FIREBASE_CONFIG) {
-                throw new Error('Configuration Firebase manquante');
-            }
-
-            // Initialiser Firebase App
-            if (!firebase.apps.length) {
-                this.app = firebase.initializeApp(window.FIREBASE_CONFIG);
-            } else {
-                this.app = firebase.app();
-            }
-
-            // Initialiser les services
+            // Initialiser Firebase
+            this.app = firebase.initializeApp(firebaseConfig);
             this.auth = firebase.auth();
-            this.firestore = firebase.firestore();
+            this.db = firebase.firestore();
 
-            // Configuration Firestore
-            this.firestore.settings({
-                cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+            // Écouter les changements d'authentification
+            this.auth.onAuthStateChanged((user) => {
+                this.currentUser = user;
+                this.handleAuthStateChange(user);
             });
 
-            // Activer la persistance offline
-            try {
-                await this.firestore.enablePersistence({
-                    synchronizeTabs: true
-                });
-                console.log('✅ Persistance Firestore activée');
-            } catch (persistenceError) {
-                if (persistenceError.code === 'failed-precondition') {
-                    console.warn('⚠️ Persistance échouée: plusieurs onglets ouverts');
-                } else if (persistenceError.code === 'unimplemented') {
-                    console.warn('⚠️ Persistance non supportée par ce navigateur');
-                } else {
-                    console.warn('⚠️ Erreur persistance:', persistenceError);
-                }
-            }
-
             this.isInitialized = true;
-            console.log('✅ Firebase Service initialisé');
-
-            // Émettre l'événement
-            this.emit('firebase:ready');
-
-            return this;
+            console.log('✅ Firebase initialisé');
 
         } catch (error) {
             console.error('❌ Erreur initialisation Firebase:', error);
@@ -86,132 +48,369 @@ class FirebaseService {
     }
 
     /**
-     * Attend que Firebase soit initialisé
+     * Gérer les changements d'état d'authentification
      */
-    async waitForInitialization() {
-        if (this.isInitialized) {
-            return this;
-        }
-
-        if (this.initPromise) {
-            return this.initPromise;
-        }
-
-        return this.init();
-    }
-
-    /**
-     * Récupère l'instance Auth
-     */
-    getAuth() {
-        if (!this.isInitialized) {
-            throw new Error('Firebase non initialisé');
-        }
-        return this.auth;
-    }
-
-    /**
-     * Récupère l'instance Firestore
-     */
-    getFirestore() {
-        if (!this.isInitialized) {
-            throw new Error('Firebase non initialisé');
-        }
-        return this.firestore;
-    }
-
-    /**
-     * Récupère l'instance App
-     */
-    getApp() {
-        return this.app;
-    }
-
-    /**
-     * Gestion des erreurs Firebase
-     */
-    handleError(error) {
-        const errorInfo = {
-            code: error.code || 'unknown',
-            message: error.message || 'Erreur inconnue',
-            type: 'firebase',
-            timestamp: new Date()
-        };
-
-        // Messages d'erreur personnalisés
-        const errorMessages = {
-            'auth/network-request-failed': 'Problème de connexion réseau',
-            'auth/too-many-requests': 'Trop de tentatives, réessayez plus tard',
-            'auth/user-disabled': 'Compte utilisateur désactivé',
-            'auth/user-not-found': 'Utilisateur non trouvé',
-            'auth/wrong-password': 'Mot de passe incorrect',
-            'auth/invalid-email': 'Adresse email invalide',
-            'auth/email-already-in-use': 'Cette adresse email est déjà utilisée',
-            'auth/weak-password': 'Mot de passe trop faible',
-            'auth/popup-closed-by-user': 'Popup fermée par l\'utilisateur',
-            'auth/unauthorized-domain': 'Domaine non autorisé',
-            'firestore/permission-denied': 'Permission refusée',
-            'firestore/unavailable': 'Service temporairement indisponible',
-            'firestore/unauthenticated': 'Authentification requise'
-        };
-
-        errorInfo.userMessage = errorMessages[error.code] || error.message;
-
-        console.error('❌ Erreur Firebase:', errorInfo);
-        return errorInfo;
-    }
-
-    /**
-     * Vérifie la connectivité
-     */
-    async checkConnectivity() {
-        try {
-            // Tenter une opération simple
-            await this.firestore.collection('_connectivity').limit(1).get();
-            return true;
-        } catch (error) {
-            console.warn('⚠️ Connectivité Firebase limitée');
-            return false;
-        }
-    }
-
-    /**
-     * Émet un événement
-     */
-    emit(eventName, data = null) {
-        const event = new CustomEvent(eventName, { detail: data });
+    handleAuthStateChange(user) {
+        const event = new CustomEvent('auth:stateChanged', {
+            detail: {
+                isAuthenticated: !!user,
+                user: user
+            }
+        });
         window.dispatchEvent(event);
     }
 
     /**
-     * État de l'initialisation
+     * Obtenir l'utilisateur actuel
      */
-    getInitializationState() {
-        return {
-            isInitialized: this.isInitialized,
-            hasAuth: !!this.auth,
-            hasFirestore: !!this.firestore,
-            hasApp: !!this.app
-        };
+    getCurrentUser() {
+        return this.currentUser;
     }
 
     /**
-     * Nettoyage
+     * Vérifier si l'utilisateur est connecté
+     */
+    isAuthenticated() {
+        return !!this.currentUser;
+    }
+
+    // ==================
+    // MÉTHODES FIRESTORE
+    // ==================
+
+    /**
+     * Ajouter un document
+     * @param {string} collection - Nom de la collection
+     * @param {object} data - Données à ajouter
+     * @returns {Promise<DocumentReference>}
+     */
+    async addDocument(collection, data) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            const docRef = await this.db.collection(collection).add({
+                ...data,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            console.log('📝 Document ajouté:', docRef.id);
+            return docRef;
+
+        } catch (error) {
+            console.error('❌ Erreur ajout document:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtenir un document
+     * @param {string} collection - Nom de la collection
+     * @param {string} docId - ID du document
+     * @returns {Promise<object>}
+     */
+    async getDocument(collection, docId) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            const doc = await this.db.collection(collection).doc(docId).get();
+            
+            if (doc.exists) {
+                return { id: doc.id, ...doc.data() };
+            } else {
+                throw new Error('Document non trouvé');
+            }
+
+        } catch (error) {
+            console.error('❌ Erreur récupération document:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Mettre à jour un document
+     * @param {string} collection - Nom de la collection
+     * @param {string} docId - ID du document
+     * @param {object} data - Données à mettre à jour
+     * @returns {Promise<void>}
+     */
+    async updateDocument(collection, docId, data) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            await this.db.collection(collection).doc(docId).update({
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            console.log('📝 Document mis à jour:', docId);
+
+        } catch (error) {
+            console.error('❌ Erreur mise à jour document:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Supprimer un document
+     * @param {string} collection - Nom de la collection
+     * @param {string} docId - ID du document
+     * @returns {Promise<void>}
+     */
+    async deleteDocument(collection, docId) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            await this.db.collection(collection).doc(docId).delete();
+            console.log('🗑️ Document supprimé:', docId);
+
+        } catch (error) {
+            console.error('❌ Erreur suppression document:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Requête sur une collection
+     * @param {string} collection - Nom de la collection
+     * @param {array} conditions - Conditions de la requête [[field, operator, value], ...]
+     * @param {array} orderBy - Tri [['field', 'direction'], ...]
+     * @param {number} limit - Limite de résultats
+     * @returns {Promise<array>}
+     */
+    async queryDocuments(collection, conditions = [], orderBy = [], limit = null) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            let query = this.db.collection(collection);
+
+            // Appliquer les conditions
+            conditions.forEach(([field, operator, value]) => {
+                query = query.where(field, operator, value);
+            });
+
+            // Appliquer le tri
+            orderBy.forEach(([field, direction]) => {
+                query = query.orderBy(field, direction);
+            });
+
+            // Appliquer la limite
+            if (limit) {
+                query = query.limit(limit);
+            }
+
+            const snapshot = await query.get();
+            const documents = [];
+
+            snapshot.forEach(doc => {
+                documents.push({ id: doc.id, ...doc.data() });
+            });
+
+            return documents;
+
+        } catch (error) {
+            console.error('❌ Erreur requête documents:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Écouter les changements d'une collection
+     * @param {string} collection - Nom de la collection
+     * @param {function} callback - Fonction appelée lors des changements
+     * @param {array} conditions - Conditions de la requête
+     * @returns {function} - Fonction pour annuler l'écoute
+     */
+    listenToCollection(collection, callback, conditions = []) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            let query = this.db.collection(collection);
+
+            // Appliquer les conditions
+            conditions.forEach(([field, operator, value]) => {
+                query = query.where(field, operator, value);
+            });
+
+            return query.onSnapshot((snapshot) => {
+                const documents = [];
+                snapshot.forEach(doc => {
+                    documents.push({ id: doc.id, ...doc.data() });
+                });
+                callback(documents);
+            }, (error) => {
+                console.error('❌ Erreur écoute collection:', error);
+            });
+
+        } catch (error) {
+            console.error('❌ Erreur configuration écoute:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Écouter les changements d'un document
+     * @param {string} collection - Nom de la collection
+     * @param {string} docId - ID du document
+     * @param {function} callback - Fonction appelée lors des changements
+     * @returns {function} - Fonction pour annuler l'écoute
+     */
+    listenToDocument(collection, docId, callback) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            return this.db.collection(collection).doc(docId).onSnapshot((doc) => {
+                if (doc.exists) {
+                    callback({ id: doc.id, ...doc.data() });
+                } else {
+                    callback(null);
+                }
+            }, (error) => {
+                console.error('❌ Erreur écoute document:', error);
+            });
+
+        } catch (error) {
+            console.error('❌ Erreur configuration écoute document:', error);
+            throw error;
+        }
+    }
+
+    // ==================
+    // MÉTHODES AUTH
+    // ==================
+
+    /**
+     * Connexion avec Google
+     * @returns {Promise<UserCredential>}
+     */
+    async signInWithGoogle() {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('email');
+            provider.addScope('profile');
+
+            const result = await this.auth.signInWithPopup(provider);
+            console.log('✅ Connexion Google réussie:', result.user.email);
+            
+            return result;
+
+        } catch (error) {
+            console.error('❌ Erreur connexion Google:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Déconnexion
+     * @returns {Promise<void>}
+     */
+    async signOut() {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            await this.auth.signOut();
+            console.log('✅ Déconnexion réussie');
+
+        } catch (error) {
+            console.error('❌ Erreur déconnexion:', error);
+            throw error;
+        }
+    }
+
+    // ==================
+    // UTILITAIRES
+    // ==================
+
+    /**
+     * Obtenir un timestamp serveur
+     * @returns {FieldValue}
+     */
+    getServerTimestamp() {
+        return firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    /**
+     * Créer une référence de document
+     * @param {string} collection
+     * @param {string} docId
+     * @returns {DocumentReference}
+     */
+    getDocumentRef(collection, docId = null) {
+        if (docId) {
+            return this.db.collection(collection).doc(docId);
+        } else {
+            return this.db.collection(collection).doc();
+        }
+    }
+
+    /**
+     * Transaction Firestore
+     * @param {function} updateFunction
+     * @returns {Promise<any>}
+     */
+    async runTransaction(updateFunction) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Firebase non initialisé');
+            }
+
+            return await this.db.runTransaction(updateFunction);
+
+        } catch (error) {
+            console.error('❌ Erreur transaction:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Batch d'écriture
+     * @returns {WriteBatch}
+     */
+    createBatch() {
+        if (!this.isInitialized) {
+            throw new Error('Firebase non initialisé');
+        }
+        return this.db.batch();
+    }
+
+    /**
+     * Nettoyer le service
      */
     destroy() {
+        if (this.app) {
+            this.app.delete();
+        }
         this.isInitialized = false;
-        this.auth = null;
-        this.firestore = null;
-        this.app = null;
-        this.initPromise = null;
         console.log('🧹 Firebase Service nettoyé');
     }
 }
 
-// Créer l'instance globale
-window.FirebaseService = FirebaseService;
+// Créer une instance singleton
+const firebaseServiceInstance = new FirebaseService();
 
-// Auto-initialisation si la configuration est disponible
-if (typeof window !== 'undefined' && window.FIREBASE_CONFIG) {
-    window.firebaseService = new FirebaseService();
-}
+// Export pour utilisation en module
+export { FirebaseService, firebaseServiceInstance };
+export default firebaseServiceInstance;
+
+// Export global pour compatibilité
+window.FirebaseService = firebaseServiceInstance;

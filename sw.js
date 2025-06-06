@@ -12,6 +12,7 @@ const CACHE_RESOURCES = [
   '/css/variables.css',
   '/css/base.css',
   '/css/components.css',
+  '/css/responsive.css',
   '/css/modules/planning.css',
   '/css/modules/notifications.css',
   
@@ -19,6 +20,7 @@ const CACHE_RESOURCES = [
   '/js/utils/constants.js',
   '/js/utils/helpers.js',
   '/js/utils/validators.js',
+  '/js/core/app-loader.js',
   '/js/core/firebase-manager.js',
   '/js/core/data-manager.js',
   '/js/core/ui-manager.js',

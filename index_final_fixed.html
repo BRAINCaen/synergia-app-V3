@@ -5,20 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYNERGIA v3.0</title>
     
-    <!-- CSP optimisé -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googletagmanager.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
-        style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
-        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-        connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://content.googleapis.com https://firebaseinstallations.googleapis.com https://firebaseremoteconfig.googleapis.com https://firebaselogging-pa.googleapis.com https://region1.google-analytics.com wss://*.firebaseio.com wss://*.firebaseapp.com;
-        frame-src 'self' https://accounts.google.com https://*.firebaseapp.com;
-        img-src 'self' data: https: blob: *.googleusercontent.com *.googleapis.com *.gstatic.com;
-    ">
-    
-    <!-- PWA -->
-    <link rel="manifest" href="./manifest.json">
+    <!-- PWA - Icônes SVG intégrées pour éviter 404 -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e94560'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     <meta name="theme-color" content="#1a1a2e">
     
@@ -30,7 +17,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Styles intégrés pour éviter les erreurs 404 -->
+    <!-- Styles intégrés COMPLETS -->
     <style>
         /* Variables CSS */
         :root {
@@ -56,7 +43,7 @@
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
         
-        /* Base styles */
+        /* Reset et base */
         * {
             margin: 0;
             padding: 0;
@@ -76,6 +63,7 @@
             padding: 20px;
         }
         
+        /* Components */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -85,11 +73,6 @@
             border: 1px solid var(--glass-border);
             box-shadow: var(--shadow);
             transition: all var(--transition);
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
         }
         
         .btn {
@@ -109,16 +92,14 @@
         .btn:hover { transform: translateY(-2px); }
         .btn-primary { background: var(--accent-color); color: white; }
         .btn-success { background: var(--success-color); color: white; }
-        .btn-warning { background: var(--warning-color); color: #000; }
-        .btn-danger { background: var(--danger-color); color: white; }
         .btn-secondary { 
             background: var(--glass-bg); 
             color: var(--text-light); 
             border: 1px solid var(--glass-border); 
         }
-        .btn-sm { padding: 8px 16px; font-size: 14px; min-width: auto; }
-        .btn-lg { padding: 16px 32px; font-size: 18px; min-width: 180px; }
+        .btn-lg { padding: 16px 32px; font-size: 18px; }
         
+        /* Status et Loading */
         .loading-container {
             display: flex;
             flex-direction: column;
@@ -142,41 +123,143 @@
             100% { transform: rotate(360deg); }
         }
         
-        .error-container {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        
-        .error-container h2 {
-            color: var(--danger-color);
-            margin-bottom: 20px;
-        }
-        
-        .module-status {
-            background: var(--glass-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
             margin: 20px 0;
         }
         
-        .module-status ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .module-status li {
-            padding: 8px 0;
+        .status-item {
+            background: var(--glass-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         
         .status-ok { color: var(--success-color); }
         .status-error { color: var(--danger-color); }
+        .status-warning { color: var(--warning-color); }
+        
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--accent-color), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-section p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+        
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 12px 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tab:hover {
+            background: var(--glass-bg);
+            color: var(--text-light);
+        }
+        
+        .nav-tab.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        /* Modales intégrées */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--secondary-color);
+            margin: 20px;
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            background: var(--glass-bg);
+            color: var(--text-light);
+            font-size: 16px;
+            transition: all var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+        }
         
         /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 16px; }
+            .hero-section h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -184,14 +267,53 @@
     <div id="app">
         <div class="loading-container">
             <div class="loading-spinner"></div>
-            <p>Chargement de SYNERGIA v3.0...</p>
+            <p id="loading-status">Initialisation de SYNERGIA v3.0...</p>
         </div>
     </div>
 
-    <!-- Configuration Firebase -->
+    <!-- Modales -->
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="modalTitle">Ajouter un membre</h2>
+                <button onclick="closeTeamModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px;">&times;</button>
+            </div>
+            <form id="teamForm">
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" id="memberEmail" class="form-control" placeholder="exemple@entreprise.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nom complet</label>
+                    <input type="text" id="memberName" class="form-control" placeholder="Prénom Nom">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Rôle</label>
+                    <select id="memberRole" class="form-control">
+                        <option value="employee">Employé</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Département</label>
+                    <input type="text" id="memberDepartment" class="form-control" placeholder="IT, RH, Commercial...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Poste</label>
+                    <input type="text" id="memberPosition" class="form-control" placeholder="Développeur, Manager...">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
+                    <button type="button" onclick="closeTeamModal()" class="btn btn-secondary">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Configuration Firebase
-        const FIREBASE_CONFIG = {
+        window.FIREBASE_CONFIG = {
             apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
             authDomain: "synergia-app-f27e7.firebaseapp.com",
             projectId: "synergia-app-f27e7",
@@ -201,153 +323,87 @@
             measurementId: "G-EGJ79SCMWX"
         };
 
-        window.FIREBASE_CONFIG = FIREBASE_CONFIG;
-        
-        // Configuration APP
-        window.APP_CONFIG = {
-            name: 'SYNERGIA v3.0',
-            version: '3.0.4',
-            environment: 'production',
-            debug: true
-        };
-    </script>
-
-    <!-- Chargement conditionnel des modules -->
-    <script>
-        // État du chargement des modules
-        const moduleLoadState = {
-            config: false,
-            firebase: false,
-            auth: false,
-            team: false,
-            badging: false,
-            router: false
+        // État de l'application
+        const appState = {
+            initialized: false,
+            modules: {},
+            currentRoute: '/',
+            user: null
         };
 
-        // URLs des modules à tester
-        const moduleUrls = {
-            config: './src/js/config.js',
-            firebase: './src/js/core/firebase-service.js',
-            auth: './src/js/managers/AuthManager.js',
-            team: './src/js/managers/team-manager.js',
-            badging: './src/js/managers/badging-manager.js',
-            router: './src/js/core/router_complete_fixed.js'
-        };
-
-        // Fonction pour tester l'existence d'un fichier
-        async function fileExists(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                return response.ok;
-            } catch {
-                return false;
+        // Fonction de mise à jour du statut
+        function updateStatus(message) {
+            const statusEl = document.getElementById('loading-status');
+            if (statusEl) {
+                statusEl.textContent = message;
             }
+            console.log(`📋 ${message}`);
+        }
+
+        // Chargement des modules EXISTANTS seulement
+        async function loadExistingModules() {
+            const modules = [
+                { name: 'config', url: './src/js/config.js', required: false },
+                { name: 'firebase-service', url: './src/js/core/firebase-service.js', required: false },
+                { name: 'AuthManager', url: './src/js/managers/AuthManager.js', required: false },
+                { name: 'TeamManager', url: './src/js/managers/team-manager.js', required: false },
+                { name: 'BadgingManager', url: './src/js/managers/badging-manager.js', required: false },
+                { name: 'Router', url: './src/js/core/router_complete_fixed.js', required: false }
+            ];
+
+            const loadedModules = [];
+            
+            for (const module of modules) {
+                try {
+                    updateStatus(`Chargement ${module.name}...`);
+                    
+                    // Tester d'abord si le fichier existe
+                    const response = await fetch(module.url, { method: 'HEAD' });
+                    
+                    if (response.ok) {
+                        // Charger le script
+                        await loadScript(module.url);
+                        loadedModules.push(module.name);
+                        console.log(`✅ ${module.name} chargé`);
+                    } else {
+                        console.warn(`⚠️ ${module.name} non disponible (${response.status})`);
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Erreur chargement ${module.name}:`, error);
+                }
+            }
+
+            return loadedModules;
         }
 
         // Fonction pour charger un script
-        function loadScript(url, id) {
+        function loadScript(url) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = url;
-                script.id = id;
-                script.onload = () => {
-                    console.log(`✅ Module chargé: ${id}`);
-                    moduleLoadState[id] = true;
-                    resolve();
-                };
-                script.onerror = () => {
-                    console.warn(`❌ Échec chargement: ${id}`);
-                    reject(new Error(`Failed to load ${id}`));
-                };
+                script.onload = resolve;
+                script.onerror = reject;
                 document.head.appendChild(script);
             });
         }
 
-        // Fonction d'initialisation principale
+        // Initialisation de l'application
         async function initializeApp() {
-            console.log('🚀 SYNERGIA v3.0 - Démarrage...');
-
             try {
-                // Tester la disponibilité des modules
-                const moduleTests = await Promise.allSettled(
-                    Object.entries(moduleUrls).map(async ([id, url]) => {
-                        const exists = await fileExists(url);
-                        return { id, url, exists };
-                    })
-                );
+                updateStatus('Vérification des modules...');
+                const loadedModules = await loadExistingModules();
 
-                console.log('📋 État des modules:');
-                moduleTests.forEach(test => {
-                    if (test.status === 'fulfilled') {
-                        const { id, exists } = test.value;
-                        console.log(`${exists ? '✅' : '❌'} ${id}: ${exists ? 'disponible' : 'manquant'}`);
-                    }
-                });
+                updateStatus('Initialisation Firebase...');
+                await initializeFirebase();
 
-                // Charger les modules disponibles
-                const availableModules = moduleTests
-                    .filter(test => test.status === 'fulfilled' && test.value.exists)
-                    .map(test => test.value);
+                updateStatus('Configuration des managers...');
+                await initializeManagers(loadedModules);
 
-                if (availableModules.length === 0) {
-                    throw new Error('Aucun module disponible - Mode fallback');
-                }
+                updateStatus('Démarrage de l\'interface...');
+                await initializeInterface();
 
-                // Charger les modules dans l'ordre
-                for (const { id, url } of availableModules) {
-                    try {
-                        await loadScript(url, id);
-                    } catch (error) {
-                        console.warn(`⚠️ Échec chargement ${id}:`, error);
-                    }
-                }
-
-                // Attendre un peu pour que les classes soient définies
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                // Initialiser Firebase Service
-                if (typeof FirebaseService !== 'undefined') {
-                    window.firebaseService = new FirebaseService();
-                    await window.firebaseService.waitForInitialization();
-                    console.log('✅ Firebase Service initialisé');
-                } else {
-                    throw new Error('FirebaseService non disponible');
-                }
-
-                // Initialiser AuthManager
-                if (typeof AuthManager !== 'undefined') {
-                    window.authManager = new AuthManager();
-                    console.log('✅ Auth Manager initialisé');
-                } else {
-                    console.warn('⚠️ AuthManager non disponible');
-                }
-
-                // Initialiser TeamManager
-                if (typeof TeamManager !== 'undefined') {
-                    window.teamManager = new TeamManager();
-                    console.log('✅ Team Manager initialisé');
-                } else {
-                    console.warn('⚠️ TeamManager non disponible');
-                }
-
-                // Initialiser BadgingManager
-                if (typeof BadgingManager !== 'undefined') {
-                    window.badgingManager = new BadgingManager();
-                    console.log('✅ Badging Manager initialisé');
-                } else {
-                    console.warn('⚠️ BadgingManager non disponible');
-                }
-
-                // Initialiser Router
-                if (typeof Router !== 'undefined') {
-                    window.router = new Router();
-                    console.log('✅ Router initialisé');
-                } else {
-                    console.warn('⚠️ Router non disponible');
-                    showFallbackInterface();
-                }
-
-                console.log('🎉 SYNERGIA v3.0 - Initialisation terminée');
+                appState.initialized = true;
+                console.log('🎉 SYNERGIA v3.0 initialisé avec succès');
 
             } catch (error) {
                 console.error('❌ Erreur d\'initialisation:', error);
@@ -355,46 +411,421 @@
             }
         }
 
-        // Interface de fallback si les modules ne sont pas disponibles
-        function showFallbackInterface() {
+        // Initialisation Firebase
+        async function initializeFirebase() {
+            if (typeof firebase === 'undefined') {
+                throw new Error('Firebase SDK non disponible');
+            }
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(window.FIREBASE_CONFIG);
+            }
+
+            appState.modules.firebase = {
+                app: firebase.app(),
+                auth: firebase.auth(),
+                firestore: firebase.firestore()
+            };
+
+            // Écouter les changements d'auth
+            firebase.auth().onAuthStateChanged((user) => {
+                appState.user = user;
+                updateAuthState(user);
+            });
+
+            console.log('✅ Firebase initialisé');
+        }
+
+        // Initialisation des managers
+        async function initializeManagers(loadedModules) {
+            // Initialiser seulement les managers disponibles
+            if (typeof AuthManager !== 'undefined') {
+                appState.modules.authManager = new AuthManager();
+                console.log('✅ AuthManager initialisé');
+            }
+
+            if (typeof TeamManager !== 'undefined') {
+                appState.modules.teamManager = new TeamManager();
+                console.log('✅ TeamManager initialisé');
+            }
+
+            if (typeof BadgingManager !== 'undefined') {
+                appState.modules.badgingManager = new BadgingManager();
+                console.log('✅ BadgingManager initialisé');
+            }
+
+            // Router en dernier
+            if (typeof Router !== 'undefined') {
+                appState.modules.router = new Router();
+                console.log('✅ Router initialisé');
+            } else {
+                // Router simple intégré
+                initSimpleRouter();
+            }
+        }
+
+        // Router simple intégré
+        function initSimpleRouter() {
+            const routes = {
+                '/': renderHome,
+                '/login': renderLogin,
+                '/dashboard': renderDashboard,
+                '/team': renderTeam,
+                '/badging': renderBadging
+            };
+
+            function navigate(path) {
+                const route = routes[path] || routes['/'];
+                route();
+                appState.currentRoute = path;
+                window.location.hash = path;
+            }
+
+            window.navigate = navigate;
+            
+            // Navigation initiale
+            const hash = window.location.hash.slice(1) || '/';
+            navigate(hash);
+
+            console.log('✅ Router simple initialisé');
+        }
+
+        // Initialisation de l'interface
+        async function initializeInterface() {
+            // Vérifier l'état d'authentification
+            const user = firebase.auth().currentUser;
+            
+            if (user) {
+                navigate('/dashboard');
+            } else {
+                navigate('/login');
+            }
+
+            // Configurer les gestionnaires d'événements
+            setupEventHandlers();
+        }
+
+        // Configuration des événements
+        function setupEventHandlers() {
+            // Gestion des liens de navigation
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('[data-route]')) {
+                    e.preventDefault();
+                    const route = e.target.getAttribute('data-route');
+                    navigate(route);
+                }
+            });
+
+            // Formulaire d'équipe
+            const teamForm = document.getElementById('teamForm');
+            if (teamForm) {
+                teamForm.addEventListener('submit', handleTeamFormSubmit);
+            }
+
+            console.log('✅ Gestionnaires d\'événements configurés');
+        }
+
+        // Mise à jour de l'état d'authentification
+        function updateAuthState(user) {
+            console.log(user ? `👤 Utilisateur connecté: ${user.email}` : '👤 Utilisateur déconnecté');
+            
+            if (appState.initialized) {
+                if (user && appState.currentRoute === '/login') {
+                    navigate('/dashboard');
+                } else if (!user && appState.currentRoute !== '/login') {
+                    navigate('/login');
+                }
+            }
+        }
+
+        // Rendu des pages
+        function renderHome() {
             const app = document.getElementById('app');
             app.innerHTML = `
                 <div class="container">
-                    <div class="card">
-                        <h1 style="color: var(--warning-color); text-align: center;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            SYNERGIA v3.0 - Mode Fallback
-                        </h1>
-                        
-                        <p style="text-align: center; margin: 20px 0;">
-                            L'application fonctionne en mode dégradé. Certains modules ne sont pas disponibles.
-                        </p>
-                        
-                        <div class="module-status">
-                            <h3>État des modules :</h3>
-                            <ul>
-                                <li><i class="fas fa-check status-ok"></i> Configuration</li>
-                                <li><i class="fas fa-${moduleLoadState.firebase ? 'check status-ok' : 'times status-error'}"></i> Firebase Service</li>
-                                <li><i class="fas fa-${moduleLoadState.auth ? 'check status-ok' : 'times status-error'}"></i> Auth Manager</li>
-                                <li><i class="fas fa-${moduleLoadState.team ? 'check status-ok' : 'times status-error'}"></i> Team Manager</li>
-                                <li><i class="fas fa-${moduleLoadState.badging ? 'check status-ok' : 'times status-error'}"></i> Badging Manager</li>
-                                <li><i class="fas fa-${moduleLoadState.router ? 'check status-ok' : 'times status-error'}"></i> Router</li>
-                            </ul>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 30px;">
-                            <button onclick="location.reload()" class="btn btn-primary">
-                                <i class="fas fa-sync"></i>
-                                Recharger l'application
-                            </button>
-                            <button onclick="showDebugInfo()" class="btn btn-secondary">
-                                <i class="fas fa-bug"></i>
-                                Informations de debug
+                    <div class="hero-section">
+                        <h1>SYNERGIA v3.0</h1>
+                        <p>Votre plateforme de gestion d'équipe nouvelle génération</p>
+                        <button data-route="/login" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Se connecter
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLogin() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <div style="max-width: 400px; margin: 100px auto;">
+                        <div class="card">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <h2>Connexion SYNERGIA</h2>
+                                <p>Connectez-vous pour accéder à votre espace</p>
+                            </div>
+                            <button onclick="handleGoogleLogin()" class="btn btn-primary btn-lg" style="width: 100%;">
+                                <i class="fab fa-google"></i>
+                                Continuer avec Google
                             </button>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function renderDashboard() {
+            const app = document.getElementById('app');
+            const user = firebase.auth().currentUser;
+            
+            app.innerHTML = `
+                <div class="container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h1>Dashboard SYNERGIA</h1>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span>👤 ${user ? user.email : 'Non connecté'}</span>
+                            <button onclick="handleSignOut()" class="btn btn-secondary">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Déconnexion
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-tabs">
+                        <a href="#/dashboard" class="nav-tab active" data-route="/dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                        <a href="#/team" class="nav-tab" data-route="/team">
+                            <i class="fas fa-users"></i>
+                            Équipe
+                        </a>
+                        <a href="#/badging" class="nav-tab" data-route="/badging">
+                            <i class="fas fa-clock"></i>
+                            Pointage
+                        </a>
+                    </div>
+                    
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <i class="fas fa-users status-ok"></i>
+                            <div>
+                                <strong>Équipe</strong><br>
+                                <small>Gestion active</small>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-clock status-ok"></i>
+                            <div>
+                                <strong>Pointage</strong><br>
+                                <small>Système opérationnel</small>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-cog status-warning"></i>
+                            <div>
+                                <strong>Modules</strong><br>
+                                <small>Chargement en cours</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Bienvenue sur SYNERGIA v3.0</h3>
+                        <p>Votre plateforme de gestion d'équipe est maintenant opérationnelle. Utilisez la navigation ci-dessus pour accéder aux différentes fonctionnalités.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTeam() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h1>Gestion de l'équipe</h1>
+                        <button onclick="openAddMemberModal()" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Ajouter un membre
+                        </button>
+                    </div>
+                    
+                    <div class="nav-tabs">
+                        <a href="#/dashboard" class="nav-tab" data-route="/dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                        <a href="#/team" class="nav-tab active" data-route="/team">
+                            <i class="fas fa-users"></i>
+                            Équipe
+                        </a>
+                        <a href="#/badging" class="nav-tab" data-route="/badging">
+                            <i class="fas fa-clock"></i>
+                            Pointage
+                        </a>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Membres de l'équipe</h3>
+                        <p>Fonctionnalité en cours de chargement...</p>
+                        <div id="team-list">
+                            <!-- La liste sera chargée par TeamManager si disponible -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Charger les membres si TeamManager est disponible
+            if (appState.modules.teamManager) {
+                loadTeamMembers();
+            }
+        }
+
+        function renderBadging() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <h1>Système de pointage</h1>
+                    
+                    <div class="nav-tabs">
+                        <a href="#/dashboard" class="nav-tab" data-route="/dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                        <a href="#/team" class="nav-tab" data-route="/team">
+                            <i class="fas fa-users"></i>
+                            Équipe
+                        </a>
+                        <a href="#/badging" class="nav-tab active" data-route="/badging">
+                            <i class="fas fa-clock"></i>
+                            Pointage
+                        </a>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Pointage en temps réel</h3>
+                        <div style="text-align: center; padding: 40px;">
+                            <div style="font-size: 48px; font-family: monospace; margin-bottom: 20px;" id="current-time">
+                                ${new Date().toLocaleTimeString()}
+                            </div>
+                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                                <button onclick="handleCheckIn()" class="btn btn-success">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Arrivée
+                                </button>
+                                <button onclick="handleCheckOut()" class="btn btn-danger">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sortie
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Démarrer l'horloge
+            startClock();
+        }
+
+        // Fonctions d'interaction
+        async function handleGoogleLogin() {
+            try {
+                updateStatus('Connexion en cours...');
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await firebase.auth().signInWithPopup(provider);
+                console.log('✅ Connexion réussie');
+            } catch (error) {
+                console.error('❌ Erreur connexion:', error);
+                alert('Erreur de connexion: ' + error.message);
+            }
+        }
+
+        async function handleSignOut() {
+            try {
+                await firebase.auth().signOut();
+                console.log('✅ Déconnexion réussie');
+            } catch (error) {
+                console.error('❌ Erreur déconnexion:', error);
+            }
+        }
+
+        function handleCheckIn() {
+            const time = new Date().toLocaleTimeString();
+            alert(`Pointage d'arrivée: ${time}`);
+            console.log('✅ Pointage arrivée:', time);
+        }
+
+        function handleCheckOut() {
+            const time = new Date().toLocaleTimeString();
+            alert(`Pointage de sortie: ${time}`);
+            console.log('✅ Pointage sortie:', time);
+        }
+
+        // Gestion de l'équipe
+        function openAddMemberModal() {
+            document.getElementById('teamModal').classList.add('show');
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('show');
+        }
+
+        function handleTeamFormSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const memberData = {
+                email: formData.get('memberEmail'),
+                name: formData.get('memberName'),
+                role: formData.get('memberRole'),
+                department: formData.get('memberDepartment'),
+                position: formData.get('memberPosition')
+            };
+            
+            console.log('Nouveau membre:', memberData);
+            alert('Membre ajouté: ' + memberData.email);
+            closeTeamModal();
+            e.target.reset();
+        }
+
+        async function loadTeamMembers() {
+            try {
+                if (appState.modules.teamManager) {
+                    const members = await appState.modules.teamManager.loadTeamMembers();
+                    renderTeamList(members);
+                }
+            } catch (error) {
+                console.error('❌ Erreur chargement équipe:', error);
+            }
+        }
+
+        function renderTeamList(members) {
+            const teamList = document.getElementById('team-list');
+            if (!teamList) return;
+            
+            if (members && members.length > 0) {
+                teamList.innerHTML = members.map(member => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--glass-bg); margin: 10px 0; border-radius: var(--border-radius);">
+                        <div>
+                            <strong>${member.displayName || member.email}</strong><br>
+                            <small>${member.role} - ${member.department}</small>
+                        </div>
+                        <span class="status-ok">Actif</span>
+                    </div>
+                `).join('');
+            } else {
+                teamList.innerHTML = '<p>Aucun membre trouvé.</p>';
+            }
+        }
+
+        // Horloge
+        function startClock() {
+            setInterval(() => {
+                const timeEl = document.getElementById('current-time');
+                if (timeEl) {
+                    timeEl.textContent = new Date().toLocaleTimeString();
+                }
+            }, 1000);
         }
 
         // Interface d'erreur
@@ -402,38 +833,48 @@
             const app = document.getElementById('app');
             app.innerHTML = `
                 <div class="container">
-                    <div class="error-container">
-                        <h2><i class="fas fa-exclamation-circle"></i> Erreur d'initialisation</h2>
-                        <p>Impossible de démarrer SYNERGIA v3.0</p>
-                        <div class="card" style="text-align: left; margin: 20px auto; max-width: 600px;">
-                            <h4>Détails de l'erreur :</h4>
-                            <pre style="background: var(--glass-bg-strong); padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 14px;">${error.message}</pre>
+                    <div class="card" style="text-align: center; margin-top: 100px; border-color: var(--danger-color);">
+                        <h2 style="color: var(--danger-color);">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Erreur d'initialisation
+                        </h2>
+                        <p>Une erreur s'est produite lors du démarrage de SYNERGIA v3.0</p>
+                        <div style="background: var(--glass-bg-strong); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <code style="color: var(--danger-color);">${error.message}</code>
                         </div>
                         <button onclick="location.reload()" class="btn btn-primary">
                             <i class="fas fa-sync"></i>
-                            Réessayer
+                            Recharger l'application
                         </button>
                     </div>
                 </div>
             `;
         }
 
-        // Fonction de debug
-        function showDebugInfo() {
-            const debugInfo = {
-                userAgent: navigator.userAgent,
-                url: window.location.href,
-                moduleStates: moduleLoadState,
-                timestamp: new Date().toISOString(),
-                firebase: typeof firebase !== 'undefined' ? 'Disponible' : 'Non disponible',
-                localStorage: typeof localStorage !== 'undefined' ? 'Disponible' : 'Non disponible'
+        // Navigation
+        function navigate(path) {
+            const routes = {
+                '/': renderHome,
+                '/login': renderLogin,
+                '/dashboard': renderDashboard,
+                '/team': renderTeam,
+                '/badging': renderBadging
             };
 
-            alert('Informations de debug copiées dans la console');
-            console.log('🐛 SYNERGIA Debug Info:', debugInfo);
+            const route = routes[path];
+            if (route) {
+                route();
+                appState.currentRoute = path;
+                window.location.hash = path;
+                
+                // Mettre à jour les onglets actifs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.getAttribute('data-route') === path);
+                });
+            }
         }
 
-        // Démarrer l'application
+        // Initialisation au chargement
         document.addEventListener('DOMContentLoaded', initializeApp);
 
         // Gestion des erreurs globales

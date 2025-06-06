@@ -18,14 +18,15 @@ class FirebaseService {
     async initialize() {
         try {
             // Configuration Firebase - À remplacer par votre config
-            const firebaseConfig = {
-                apiKey: "your-api-key",
-                authDomain: "your-project.firebaseapp.com",
-                projectId: "your-project-id",
-                storageBucket: "your-project.appspot.com",
-                messagingSenderId: "123456789",
-                appId: "your-app-id"
-            };
+const firebaseConfig = {
+  apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+  authDomain: "synergia-app-f27e7.firebaseapp.com",
+  projectId: "synergia-app-f27e7",
+  storageBucket: "synergia-app-f27e7.firebasestorage.app",
+  messagingSenderId: "201912738922",
+  appId: "1:201912738922:web:2fcc1e49293bb632899613",
+  measurementId: "G-EGJ79SCMWX"
+};
 
             // Initialiser Firebase
             this.app = firebase.initializeApp(firebaseConfig);

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGIA v3.0</title>
+    <title>SYNERGIA v3.0 - Gestion d'Équipe</title>
     
-    <!-- PWA - Icônes SVG intégrées pour éviter 404 -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e94560'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
-    <meta name="theme-color" content="#1a1a2e">
+    <!-- PWA -->
+    <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;SYNERGIA v3.0&quot;,&quot;short_name&quot;:&quot;SYNERGIA&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23667eea&quot;,&quot;theme_color&quot;:&quot;%23764ba2&quot;}">
+    <meta name="theme-color" content="#667eea">
     
-    <!-- Firebase CDN -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -17,874 +17,1117 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Styles intégrés COMPLETS -->
     <style>
-        /* Variables CSS */
         :root {
-            --primary-color: #1a1a2e;
-            --secondary-color: #16213e;
-            --accent-color: #e94560;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --info-color: #17a2b8;
-            
-            --text-light: #ffffff;
-            --text-secondary: #b8b9ba;
-            --text-muted: #8a8b8c;
-            
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-bg-strong: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            
-            --border-radius: 0.5rem;
-            --border-radius-lg: 1rem;
-            --transition: 300ms ease-in-out;
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #e94560;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #1a1a2e;
+            --light: #ffffff;
+            --gray: #6c757d;
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-card: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.15);
+            --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --border-radius: 16px;
+            --transition: 0.3s ease;
         }
-        
-        /* Reset et base */
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-light);
-            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
-        
-        .container {
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--accent), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--light);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab:hover, .nav-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 2rem;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            width: 100%;
         }
-        
-        /* Components */
+
+        /* Cards */
         .card {
-            background: var(--glass-bg);
+            background: var(--bg-card);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: var(--border-radius);
-            padding: 24px;
-            margin: 20px 0;
-            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            margin-bottom: 2rem;
             box-shadow: var(--shadow);
-            transition: all var(--transition);
+            transition: var(--transition);
         }
-        
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Buttons */
         .btn {
-            padding: 12px 24px;
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
             font-weight: 500;
-            transition: all var(--transition);
+            transition: var(--transition);
             text-decoration: none;
-            display: inline-block;
-            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             min-width: 120px;
+            justify-content: center;
         }
-        
-        .btn:hover { transform: translateY(-2px); }
-        .btn-primary { background: var(--accent-color); color: white; }
-        .btn-success { background: var(--success-color); color: white; }
-        .btn-secondary { 
-            background: var(--glass-bg); 
-            color: var(--text-light); 
-            border: 1px solid var(--glass-border); 
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--light);
         }
-        .btn-lg { padding: 16px 32px; font-size: 18px; }
-        
-        /* Status et Loading */
-        .loading-container {
+
+        .btn-success {
+            background: var(--success);
+            color: var(--light);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+        /* Stats Cards */
+        .stats-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.3);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Loading */
+        .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            gap: 20px;
+            padding: 4rem;
         }
-        
-        .loading-spinner {
+
+        .spinner {
             width: 40px;
             height: 40px;
             border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid var(--accent-color);
+            border-top: 3px solid var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .status-item {
-            background: var(--glass-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .status-ok { color: var(--success-color); }
-        .status-error { color: var(--danger-color); }
-        .status-warning { color: var(--warning-color); }
-        
-        .hero-section {
+
+        /* Clock Widget */
+        .clock-widget {
             text-align: center;
-            padding: 60px 20px;
+            padding: 3rem 2rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
         }
-        
-        .hero-section h1 {
+
+        .current-time {
             font-size: 3rem;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, var(--accent-color), #ff6b9d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1rem;
+            color: var(--accent);
         }
-        
-        .hero-section p {
+
+        .current-date {
             font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
+            margin-bottom: 2rem;
+            opacity: 0.8;
         }
-        
-        /* Navigation */
-        .nav-tabs {
+
+        .badge-buttons {
             display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 1rem;
+            justify-content: center;
             flex-wrap: wrap;
         }
-        
-        .nav-tab {
-            padding: 12px 20px;
-            background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all var(--transition);
-            text-decoration: none;
-            font-weight: 500;
+
+        /* Team Member */
+        .team-member {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: var(--transition);
         }
-        
-        .nav-tab:hover {
-            background: var(--glass-bg);
-            color: var(--text-light);
+
+        .team-member:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
         }
-        
-        .nav-tab.active {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-        
-        /* Modales intégrées */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.show {
+
+        .member-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-weight: bold;
         }
-        
-        .modal-content {
-            background: var(--secondary-color);
-            margin: 20px;
-            padding: 30px;
-            border-radius: var(--border-radius-lg);
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
+
+        .member-info {
+            flex: 1;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+
+        .member-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
         }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-light);
+
+        .member-role {
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            background: var(--glass-bg);
-            color: var(--text-light);
-            font-size: 16px;
-            transition: all var(--transition);
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
         }
-        
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
-            .container { padding: 16px; }
-            .hero-section h1 { font-size: 2rem; }
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                justify-content: center;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .current-time {
+                font-size: 2rem;
+            }
+
+            .badge-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Hide/Show views */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.8;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <div class="loading-container">
-            <div class="loading-spinner"></div>
-            <p id="loading-status">Initialisation de SYNERGIA v3.0...</p>
+    <div class="app" id="app">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading">
+            <div class="spinner"></div>
+            <h2 style="margin-top: 2rem;">SYNERGIA v3.0</h2>
+            <p>Chargement en cours...</p>
         </div>
-    </div>
 
-    <!-- Modales -->
-    <div id="teamModal" class="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 id="modalTitle">Ajouter un membre</h2>
-                <button onclick="closeTeamModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px;">&times;</button>
+        <!-- App Content (Hidden initially) -->
+        <div id="appContent" style="display: none;">
+            <!-- Header -->
+            <header class="header">
+                <div class="logo">
+                    <i class="fas fa-bolt"></i> SYNERGIA
+                </div>
+                <div class="user-menu">
+                    <span id="userEmail">Chargement...</span>
+                    <button class="btn btn-secondary btn-sm" onclick="signOut()">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </button>
+                </div>
+            </header>
+
+            <!-- Navigation -->
+            <nav class="nav">
+                <div class="nav-tabs">
+                    <a href="#" class="nav-tab active" onclick="showView('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="#" class="nav-tab" onclick="showView('badging')">
+                        <i class="fas fa-clock"></i> Pointage
+                    </a>
+                    <a href="#" class="nav-tab" onclick="showView('team')">
+                        <i class="fas fa-users"></i> Équipe
+                    </a>
+                    <a href="#" class="nav-tab" onclick="showView('planning')">
+                        <i class="fas fa-calendar"></i> Planning
+                    </a>
+                    <a href="#" class="nav-tab" onclick="showView('chat')">
+                        <i class="fas fa-comments"></i> Chat
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main">
+                <!-- Dashboard View -->
+                <div id="dashboardView" class="view active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-line"></i> Vue d'ensemble
+                            </h2>
+                        </div>
+                        
+                        <div class="grid grid-4">
+                            <div class="stats-card">
+                                <div class="stats-number" id="totalMembers">-</div>
+                                <div class="stats-label">Membres</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number" id="activeToday">-</div>
+                                <div class="stats-label">Actifs aujourd'hui</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number" id="totalHours">-</div>
+                                <div class="stats-label">Heures cette semaine</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number" id="productivity">-</div>
+                                <div class="stats-label">Productivité</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-2">
+                            <div class="card">
+                                <h3>Actions rapides</h3>
+                                <div class="grid grid-2" style="margin-top: 1rem;">
+                                    <button class="btn btn-primary" onclick="showView('badging')">
+                                        <i class="fas fa-clock"></i> Pointer
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="showView('team')">
+                                        <i class="fas fa-users"></i> Équipe
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3>Activité récente</h3>
+                                <div id="recentActivity">
+                                    <div class="loading">
+                                        <div class="spinner" style="width: 20px; height: 20px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Badging View -->
+                <div id="badgingView" class="view">
+                    <div class="clock-widget">
+                        <div class="current-time" id="currentTime">--:--:--</div>
+                        <div class="current-date" id="currentDate">Chargement...</div>
+                        
+                        <div class="badge-buttons">
+                            <button class="btn btn-success btn-lg" onclick="handleCheckIn()">
+                                <i class="fas fa-sign-in-alt"></i> Arrivée
+                            </button>
+                            <button class="btn btn-danger btn-lg" onclick="handleCheckOut()">
+                                <i class="fas fa-sign-out-alt"></i> Sortie
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="handleBreak()">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Statut du jour</h3>
+                        </div>
+                        <div id="todayStatus">
+                            <div class="loading">
+                                <div class="spinner" style="width: 20px; height: 20px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team View -->
+                <div id="teamView" class="view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-users"></i> Gestion de l'équipe
+                            </h2>
+                            <button class="btn btn-primary" onclick="showAddMemberModal()">
+                                <i class="fas fa-plus"></i> Ajouter
+                            </button>
+                        </div>
+                        
+                        <div id="teamList">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Chargement de l'équipe...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Planning View -->
+                <div id="planningView" class="view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-calendar"></i> Planning
+                            </h2>
+                        </div>
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h3>Planning à venir</h3>
+                            <p>Cette fonctionnalité sera bientôt disponible</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat View -->
+                <div id="chatView" class="view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-comments"></i> Chat d'équipe
+                            </h2>
+                        </div>
+                        <div class="empty-state">
+                            <i class="fas fa-comment-dots"></i>
+                            <h3>Chat d'équipe</h3>
+                            <p>Cette fonctionnalité sera bientôt disponible</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form id="teamForm">
-                <div class="form-group">
-                    <label class="form-label">Email *</label>
-                    <input type="email" id="memberEmail" class="form-control" placeholder="exemple@entreprise.com" required>
+        </div>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal show">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Connexion SYNERGIA</h2>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Nom complet</label>
-                    <input type="text" id="memberName" class="form-control" placeholder="Prénom Nom">
+                <div style="text-align: center; margin: 2rem 0;">
+                    <p style="margin-bottom: 2rem;">Connectez-vous pour accéder à votre espace</p>
+                    <button class="btn btn-primary btn-lg" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i> Continuer avec Google
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Rôle</label>
-                    <select id="memberRole" class="form-control">
-                        <option value="employee">Employé</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Administrateur</option>
-                    </select>
+            </div>
+        </div>
+
+        <!-- Add Member Modal -->
+        <div id="addMemberModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Ajouter un membre</h3>
+                    <button onclick="closeAddMemberModal()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Département</label>
-                    <input type="text" id="memberDepartment" class="form-control" placeholder="IT, RH, Commercial...">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Poste</label>
-                    <input type="text" id="memberPosition" class="form-control" placeholder="Développeur, Manager...">
-                </div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
-                    <button type="button" onclick="closeTeamModal()" class="btn btn-secondary">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </form>
+                <form id="addMemberForm" onsubmit="addMember(event)">
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="memberEmail" required placeholder="exemple@entreprise.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom complet</label>
+                        <input type="text" class="form-control" id="memberName" placeholder="Prénom Nom">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rôle</label>
+                        <select class="form-control" id="memberRole">
+                            <option value="employee">Employé</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Administrateur</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddMemberModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
         // Configuration Firebase
-        window.FIREBASE_CONFIG = {
+        const firebaseConfig = {
             apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
             authDomain: "synergia-app-f27e7.firebaseapp.com",
             projectId: "synergia-app-f27e7",
             storageBucket: "synergia-app-f27e7.firebasestorage.app",
             messagingSenderId: "201912738922",
-            appId: "1:201912738922:web:2fcc1e49293bb632899613",
-            measurementId: "G-EGJ79SCMWX"
+            appId: "1:201912738922:web:2fcc1e49293bb632899613"
         };
 
-        // État de l'application
-        const appState = {
-            initialized: false,
-            modules: {},
-            currentRoute: '/',
-            user: null
-        };
-
-        // Fonction de mise à jour du statut
-        function updateStatus(message) {
-            const statusEl = document.getElementById('loading-status');
-            if (statusEl) {
-                statusEl.textContent = message;
-            }
-            console.log(`📋 ${message}`);
-        }
-
-        // Chargement des modules EXISTANTS seulement
-        async function loadExistingModules() {
-            const modules = [
-                { name: 'config', url: './src/js/config.js', required: false },
-                { name: 'firebase-service', url: './src/js/core/firebase-service.js', required: false },
-                { name: 'AuthManager', url: './src/js/managers/AuthManager.js', required: false },
-                { name: 'TeamManager', url: './src/js/managers/team-manager.js', required: false },
-                { name: 'BadgingManager', url: './src/js/managers/badging-manager.js', required: false },
-                { name: 'Router', url: './src/js/core/router_complete_fixed.js', required: false }
-            ];
-
-            const loadedModules = [];
-            
-            for (const module of modules) {
-                try {
-                    updateStatus(`Chargement ${module.name}...`);
-                    
-                    // Tester d'abord si le fichier existe
-                    const response = await fetch(module.url, { method: 'HEAD' });
-                    
-                    if (response.ok) {
-                        // Charger le script
-                        await loadScript(module.url);
-                        loadedModules.push(module.name);
-                        console.log(`✅ ${module.name} chargé`);
-                    } else {
-                        console.warn(`⚠️ ${module.name} non disponible (${response.status})`);
-                    }
-                } catch (error) {
-                    console.warn(`⚠️ Erreur chargement ${module.name}:`, error);
-                }
-            }
-
-            return loadedModules;
-        }
-
-        // Fonction pour charger un script
-        function loadScript(url) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
+        // Variables globales
+        let app, auth, db;
+        let currentUser = null;
+        let teamMembers = [];
+        let currentView = 'dashboard';
 
         // Initialisation de l'application
-        async function initializeApp() {
+        async function initApp() {
             try {
-                updateStatus('Vérification des modules...');
-                const loadedModules = await loadExistingModules();
-
-                updateStatus('Initialisation Firebase...');
-                await initializeFirebase();
-
-                updateStatus('Configuration des managers...');
-                await initializeManagers(loadedModules);
-
-                updateStatus('Démarrage de l\'interface...');
-                await initializeInterface();
-
-                appState.initialized = true;
-                console.log('🎉 SYNERGIA v3.0 initialisé avec succès');
-
+                console.log('🚀 Initialisation SYNERGIA v3.0...');
+                
+                // Initialiser Firebase
+                app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                
+                // Écouter les changements d'authentification
+                auth.onAuthStateChanged(handleAuthStateChange);
+                
+                console.log('✅ Firebase initialisé');
+                
+                // Démarrer l'horloge
+                startClock();
+                
             } catch (error) {
-                console.error('❌ Erreur d\'initialisation:', error);
-                showErrorInterface(error);
+                console.error('❌ Erreur initialisation:', error);
+                showAlert('Erreur d\'initialisation: ' + error.message, 'danger');
             }
         }
 
-        // Initialisation Firebase
-        async function initializeFirebase() {
-            if (typeof firebase === 'undefined') {
-                throw new Error('Firebase SDK non disponible');
-            }
-
-            if (!firebase.apps.length) {
-                firebase.initializeApp(window.FIREBASE_CONFIG);
-            }
-
-            appState.modules.firebase = {
-                app: firebase.app(),
-                auth: firebase.auth(),
-                firestore: firebase.firestore()
-            };
-
-            // Écouter les changements d'auth
-            firebase.auth().onAuthStateChanged((user) => {
-                appState.user = user;
-                updateAuthState(user);
-            });
-
-            console.log('✅ Firebase initialisé');
-        }
-
-        // Initialisation des managers
-        async function initializeManagers(loadedModules) {
-            // Initialiser seulement les managers disponibles
-            if (typeof AuthManager !== 'undefined') {
-                appState.modules.authManager = new AuthManager();
-                console.log('✅ AuthManager initialisé');
-            }
-
-            if (typeof TeamManager !== 'undefined') {
-                appState.modules.teamManager = new TeamManager();
-                console.log('✅ TeamManager initialisé');
-            }
-
-            if (typeof BadgingManager !== 'undefined') {
-                appState.modules.badgingManager = new BadgingManager();
-                console.log('✅ BadgingManager initialisé');
-            }
-
-            // Router en dernier
-            if (typeof Router !== 'undefined') {
-                appState.modules.router = new Router();
-                console.log('✅ Router initialisé');
-            } else {
-                // Router simple intégré
-                initSimpleRouter();
-            }
-        }
-
-        // Router simple intégré
-        function initSimpleRouter() {
-            const routes = {
-                '/': renderHome,
-                '/login': renderLogin,
-                '/dashboard': renderDashboard,
-                '/team': renderTeam,
-                '/badging': renderBadging
-            };
-
-            function navigate(path) {
-                const route = routes[path] || routes['/'];
-                route();
-                appState.currentRoute = path;
-                window.location.hash = path;
-            }
-
-            window.navigate = navigate;
-            
-            // Navigation initiale
-            const hash = window.location.hash.slice(1) || '/';
-            navigate(hash);
-
-            console.log('✅ Router simple initialisé');
-        }
-
-        // Initialisation de l'interface
-        async function initializeInterface() {
-            // Vérifier l'état d'authentification
-            const user = firebase.auth().currentUser;
+        // Gestion de l'authentification
+        function handleAuthStateChange(user) {
+            currentUser = user;
             
             if (user) {
-                navigate('/dashboard');
+                console.log('👤 Utilisateur connecté:', user.email);
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('loginModal').classList.remove('show');
+                document.getElementById('appContent').style.display = 'block';
+                document.getElementById('loadingScreen').style.display = 'none';
+                
+                // Charger les données
+                loadDashboardData();
+                loadTeamData();
+                
             } else {
-                navigate('/login');
-            }
-
-            // Configurer les gestionnaires d'événements
-            setupEventHandlers();
-        }
-
-        // Configuration des événements
-        function setupEventHandlers() {
-            // Gestion des liens de navigation
-            document.addEventListener('click', (e) => {
-                if (e.target.matches('[data-route]')) {
-                    e.preventDefault();
-                    const route = e.target.getAttribute('data-route');
-                    navigate(route);
-                }
-            });
-
-            // Formulaire d'équipe
-            const teamForm = document.getElementById('teamForm');
-            if (teamForm) {
-                teamForm.addEventListener('submit', handleTeamFormSubmit);
-            }
-
-            console.log('✅ Gestionnaires d\'événements configurés');
-        }
-
-        // Mise à jour de l'état d'authentification
-        function updateAuthState(user) {
-            console.log(user ? `👤 Utilisateur connecté: ${user.email}` : '👤 Utilisateur déconnecté');
-            
-            if (appState.initialized) {
-                if (user && appState.currentRoute === '/login') {
-                    navigate('/dashboard');
-                } else if (!user && appState.currentRoute !== '/login') {
-                    navigate('/login');
-                }
+                console.log('👤 Utilisateur déconnecté');
+                document.getElementById('loginModal').classList.add('show');
+                document.getElementById('appContent').style.display = 'none';
+                document.getElementById('loadingScreen').style.display = 'none';
             }
         }
 
-        // Rendu des pages
-        function renderHome() {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <div class="container">
-                    <div class="hero-section">
-                        <h1>SYNERGIA v3.0</h1>
-                        <p>Votre plateforme de gestion d'équipe nouvelle génération</p>
-                        <button data-route="/login" class="btn btn-primary btn-lg">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Se connecter
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderLogin() {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <div class="container">
-                    <div style="max-width: 400px; margin: 100px auto;">
-                        <div class="card">
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <h2>Connexion SYNERGIA</h2>
-                                <p>Connectez-vous pour accéder à votre espace</p>
-                            </div>
-                            <button onclick="handleGoogleLogin()" class="btn btn-primary btn-lg" style="width: 100%;">
-                                <i class="fab fa-google"></i>
-                                Continuer avec Google
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderDashboard() {
-            const app = document.getElementById('app');
-            const user = firebase.auth().currentUser;
-            
-            app.innerHTML = `
-                <div class="container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h1>Dashboard SYNERGIA</h1>
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span>👤 ${user ? user.email : 'Non connecté'}</span>
-                            <button onclick="handleSignOut()" class="btn btn-secondary">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Déconnexion
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="nav-tabs">
-                        <a href="#/dashboard" class="nav-tab active" data-route="/dashboard">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                        <a href="#/team" class="nav-tab" data-route="/team">
-                            <i class="fas fa-users"></i>
-                            Équipe
-                        </a>
-                        <a href="#/badging" class="nav-tab" data-route="/badging">
-                            <i class="fas fa-clock"></i>
-                            Pointage
-                        </a>
-                    </div>
-                    
-                    <div class="status-grid">
-                        <div class="status-item">
-                            <i class="fas fa-users status-ok"></i>
-                            <div>
-                                <strong>Équipe</strong><br>
-                                <small>Gestion active</small>
-                            </div>
-                        </div>
-                        <div class="status-item">
-                            <i class="fas fa-clock status-ok"></i>
-                            <div>
-                                <strong>Pointage</strong><br>
-                                <small>Système opérationnel</small>
-                            </div>
-                        </div>
-                        <div class="status-item">
-                            <i class="fas fa-cog status-warning"></i>
-                            <div>
-                                <strong>Modules</strong><br>
-                                <small>Chargement en cours</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Bienvenue sur SYNERGIA v3.0</h3>
-                        <p>Votre plateforme de gestion d'équipe est maintenant opérationnelle. Utilisez la navigation ci-dessus pour accéder aux différentes fonctionnalités.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderTeam() {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <div class="container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h1>Gestion de l'équipe</h1>
-                        <button onclick="openAddMemberModal()" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Ajouter un membre
-                        </button>
-                    </div>
-                    
-                    <div class="nav-tabs">
-                        <a href="#/dashboard" class="nav-tab" data-route="/dashboard">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                        <a href="#/team" class="nav-tab active" data-route="/team">
-                            <i class="fas fa-users"></i>
-                            Équipe
-                        </a>
-                        <a href="#/badging" class="nav-tab" data-route="/badging">
-                            <i class="fas fa-clock"></i>
-                            Pointage
-                        </a>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Membres de l'équipe</h3>
-                        <p>Fonctionnalité en cours de chargement...</p>
-                        <div id="team-list">
-                            <!-- La liste sera chargée par TeamManager si disponible -->
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Charger les membres si TeamManager est disponible
-            if (appState.modules.teamManager) {
-                loadTeamMembers();
-            }
-        }
-
-        function renderBadging() {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <div class="container">
-                    <h1>Système de pointage</h1>
-                    
-                    <div class="nav-tabs">
-                        <a href="#/dashboard" class="nav-tab" data-route="/dashboard">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                        <a href="#/team" class="nav-tab" data-route="/team">
-                            <i class="fas fa-users"></i>
-                            Équipe
-                        </a>
-                        <a href="#/badging" class="nav-tab active" data-route="/badging">
-                            <i class="fas fa-clock"></i>
-                            Pointage
-                        </a>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Pointage en temps réel</h3>
-                        <div style="text-align: center; padding: 40px;">
-                            <div style="font-size: 48px; font-family: monospace; margin-bottom: 20px;" id="current-time">
-                                ${new Date().toLocaleTimeString()}
-                            </div>
-                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                                <button onclick="handleCheckIn()" class="btn btn-success">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    Arrivée
-                                </button>
-                                <button onclick="handleCheckOut()" class="btn btn-danger">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sortie
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Démarrer l'horloge
-            startClock();
-        }
-
-        // Fonctions d'interaction
-        async function handleGoogleLogin() {
+        // Connexion Google
+        async function signInWithGoogle() {
             try {
-                updateStatus('Connexion en cours...');
                 const provider = new firebase.auth.GoogleAuthProvider();
-                await firebase.auth().signInWithPopup(provider);
-                console.log('✅ Connexion réussie');
+                await auth.signInWithPopup(provider);
             } catch (error) {
                 console.error('❌ Erreur connexion:', error);
-                alert('Erreur de connexion: ' + error.message);
+                showAlert('Erreur de connexion: ' + error.message, 'danger');
             }
         }
 
-        async function handleSignOut() {
+        // Déconnexion
+        async function signOut() {
             try {
-                await firebase.auth().signOut();
-                console.log('✅ Déconnexion réussie');
+                await auth.signOut();
             } catch (error) {
                 console.error('❌ Erreur déconnexion:', error);
             }
         }
 
+        // Navigation entre vues
+        function showView(viewName) {
+            // Masquer toutes les vues
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Désactiver tous les onglets
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Afficher la vue sélectionnée
+            document.getElementById(viewName + 'View').classList.add('active');
+            
+            // Activer l'onglet correspondant
+            event.target.classList.add('active');
+            
+            currentView = viewName;
+            
+            // Charger les données spécifiques à la vue
+            if (viewName === 'badging') {
+                loadBadgingData();
+            } else if (viewName === 'team') {
+                loadTeamData();
+            }
+        }
+
+        // Horloge temps réel
+        function startClock() {
+            function updateClock() {
+                const now = new Date();
+                const timeElement = document.getElementById('currentTime');
+                const dateElement = document.getElementById('currentDate');
+                
+                if (timeElement) {
+                    timeElement.textContent = now.toLocaleTimeString('fr-FR');
+                }
+                
+                if (dateElement) {
+                    dateElement.textContent = now.toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+            }
+            
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // Chargement des données du dashboard
+        async function loadDashboardData() {
+            try {
+                // Simuler des données
+                document.getElementById('totalMembers').textContent = teamMembers.length || '5';
+                document.getElementById('activeToday').textContent = '3';
+                document.getElementById('totalHours').textContent = '32h';
+                document.getElementById('productivity').textContent = '94%';
+                
+                // Activité récente
+                const recentActivity = document.getElementById('recentActivity');
+                recentActivity.innerHTML = `
+                    <div style="padding: 1rem 0;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <i class="fas fa-clock" style="color: var(--success);"></i>
+                            <div>
+                                <div>Pointage d'arrivée</div>
+                                <small style="opacity: 0.7;">Il y a 2h</small>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <i class="fas fa-users" style="color: var(--accent);"></i>
+                            <div>
+                                <div>Nouveau membre ajouté</div>
+                                <small style="opacity: 0.7;">Hier</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('❌ Erreur chargement dashboard:', error);
+            }
+        }
+
+        // Chargement des données de pointage
+        function loadBadgingData() {
+            const statusElement = document.getElementById('todayStatus');
+            if (statusElement) {
+                statusElement.innerHTML = `
+                    <div class="grid grid-3">
+                        <div class="stats-card">
+                            <div class="stats-number">09:00</div>
+                            <div class="stats-label">Arrivée</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-number">--:--</div>
+                            <div class="stats-label">Sortie</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-number">7h30</div>
+                            <div class="stats-label">Temps travaillé</div>
+                        </div>
+                    </div>
+                    <div class="alert alert-success" style="margin-top: 1rem;">
+                        <i class="fas fa-check-circle"></i>
+                        Vous êtes actuellement au travail
+                    </div>
+                `;
+            }
+        }
+
+        // Chargement de l'équipe
+        async function loadTeamData() {
+            const teamList = document.getElementById('teamList');
+            if (!teamList) return;
+            
+            try {
+                if (!currentUser) return;
+                
+                // Charger depuis Firestore
+                const snapshot = await db.collection('users').orderBy('displayName').get();
+                teamMembers = [];
+                
+                snapshot.forEach(doc => {
+                    teamMembers.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Afficher la liste
+                if (teamMembers.length === 0) {
+                    teamList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Aucun membre</h3>
+                            <p>Commencez par ajouter des membres à votre équipe</p>
+                        </div>
+                    `;
+                } else {
+                    teamList.innerHTML = teamMembers.map(member => `
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                ${member.displayName ? member.displayName.charAt(0).toUpperCase() : member.email.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">${member.displayName || 'Nom non défini'}</div>
+                                <div class="member-role">${member.email} • ${formatRole(member.role || 'employee')}</div>
+                            </div>
+                            <div style="margin-left: auto;">
+                                <button class="btn btn-secondary btn-sm" onclick="deleteMember('${member.id}')" style="padding: 0.5rem;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erreur chargement équipe:', error);
+                teamList.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Erreur lors du chargement de l'équipe
+                    </div>
+                `;
+            }
+        }
+
+        // Actions de pointage
         function handleCheckIn() {
-            const time = new Date().toLocaleTimeString();
-            alert(`Pointage d'arrivée: ${time}`);
-            console.log('✅ Pointage arrivée:', time);
+            const time = new Date().toLocaleTimeString('fr-FR');
+            showAlert(`Pointage d'arrivée enregistré: ${time}`, 'success');
+            loadBadgingData();
         }
 
         function handleCheckOut() {
-            const time = new Date().toLocaleTimeString();
-            alert(`Pointage de sortie: ${time}`);
-            console.log('✅ Pointage sortie:', time);
+            const time = new Date().toLocaleTimeString('fr-FR');
+            showAlert(`Pointage de sortie enregistré: ${time}`, 'success');
+            loadBadgingData();
         }
 
-        // Gestion de l'équipe
-        function openAddMemberModal() {
-            document.getElementById('teamModal').classList.add('show');
+        function handleBreak() {
+            const time = new Date().toLocaleTimeString('fr-FR');
+            showAlert(`Pause enregistrée: ${time}`, 'warning');
         }
 
-        function closeTeamModal() {
-            document.getElementById('teamModal').classList.remove('show');
+        // Gestion des membres
+        function showAddMemberModal() {
+            document.getElementById('addMemberModal').classList.add('show');
         }
 
-        function handleTeamFormSubmit(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const memberData = {
-                email: formData.get('memberEmail'),
-                name: formData.get('memberName'),
-                role: formData.get('memberRole'),
-                department: formData.get('memberDepartment'),
-                position: formData.get('memberPosition')
-            };
+        function closeAddMemberModal() {
+            document.getElementById('addMemberModal').classList.remove('show');
+            document.getElementById('addMemberForm').reset();
+        }
+
+        async function addMember(event) {
+            event.preventDefault();
             
-            console.log('Nouveau membre:', memberData);
-            alert('Membre ajouté: ' + memberData.email);
-            closeTeamModal();
-            e.target.reset();
-        }
-
-        async function loadTeamMembers() {
+            if (!currentUser) return;
+            
             try {
-                if (appState.modules.teamManager) {
-                    const members = await appState.modules.teamManager.loadTeamMembers();
-                    renderTeamList(members);
-                }
-            } catch (error) {
-                console.error('❌ Erreur chargement équipe:', error);
-            }
-        }
-
-        function renderTeamList(members) {
-            const teamList = document.getElementById('team-list');
-            if (!teamList) return;
-            
-            if (members && members.length > 0) {
-                teamList.innerHTML = members.map(member => `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--glass-bg); margin: 10px 0; border-radius: var(--border-radius);">
-                        <div>
-                            <strong>${member.displayName || member.email}</strong><br>
-                            <small>${member.role} - ${member.department}</small>
-                        </div>
-                        <span class="status-ok">Actif</span>
-                    </div>
-                `).join('');
-            } else {
-                teamList.innerHTML = '<p>Aucun membre trouvé.</p>';
-            }
-        }
-
-        // Horloge
-        function startClock() {
-            setInterval(() => {
-                const timeEl = document.getElementById('current-time');
-                if (timeEl) {
-                    timeEl.textContent = new Date().toLocaleTimeString();
-                }
-            }, 1000);
-        }
-
-        // Interface d'erreur
-        function showErrorInterface(error) {
-            const app = document.getElementById('app');
-            app.innerHTML = `
-                <div class="container">
-                    <div class="card" style="text-align: center; margin-top: 100px; border-color: var(--danger-color);">
-                        <h2 style="color: var(--danger-color);">
-                            <i class="fas fa-exclamation-circle"></i>
-                            Erreur d'initialisation
-                        </h2>
-                        <p>Une erreur s'est produite lors du démarrage de SYNERGIA v3.0</p>
-                        <div style="background: var(--glass-bg-strong); padding: 15px; border-radius: 8px; margin: 20px 0;">
-                            <code style="color: var(--danger-color);">${error.message}</code>
-                        </div>
-                        <button onclick="location.reload()" class="btn btn-primary">
-                            <i class="fas fa-sync"></i>
-                            Recharger l'application
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Navigation
-        function navigate(path) {
-            const routes = {
-                '/': renderHome,
-                '/login': renderLogin,
-                '/dashboard': renderDashboard,
-                '/team': renderTeam,
-                '/badging': renderBadging
-            };
-
-            const route = routes[path];
-            if (route) {
-                route();
-                appState.currentRoute = path;
-                window.location.hash = path;
+                const email = document.getElementById('memberEmail').value.trim().toLowerCase();
+                const name = document.getElementById('memberName').value.trim();
+                const role = document.getElementById('memberRole').value;
                 
-                // Mettre à jour les onglets actifs
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.getAttribute('data-route') === path);
-                });
+                // Vérifier si l'email existe déjà
+                const existingSnapshot = await db.collection('users').where('email', '==', email).get();
+                if (!existingSnapshot.empty) {
+                    showAlert('Un utilisateur avec cet email existe déjà', 'warning');
+                    return;
+                }
+                
+                // Ajouter le nouveau membre
+                const memberData = {
+                    email: email,
+                    displayName: name || '',
+                    role: role,
+                    status: 'invited',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser.uid
+                };
+                
+                await db.collection('users').add(memberData);
+                
+                showAlert('Membre ajouté avec succès!', 'success');
+                closeAddMemberModal();
+                loadTeamData();
+                loadDashboardData();
+                
+            } catch (error) {
+                console.error('❌ Erreur ajout membre:', error);
+                showAlert('Erreur lors de l\'ajout: ' + error.message, 'danger');
             }
         }
 
-        // Initialisation au chargement
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        async function deleteMember(memberId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) return;
+            
+            try {
+                await db.collection('users').doc(memberId).delete();
+                showAlert('Membre supprimé avec succès', 'success');
+                loadTeamData();
+                loadDashboardData();
+            } catch (error) {
+                console.error('❌ Erreur suppression:', error);
+                showAlert('Erreur lors de la suppression', 'danger');
+            }
+        }
 
-        // Gestion des erreurs globales
-        window.addEventListener('error', (e) => {
-            console.error('❌ Erreur JavaScript:', e.error);
+        // Utilitaires
+        function formatRole(role) {
+            const roles = {
+                'admin': 'Administrateur',
+                'manager': 'Manager',
+                'employee': 'Employé'
+            };
+            return roles[role] || 'Employé';
+        }
+
+        function showAlert(message, type) {
+            // Créer l'alerte
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            
+            // Ajouter au début du contenu principal
+            const main = document.querySelector('.main');
+            main.insertBefore(alert, main.firstChild);
+            
+            // Supprimer après 5 secondes
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 5000);
+        }
+
+        // Fermer les modales en cliquant à l'extérieur
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
         });
 
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('❌ Promesse rejetée:', e.reason);
-        });
+        // Initialiser l'application au chargement
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>

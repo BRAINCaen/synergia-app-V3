@@ -1,44 +1,162 @@
+# netlify.toml - Configuration Netlify pour SYNERGIA v3.0
+
+[build]
+  # Répertoire de publication
+  publish = "."
+  
+  # Commande de build (si nécessaire)
+  # command = "npm run build"
+
+[build.environment]
+  # Variables d'environnement
+  NODE_VERSION = "18"
+
+# Redirections et réécriture d'URL
+[[redirects]]
+  # SPA routing - toutes les routes vers index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["visitor"]}
+
+[[redirects]]
+  # Redirection pour les anciennes URLs
+  from = "/badging"
+  to = "/#/badging"
+  status = 301
+
+[[redirects]]
+  # Redirection pour le pointage
+  from = "/timeclock"
+  to = "/#/pointage"
+  status = 301
+
+[[redirects]]
+  # Redirection pour l'équipe
+  from = "/team"
+  to = "/#/team"
+  status = 301
+
+[[redirects]]
+  # Redirection pour le planning
+  from = "/planning"
+  to = "/#/planning"
+  status = 301
+
+# Headers personnalisés
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = '''
+    # Sécurité de base
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff" 
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Content Security Policy
+    Content-Security-Policy = """
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-        https://www.gstatic.com 
-        https://www.googleapis.com 
-        https://apis.google.com 
-        https://accounts.google.com 
-        https://cdn.jsdelivr.net 
-        https://cdnjs.cloudflare.com
-        https://www.googletagmanager.com
-        https://content.googleapis.com;
-      connect-src 'self' 
-        https://*.googleapis.com 
-        https://*.google.com 
-        https://*.firebaseapp.com 
-        https://identitytoolkit.googleapis.com
-        https://securetoken.googleapis.com
-        https://firebase.googleapis.com
-        https://content.googleapis.com
-        https://firebaseinstallations.googleapis.com
-        https://firebaseremoteconfig.googleapis.com
-        https://firebaselogging-pa.googleapis.com
-        wss://*.firebaseio.com
-        wss://*.firebaseapp.com;
-      frame-src 'self'
-        https://accounts.google.com
-        https://content.googleapis.com
-        https://*.firebaseapp.com;
-      style-src 'self' 'unsafe-inline' 
-        https://fonts.googleapis.com 
-        https://cdnjs.cloudflare.com;
-      font-src 'self' 
-        https://fonts.gstatic.com 
-        https://cdnjs.cloudflare.com;
-      img-src 'self' data: 
-        https://*.googleapis.com 
-        https://*.google.com 
-        https://*.firebaseapp.com;
-    '''
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
+      script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+      font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com;
+      img-src 'self' data: https: blob:;
+      connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests
+    """
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "*.png"
+  [headers.values]
+    Content-Type = "image/png"
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "*.jpg"
+  [headers.values]
+    Content-Type = "image/jpeg"
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "*.svg"
+  [headers.values]
+    Content-Type = "image/svg+xml"
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/src/templates/*"
+  [headers.values]
+    Content-Type = "text/html; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+# Configuration des fonctions (si utilisées)
+[functions]
+  directory = "functions"
+
+# Paramètres du build
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = false
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+# Configuration des formulaires
+[forms]
+  # Pas de formulaires Netlify pour cette app
+
+# Configuration du déploiement
+[context.production]
+  command = "echo 'Production build'"
+
+[context.deploy-preview]
+  command = "echo 'Deploy preview'"
+
+[context.branch-deploy]
+  command = "echo 'Branch deploy'"
+
+# Variables d'environnement par contexte
+[context.production.environment]
+  NODE_ENV = "production"
+  
+[context.deploy-preview.environment]
+  NODE_ENV = "preview"
+
+# Configuration Edge Functions (si nécessaire)
+# [[edge_functions]]
+#   function = "auth-check"
+#   path = "/api/*"

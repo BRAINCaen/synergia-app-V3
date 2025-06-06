@@ -399,7 +399,25 @@
             <p>Chargement de SYNERGIA v3.0...</p>
         </div>
     </div>
-
+<!-- Modal pour ajouter une note de pointage -->
+<div id="badgeNoteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Ajouter une note</h2>
+            <button class="close" onclick="closeBadgeNoteModal()">&times;</button>
+        </div>
+        <form id="badgeNoteForm">
+            <div class="form-group">
+                <label class="form-label">Note (optionnelle)</label>
+                <textarea id="badgeNote" class="form-control" rows="3" placeholder="Raison du retard, projet spécial, etc."></textarea>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
+                <button type="button" onclick="closeBadgeNoteModal()" class="btn btn-secondary">Annuler</button>
+                <button type="submit" class="btn btn-primary">Confirmer</button>
+            </div>
+        </form>
+    </div>
+</div>
     <!-- Modal pour l'équipe -->
     <div id="teamModal" class="modal">
         <div class="modal-content">

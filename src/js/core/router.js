@@ -724,3 +724,12 @@ class Router {
 
 // Export pour utilisation globale
 window.Router = Router;
+// À ajouter à la fin de votre src/js/core/router.js
+
+// Export pour utilisation globale (existant)
+window.Router = Router;
+
+// AJOUTER CES LIGNES :
+// Export pour utilisation en module ES6
+export { Router };
+export default Router;

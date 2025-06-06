@@ -620,6 +620,10 @@ class Router {
                 statusColor = 'text-info';
                 statusText = 'Journée terminée';
                 break;
+            case 'pointage':
+                case 'timeclock':
+                EventBus.emit('router:beforeNavigate', 'timeclock');
+                break;
         }
 
         const statusHTML = `

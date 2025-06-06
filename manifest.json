@@ -1,22 +1,56 @@
 {
-  "name": "SYNERGIA v3.0 - Gestion d'Équipe",
+  "name": "SYNERGIA v3.0",
   "short_name": "SYNERGIA",
-  "description": "Application complète de gestion d'équipe avec badging, planning, chat et gamification",
+  "description": "Plateforme de gestion d'équipe nouvelle génération",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0f23",
-  "theme_color": "#1a1a2e",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e94560",
   "orientation": "portrait-primary",
-  "categories": ["business", "productivity"],
-  "lang": "fr",
-  "dir": "ltr",
   "scope": "/",
+  "lang": "fr",
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e94560'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23e94560' rx='20'/%3E%3Ctext x='96' y='120' font-family='Arial' font-size='80' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23e94560' rx='50'/%3E%3Ctext x='256' y='320' font-family='Arial' font-size='200' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Pointage",
+      "short_name": "Pointage",
+      "description": "Accès rapide au pointage",
+      "url": "/#/badging",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23e94560' rx='10'/%3E%3Ctext x='48' y='58' font-family='Arial' font-size='32' fill='white' text-anchor='middle'%3E⏰%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Équipe",
+      "short_name": "Équipe",
+      "description": "Gestion de l'équipe",
+      "url": "/#/team",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23e94560' rx='10'/%3E%3Ctext x='48' y='58' font-family='Arial' font-size='32' fill='white' text-anchor='middle'%3E👥%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
 }

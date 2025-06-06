@@ -21,16 +21,375 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e94560'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     <meta name="theme-color" content="#1a1a2e">
     
-    <!-- CSS Modulaire -->
-    <link rel="stylesheet" href="./src/styles/variables.css">
-    <link rel="stylesheet" href="./src/styles/base.css">
-    <link rel="stylesheet" href="./src/styles/components.css">
-    <link rel="stylesheet" href="./src/styles/modules/team.css">
-    
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- =========================== -->
+    <!-- CSS VARIABLES & BASE STYLES -->
+    <!-- =========================== -->
+    <style>
+        /* Variables CSS (à extraire vers src/styles/variables.css plus tard) */
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #e94560;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            
+            --text-light: #ffffff;
+            --text-secondary: #b8b9ba;
+            --text-muted: #8a8b8c;
+            
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-bg-strong: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            
+            --border-radius: 0.5rem;
+            --border-radius-lg: 1rem;
+            --transition: 300ms ease-in-out;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        /* Base styles (à extraire vers src/styles/base.css plus tard) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Component styles (à extraire vers src/styles/components.css plus tard) */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin: 20px 0;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: var(--accent-color); color: white; }
+        .btn-success { background: var(--success-color); color: white; }
+        .btn-warning { background: var(--warning-color); color: #000; }
+        .btn-danger { background: var(--danger-color); color: white; }
+        .btn-secondary { 
+            background: var(--glass-bg); 
+            color: var(--text-light); 
+            border: 1px solid var(--glass-border); 
+        }
+        .btn-sm { padding: 8px 16px; font-size: 14px; min-width: auto; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .status-online { background: var(--success-color); color: white; }
+        .status-offline { background: var(--text-muted); color: white; }
+        .status-admin { background: var(--danger-color); color: white; }
+        .status-manager { background: var(--warning-color); color: #000; }
+        .status-employee { background: var(--info-color); color: white; }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--glass-bg-strong);
+            border-radius: var(--border-radius);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 12px 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-tab:hover {
+            background: var(--glass-bg);
+            color: var(--text-light);
+        }
+        
+        .nav-tab.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        
+        /* Table styles (à extraire vers src/styles/modules/team.css plus tard) */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            background: var(--glass-bg);
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: transparent;
+        }
+        
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .table th {
+            background: var(--glass-bg-strong);
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .table td {
+            color: var(--text-light);
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Form styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            background: var(--glass-bg);
+            color: var(--text-light);
+            font-size: 16px;
+            transition: all var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+        
+        select.form-control {
+            cursor: pointer;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--secondary-color);
+            margin: 20px;
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: var(--text-light);
+        }
+        
+        /* Grid layout */
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        
+        /* Stats cards */
+        .stats-card {
+            background: var(--glass-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+        
+        .stats-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .header { flex-direction: column; align-items: stretch; }
+            .nav-tabs { overflow-x: auto; padding-bottom: 8px; }
+            .nav-tab { white-space: nowrap; }
+            .table-container { font-size: 14px; }
+            .modal-content { margin: 10px; padding: 20px; }
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -80,32 +439,884 @@
         </div>
     </div>
 
-    <!-- Configuration -->
-    <script src="./src/js/config.js"></script>
-    
-    <!-- Core modules -->
-    <script src="./src/js/core/firebase.js"></script>
-    <script src="./src/js/core/router.js"></script>
-    <script src="./src/js/core/utils.js"></script>
-    
-    <!-- Managers -->
-    <script src="./src/js/managers/AuthManager.js"></script>
-    <script src="./src/js/managers/TeamManager.js"></script>
-    <!-- <script src="./src/js/managers/BadgingManager.js"></script> -->
-    <!-- <script src="./src/js/managers/ChatManager.js"></script> -->
-    
-    <!-- Components -->
-    <script src="./src/js/components/Navigation.js"></script>
-    <script src="./src/js/components/Modal.js"></script>
-    <script src="./src/js/components/Toast.js"></script>
-    
-    <!-- Views -->
-    <script src="./src/js/views/Dashboard.js"></script>
-    <script src="./src/js/views/Team.js"></script>
-    <script src="./src/js/views/Profile.js"></script>
-    
-    <!-- App initialization -->
-    <script src="./src/js/app.js"></script>
-    <script src="./src/js/main.js"></script>
+    <!-- ========================= -->
+    <!-- CONFIGURATION & FIREBASE  -->
+    <!-- ========================= -->
+    <script>
+        // Configuration Firebase
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+            authDomain: "synergia-app-f27e7.firebaseapp.com",
+            projectId: "synergia-app-f27e7",
+            storageBucket: "synergia-app-f27e7.firebasestorage.app",
+            messagingSenderId: "201912738922",
+            appId: "1:201912738922:web:2fcc1e49293bb632899613",
+            measurementId: "G-EGJ79SCMWX"
+        };
+
+        window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+    </script>
+
+    <!-- ================== -->
+    <!-- FIREBASE SERVICE   -->
+    <!-- ================== -->
+    <script>
+        /* À extraire vers src/js/core/firebase.js plus tard */
+        class FirebaseService {
+            constructor() {
+                this.app = null;
+                this.auth = null;
+                this.firestore = null;
+                this.isInitialized = false;
+            }
+
+            async initialize() {
+                try {
+                    console.log('🔥 Initialisation Firebase...');
+                    await this.waitForFirebase();
+                    
+                    this.app = firebase.initializeApp(FIREBASE_CONFIG);
+                    this.auth = firebase.auth();
+                    this.firestore = firebase.firestore();
+                    
+                    // Pas de setPersistence ici pour éviter l'erreur
+                    
+                    this.isInitialized = true;
+                    console.log('✅ Firebase initialisé');
+                    
+                    window.dispatchEvent(new CustomEvent('firebase:initialized'));
+                } catch (error) {
+                    console.error('❌ Erreur Firebase:', error);
+                    throw error;
+                }
+            }
+
+            waitForFirebase() {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const check = () => {
+                        if (typeof firebase !== 'undefined') {
+                            resolve();
+                        } else if (attempts < 50) {
+                            attempts++;
+                            setTimeout(check, 100);
+                        } else {
+                            reject(new Error('Firebase non disponible'));
+                        }
+                    };
+                    check();
+                });
+            }
+
+            getAuth() { return this.auth; }
+            getFirestore() { return this.firestore; }
+        }
+
+        window.firebaseService = new FirebaseService();
+    </script>
+
+    <!-- ================ -->
+    <!-- AUTH MANAGER     -->
+    <!-- ================ -->
+    <script>
+        /* À extraire vers src/js/managers/AuthManager.js plus tard */
+        class AuthManager {
+            constructor() {
+                this.currentUser = null;
+                this.userProfile = null;
+                this.init();
+            }
+
+            async init() {
+                await firebaseService.initialize();
+                this.auth = firebaseService.getAuth();
+                this.firestore = firebaseService.getFirestore();
+                
+                this.auth.onAuthStateChanged((user) => {
+                    this.handleAuthStateChange(user);
+                });
+            }
+
+            async handleAuthStateChange(user) {
+                this.currentUser = user;
+                
+                if (user) {
+                    await this.loadUserProfile(user.uid);
+                    this.emit('user:login', { user, profile: this.userProfile });
+                } else {
+                    this.userProfile = null;
+                    this.emit('user:logout');
+                }
+                
+                this.emit('auth:stateChanged', {
+                    user: this.currentUser,
+                    profile: this.userProfile,
+                    isAuthenticated: !!user
+                });
+            }
+
+            async signInWithGoogle() {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('email');
+                    provider.addScope('profile');
+                    provider.setCustomParameters({ prompt: 'select_account' });
+                    
+                    const result = await this.auth.signInWithPopup(provider);
+                    await this.createOrUpdateUserProfile(result.user);
+                    
+                    return { success: true, user: result.user };
+                } catch (error) {
+                    console.error('Erreur connexion Google:', error);
+                    throw error;
+                }
+            }
+
+            async signOut() {
+                try {
+                    await this.auth.signOut();
+                    return { success: true };
+                } catch (error) {
+                    console.error('Erreur déconnexion:', error);
+                    throw error;
+                }
+            }
+
+            async loadUserProfile(uid) {
+                try {
+                    const doc = await this.firestore.collection('users').doc(uid).get();
+                    if (doc.exists) {
+                        this.userProfile = { id: uid, ...doc.data() };
+                    } else {
+                        await this.createUserProfile(this.currentUser);
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement profil:', error);
+                }
+            }
+
+            async createOrUpdateUserProfile(user) {
+                const userRef = this.firestore.collection('users').doc(user.uid);
+                const userData = {
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                try {
+                    await userRef.set(userData, { merge: true });
+                    await this.loadUserProfile(user.uid);
+                } catch (error) {
+                    console.error('Erreur mise à jour profil:', error);
+                }
+            }
+
+            async createUserProfile(user) {
+                const userData = {
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    role: 'employee',
+                    department: '',
+                    position: '',
+                    xp: 0,
+                    level: 1,
+                    status: 'active',
+                    preferences: { theme: 'dark', notifications: true },
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await this.firestore.collection('users').doc(user.uid).set(userData);
+                this.userProfile = { id: user.uid, ...userData };
+            }
+
+            isAuthenticated() { return !!this.currentUser; }
+            getCurrentUser() { return this.currentUser; }
+            getUserProfile() { return this.userProfile; }
+
+            emit(eventName, data) {
+                window.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+            }
+        }
+
+        window.authManager = new AuthManager();
+    </script>
+
+    <!-- ================ -->
+    <!-- TEAM MANAGER     -->
+    <!-- ================ -->
+    <script>
+        /* À extraire vers src/js/managers/TeamManager.js plus tard */
+        class TeamManager {
+            constructor() {
+                this.firestore = null;
+                this.members = [];
+                this.isInitialized = false;
+                this.init();
+            }
+
+            async init() {
+                try {
+                    await this.waitForFirebase();
+                    this.firestore = firebaseService.getFirestore();
+                    this.isInitialized = true;
+                    console.log('✅ TeamManager initialisé');
+                } catch (error) {
+                    console.error('❌ Erreur TeamManager:', error);
+                }
+            }
+
+            async waitForFirebase() {
+                return new Promise((resolve) => {
+                    const check = () => {
+                        if (window.firebaseService && window.firebaseService.isInitialized) {
+                            resolve();
+                        } else {
+                            setTimeout(check, 100);
+                        }
+                    };
+                    check();
+                });
+            }
+
+            async loadTeamMembers() {
+                try {
+                    console.log('📄 Chargement des membres...');
+                    
+                    const snapshot = await this.firestore.collection('users')
+                        .orderBy('displayName')
+                        .get();
+                    
+                    this.members = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate(),
+                        updatedAt: doc.data().updatedAt?.toDate(),
+                        lastSeen: doc.data().lastSeen?.toDate()
+                    }));
+                    
+                    console.log(`✅ ${this.members.length} membres chargés`);
+                    this.emit('team:loaded', this.members);
+                    
+                    return this.members;
+                } catch (error) {
+                    console.error('❌ Erreur chargement équipe:', error);
+                    throw error;
+                }
+            }
+
+            async addMember(memberData) {
+                try {
+                    console.log('➕ Ajout membre:', memberData.email);
+                    
+                    // Vérifier si l'email existe déjà
+                    const existingUser = await this.findMemberByEmail(memberData.email);
+                    if (existingUser) {
+                        throw new Error('Un utilisateur avec cet email existe déjà');
+                    }
+
+                    const newMemberData = {
+                        email: memberData.email.toLowerCase().trim(),
+                        displayName: memberData.displayName?.trim() || '',
+                        role: memberData.role || 'employee',
+                        department: memberData.department?.trim() || '',
+                        position: memberData.position?.trim() || '',
+                        status: 'invited',
+                        xp: 0,
+                        level: 1,
+                        photoURL: '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        invitedBy: authManager.getCurrentUser()?.uid || null,
+                        preferences: { theme: 'dark', notifications: true }
+                    };
+
+                    const docRef = await this.firestore.collection('users').add(newMemberData);
+                    
+                    const newMember = { 
+                        id: docRef.id, 
+                        ...newMemberData,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    };
+                    
+                    this.members.push(newMember);
+                    
+                    console.log('✅ Membre ajouté:', newMember.email);
+                    this.emit('member:added', newMember);
+                    
+                    return newMember;
+                } catch (error) {
+                    console.error('❌ Erreur ajout membre:', error);
+                    throw error;
+                }
+            }
+
+            async updateMember(memberId, updates) {
+                try {
+                    console.log('🔄 Mise à jour membre:', memberId);
+                    
+                    const updateData = {
+                        ...updates,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await this.firestore.collection('users').doc(memberId).update(updateData);
+                    
+                    const memberIndex = this.members.findIndex(m => m.id === memberId);
+                    if (memberIndex !== -1) {
+                        this.members[memberIndex] = { 
+                            ...this.members[memberIndex], 
+                            ...updates,
+                            updatedAt: new Date()
+                        };
+                        
+                        console.log('✅ Membre mis à jour');
+                        this.emit('member:updated', this.members[memberIndex]);
+                        
+                        return this.members[memberIndex];
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur mise à jour membre:', error);
+                    throw error;
+                }
+            }
+
+            async deleteMember(memberId) {
+                try {
+                    console.log('🗑️ Suppression membre:', memberId);
+                    
+                    const currentUser = authManager.getCurrentUser();
+                    if (currentUser && currentUser.uid === memberId) {
+                        throw new Error('Impossible de supprimer votre propre compte');
+                    }
+
+                    await this.firestore.collection('users').doc(memberId).delete();
+                    
+                    const memberIndex = this.members.findIndex(m => m.id === memberId);
+                    if (memberIndex !== -1) {
+                        const deletedMember = this.members[memberIndex];
+                        this.members.splice(memberIndex, 1);
+                        
+                        console.log('✅ Membre supprimé');
+                        this.emit('member:deleted', { id: memberId, member: deletedMember });
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error('❌ Erreur suppression membre:', error);
+                    throw error;
+                }
+            }
+
+            async findMemberByEmail(email) {
+                try {
+                    const snapshot = await this.firestore.collection('users')
+                        .where('email', '==', email.toLowerCase().trim())
+                        .limit(1)
+                        .get();
+                    
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        return { id: doc.id, ...doc.data() };
+                    }
+                    
+                    return null;
+                } catch (error) {
+                    console.error('❌ Erreur recherche par email:', error);
+                    return null;
+                }
+            }
+
+            getMembers() { return [...this.members]; }
+
+            getTeamStats() {
+                const total = this.members.length;
+                const active = this.members.filter(m => m.status === 'active').length;
+                const invited = this.members.filter(m => m.status === 'invited').length;
+                const inactive = this.members.filter(m => m.status === 'inactive').length;
+                
+                const departments = [...new Set(
+                    this.members
+                        .map(m => m.department)
+                        .filter(d => d && d.trim())
+                )];
+                
+                return { total, active, invited, inactive, departments: departments.length };
+            }
+
+            emit(eventName, data) {
+                window.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+            }
+        }
+
+        window.teamManager = new TeamManager();
+    </script>
+
+    <!-- ============ -->
+    <!-- ROUTER       -->
+    <!-- ============ -->
+    <script>
+        /* À extraire vers src/js/core/router.js plus tard */
+        class Router {
+            constructor() {
+                this.currentPath = '/';
+                this.init();
+            }
+
+            navigate(path) {
+                window.location.hash = path;
+                this.render();
+            }
+
+            render() {
+                const hash = window.location.hash.slice(1) || '/';
+                const app = document.getElementById('app');
+                
+                const isAuthenticated = authManager.isAuthenticated();
+                
+                switch(hash) {
+                    case '/':
+                    case '/dashboard':
+                        if (isAuthenticated) {
+                            app.innerHTML = this.renderDashboard();
+                        } else {
+                            this.navigate('/login');
+                        }
+                        break;
+                    case '/login':
+                        app.innerHTML = this.renderLogin();
+                        break;
+                    case '/profile':
+                        if (isAuthenticated) {
+                            app.innerHTML = this.renderProfile();
+                        } else {
+                            this.navigate('/login');
+                        }
+                        break;
+                    case '/team':
+                        if (isAuthenticated) {
+                            app.innerHTML = this.renderTeam();
+                            this.loadTeamData();
+                        } else {
+                            this.navigate('/login');
+                        }
+                        break;
+                    default:
+                        app.innerHTML = this.render404();
+                }
+            }
+
+            async loadTeamData() {
+                try {
+                    await teamManager.loadTeamMembers();
+                    this.updateTeamView();
+                } catch (error) {
+                    console.error('Erreur chargement équipe:', error);
+                }
+            }
+
+            updateTeamView() {
+                const stats = teamManager.getTeamStats();
+                const members = teamManager.getMembers();
+                
+                // Mettre à jour les statistiques
+                if (document.getElementById('totalMembers')) {
+                    document.getElementById('totalMembers').textContent = stats.total;
+                    document.getElementById('activeMembers').textContent = stats.active;
+                    document.getElementById('invitedMembers').textContent = stats.invited;
+                    document.getElementById('totalDepartments').textContent = stats.departments;
+                }
+                
+                // Mettre à jour la table
+                this.renderMembersTable(members);
+            }
+
+            renderMembersTable(members) {
+                const tbody = document.getElementById('membersTableBody');
+                if (!tbody) return;
+                
+                tbody.innerHTML = members.map(member => `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 14px;">
+                                    ${member.photoURL ? 
+                                        `<img src="${member.photoURL}" alt="${member.displayName}">` : 
+                                        (member.displayName ? member.displayName[0].toUpperCase() : 'U')
+                                    }
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500;">${member.displayName || 'Sans nom'}</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">${member.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-${member.role}">${this.getRoleLabel(member.role)}</span></td>
+                        <td>${member.department || '-'}</td>
+                        <td>${member.position || '-'}</td>
+                        <td><span class="status-badge ${member.status === 'active' ? 'status-online' : 'status-offline'}">${this.getStatusLabel(member.status)}</span></td>
+                        <td>
+                            <button onclick="editMember('${member.id}')" class="btn btn-sm btn-secondary" style="margin-right: 8px;">Modifier</button>
+                            <button onclick="deleteMemberConfirm('${member.id}')" class="btn btn-sm btn-danger">Supprimer</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            getRoleLabel(role) {
+                const labels = { 'admin': 'Admin', 'manager': 'Manager', 'employee': 'Employé' };
+                return labels[role] || role;
+            }
+
+            getStatusLabel(status) {
+                const labels = { 'active': 'Actif', 'invited': 'Invité', 'inactive': 'Inactif' };
+                return labels[status] || status;
+            }
+
+            renderDashboard() {
+                const user = authManager.getCurrentUser();
+                
+                return `
+                    <div class="container">
+                        ${this.renderHeader()}
+                        ${this.renderNavigation('/dashboard')}
+                        
+                        <div class="grid grid-3">
+                            <div class="stats-card">
+                                <div class="stats-number">✅</div>
+                                <div class="stats-label">Phase 3 Complète</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number">🚀</div>
+                                <div class="stats-label">TeamManager Actif</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number">👥</div>
+                                <div class="stats-label">Gestion d'Équipe</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>🎉 Phase 3 - TeamManager terminée !</h2>
+                            <p>Le système de gestion d'équipe est maintenant opérationnel.</p>
+                            
+                            <div style="margin: 20px 0;">
+                                <h3>Nouvelles fonctionnalités :</h3>
+                                <ul style="margin: 16px 0; padding-left: 20px; color: var(--text-secondary);">
+                                    <li>✅ Gestion complète des membres d'équipe</li>
+                                    <li>✅ Ajout/modification/suppression de membres</li>
+                                    <li>✅ Gestion des rôles et départements</li>
+                                    <li>✅ Interface moderne avec tableaux et modales</li>
+                                    <li>✅ Statistiques d'équipe en temps réel</li>
+                                </ul>
+                            </div>
+                            
+                            <button onclick="router.navigate('/team')" class="btn btn-primary">
+                                👥 Voir l'équipe
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderTeam() {
+                return `
+                    <div class="container">
+                        ${this.renderHeader()}
+                        ${this.renderNavigation('/team')}
+                        
+                        <div class="grid grid-3">
+                            <div class="stats-card">
+                                <div class="stats-number" id="totalMembers">0</div>
+                                <div class="stats-label">Total Membres</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number" id="activeMembers">0</div>
+                                <div class="stats-label">Membres Actifs</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number" id="invitedMembers">0</div>
+                                <div class="stats-label">Invitations</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number" id="totalDepartments">0</div>
+                                <div class="stats-label">Départements</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h2>👥 Gestion d'équipe</h2>
+                                <button onclick="openAddMemberModal()" class="btn btn-primary">
+                                    + Ajouter un membre
+                                </button>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Membre</th>
+                                            <th>Rôle</th>
+                                            <th>Département</th>
+                                            <th>Poste</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="membersTableBody">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                                <div class="loading-spinner"></div>
+                                                <p style="margin-top: 16px;">Chargement des membres...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderLogin() {
+                return `
+                    <div class="container">
+                        <div style="max-width: 400px; margin: 100px auto;">
+                            <div class="card" style="text-align: center;">
+                                <h1>🔐 Connexion SYNERGIA</h1>
+                                <p style="margin: 20px 0; color: var(--text-secondary);">
+                                    Connectez-vous pour accéder à votre espace de travail.
+                                </p>
+                                <button onclick="handleGoogleLogin()" class="btn btn-primary" style="width: 100%; margin: 10px 0;">
+                                    🚀 Connexion avec Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderProfile() {
+                const user = authManager.getCurrentUser();
+                const profile = authManager.getUserProfile();
+                
+                return `
+                    <div class="container">
+                        ${this.renderHeader()}
+                        ${this.renderNavigation('/profile')}
+                        
+                        <div class="card">
+                            <h2>👤 Profil utilisateur</h2>
+                            <div style="margin: 20px 0;">
+                                <p><strong>Nom d'affichage:</strong> ${user.displayName || 'Non défini'}</p>
+                                <p><strong>Email:</strong> ${user.email}</p>
+                                <p><strong>Rôle:</strong> ${profile?.role || 'employee'}</p>
+                                <p><strong>Département:</strong> ${profile?.department || 'Non défini'}</p>
+                                <p><strong>Poste:</strong> ${profile?.position || 'Non défini'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderHeader() {
+                const user = authManager.getCurrentUser();
+                
+                return `
+                    <div class="header">
+                        <h1>🚀 SYNERGIA v3.0</h1>
+                        <div class="user-profile">
+                            <div class="user-avatar">
+                                ${user.photoURL ? 
+                                    `<img src="${user.photoURL}" alt="${user.displayName}">` : 
+                                    (user.displayName ? user.displayName[0].toUpperCase() : 'U')
+                                }
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">${user.displayName || 'Utilisateur'}</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">${user.email}</div>
+                            </div>
+                            <button onclick="handleSignOut()" class="btn btn-secondary" style="margin-left: 12px;">Déconnexion</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderNavigation(activePath) {
+                return `
+                    <div class="nav-tabs">
+                        <a href="#/dashboard" class="nav-tab ${activePath === '/dashboard' ? 'active' : ''}">📊 Dashboard</a>
+                        <a href="#/profile" class="nav-tab ${activePath === '/profile' ? 'active' : ''}">👤 Profil</a>
+                        <a href="#/team" class="nav-tab ${activePath === '/team' ? 'active' : ''}">👥 Équipe</a>
+                        <button class="nav-tab" onclick="alert('Bientôt disponible!')">⏰ Badging</button>
+                        <button class="nav-tab" onclick="alert('Bientôt disponible!')">💬 Chat</button>
+                        <button class="nav-tab" onclick="alert('Bientôt disponible!')">📅 Planning</button>
+                    </div>
+                `;
+            }
+
+            render404() {
+                return `
+                    <div class="container">
+                        <div class="card" style="text-align: center;">
+                            <h1>404 - Page non trouvée</h1>
+                            <button onclick="router.navigate('/dashboard')" class="btn btn-primary">Retour à l'accueil</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            init() {
+                window.addEventListener('hashchange', () => this.render());
+                
+                authManager.on?.('auth:stateChanged', () => {
+                    this.render();
+                });
+
+                teamManager.on?.('team:loaded', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.updateTeamView();
+                    }
+                });
+
+                teamManager.on?.('member:added', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.loadTeamData();
+                    }
+                });
+
+                teamManager.on?.('member:updated', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.loadTeamData();
+                    }
+                });
+
+                teamManager.on?.('member:deleted', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.loadTeamData();
+                    }
+                });
+            }
+        }
+
+        window.router = new Router();
+    </script>
+
+    <!-- ================================ -->
+    <!-- FONCTIONS D'INTERACTION          -->
+    <!-- ================================ -->
+    <script>
+        async function handleGoogleLogin() {
+            try {
+                await authManager.signInWithGoogle();
+                router.navigate('/dashboard');
+            } catch (error) {
+                alert('Erreur de connexion: ' + error.message);
+            }
+        }
+
+        async function handleSignOut() {
+            try {
+                await authManager.signOut();
+                router.navigate('/login');
+            } catch (error) {
+                alert('Erreur de déconnexion: ' + error.message);
+            }
+        }
+
+        function openAddMemberModal() {
+            document.getElementById('modalTitle').textContent = 'Ajouter un membre';
+            document.getElementById('teamForm').reset();
+            document.getElementById('teamModal').classList.add('show');
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('show');
+        }
+
+        async function editMember(memberId) {
+            const members = teamManager.getMembers();
+            const member = members.find(m => m.id === memberId);
+            
+            if (!member) return;
+            
+            document.getElementById('modalTitle').textContent = 'Modifier le membre';
+            document.getElementById('memberEmail').value = member.email;
+            document.getElementById('memberName').value = member.displayName || '';
+            document.getElementById('memberRole').value = member.role || 'employee';
+            document.getElementById('memberDepartment').value = member.department || '';
+            document.getElementById('memberPosition').value = member.position || '';
+            
+            document.getElementById('teamForm').dataset.editId = memberId;
+            document.getElementById('teamModal').classList.add('show');
+        }
+
+        async function deleteMemberConfirm(memberId) {
+            const members = teamManager.getMembers();
+            const member = members.find(m => m.id === memberId);
+            
+            if (!member) return;
+            
+            if (confirm(`Êtes-vous sûr de vouloir supprimer ${member.displayName || member.email} ?`)) {
+                try {
+                    await teamManager.deleteMember(memberId);
+                    alert('Membre supprimé avec succès');
+                } catch (error) {
+                    alert('Erreur lors de la suppression: ' + error.message);
+                }
+            }
+        }
+
+        // Gestionnaire du formulaire
+        document.addEventListener('DOMContentLoaded', () => {
+            const teamForm = document.getElementById('teamForm');
+            
+            teamForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    email: document.getElementById('memberEmail').value,
+                    displayName: document.getElementById('memberName').value,
+                    role: document.getElementById('memberRole').value,
+                    department: document.getElementById('memberDepartment').value,
+                    position: document.getElementById('memberPosition').value
+                };
+                
+                try {
+                    const editId = teamForm.dataset.editId;
+                    
+                    if (editId) {
+                        await teamManager.updateMember(editId, formData);
+                        alert('Membre modifié avec succès');
+                        delete teamForm.dataset.editId;
+                    } else {
+                        await teamManager.addMember(formData);
+                        alert('Membre ajouté avec succès');
+                    }
+                    
+                    closeTeamModal();
+                } catch (error) {
+                    alert('Erreur: ' + error.message);
+                }
+            });
+            
+            // Fermer la modale en cliquant à côté
+            document.getElementById('teamModal').addEventListener('click', (e) => {
+                if (e.target.id === 'teamModal') {
+                    closeTeamModal();
+                }
+            });
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 SYNERGIA v3.0 - Solution hybride chargée');
+        });
+    </script>
 </body>
 </html>

@@ -2,20 +2,33 @@
  * Router pour SYNERGIA v3.0
  * Fichier: src/js/core/router.js
  */
+
+// Import du module de pointage
+import { timeClockModule } from '../modules/timeclock-init.js';
+
 class Router {
     constructor() {
         this.routes = {};
         this.currentRoute = null;
         this.isInitialized = false;
+        this.currentController = null; // Pour gérer les contrôleurs
         
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupRoutes();
         this.setupEventListeners();
-        this.isInitialized = true;
         
+        // Initialiser le module de pointage
+        try {
+            await timeClockModule.initialize();
+            console.log('🕐 Module de pointage initialisé');
+        } catch (error) {
+            console.error('❌ Erreur initialisation module pointage:', error);
+        }
+        
+        this.isInitialized = true;
         console.log('🧭 Router initialisé');
         
         this.handleInitialRoute();
@@ -44,6 +57,19 @@ class Router {
                 render: () => this.renderBadging(),
                 requiresAuth: true,
                 onLoad: () => this.loadBadgingData()
+            },
+            // Nouvelle route pour le module de pointage avancé
+            '/pointage': {
+                title: 'Pointage Avancé',
+                render: () => this.renderTimeClock(),
+                requiresAuth: true,
+                onLoad: () => this.loadTimeClockData()
+            },
+            '/timeclock': {
+                title: 'Pointage Avancé',
+                render: () => this.renderTimeClock(),
+                requiresAuth: true,
+                onLoad: () => this.loadTimeClockData()
             },
             '/team': {
                 title: 'Équipe',
@@ -92,6 +118,31 @@ class Router {
 
         window.addEventListener('auth:stateChanged', (e) => {
             this.handleAuthStateChange(e.detail);
+        });
+
+        // Écouter les événements du module de pointage
+        window.addEventListener('timeclock:navigate', () => {
+            this.navigate('/pointage');
+        });
+
+        // Écouter les raccourcis clavier globaux
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey) {
+                switch (e.key) {
+                    case 'P':
+                        e.preventDefault();
+                        this.navigate('/pointage');
+                        break;
+                    case 'D':
+                        e.preventDefault();
+                        this.navigate('/dashboard');
+                        break;
+                    case 'B':
+                        e.preventDefault();
+                        this.navigate('/badging');
+                        break;
+                }
+            }
         });
     }
 
@@ -181,6 +232,12 @@ class Router {
     }
 
     cleanup() {
+        // Nettoyer le contrôleur précédent
+        if (this.currentController && typeof this.currentController.destroy === 'function') {
+            this.currentController.destroy();
+            this.currentController = null;
+        }
+
         if (window.badgingManager) {
             window.badgingManager.stopClock();
         }
@@ -275,9 +332,13 @@ class Router {
                         <div class="card">
                             <h3>Actions rapides</h3>
                             <div class="quick-actions">
-                                <button class="btn btn-primary" data-route="/badging">
+                                <button class="btn btn-primary" data-route="/pointage">
                                     <i class="fas fa-clock"></i>
-                                    Pointage
+                                    Pointage Avancé
+                                </button>
+                                <button class="btn btn-secondary" data-route="/badging">
+                                    <i class="fas fa-stopwatch"></i>
+                                    Pointage Simple
                                 </button>
                                 <button class="btn btn-success" data-route="/team">
                                     <i class="fas fa-users"></i>
@@ -307,6 +368,17 @@ class Router {
                 ${this.renderNavigation()}
                 
                 <div class="badging-content">
+                    <div class="card" style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div style="text-align: center;">
+                            <h3 style="margin: 0 0 10px 0;">💡 Nouveau !</h3>
+                            <p style="margin: 0 0 15px 0;">Découvrez notre nouveau module de pointage avancé avec historique complet et exports.</p>
+                            <button class="btn" style="background: white; color: #667eea; border: none; font-weight: 600;" data-route="/pointage">
+                                <i class="fas fa-rocket"></i>
+                                Essayer le pointage avancé
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-2">
                         <div class="clock-widget">
                             <div class="current-time" id="currentTime">--:--:--</div>
@@ -344,6 +416,82 @@ class Router {
                 </div>
             </div>
         `;
+    }
+
+    // NOUVELLE MÉTHODE : Rendu du module de pointage avancé
+    async renderTimeClock() {
+        try {
+            console.log('🕐 Chargement du module de pointage avancé...');
+            
+            // Charger le CSS du module si pas déjà fait
+            this.loadStylesheet('./src/styles/modules/timeclock.css');
+            
+            // Charger le template HTML
+            const response = await fetch('./src/templates/timeclock.html');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const html = await response.text();
+            const app = document.getElementById('app');
+            
+            // Injecter le contenu avec header et navigation
+            app.innerHTML = `
+                <div class="container">
+                    ${this.renderHeader()}
+                    ${this.renderNavigation()}
+                    ${html}
+                </div>
+            `;
+            
+            console.log('✅ Template de pointage chargé');
+            
+        } catch (error) {
+            console.error('❌ Erreur chargement template pointage:', error);
+            this.renderError('Impossible de charger le module de pointage avancé');
+        }
+    }
+
+    // NOUVELLE MÉTHODE : Charger les données du module de pointage
+    async loadTimeClockData() {
+        try {
+            console.log('📊 Chargement des données de pointage...');
+            
+            // Importer et initialiser le contrôleur
+            const { TimeClockController } = await import('../controllers/timeclock-controller.js');
+            this.currentController = new TimeClockController();
+            
+            // Exposer globalement pour debug
+            window.timeClockController = this.currentController;
+            
+            console.log('✅ Contrôleur de pointage initialisé');
+            
+        } catch (error) {
+            console.error('❌ Erreur chargement contrôleur pointage:', error);
+            this.showError('Erreur d\'initialisation du module de pointage');
+        }
+    }
+
+    // Méthode utilitaire pour charger les CSS
+    loadStylesheet(href) {
+        if (!document.querySelector(`link[href="${href}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.onload = () => console.log(`✅ Stylesheet chargé: ${href}`);
+            link.onerror = () => console.error(`❌ Erreur chargement stylesheet: ${href}`);
+            document.head.appendChild(link);
+        }
+    }
+
+    // Méthode utilitaire pour afficher les erreurs
+    showError(message) {
+        this.emit('notification:show', {
+            title: 'Erreur',
+            message: message,
+            type: 'error',
+            duration: 5000
+        });
     }
 
     renderTeam() {
@@ -506,9 +654,14 @@ class Router {
                     <i class="fas fa-tachometer-alt"></i>
                     Dashboard
                 </a>
-                <a href="#/badging" class="nav-tab" data-route="/badging">
+                <a href="#/pointage" class="nav-tab" data-route="/pointage">
                     <i class="fas fa-clock"></i>
                     Pointage
+                    <span class="nav-badge new">Nouveau!</span>
+                </a>
+                <a href="#/badging" class="nav-tab" data-route="/badging">
+                    <i class="fas fa-stopwatch"></i>
+                    Pointage Simple
                 </a>
                 <a href="#/team" class="nav-tab" data-route="/team">
                     <i class="fas fa-users"></i>
@@ -531,7 +684,7 @@ class Router {
     }
 
     // ==================
-    // CHARGEMENT DES DONNÉES
+    // CHARGEMENT DES DONNÉES (existant)
     // ==================
 
     async loadDashboardData() {
@@ -619,10 +772,6 @@ class Router {
             case 'finished':
                 statusColor = 'text-info';
                 statusText = 'Journée terminée';
-                break;
-            case 'pointage':
-                case 'timeclock':
-                EventBus.emit('router:beforeNavigate', 'timeclock');
                 break;
         }
 
@@ -854,253 +1003,17 @@ class Router {
 
     destroy() {
         this.cleanup();
+        
+        // Détruire le module de pointage
+        if (timeClockModule) {
+            timeClockModule.destroy();
+        }
+        
         this.routes = {};
         this.currentRoute = null;
         console.log('🧹 Router nettoyé');
     }
 }
 
-<!-- Page Pointage - À intégrer dans votre router -->
-<div id="timeclock-page" class="page-content">
-    <!-- En-tête avec statut actuel -->
-    <div class="timeclock-header">
-        <div class="current-status" id="current-status">
-            <div class="status-icon" id="status-icon">⏰</div>
-            <div class="status-info">
-                <h2 id="status-title">Non pointé</h2>
-                <p id="status-subtitle">Cliquez pour pointer votre arrivée</p>
-                <div id="current-session-timer" class="session-timer" style="display: none;">
-                    <span id="work-timer">00:00</span>
-                    <span id="break-indicator" style="display: none;">📱 En pause</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Actions de pointage -->
-    <div class="timeclock-actions">
-        <!-- Pointage principal -->
-        <div class="main-actions">
-            <button id="clock-in-btn" class="action-btn primary" style="display: none;">
-                <i class="icon">🕐</i>
-                <span>Pointer l'arrivée</span>
-            </button>
-            
-            <button id="clock-out-btn" class="action-btn danger" style="display: none;">
-                <i class="icon">🏠</i>
-                <span>Pointer la sortie</span>
-            </button>
-            
-            <button id="training-btn" class="action-btn secondary">
-                <i class="icon">📚</i>
-                <span>En formation</span>
-            </button>
-        </div>
-
-        <!-- Actions de pause -->
-        <div class="break-actions" id="break-actions" style="display: none;">
-            <button id="start-break-btn" class="action-btn secondary">
-                <i class="icon">⏸️</i>
-                <span>Commencer une pause</span>
-            </button>
-            
-            <button id="end-break-btn" class="action-btn success" style="display: none;">
-                <i class="icon">▶️</i>
-                <span>Terminer la pause</span>
-            </button>
-        </div>
-
-        <!-- Options distanciel -->
-        <div class="remote-options">
-            <label class="checkbox-container">
-                <input type="checkbox" id="remote-work-checkbox">
-                <span class="checkmark"></span>
-                Travail à distance
-            </label>
-            <button id="location-btn" class="icon-btn" title="Localisation actuelle">📍</button>
-        </div>
-    </div>
-
-    <!-- Zone de commentaires -->
-    <div class="comment-section" id="comment-section" style="display: none;">
-        <h3 id="comment-title">Commentaire</h3>
-        <textarea id="comment-input" placeholder="Ajouter un commentaire (optionnel)..." rows="3"></textarea>
-        <div class="comment-actions">
-            <button id="comment-cancel" class="btn secondary">Annuler</button>
-            <button id="comment-confirm" class="btn primary">Confirmer</button>
-        </div>
-    </div>
-
-    <!-- Statistiques du jour -->
-    <div class="daily-stats">
-        <h3>Aujourd'hui</h3>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value" id="today-work-time">00:00</div>
-                <div class="stat-label">Temps travaillé</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="today-break-time">00:00</div>
-                <div class="stat-label">Temps pause</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="today-overtime">00:00</div>
-                <div class="stat-label">Heures sup.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Historique -->
-    <div class="timeclock-history">
-        <div class="history-header">
-            <h3>Historique des pointages</h3>
-            <div class="history-controls">
-                <select id="period-select">
-                    <option value="week">Cette semaine</option>
-                    <option value="month">Ce mois</option>
-                    <option value="custom">Période personnalisée</option>
-                </select>
-                <button id="export-btn" class="btn secondary">📥 Exporter</button>
-            </div>
-        </div>
-
-        <!-- Filtres personnalisés -->
-        <div class="custom-period" id="custom-period" style="display: none;">
-            <div class="date-inputs">
-                <input type="date" id="start-date">
-                <span>à</span>
-                <input type="date" id="end-date">
-                <button id="apply-filter" class="btn primary">Appliquer</button>
-            </div>
-        </div>
-
-        <!-- Résumé de la période -->
-        <div class="period-summary">
-            <div class="summary-stats">
-                <div class="summary-item">
-                    <span class="summary-label">Temps total:</span>
-                    <span class="summary-value" id="period-total-time">00:00</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Jours travaillés:</span>
-                    <span class="summary-value" id="period-days-worked">0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Heures sup.:</span>
-                    <span class="summary-value" id="period-overtime">00:00</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Jours formation:</span>
-                    <span class="summary-value" id="period-training-days">0</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Liste des entrées -->
-        <div class="entries-list" id="entries-list">
-            <!-- Les entrées seront chargées ici -->
-        </div>
-    </div>
-
-    <!-- Modal d'export -->
-    <div id="export-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Exporter les données</h3>
-                <button class="modal-close" id="export-modal-close">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="export-options">
-                    <label>Format:</label>
-                    <select id="export-format">
-                        <option value="csv">CSV (Excel)</option>
-                        <option value="json">JSON</option>
-                    </select>
-                </div>
-                <div class="export-period">
-                    <label>Période:</label>
-                    <input type="date" id="export-start-date">
-                    <span>à</span>
-                    <input type="date" id="export-end-date">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="export-cancel" class="btn secondary">Annuler</button>
-                <button id="export-download" class="btn primary">Télécharger</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de confirmation admin -->
-    <div id="admin-edit-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Modifier le pointage</h3>
-                <button class="modal-close" id="admin-modal-close">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="admin-clock-in">Heure d'arrivée:</label>
-                    <input type="datetime-local" id="admin-clock-in">
-                </div>
-                <div class="form-group">
-                    <label for="admin-clock-out">Heure de sortie:</label>
-                    <input type="datetime-local" id="admin-clock-out">
-                </div>
-                <div class="form-group">
-                    <label for="admin-comment">Commentaire de modification:</label>
-                    <textarea id="admin-comment" rows="3" placeholder="Raison de la modification..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="admin-cancel" class="btn secondary">Annuler</button>
-                <button id="admin-save" class="btn primary">Sauvegarder</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Template pour les entrées d'historique -->
-<template id="entry-template">
-    <div class="entry-item" data-entry-id="">
-        <div class="entry-header">
-            <div class="entry-date"></div>
-            <div class="entry-badges">
-                <span class="badge remote" style="display: none;">📱 Distanciel</span>
-                <span class="badge training" style="display: none;">📚 Formation</span>
-                <span class="badge late" style="display: none;">⏰ Retard</span>
-            </div>
-            <div class="entry-actions">
-                <button class="admin-edit-btn" style="display: none;" title="Modifier (Admin)">✏️</button>
-            </div>
-        </div>
-        <div class="entry-details">
-            <div class="time-info">
-                <span class="clock-in">
-                    <strong>Arrivée:</strong> <span class="time-value"></span>
-                </span>
-                <span class="clock-out">
-                    <strong>Sortie:</strong> <span class="time-value"></span>
-                </span>
-            </div>
-            <div class="duration-info">
-                <span class="work-duration">
-                    <strong>Travaillé:</strong> <span class="duration-value"></span>
-                </span>
-                <span class="break-duration">
-                    <strong>Pauses:</strong> <span class="duration-value"></span>
-                </span>
-            </div>
-            <div class="comments" style="display: none;">
-                <div class="comment-in"></div>
-                <div class="comment-out"></div>
-            </div>
-            <div class="breaks-list" style="display: none;">
-                <strong>Détail des pauses:</strong>
-                <div class="breaks-content"></div>
-            </div>
-        </div>
-    </div>
-</template>
 // Export pour utilisation globale
 window.Router = Router;

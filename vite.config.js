@@ -16,6 +16,9 @@ export default defineConfig({
     }
   },
 
+  // Configuration des assets publics
+  publicDir: 'public',
+
   // Optimisations
   build: {
     target: 'es2020',

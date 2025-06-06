@@ -1,286 +1,163 @@
 // src/js/main.js
-// Point d'entrée principal de SYNERGIA v3.0
+// Point d'entrée principal SYNERGIA v3.0 avec Vite
 
-import { App } from './core/App.js';
-import { Logger } from './utils/Logger.js';
+// Import Firebase ES6 (remplace les CDN)
+import { initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
+import { getAnalytics } from 'firebase/analytics'
+
+// Import des styles
+import '/src/styles/main.css'
+
+// Configuration Firebase avec variables Vite
+const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+}
 
 // Configuration globale
 const CONFIG = {
     version: '3.0.0',
     environment: import.meta.env.DEV ? 'development' : 'production',
     debug: import.meta.env.DEV,
-    firebase: {
-        apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
-        authDomain: "synergia-app-f27e7.firebaseapp.com",
-        projectId: "synergia-app-f27e7",
-        storageBucket: "synergia-app-f27e7.appspot.com",
-        messagingSenderId: "201912738922",
-        appId: "1:201912738922:web:2fcc1e49293bb632899613",
-        measurementId: "G-EGJ79SCMWX"
-    }
-};
+    firebase: firebaseConfig
+}
 
-// Logger global
-const logger = new Logger('SYNERGIA', CONFIG.debug);
+// Initialiser Firebase
+console.log('🔥 Initialisation Firebase avec Vite...')
+const app = initializeApp(firebaseConfig)
+const auth = getAuth(app)
+const db = getFirestore(app)
+const storage = getStorage(app)
+const analytics = getAnalytics(app)
 
-/**
- * Gestionnaire d'erreurs global
- */
-window.addEventListener('error', (event) => {
-    logger.error('Erreur globale:', event.error);
-    
-    // Afficher erreur en développement
-    if (CONFIG.debug) {
-        console.error('Erreur détaillée:', event);
-    }
-    
-    // En production, logger vers service externe
-    if (CONFIG.environment === 'production') {
-        // TODO: Intégrer service de monitoring (Sentry, etc.)
-    }
-});
+// Exposer Firebase globalement pour compatibilité avec ton code existant
+window.firebase = {
+    app,
+    auth: () => auth,
+    firestore: () => db,
+    storage: () => storage,
+    analytics: () => analytics
+}
 
-/**
- * Gestionnaire des promesses rejetées
- */
-window.addEventListener('unhandledrejection', (event) => {
-    logger.error('Promise rejetée:', event.reason);
-    event.preventDefault(); // Évite les erreurs console en dev
-});
+// Exposer les instances directement aussi
+window.auth = auth
+window.db = db
+window.storage = storage
 
-/**
- * Animation de la barre de progression du loading
- */
+console.log('✅ Firebase initialisé avec Vite!')
+
+// Logger simple pour remplacer temporairement
+const logger = {
+    info: (...args) => console.log('📘', ...args),
+    error: (...args) => console.error('❌', ...args),
+    warn: (...args) => console.warn('⚠️', ...args)
+}
+
+// Animation de la barre de progression
 function animateLoadingProgress() {
-    const progressBar = document.getElementById('progress-bar');
-    if (!progressBar) return;
+    const progressBar = document.getElementById('progress-bar')
+    if (!progressBar) return
     
-    let progress = 0;
     const steps = [
-        { percent: 20, duration: 300, label: 'Chargement des modules...' },
-        { percent: 40, duration: 400, label: 'Configuration Firebase...' },
-        { percent: 60, duration: 500, label: 'Initialisation des managers...' },
-        { percent: 80, duration: 300, label: 'Préparation de l\'interface...' },
-        { percent: 100, duration: 200, label: 'Finalisation...' }
-    ];
+        { percent: 20, duration: 300, label: 'Initialisation Firebase...' },
+        { percent: 40, duration: 200, label: 'Chargement des modules...' },
+        { percent: 60, duration: 300, label: 'Configuration Vite...' },
+        { percent: 80, duration: 200, label: 'Préparation de l\'interface...' },
+        { percent: 100, duration: 150, label: 'Finalisation...' }
+    ]
     
-    let currentStep = 0;
+    let currentStep = 0
     
     function nextStep() {
-        if (currentStep >= steps.length) return;
+        if (currentStep >= steps.length) return
         
-        const step = steps[currentStep];
-        progress = step.percent;
+        const step = steps[currentStep]
+        progressBar.style.width = `${step.percent}%`
         
-        progressBar.style.width = `${progress}%`;
-        
-        // Mettre à jour le texte si disponible
-        const statusElement = document.querySelector('.loading-content p');
+        const statusElement = document.querySelector('.loading-content p')
         if (statusElement && step.label) {
-            statusElement.textContent = step.label;
+            statusElement.textContent = step.label
         }
         
-        currentStep++;
+        currentStep++
         
         if (currentStep < steps.length) {
-            setTimeout(nextStep, step.duration);
+            setTimeout(nextStep, step.duration)
+        } else {
+            // Quand terminé, charger l'ancienne logique
+            setTimeout(loadLegacyApp, 300)
         }
     }
     
-    // Démarrer l'animation
-    setTimeout(nextStep, 100);
+    setTimeout(nextStep, 100)
 }
 
-/**
- * Masquer l'écran de chargement
- */
+// Masquer l'écran de chargement
 function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loading-screen');
-    const appContainer = document.getElementById('app');
+    const loadingScreen = document.getElementById('loading-screen')
+    const appContainer = document.getElementById('app')
     
     if (loadingScreen && appContainer) {
-        // Animation de sortie
-        loadingScreen.style.opacity = '0';
-        loadingScreen.style.transform = 'scale(0.95)';
+        loadingScreen.style.opacity = '0'
+        loadingScreen.style.transform = 'scale(0.95)'
         
         setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            appContainer.style.display = 'grid';
+            loadingScreen.style.display = 'none'
+            appContainer.style.display = 'grid'
             
-            // Animation d'entrée de l'app
-            appContainer.style.opacity = '0';
-            appContainer.style.transform = 'translateY(20px)';
+            appContainer.style.opacity = '0'
+            appContainer.style.transform = 'translateY(20px)'
             
             requestAnimationFrame(() => {
-                appContainer.style.transition = 'all 0.5s ease';
-                appContainer.style.opacity = '1';
-                appContainer.style.transform = 'translateY(0)';
-            });
-        }, 300);
+                appContainer.style.transition = 'all 0.5s ease'
+                appContainer.style.opacity = '1'
+                appContainer.style.transform = 'translateY(0)'
+            })
+        }, 300)
     }
 }
 
-/**
- * Gestionnaire de performance
- */
-function initPerformanceMonitoring() {
-    // Mesurer les métriques de performance
-    if ('performance' in window) {
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const navigation = performance.getEntriesByType('navigation')[0];
-                const loadTime = navigation.loadEventEnd - navigation.loadEventStart;
-                
-                logger.info('Performance:', {
-                    loadTime: `${loadTime}ms`,
-                    domContentLoaded: `${navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart}ms`,
-                    firstPaint: performance.getEntriesByName('first-paint')[0]?.startTime || 'N/A'
-                });
-                
-                // Analytics de performance
-                if (window.gtag) {
-                    gtag('event', 'page_load_time', {
-                        value: Math.round(loadTime)
-                    });
-                }
-            }, 0);
-        });
-    }
-}
-
-/**
- * Détection des capacités du navigateur
- */
-function detectBrowserCapabilities() {
-    const capabilities = {
-        serviceWorker: 'serviceWorker' in navigator,
-        pushNotifications: 'PushManager' in window,
-        webRTC: 'RTCPeerConnection' in window,
-        geolocation: 'geolocation' in navigator,
-        camera: 'mediaDevices' in navigator,
-        storage: {
-            localStorage: 'localStorage' in window,
-            indexedDB: 'indexedDB' in window,
-            webSQL: 'openDatabase' in window
-        },
-        graphics: {
-            canvas: 'getContext' in document.createElement('canvas'),
-            webGL: !!document.createElement('canvas').getContext('webgl')
-        }
-    };
-    
-    logger.info('Capacités du navigateur:', capabilities);
-    
-    // Stocker pour usage par les managers
-    window.SYNERGIA_CAPABILITIES = capabilities;
-    
-    // Avertissements pour les fonctionnalités manquantes critiques
-    if (!capabilities.localStorage) {
-        logger.warn('localStorage non disponible - fonctionnalités limitées');
-    }
-    
-    if (!capabilities.serviceWorker) {
-        logger.warn('Service Worker non supporté - pas de mode hors ligne');
-    }
-    
-    return capabilities;
-}
-
-/**
- * Configuration PWA
- */
-function initPWA() {
-    // Manifest
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            try {
-                const registration = await navigator.serviceWorker.register('/sw.js');
-                logger.info('Service Worker enregistré:', registration);
-                
-                // Vérifier les mises à jour
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Nouvelle version disponible
-                            logger.info('Nouvelle version de l\'app disponible');
-                            
-                            // TODO: Afficher notification de mise à jour
-                            if (window.SYNERGIA?.notificationManager) {
-                                window.SYNERGIA.notificationManager.showUpdateNotification();
-                            }
-                        }
-                    });
-                });
-                
-            } catch (error) {
-                logger.error('Erreur Service Worker:', error);
-            }
-        });
-    }
-    
-    // Événement d'installation PWA
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        // TODO: Afficher bouton d'installation personnalisé
-        logger.info('PWA installable détectée');
-    });
-}
-
-/**
- * Initialisation de l'application
- */
-async function initApp() {
+// Charger l'ancienne logique (temporaire, pour migration progressive)
+async function loadLegacyApp() {
     try {
-        logger.info(`🚀 Démarrage SYNERGIA v${CONFIG.version}`);
-        logger.info(`Environnement: ${CONFIG.environment}`);
+        logger.info('🚀 Démarrage SYNERGIA v3.0 avec Vite')
         
-        // Démarrer l'animation de chargement
-        animateLoadingProgress();
+        // Émettre l'événement firebase:ready pour les anciens managers
+        document.dispatchEvent(new CustomEvent('firebase:ready', { 
+            detail: { auth, db, storage, analytics } 
+        }))
         
-        // Détection des capacités
-        const capabilities = detectBrowserCapabilities();
+        // Importer et démarrer tes managers existants
+        // (On les importera progressivement)
         
-        // Configuration PWA
-        initPWA();
+        // Pour l'instant, juste afficher l'app
+        hideLoadingScreen()
         
-        // Monitoring de performance
-        initPerformanceMonitoring();
+        logger.info('✅ SYNERGIA démarré avec Vite!')
         
-        // Initialiser l'application principale
-        const app = new App(CONFIG);
-        
-        // Exposer globalement pour le debug
+        // Exposer pour debug
         if (CONFIG.debug) {
-            window.SYNERGIA = app;
-            window.CONFIG = CONFIG;
-            logger.info('🔧 Mode debug activé - App disponible sur window.SYNERGIA');
+            window.CONFIG = CONFIG
+            logger.info('🔧 Mode debug - Firebase et Config disponibles sur window')
         }
-        
-        // Initialiser l'app
-        await app.init();
-        
-        // Masquer le loading après initialisation
-        setTimeout(hideLoadingScreen, 800);
-        
-        logger.info('✅ SYNERGIA initialisé avec succès');
         
     } catch (error) {
-        logger.error('❌ Erreur lors de l\'initialisation:', error);
-        
-        // Afficher erreur à l'utilisateur
-        showCriticalError(error);
+        logger.error('❌ Erreur lors de l\'initialisation:', error)
+        showCriticalError(error)
     }
 }
 
-/**
- * Affichage d'erreur critique
- */
+// Affichage d'erreur critique
 function showCriticalError(error) {
-    const loadingScreen = document.getElementById('loading-screen');
+    const loadingScreen = document.getElementById('loading-screen')
     if (loadingScreen) {
         loadingScreen.innerHTML = `
             <div style="text-align: center; color: white; max-width: 500px; padding: 2rem;">
@@ -297,25 +174,25 @@ function showCriticalError(error) {
                     Recharger l'application
                 </button>
             </div>
-        `;
+        `
     }
 }
 
-/**
- * Démarrage de l'application
- */
+// Hot Module Replacement pour le développement
+if (import.meta.hot) {
+    import.meta.hot.accept()
+    logger.info('🔥 Hot Module Replacement activé')
+}
+
+// Démarrage de l'application
 document.addEventListener('DOMContentLoaded', () => {
-    logger.info('DOM prêt, initialisation de l\'application...');
-    initApp();
-});
+    logger.info('DOM prêt avec Vite, initialisation Firebase...')
+    animateLoadingProgress()
+})
 
-// Gestion du rechargement de page
+// Gestion du rechargement
 window.addEventListener('beforeunload', () => {
-    if (window.SYNERGIA) {
-        logger.info('Nettoyage avant fermeture...');
-        window.SYNERGIA.cleanup();
-    }
-});
+    logger.info('Nettoyage avant fermeture...')
+})
 
-// Export pour les tests
-export { CONFIG, initApp };
+console.log('🚀 SYNERGIA v3.0 avec Vite - Point d\'entrée chargé!')

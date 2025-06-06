@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYNERGIA v3.0</title>
     
-    <!-- CSP corrigé pour Font Awesome -->
+    <!-- CSP optimisé -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googletagmanager.com;
@@ -27,10 +27,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Font Awesome pour les icônes -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- STYLES INTÉGRÉS -->
+    <!-- Styles intégrés pour éviter les erreurs 404 -->
     <style>
         /* Variables CSS */
         :root {
@@ -76,7 +76,6 @@
             padding: 20px;
         }
         
-        /* Component styles */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -105,12 +104,9 @@
             display: inline-block;
             text-align: center;
             min-width: 120px;
-            position: relative;
-            overflow: hidden;
         }
         
         .btn:hover { transform: translateY(-2px); }
-        .btn:active { transform: translateY(0) scale(0.98); }
         .btn-primary { background: var(--accent-color); color: white; }
         .btn-success { background: var(--success-color); color: white; }
         .btn-warning { background: var(--warning-color); color: #000; }
@@ -120,99 +116,8 @@
             color: var(--text-light); 
             border: 1px solid var(--glass-border); 
         }
-        .btn-info { background: var(--info-color); color: white; }
         .btn-sm { padding: 8px 16px; font-size: 14px; min-width: auto; }
         .btn-lg { padding: 16px 32px; font-size: 18px; min-width: 180px; }
-        .btn-icon { 
-            min-width: auto; 
-            padding: 8px; 
-            width: 40px; 
-            height: 40px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-        
-        .status-online { background: var(--success-color); color: white; }
-        .status-offline { background: var(--text-muted); color: white; }
-        .status-admin { background: var(--danger-color); color: white; }
-        .status-manager { background: var(--warning-color); color: #000; }
-        .status-employee { background: var(--info-color); color: white; }
-        .status-present { background: var(--success-color); color: white; }
-        .status-absent { background: var(--danger-color); color: white; }
-        .status-late { background: var(--warning-color); color: #000; }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--glass-bg-strong);
-            border-radius: var(--border-radius);
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            overflow: hidden;
-        }
-        
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .loading-spinner::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 60px;
-            height: 60px;
-            margin: -30px 0 0 -30px;
-            border: 2px solid rgba(233, 69, 96, 0.1);
-            border-radius: 50%;
-            animation: pulse-ring 2s infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(1.3); opacity: 0; }
-        }
         
         .loading-container {
             display: flex;
@@ -223,752 +128,55 @@
             gap: 20px;
         }
         
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 16px;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        .header-left h1 {
-            background: linear-gradient(45deg, var(--accent-color), #ff6b9d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 0;
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .nav-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .nav-tab {
-            padding: 12px 20px;
-            background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all var(--transition);
-            text-decoration: none;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-        }
-        
-        .nav-tab::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background: var(--accent-color);
-            transition: all var(--transition);
-            transform: translateX(-50%);
-        }
-        
-        .nav-tab:hover {
-            background: var(--glass-bg);
-            color: var(--text-light);
-        }
-        
-        .nav-tab:hover::after {
-            width: 100%;
-            background: var(--text-light);
-        }
-        
-        .nav-tab.active {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-        
-        .nav-tab.active::after {
-            width: 100%;
-        }
-        
-        /* Grid layout */
-        .grid {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        }
-        
-        .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-        
-        .grid-4 {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        }
-        
-        /* Stats cards */
-        .stats-card {
-            background: var(--glass-bg);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--glass-border);
-            text-align: center;
-            transition: all var(--transition);
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
-        }
-        
-        .stats-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-bottom: 8px;
-            transition: transform var(--transition);
-        }
-        
-        .stats-card:hover .stats-number {
-            transform: scale(1.1);
-        }
-        
-        .stats-label {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        /* Badging specific styles */
-        .clock-widget {
-            background: var(--glass-bg-strong);
-            padding: 40px;
-            border-radius: var(--border-radius-lg);
-            text-align: center;
-            border: 1px solid var(--glass-border);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .clock-widget::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(233, 69, 96, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-            pointer-events: none;
-        }
-        
-        @keyframes rotate {
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
-        .current-time {
-            font-size: 48px;
-            font-weight: bold;
-            color: var(--text-light);
-            margin-bottom: 16px;
-            font-family: 'Courier New', monospace;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .current-date {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 30px;
-            text-transform: capitalize;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .badge-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .badge-status {
-            background: var(--glass-bg);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
-        }
-        
-        /* Status overview */
-        .status-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-            padding: 20px 0;
-        }
-        
-        .current-status {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 20px;
-            background: var(--glass-bg);
-            border-radius: var(--border-radius);
-            border: 1px solid var(--glass-border);
-        }
-        
-        .current-status h4 {
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .current-status p {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .current-status .fas {
-            font-size: 12px;
-        }
-        
-        .time-info {
-            text-align: center;
-            padding: 16px;
-            background: var(--glass-bg);
-            border-radius: var(--border-radius);
-            border: 1px solid var(--glass-border);
-        }
-        
-        .time-display {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--text-light);
-            font-family: 'Courier New', monospace;
-        }
-        
-        .time-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        /* Team specific styles */
-        .team-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .team-list {
-            min-height: 200px;
-        }
-
-        .team-member {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid var(--glass-border);
-            transition: all var(--transition);
-            position: relative;
-            border-radius: var(--border-radius);
-            margin-bottom: 8px;
-            animation: fadeInUp 0.3s ease-out;
-        }
-
-        .team-member:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-1px);
-        }
-
-        .team-member:hover .member-actions {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .team-member:last-child {
-            border-bottom: none;
-        }
-
-        .member-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            margin-right: 16px;
-            overflow: hidden;
-        }
-
-        .member-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .member-info {
-            flex: 1;
-        }
-
-        .member-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .member-email {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .member-meta {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            font-size: 13px;
-        }
-
-        .member-actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transform: translateX(10px);
-            transition: all var(--transition);
-        }
-
-        /* Status indicators */
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-            position: relative;
-        }
-
-        .status-dot.online { 
-            background: var(--success-color);
-        }
-
-        .status-dot.online::after {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            border-radius: 50%;
-            background: var(--success-color);
-            opacity: 0.3;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.away { background: var(--warning-color); }
-        .status-dot.offline { background: var(--text-muted); }
-
-        @keyframes pulse {
-            0% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.1; transform: scale(1.5); }
-            100% { opacity: 0.3; transform: scale(1); }
-        }
-
-        /* Empty states */
-        .empty-state {
+        .error-container {
             text-align: center;
             padding: 60px 20px;
-            color: var(--text-muted);
         }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-
-        /* Form styles */
-        .form-group {
+        
+        .error-container h2 {
+            color: var(--danger-color);
             margin-bottom: 20px;
-            position: relative;
         }
         
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-light);
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
+        .module-status {
             background: var(--glass-bg);
-            color: var(--text-light);
-            font-size: 16px;
-            transition: all var(--transition);
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .form-control::placeholder {
-            color: var(--text-muted);
-        }
-        
-        select.form-control {
-            cursor: pointer;
-        }
-        
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.show .modal-content {
-            animation: modalSlideIn 0.3s ease-out;
-        }
-        
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        
-        .modal-content {
-            background: var(--secondary-color);
-            margin: 20px;
-            padding: 30px;
-            border-radius: var(--border-radius-lg);
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-        
-        .close {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: var(--text-muted);
-            line-height: 1;
-        }
-        
-        .close:hover {
-            color: var(--text-light);
-        }
-
-        /* Login page styles */
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h2 {
-            margin-bottom: 10px;
-            color: var(--text-light);
-        }
-
-        .login-header p {
-            color: var(--text-secondary);
-        }
-
-        .divider {
-            text-align: center;
+            padding: 15px;
+            border-radius: var(--border-radius);
             margin: 20px 0;
-            position: relative;
         }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: var(--glass-border);
+        
+        .module-status ul {
+            list-style: none;
+            padding: 0;
         }
-
-        .divider span {
-            background: var(--secondary-color);
-            padding: 0 15px;
-            color: var(--text-muted);
-        }
-
-        /* Hero section */
-        .hero-section {
-            text-align: center;
-            padding: 100px 0;
-            position: relative;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(233, 69, 96, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .hero-section h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, var(--accent-color), #ff6b9d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-section p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-        }
-
-        .hero-actions {
-            margin-top: 40px;
-        }
-
-        /* Quick actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .quick-actions .btn {
+        
+        .module-status li {
+            padding: 8px 0;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 20px;
-            flex-direction: column;
-            min-width: auto;
+            gap: 10px;
         }
-
-        .quick-actions .btn i {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        /* Activity list */
-        .activity-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--glass-border);
-            gap: 15px;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .activity-item span {
-            flex: 1;
-        }
-
-        .activity-item small {
-            color: var(--text-muted);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card {
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        .team-member:nth-child(1) { animation-delay: 0.1s; }
-        .team-member:nth-child(2) { animation-delay: 0.2s; }
-        .team-member:nth-child(3) { animation-delay: 0.3s; }
-        .team-member:nth-child(4) { animation-delay: 0.4s; }
-        .team-member:nth-child(5) { animation-delay: 0.5s; }
-
-        /* Utilities */
-        .text-center { text-align: center; }
-        .text-success { color: var(--success-color); }
-        .text-danger { color: var(--danger-color); }
-        .text-warning { color: var(--warning-color); }
-        .text-info { color: var(--info-color); }
-        .text-muted { color: var(--text-muted); }
+        
+        .status-ok { color: var(--success-color); }
+        .status-error { color: var(--danger-color); }
         
         /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 16px; }
-            .header { flex-direction: column; align-items: stretch; }
-            .nav-tabs { overflow-x: auto; padding-bottom: 8px; }
-            .nav-tab { white-space: nowrap; min-width: 120px; }
-            .modal-content { margin: 10px; padding: 20px; }
-            .current-time { font-size: 36px; }
-            .badge-buttons { flex-direction: column; align-items: center; }
-            .btn-lg { width: 100%; }
-            .hero-section h1 { font-size: 2rem; }
-            .team-member { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 12px; 
-                padding: 12px;
-            }
-            .member-info { text-align: center; }
-            .grid-4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-            .status-overview { grid-template-columns: 1fr; }
-            .current-status { grid-column: 1; }
-            .member-actions {
-                opacity: 1;
-                transform: translateX(0);
-                margin-top: 12px;
-            }
-            .badge-buttons .btn {
-                min-width: auto;
-                flex: 1;
-            }
-            .clock-widget {
-                padding: 20px;
-            }
-        }
-
-        /* Focus styles for accessibility */
-        .btn:focus,
-        .form-control:focus,
-        .nav-tab:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
-        }
-
-        .btn:focus:not(:focus-visible),
-        .form-control:focus:not(:focus-visible),
-        .nav-tab:focus:not(:focus-visible) {
-            outline: none;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--glass-bg);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d63651;
         }
     </style>
 </head>
@@ -980,69 +188,7 @@
         </div>
     </div>
 
-    <!-- Modal pour l'équipe -->
-    <div id="teamModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Ajouter un membre</h2>
-                <button class="close" onclick="closeTeamModal()">&times;</button>
-            </div>
-            <form id="teamForm">
-                <div class="form-group">
-                    <label class="form-label">Email *</label>
-                    <input type="email" id="memberEmail" class="form-control" placeholder="exemple@entreprise.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nom complet</label>
-                    <input type="text" id="memberName" class="form-control" placeholder="Prénom Nom">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Rôle</label>
-                    <select id="memberRole" class="form-control">
-                        <option value="employee">Employé</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Administrateur</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Département</label>
-                    <input type="text" id="memberDepartment" class="form-control" placeholder="IT, RH, Commercial...">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Poste</label>
-                    <input type="text" id="memberPosition" class="form-control" placeholder="Développeur, Manager...">
-                </div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
-                    <button type="button" onclick="closeTeamModal()" class="btn btn-secondary">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal pour ajouter une note de pointage -->
-    <div id="badgeNoteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Ajouter une note</h2>
-                <button class="close" onclick="closeBadgeNoteModal()">&times;</button>
-            </div>
-            <form id="badgeNoteForm">
-                <div class="form-group">
-                    <label class="form-label">Note (optionnelle)</label>
-                    <textarea id="badgeNote" class="form-control" rows="3" placeholder="Raison du retard, projet spécial, etc."></textarea>
-                </div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
-                    <button type="button" onclick="closeBadgeNoteModal()" class="btn btn-secondary">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Confirmer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ========================= -->
-    <!-- CONFIGURATION & FIREBASE  -->
-    <!-- ========================= -->
+    <!-- Configuration Firebase -->
     <script>
         // Configuration Firebase
         const FIREBASE_CONFIG = {
@@ -1056,29 +202,21 @@
         };
 
         window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+        
+        // Configuration APP
+        window.APP_CONFIG = {
+            name: 'SYNERGIA v3.0',
+            version: '3.0.4',
+            environment: 'production',
+            debug: true
+        };
     </script>
 
-    <!-- ================== -->
-    <!-- MODULES IMPORT     -->
-    <!-- ================== -->
-    
-    <!-- Firebase Service (doit être chargé en premier) -->
-    <script src="src/js/core/firebase-service.js"></script>
-    
-    <!-- Managers (après Firebase) -->
-    <script src="src/js/managers/AuthManager.js"></script>
-    <script src="src/js/managers/team-manager.js"></script>
-    <script src="src/js/managers/badging-manager.js"></script>
-    
-    <!-- Router (après les managers) -->
-    <script src="src/js/core/router.js"></script>
-    
-    <!-- ================================ -->
-    <!-- INITIALISATION DES SERVICES     -->
-    <!-- ================================ -->
+    <!-- Chargement conditionnel des modules -->
     <script>
-        // Variable pour vérifier si tous les scripts sont chargés
-        let scriptsLoaded = {
+        // État du chargement des modules
+        const moduleLoadState = {
+            config: false,
             firebase: false,
             auth: false,
             team: false,
@@ -1086,570 +224,226 @@
             router: false
         };
 
-        // Fonction pour vérifier si tous les scripts sont chargés
-        function checkAllScriptsLoaded() {
-            return Object.values(scriptsLoaded).every(loaded => loaded);
+        // URLs des modules à tester
+        const moduleUrls = {
+            config: './src/js/config.js',
+            firebase: './src/js/core/firebase-service.js',
+            auth: './src/js/managers/AuthManager.js',
+            team: './src/js/managers/team-manager.js',
+            badging: './src/js/managers/badging-manager.js',
+            router: './src/js/core/router_complete_fixed.js'
+        };
+
+        // Fonction pour tester l'existence d'un fichier
+        async function fileExists(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch {
+                return false;
+            }
         }
 
-        // Marquer les scripts comme chargés
-        window.addEventListener('load', () => {
-            // Vérifier que toutes les classes sont disponibles
-            if (typeof FirebaseService !== 'undefined') scriptsLoaded.firebase = true;
-            if (typeof AuthManager !== 'undefined') scriptsLoaded.auth = true;
-            if (typeof TeamManager !== 'undefined') scriptsLoaded.team = true;
-            if (typeof BadgingManager !== 'undefined') scriptsLoaded.badging = true;
-            if (typeof Router !== 'undefined') scriptsLoaded.router = true;
+        // Fonction pour charger un script
+        function loadScript(url, id) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = url;
+                script.id = id;
+                script.onload = () => {
+                    console.log(`✅ Module chargé: ${id}`);
+                    moduleLoadState[id] = true;
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.warn(`❌ Échec chargement: ${id}`);
+                    reject(new Error(`Failed to load ${id}`));
+                };
+                document.head.appendChild(script);
+            });
+        }
 
-            // Si tout est chargé, initialiser
-            if (checkAllScriptsLoaded()) {
-                initializeApp();
-            } else {
-                console.warn('❌ Certains scripts ne sont pas chargés:', scriptsLoaded);
-                // Réessayer après un délai
-                setTimeout(() => {
-                    if (typeof Router !== 'undefined') {
-                        initializeApp();
-                    } else {
-                        showLoadError();
-                    }
-                }, 2000);
-            }
-        });
-
-        // Fonction pour initialiser l'application
+        // Fonction d'initialisation principale
         async function initializeApp() {
-            try {
-                console.log('🚀 SYNERGIA v3.0 - Initialisation...');
+            console.log('🚀 SYNERGIA v3.0 - Démarrage...');
 
-                // Vérifier que toutes les classes sont disponibles
-                if (typeof FirebaseService === 'undefined') {
-                    throw new Error('FirebaseService non disponible');
+            try {
+                // Tester la disponibilité des modules
+                const moduleTests = await Promise.allSettled(
+                    Object.entries(moduleUrls).map(async ([id, url]) => {
+                        const exists = await fileExists(url);
+                        return { id, url, exists };
+                    })
+                );
+
+                console.log('📋 État des modules:');
+                moduleTests.forEach(test => {
+                    if (test.status === 'fulfilled') {
+                        const { id, exists } = test.value;
+                        console.log(`${exists ? '✅' : '❌'} ${id}: ${exists ? 'disponible' : 'manquant'}`);
+                    }
+                });
+
+                // Charger les modules disponibles
+                const availableModules = moduleTests
+                    .filter(test => test.status === 'fulfilled' && test.value.exists)
+                    .map(test => test.value);
+
+                if (availableModules.length === 0) {
+                    throw new Error('Aucun module disponible - Mode fallback');
                 }
-                if (typeof Router === 'undefined') {
-                    throw new Error('Router non disponible');
+
+                // Charger les modules dans l'ordre
+                for (const { id, url } of availableModules) {
+                    try {
+                        await loadScript(url, id);
+                    } catch (error) {
+                        console.warn(`⚠️ Échec chargement ${id}:`, error);
+                    }
                 }
+
+                // Attendre un peu pour que les classes soient définies
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 // Initialiser Firebase Service
-                window.firebaseService = new FirebaseService();
-                await window.firebaseService.waitForInitialization();
+                if (typeof FirebaseService !== 'undefined') {
+                    window.firebaseService = new FirebaseService();
+                    await window.firebaseService.waitForInitialization();
+                    console.log('✅ Firebase Service initialisé');
+                } else {
+                    throw new Error('FirebaseService non disponible');
+                }
 
-                // Initialiser les managers
-                window.authManager = new AuthManager();
-                window.teamManager = new TeamManager();
-                window.badgingManager = new BadgingManager();
-                
-                // Initialiser le router
-                window.router = new Router();
-                
-                console.log('✅ SYNERGIA v3.0 - Tous les services initialisés');
-                
+                // Initialiser AuthManager
+                if (typeof AuthManager !== 'undefined') {
+                    window.authManager = new AuthManager();
+                    console.log('✅ Auth Manager initialisé');
+                } else {
+                    console.warn('⚠️ AuthManager non disponible');
+                }
+
+                // Initialiser TeamManager
+                if (typeof TeamManager !== 'undefined') {
+                    window.teamManager = new TeamManager();
+                    console.log('✅ Team Manager initialisé');
+                } else {
+                    console.warn('⚠️ TeamManager non disponible');
+                }
+
+                // Initialiser BadgingManager
+                if (typeof BadgingManager !== 'undefined') {
+                    window.badgingManager = new BadgingManager();
+                    console.log('✅ Badging Manager initialisé');
+                } else {
+                    console.warn('⚠️ BadgingManager non disponible');
+                }
+
+                // Initialiser Router
+                if (typeof Router !== 'undefined') {
+                    window.router = new Router();
+                    console.log('✅ Router initialisé');
+                } else {
+                    console.warn('⚠️ Router non disponible');
+                    showFallbackInterface();
+                }
+
+                console.log('🎉 SYNERGIA v3.0 - Initialisation terminée');
+
             } catch (error) {
                 console.error('❌ Erreur d\'initialisation:', error);
-                showLoadError(error);
+                showErrorInterface(error);
             }
         }
 
-        // Fonction pour afficher une erreur de chargement
-        function showLoadError(error = null) {
+        // Interface de fallback si les modules ne sont pas disponibles
+        function showFallbackInterface() {
             const app = document.getElementById('app');
             app.innerHTML = `
                 <div class="container">
-                    <div class="card" style="text-align: center; margin-top: 50px;">
-                        <h2 style="color: var(--danger-color);">Erreur d'initialisation</h2>
-                        <p>Une erreur s'est produite lors du chargement de l'application.</p>
-                        ${error ? `<p style="color: var(--text-muted); font-size: 14px;">${error.message}</p>` : ''}
-                        <div style="margin-top: 20px;">
+                    <div class="card">
+                        <h1 style="color: var(--warning-color); text-align: center;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            SYNERGIA v3.0 - Mode Fallback
+                        </h1>
+                        
+                        <p style="text-align: center; margin: 20px 0;">
+                            L'application fonctionne en mode dégradé. Certains modules ne sont pas disponibles.
+                        </p>
+                        
+                        <div class="module-status">
+                            <h3>État des modules :</h3>
+                            <ul>
+                                <li><i class="fas fa-check status-ok"></i> Configuration</li>
+                                <li><i class="fas fa-${moduleLoadState.firebase ? 'check status-ok' : 'times status-error'}"></i> Firebase Service</li>
+                                <li><i class="fas fa-${moduleLoadState.auth ? 'check status-ok' : 'times status-error'}"></i> Auth Manager</li>
+                                <li><i class="fas fa-${moduleLoadState.team ? 'check status-ok' : 'times status-error'}"></i> Team Manager</li>
+                                <li><i class="fas fa-${moduleLoadState.badging ? 'check status-ok' : 'times status-error'}"></i> Badging Manager</li>
+                                <li><i class="fas fa-${moduleLoadState.router ? 'check status-ok' : 'times status-error'}"></i> Router</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
                             <button onclick="location.reload()" class="btn btn-primary">
                                 <i class="fas fa-sync"></i>
-                                Recharger la page
+                                Recharger l'application
                             </button>
-                        </div>
-                        <div style="margin-top: 20px; padding: 15px; background: var(--glass-bg); border-radius: var(--border-radius);">
-                            <h4>État du chargement:</h4>
-                            <ul style="list-style: none; padding: 0;">
-                                <li>Firebase: ${scriptsLoaded.firebase ? '✅' : '❌'}</li>
-                                <li>Auth: ${scriptsLoaded.auth ? '✅' : '❌'}</li>
-                                <li>Team: ${scriptsLoaded.team ? '✅' : '❌'}</li>
-                                <li>Badging: ${scriptsLoaded.badging ? '✅' : '❌'}</li>
-                                <li>Router: ${scriptsLoaded.router ? '✅' : '❌'}</li>
-                            </ul>
+                            <button onclick="showDebugInfo()" class="btn btn-secondary">
+                                <i class="fas fa-bug"></i>
+                                Informations de debug
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
         }
-    </script>
 
-    <!-- ================================ -->
-    <!-- FONCTIONS D'INTERACTION          -->
-    <!-- ================================ -->
-    <script>
-        // Variables globales pour les modales de pointage
-        let pendingBadgeAction = null;
-
-        // ==================
-        // FONCTIONS D'AUTHENTIFICATION
-        // ==================
-        async function handleGoogleLogin() {
-            try {
-                const loginBtn = document.querySelector('[onclick="handleGoogleLogin()"]');
-                if (loginBtn) {
-                    loginBtn.textContent = 'Connexion...';
-                    loginBtn.disabled = true;
-                }
-
-                await window.authManager.signInWithGoogle();
-                
-                console.log('✅ Connexion Google réussie');
-                
-            } catch (error) {
-                console.error('❌ Erreur connexion:', error);
-                showToast('Erreur de connexion: ' + error.message, 'error');
-                
-                const loginBtn = document.querySelector('[onclick="handleGoogleLogin()"]');
-                if (loginBtn) {
-                    loginBtn.innerHTML = '<i class="fab fa-google"></i> Continuer avec Google';
-                    loginBtn.disabled = false;
-                }
-            }
-        }
-
-        async function handleSignOut() {
-            try {
-                if (window.badgingManager) {
-                    window.badgingManager.stopClock();
-                }
-                await window.authManager.signOut();
-                
-                console.log('✅ Déconnexion réussie');
-                
-            } catch (error) {
-                console.error('❌ Erreur déconnexion:', error);
-                showToast('Erreur de déconnexion: ' + error.message, 'error');
-            }
-        }
-
-        // ==================
-        // FONCTIONS DE POINTAGE
-        // ==================
-        function handleCheckIn() {
-            pendingBadgeAction = 'checkin';
-            openBadgeNoteModal('Pointage d\'arrivée', 'Ajouter une note pour votre arrivée (optionnel)');
-        }
-
-        function handleCheckOut() {
-            pendingBadgeAction = 'checkout';
-            openBadgeNoteModal('Pointage de sortie', 'Ajouter une note pour votre sortie (optionnel)');
-        }
-
-        function handleBreakStart() {
-            pendingBadgeAction = 'breakstart';
-            openBadgeNoteModal('Début de pause', 'Motif de la pause (optionnel)');
-        }
-
-        function handleBreakEnd() {
-            pendingBadgeAction = 'breakend';
-            openBadgeNoteModal('Fin de pause', 'Retour de pause');
-        }
-
-        // ==================
-        // GESTION DES MODALES
-        // ==================
-        function openBadgeNoteModal(title, placeholder = '') {
-            const modal = document.getElementById('badgeNoteModal');
-            const titleElement = modal.querySelector('.modal-title');
-            const noteInput = document.getElementById('badgeNote');
-            
-            if (titleElement) titleElement.textContent = title;
-            if (noteInput) {
-                noteInput.value = '';
-                noteInput.placeholder = placeholder;
-            }
-            
-            modal.classList.add('show');
-            
-            setTimeout(() => {
-                if (noteInput) noteInput.focus();
-            }, 100);
-        }
-
-        function closeBadgeNoteModal() {
-            const modal = document.getElementById('badgeNoteModal');
-            modal.classList.remove('show');
-            pendingBadgeAction = null;
-        }
-
-        async function executeBadgeAction() {
-            if (!pendingBadgeAction) return;
-
-            try {
-                const note = document.getElementById('badgeNote').value.trim();
-                let result;
-
-                const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Enregistrement...';
-                submitBtn.disabled = true;
-
-                switch(pendingBadgeAction) {
-                    case 'checkin':
-                        result = await window.badgingManager.checkIn(note);
-                        break;
-                    case 'checkout':
-                        result = await window.badgingManager.checkOut(note);
-                        break;
-                    case 'breakstart':
-                        result = await window.badgingManager.startBreak(note);
-                        break;
-                    case 'breakend':
-                        result = await window.badgingManager.endBreak(note);
-                        break;
-                }
-
-                if (result) {
-                    closeBadgeNoteModal();
-                    
-                    const messages = {
-                        'checkin': 'Arrivée enregistrée avec succès !',
-                        'checkout': 'Sortie enregistrée avec succès !',
-                        'breakstart': 'Début de pause enregistré !',
-                        'breakend': 'Fin de pause enregistrée !'
-                    };
-                    
-                    showToast(messages[pendingBadgeAction], 'success');
-                }
-
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-
-            } catch (error) {
-                console.error('❌ Erreur lors du pointage:', error);
-                showToast('Erreur: ' + error.message, 'error');
-                
-                const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
-                submitBtn.textContent = 'Confirmer';
-                submitBtn.disabled = false;
-            }
-        }
-
-        // ==================
-        // FONCTIONS ÉQUIPE
-        // ==================
-        function openAddMemberModal() {
-            document.getElementById('modalTitle').textContent = 'Ajouter un membre';
-            document.getElementById('teamForm').reset();
-            document.getElementById('teamModal').classList.add('show');
-        }
-
-        function closeTeamModal() {
-            document.getElementById('teamModal').classList.remove('show');
-        }
-
-        async function editMember(memberId) {
-            const members = window.teamManager.getMembers();
-            const member = members.find(m => m.id === memberId);
-            
-            if (!member) return;
-            
-            document.getElementById('modalTitle').textContent = 'Modifier le membre';
-            document.getElementById('memberEmail').value = member.email;
-            document.getElementById('memberName').value = member.displayName || '';
-            document.getElementById('memberRole').value = member.role || 'employee';
-            document.getElementById('memberDepartment').value = member.department || '';
-            document.getElementById('memberPosition').value = member.position || '';
-            
-            document.getElementById('teamForm').dataset.editId = memberId;
-            document.getElementById('teamModal').classList.add('show');
-        }
-
-        async function deleteMemberConfirm(memberId) {
-            const members = window.teamManager.getMembers();
-            const member = members.find(m => m.id === memberId);
-            
-            if (!member) return;
-            
-            if (confirm(`Êtes-vous sûr de vouloir supprimer ${member.displayName || member.email} ?`)) {
-                try {
-                    await window.teamManager.deleteMember(memberId);
-                    showToast('Membre supprimé avec succès', 'success');
-                } catch (error) {
-                    showToast('Erreur lors de la suppression: ' + error.message, 'error');
-                }
-            }
-        }
-
-        // ==================
-        // SYSTÈME DE NOTIFICATIONS TOAST
-        // ==================
-        function showToast(message, type = 'info') {
-            // Supprimer les anciens toasts
-            const existingToasts = document.querySelectorAll('.toast');
-            existingToasts.forEach(toast => toast.remove());
-
-            // Créer le nouveau toast
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <div class="toast-content">
-                    <i class="fas fa-${getToastIcon(type)}"></i>
-                    <span>${message}</span>
+        // Interface d'erreur
+        function showErrorInterface(error) {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <div class="error-container">
+                        <h2><i class="fas fa-exclamation-circle"></i> Erreur d'initialisation</h2>
+                        <p>Impossible de démarrer SYNERGIA v3.0</p>
+                        <div class="card" style="text-align: left; margin: 20px auto; max-width: 600px;">
+                            <h4>Détails de l'erreur :</h4>
+                            <pre style="background: var(--glass-bg-strong); padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 14px;">${error.message}</pre>
+                        </div>
+                        <button onclick="location.reload()" class="btn btn-primary">
+                            <i class="fas fa-sync"></i>
+                            Réessayer
+                        </button>
+                    </div>
                 </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
             `;
-
-            // Ajouter les styles du toast
-            if (!document.querySelector('style[data-toast-styles]')) {
-                const style = document.createElement('style');
-                style.setAttribute('data-toast-styles', 'true');
-                style.textContent = `
-                    .toast {
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: var(--glass-bg-strong);
-                        backdrop-filter: blur(10px);
-                        border: 1px solid var(--glass-border);
-                        border-radius: var(--border-radius);
-                        padding: 16px;
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        color: var(--text-light);
-                        z-index: 10000;
-                        animation: slideInRight 0.3s ease-out;
-                        max-width: 400px;
-                        min-width: 300px;
-                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-                    }
-                    .toast-success { border-left: 4px solid var(--success-color); }
-                    .toast-success .toast-content i { color: var(--success-color); }
-                    .toast-error { border-left: 4px solid var(--danger-color); }
-                    .toast-error .toast-content i { color: var(--danger-color); }
-                    .toast-warning { border-left: 4px solid var(--warning-color); }
-                    .toast-warning .toast-content i { color: var(--warning-color); }
-                    .toast-info { border-left: 4px solid var(--info-color); }
-                    .toast-info .toast-content i { color: var(--info-color); }
-                    .toast-content {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        flex: 1;
-                    }
-                    .toast-close {
-                        background: none;
-                        border: none;
-                        color: var(--text-muted);
-                        cursor: pointer;
-                        padding: 4px;
-                        border-radius: 4px;
-                        transition: all 0.2s;
-                    }
-                    .toast-close:hover {
-                        background: rgba(255, 255, 255, 0.1);
-                        color: var(--text-light);
-                    }
-                    @keyframes slideInRight {
-                        from { transform: translateX(100%); opacity: 0; }
-                        to { transform: translateX(0); opacity: 1; }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-
-            document.body.appendChild(toast);
-
-            // Auto-suppression après 5 secondes
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.style.animation = 'slideInRight 0.3s ease-out reverse';
-                    setTimeout(() => toast.remove(), 300);
-                }
-            }, 5000);
         }
 
-        function getToastIcon(type) {
-            const icons = {
-                'success': 'check-circle',
-                'error': 'exclamation-circle',
-                'warning': 'exclamation-triangle',
-                'info': 'info-circle'
+        // Fonction de debug
+        function showDebugInfo() {
+            const debugInfo = {
+                userAgent: navigator.userAgent,
+                url: window.location.href,
+                moduleStates: moduleLoadState,
+                timestamp: new Date().toISOString(),
+                firebase: typeof firebase !== 'undefined' ? 'Disponible' : 'Non disponible',
+                localStorage: typeof localStorage !== 'undefined' ? 'Disponible' : 'Non disponible'
             };
-            return icons[type] || icons.info;
+
+            alert('Informations de debug copiées dans la console');
+            console.log('🐛 SYNERGIA Debug Info:', debugInfo);
         }
 
-        // ==================
-        // GESTIONNAIRES D'ÉVÉNEMENTS
-        // ==================
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 SYNERGIA v3.0 - Interface chargée');
+        // Démarrer l'application
+        document.addEventListener('DOMContentLoaded', initializeApp);
 
-            // Gestionnaire du formulaire d'équipe
-            const teamForm = document.getElementById('teamForm');
-            if (teamForm) {
-                teamForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const formData = {
-                        email: document.getElementById('memberEmail').value,
-                        displayName: document.getElementById('memberName').value,
-                        role: document.getElementById('memberRole').value,
-                        department: document.getElementById('memberDepartment').value,
-                        position: document.getElementById('memberPosition').value
-                    };
-                    
-                    try {
-                        const editId = teamForm.dataset.editId;
-                        
-                        if (editId) {
-                            await window.teamManager.updateMember(editId, formData);
-                            showToast('Membre modifié avec succès', 'success');
-                            delete teamForm.dataset.editId;
-                        } else {
-                            await window.teamManager.addMember(formData);
-                            showToast('Membre ajouté avec succès', 'success');
-                        }
-                        
-                        closeTeamModal();
-                    } catch (error) {
-                        showToast('Erreur: ' + error.message, 'error');
-                    }
-                });
-            }
-
-            // Gestionnaire du formulaire de note de pointage
-            const badgeNoteForm = document.getElementById('badgeNoteForm');
-            if (badgeNoteForm) {
-                badgeNoteForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    await executeBadgeAction();
-                });
-            }
-            
-            // Fermer les modales en cliquant à côté
-            const teamModal = document.getElementById('teamModal');
-            if (teamModal) {
-                teamModal.addEventListener('click', (e) => {
-                    if (e.target.id === 'teamModal') {
-                        closeTeamModal();
-                    }
-                });
-            }
-
-            const badgeNoteModal = document.getElementById('badgeNoteModal');
-            if (badgeNoteModal) {
-                badgeNoteModal.addEventListener('click', (e) => {
-                    if (e.target.id === 'badgeNoteModal') {
-                        closeBadgeNoteModal();
-                    }
-                });
-            }
-
-            // Raccourcis clavier
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeTeamModal();
-                    closeBadgeNoteModal();
-                }
-                
-                // Raccourcis pour le pointage (uniquement sur la page badging)
-                if (window.router && window.router.getCurrentRoute() === '/badging') {
-                    if (e.ctrlKey) {
-                        switch(e.key.toLowerCase()) {
-                            case 'i':
-                                e.preventDefault();
-                                handleCheckIn();
-                                break;
-                            case 'o':
-                                e.preventDefault();
-                                handleCheckOut();
-                                break;
-                            case 'p':
-                                e.preventDefault();
-                                const status = window.badgingManager?.getCurrentStatus();
-                                if (status === 'working') {
-                                    handleBreakStart();
-                                } else if (status === 'on-break') {
-                                    handleBreakEnd();
-                                }
-                                break;
-                        }
-                    }
-                }
-            });
-
-            // Nettoyage lors de la fermeture
-            window.addEventListener('beforeunload', () => {
-                if (window.badgingManager) {
-                    window.badgingManager.stopClock();
-                }
-            });
-        });
-
-        // ==================
-        // GESTION DES ERREURS GLOBALES
-        // ==================
+        // Gestion des erreurs globales
         window.addEventListener('error', (e) => {
             console.error('❌ Erreur JavaScript:', e.error);
-            
-            // Ne pas montrer les erreurs de chargement de ressources externes
-            if (e.filename && (e.filename.includes('googleapis.com') || e.filename.includes('gstatic.com'))) {
-                return;
-            }
-            
-            // Ne pas afficher certaines erreurs communes
-            if (e.error && e.error.message && 
-                (e.error.message.includes('Non-Error promise rejection') ||
-                 e.error.message.includes('Script error'))) {
-                return;
-            }
         });
 
         window.addEventListener('unhandledrejection', (e) => {
             console.error('❌ Promesse rejetée:', e.reason);
-            
-            // Gérer les erreurs Firebase spécifiques
-            if (e.reason && e.reason.code) {
-                const firebaseErrors = {
-                    'auth/network-request-failed': 'Problème de connexion réseau',
-                    'firestore/unavailable': 'Service temporairement indisponible',
-                    'auth/too-many-requests': 'Trop de tentatives, réessayez plus tard'
-                };
-                
-                const message = firebaseErrors[e.reason.code];
-                if (message) {
-                    showToast(message, 'error');
-                    e.preventDefault();
-                }
-            }
         });
-
-        // ==================
-        // INFORMATIONS DE DEBUG
-        // ==================
-        console.log(`
-    🚀 SYNERGIA v3.0 - Phase 4
-    
-    📋 Modules chargés:
-    - Firebase Service
-    - Auth Manager  
-    - Team Manager
-    - Badging Manager
-    - Router
-    
-    🎯 Raccourcis clavier (page pointage):
-    - Ctrl+I: Pointage arrivée
-    - Ctrl+O: Pointage sortie  
-    - Ctrl+P: Pause/Reprise
-    - Escape: Fermer modales
-    
-    🔧 Debug:
-    window.authManager
-    window.teamManager
-    window.badgingManager
-    window.router
-        `);
     </script>
 </body>
 </html>

@@ -17,73 +17,65 @@
         img-src 'self' data: https:;
     ">
     
-    <!-- PWA Manifest -->
+    <!-- PWA et icônes -->
     <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e94560'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     <meta name="theme-color" content="#1a1a2e">
     
-    <!-- Polices (optionnel, peut être retiré pour éviter les erreurs) -->
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
-    
-    <!-- CSS existant (gardez vos styles actuels) -->
+    <!-- CSS Variables (Phase 2A) -->
     <style>
         :root {
+            /* Variables principales */
             --primary-color: #1a1a2e;
             --secondary-color: #16213e;
             --accent-color: #e94560;
             --text-light: #ffffff;
+            --text-secondary: #b8b9ba;
             --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-bg-strong: rgba(255, 255, 255, 0.15);
+            --border-radius: 0.5rem;
+            --transition: 300ms ease-in-out;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            margin: 0;
-            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: var(--text-light);
             min-height: 100vh;
         }
         
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            gap: 20px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
+        .card {
             background: var(--glass-bg);
-            border-radius: 10px;
             backdrop-filter: blur(10px);
-            text-align: center;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 16px;
-            transition: transform 0.2s;
-            margin: 10px;
+            font-weight: 500;
+            transition: all var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
         
         .btn:hover {
@@ -95,28 +87,100 @@
             color: white;
         }
         
-        #app {
-            min-height: 100vh;
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .init-error {
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-warning {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--glass-bg-strong);
+            border-radius: var(--border-radius);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            font-weight: bold;
         }
         
-        details {
-            margin-top: 20px;
-            text-align: left;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        pre {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            padding: 8px 16px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        
+        .nav-tab.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
         }
     </style>
     
@@ -124,11 +188,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <!-- Analytics optionnel - peut être commenté pour éviter les erreurs CSP -->
-    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script> -->
 </head>
 <body>
-    <!-- App Container -->
     <div id="app">
         <div class="loading-container">
             <div class="loading-spinner"></div>
@@ -136,9 +197,8 @@
         </div>
     </div>
 
-    <!-- Configuration Firebase inline -->
+    <!-- Configuration Firebase -->
     <script>
-        // Configuration Firebase - SYNERGIA
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
             authDomain: "synergia-app-f27e7.firebaseapp.com",
@@ -149,19 +209,10 @@
             measurementId: "G-EGJ79SCMWX"
         };
 
-        // Configuration générale
-        const APP_CONFIG = {
-            name: 'SYNERGIA v3.0',
-            version: '3.0.0',
-            environment: 'production',
-            debug: true // Pour voir les logs pendant la migration
-        };
-
         window.FIREBASE_CONFIG = FIREBASE_CONFIG;
-        window.APP_CONFIG = APP_CONFIG;
     </script>
 
-    <!-- Service Firebase minimal -->
+    <!-- Firebase Service -->
     <script>
         class FirebaseService {
             constructor() {
@@ -173,31 +224,15 @@
 
             async initialize() {
                 try {
-                    console.log('🔥 Initialisation Firebase...');
-                    
-                    // Attendre que Firebase soit disponible
                     await this.waitForFirebase();
-                    
-                    // Initialiser Firebase
                     this.app = firebase.initializeApp(FIREBASE_CONFIG);
                     this.auth = firebase.auth();
                     this.firestore = firebase.firestore();
-                    
-                    // Analytics (optionnel)
-                    // if (typeof firebase.analytics !== 'undefined') {
-                    //     this.analytics = firebase.analytics();
-                    // }
-                    
-                    // Configuration de base
                     await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                    
                     this.isInitialized = true;
-                    console.log('✅ Firebase initialisé');
-                    
                     window.dispatchEvent(new CustomEvent('firebase:initialized'));
-                    
                 } catch (error) {
-                    console.error('❌ Erreur Firebase:', error);
+                    console.error('Erreur Firebase:', error);
                     throw error;
                 }
             }
@@ -205,62 +240,208 @@
             waitForFirebase() {
                 return new Promise((resolve, reject) => {
                     let attempts = 0;
-                    const maxAttempts = 50;
-                    
                     const check = () => {
                         if (typeof firebase !== 'undefined') {
                             resolve();
-                        } else if (attempts < maxAttempts) {
+                        } else if (attempts < 50) {
                             attempts++;
                             setTimeout(check, 100);
                         } else {
                             reject(new Error('Firebase non disponible'));
                         }
                     };
-                    
                     check();
                 });
             }
 
-            getAuth() {
-                return this.auth;
-            }
-
-            getFirestore() {
-                return this.firestore;
-            }
+            getAuth() { return this.auth; }
+            getFirestore() { return this.firestore; }
         }
 
         window.firebaseService = new FirebaseService();
     </script>
 
-    <!-- Router minimal -->
+    <!-- AuthManager (Phase 2B) -->
     <script>
-        class MinimalRouter {
+        class AuthManager {
+            constructor() {
+                this.currentUser = null;
+                this.userProfile = null;
+                this.listeners = new Set();
+                this.init();
+            }
+
+            async init() {
+                await firebaseService.initialize();
+                this.auth = firebaseService.getAuth();
+                this.firestore = firebaseService.getFirestore();
+                
+                this.auth.onAuthStateChanged((user) => {
+                    this.handleAuthStateChange(user);
+                });
+            }
+
+            async handleAuthStateChange(user) {
+                this.currentUser = user;
+                
+                if (user) {
+                    await this.loadUserProfile(user.uid);
+                    this.emit('user:login', { user, profile: this.userProfile });
+                } else {
+                    this.userProfile = null;
+                    this.emit('user:logout');
+                }
+                
+                this.emit('auth:stateChanged', {
+                    user: this.currentUser,
+                    profile: this.userProfile,
+                    isAuthenticated: !!user
+                });
+            }
+
+            async signInWithGoogle() {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('email');
+                    provider.addScope('profile');
+                    provider.setCustomParameters({ prompt: 'select_account' });
+                    
+                    const result = await this.auth.signInWithPopup(provider);
+                    await this.createOrUpdateUserProfile(result.user);
+                    
+                    return { success: true, user: result.user };
+                } catch (error) {
+                    console.error('Erreur connexion Google:', error);
+                    throw error;
+                }
+            }
+
+            async signOut() {
+                try {
+                    await this.auth.signOut();
+                    return { success: true };
+                } catch (error) {
+                    console.error('Erreur déconnexion:', error);
+                    throw error;
+                }
+            }
+
+            async loadUserProfile(uid) {
+                try {
+                    const doc = await this.firestore.collection('users').doc(uid).get();
+                    if (doc.exists) {
+                        this.userProfile = { id: uid, ...doc.data() };
+                    } else {
+                        await this.createUserProfile(this.currentUser);
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement profil:', error);
+                }
+            }
+
+            async createOrUpdateUserProfile(user) {
+                const userRef = this.firestore.collection('users').doc(user.uid);
+                const userData = {
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                try {
+                    await userRef.set(userData, { merge: true });
+                    await this.loadUserProfile(user.uid);
+                } catch (error) {
+                    console.error('Erreur mise à jour profil:', error);
+                }
+            }
+
+            async createUserProfile(user) {
+                const userData = {
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    role: 'employee',
+                    xp: 0,
+                    level: 1,
+                    preferences: { theme: 'dark', notifications: true },
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await this.firestore.collection('users').doc(user.uid).set(userData);
+                this.userProfile = { id: user.uid, ...userData };
+            }
+
+            isAuthenticated() {
+                return !!this.currentUser;
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+
+            getUserProfile() {
+                return this.userProfile;
+            }
+
+            on(event, callback) {
+                this.listeners.add({ event, callback });
+                window.addEventListener(event, callback);
+            }
+
+            off(event, callback) {
+                window.removeEventListener(event, callback);
+                this.listeners.delete({ event, callback });
+            }
+
+            emit(eventName, data) {
+                window.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+            }
+        }
+
+        window.authManager = new AuthManager();
+    </script>
+
+    <!-- Router amélioré -->
+    <script>
+        class Router {
             constructor() {
                 this.currentPath = '/';
+                this.init();
             }
 
             navigate(path) {
-                console.log('🧭 Navigation vers:', path);
                 window.location.hash = path;
-                this.currentPath = path;
                 this.render();
             }
 
             render() {
-                const app = document.getElementById('app');
                 const hash = window.location.hash.slice(1) || '/';
+                const app = document.getElementById('app');
                 
-                console.log('📄 Rendu de la page:', hash);
+                // Vérifier l'authentification
+                const isAuthenticated = authManager.isAuthenticated();
                 
                 switch(hash) {
                     case '/':
                     case '/dashboard':
-                        app.innerHTML = this.renderDashboard();
+                        if (isAuthenticated) {
+                            app.innerHTML = this.renderDashboard();
+                        } else {
+                            this.navigate('/login');
+                        }
                         break;
                     case '/login':
                         app.innerHTML = this.renderLogin();
+                        break;
+                    case '/profile':
+                        if (isAuthenticated) {
+                            app.innerHTML = this.renderProfile();
+                        } else {
+                            this.navigate('/login');
+                        }
                         break;
                     default:
                         app.innerHTML = this.render404();
@@ -268,21 +449,58 @@
             }
 
             renderDashboard() {
+                const user = authManager.getCurrentUser();
+                const profile = authManager.getUserProfile();
+                
                 return `
-                    <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
-                        <h1>🚀 SYNERGIA v3.0 - Dashboard</h1>
-                        <div style="background: var(--glass-bg); padding: 20px; border-radius: 10px; margin: 20px 0;">
-                            <h2>✅ Migration réussie !</h2>
-                            <p>La structure de base fonctionne. Prêt pour la suite de la migration.</p>
-                            <button onclick="router.navigate('/login')" class="btn btn-primary">
-                                Test Login
-                            </button>
+                    <div class="container">
+                        <div class="header">
+                            <h1>🚀 SYNERGIA v3.0</h1>
+                            <div class="user-profile">
+                                <div class="user-avatar">${user.displayName ? user.displayName[0].toUpperCase() : 'U'}</div>
+                                <div>
+                                    <div style="font-weight: 500;">${user.displayName || 'Utilisateur'}</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">${user.email}</div>
+                                </div>
+                                <button onclick="handleSignOut()" class="btn btn-secondary" style="margin-left: 12px;">Déconnexion</button>
+                            </div>
                         </div>
                         
-                        <div style="background: var(--glass-bg); padding: 20px; border-radius: 10px; margin: 20px 0;">
-                            <h3>📊 État Firebase</h3>
-                            <p>Connexion: <span id="firebase-status">🔄 Vérification...</span></p>
-                            <p>Utilisateur: <span id="user-status">🔄 Vérification...</span></p>
+                        <div class="nav-tabs">
+                            <button class="nav-tab active" onclick="router.navigate('/dashboard')">Dashboard</button>
+                            <button class="nav-tab" onclick="router.navigate('/profile')">Profil</button>
+                            <button class="nav-tab" onclick="alert('Bientôt disponible!')">Équipe</button>
+                            <button class="nav-tab" onclick="alert('Bientôt disponible!')">Badging</button>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>✅ Migration Phase 2 - Succès !</h2>
+                            <p>AuthManager modulaire intégré avec succès.</p>
+                            <div style="margin: 20px 0;">
+                                <span class="status-badge status-success">✅ Firebase connecté</span>
+                                <span class="status-badge status-success">✅ Utilisateur authentifié</span>
+                                <span class="status-badge status-success">✅ Profil chargé</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>📊 Informations utilisateur</h3>
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            <p><strong>Nom:</strong> ${user.displayName || 'Non défini'}</p>
+                            <p><strong>UID:</strong> ${user.uid}</p>
+                            <p><strong>Profil chargé:</strong> ${profile ? '✅ Oui' : '❌ Non'}</p>
+                            ${profile ? `<p><strong>Rôle:</strong> ${profile.role || 'Non défini'}</p>` : ''}
+                        </div>
+                        
+                        <div class="card">
+                            <h3>🎯 Prochaines étapes</h3>
+                            <ul style="margin: 16px 0; padding-left: 20px;">
+                                <li>✅ Phase 1: Structure de base (Terminé)</li>
+                                <li>✅ Phase 2: AuthManager modulaire (Terminé)</li>
+                                <li>🔄 Phase 3: TeamManager (En cours)</li>
+                                <li>⏳ Phase 4: BadgingManager</li>
+                                <li>⏳ Phase 5: ChatManager</li>
+                            </ul>
                         </div>
                     </div>
                 `;
@@ -290,144 +508,104 @@
 
             renderLogin() {
                 return `
-                    <div style="padding: 20px; max-width: 400px; margin: 100px auto;">
-                        <div style="background: var(--glass-bg); padding: 30px; border-radius: 10px; text-align: center;">
-                            <h1>🔐 Connexion</h1>
-                            <button onclick="testGoogleLogin()" class="btn btn-primary" style="width: 100%; margin: 10px 0;">
-                                🚀 Connexion Google
-                            </button>
-                            <button onclick="router.navigate('/dashboard')" class="btn" style="background: #666; color: white; width: 100%;">
-                                Retour Dashboard
-                            </button>
+                    <div class="container">
+                        <div style="max-width: 400px; margin: 100px auto;">
+                            <div class="card" style="text-align: center;">
+                                <h1>🔐 Connexion SYNERGIA</h1>
+                                <p style="margin: 20px 0; color: var(--text-secondary);">
+                                    Connectez-vous pour accéder à votre espace de travail.
+                                </p>
+                                <button onclick="handleGoogleLogin()" class="btn btn-primary" style="width: 100%; margin: 10px 0;">
+                                    🚀 Connexion avec Google
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                `;
+            }
+
+            renderProfile() {
+                const user = authManager.getCurrentUser();
+                const profile = authManager.getUserProfile();
+                
+                return `
+                    <div class="container">
+                        <div class="header">
+                            <h1>👤 Profil utilisateur</h1>
+                            <button onclick="router.navigate('/dashboard')" class="btn btn-secondary">← Retour</button>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>Informations personnelles</h2>
+                            <div style="margin: 20px 0;">
+                                <p><strong>Nom d'affichage:</strong> ${user.displayName || 'Non défini'}</p>
+                                <p><strong>Email:</strong> ${user.email}</p>
+                                <p><strong>Photo:</strong> ${user.photoURL ? '✅ Oui' : '❌ Non'}</p>
+                                <p><strong>Email vérifié:</strong> ${user.emailVerified ? '✅ Oui' : '❌ Non'}</p>
+                            </div>
+                        </div>
+                        
+                        ${profile ? `
+                            <div class="card">
+                                <h2>Profil SYNERGIA</h2>
+                                <p><strong>Rôle:</strong> ${profile.role || 'Non défini'}</p>
+                                <p><strong>Niveau:</strong> ${profile.level || 1}</p>
+                                <p><strong>XP:</strong> ${profile.xp || 0}</p>
+                                <p><strong>Membre depuis:</strong> ${profile.createdAt ? new Date(profile.createdAt.seconds * 1000).toLocaleDateString() : 'Inconnu'}</p>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }
 
             render404() {
                 return `
-                    <div style="padding: 20px; text-align: center;">
-                        <h1>404 - Page non trouvée</h1>
-                        <button onclick="router.navigate('/dashboard')" class="btn btn-primary">
-                            Retour à l'accueil
-                        </button>
+                    <div class="container">
+                        <div class="card" style="text-align: center;">
+                            <h1>404 - Page non trouvée</h1>
+                            <button onclick="router.navigate('/dashboard')" class="btn btn-primary">Retour à l'accueil</button>
+                        </div>
                     </div>
                 `;
             }
 
             init() {
                 window.addEventListener('hashchange', () => this.render());
-                this.render();
+                
+                // Attendre que l'AuthManager soit prêt
+                authManager.on('auth:stateChanged', () => {
+                    this.render();
+                });
             }
         }
 
-        window.router = new MinimalRouter();
+        window.router = new Router();
     </script>
 
-    <!-- Fonctions de test -->
+    <!-- Fonctions d'interaction -->
     <script>
-        async function testGoogleLogin() {
+        async function handleGoogleLogin() {
             try {
-                console.log('🔐 Test de connexion Google...');
-                
-                if (!window.firebaseService.isInitialized) {
-                    alert('Firebase pas encore initialisé, patientez...');
-                    return;
-                }
-                
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.addScope('email');
-                provider.addScope('profile');
-                
-                // Configuration pour éviter les erreurs de popup
-                provider.setCustomParameters({
-                    prompt: 'select_account'
-                });
-                
-                const result = await window.firebaseService.getAuth().signInWithPopup(provider);
-                console.log('✅ Connexion réussie:', result.user.email);
-                alert(`Connecté en tant que ${result.user.displayName || result.user.email}`);
-                
+                await authManager.signInWithGoogle();
                 router.navigate('/dashboard');
-                
             } catch (error) {
-                console.error('❌ Erreur de connexion:', error);
-                
-                let message = 'Erreur de connexion';
-                if (error.code === 'auth/unauthorized-domain') {
-                    message = 'Domaine non autorisé. Ajoutez papaya-seahorse-cec6c7.netlify.app dans Firebase Console → Authentication → Settings → Authorized domains';
-                } else if (error.code === 'auth/popup-closed-by-user') {
-                    message = 'Connexion annulée par l\'utilisateur';
-                } else if (error.code === 'auth/internal-error') {
-                    message = 'Erreur interne. Vérifiez la configuration CSP et les domaines autorisés.';
-                }
-                
-                alert(message);
+                alert('Erreur de connexion: ' + error.message);
             }
         }
 
-        function updateStatus() {
-            const firebaseStatus = document.getElementById('firebase-status');
-            const userStatus = document.getElementById('user-status');
-            
-            if (firebaseStatus) {
-                firebaseStatus.textContent = window.firebaseService.isInitialized ? '✅ Connecté' : '❌ Déconnecté';
-            }
-            
-            if (userStatus) {
-                const user = window.firebaseService.getAuth()?.currentUser;
-                if (userStatus) {
-                    userStatus.textContent = user ? `✅ ${user.displayName || user.email}` : '❌ Non connecté';
-                }
-            }
-        }
-
-        // Mise à jour périodique du statut
-        setInterval(updateStatus, 1000);
-    </script>
-
-    <!-- Initialisation de l'app -->
-    <script>
-        async function initApp() {
+        async function handleSignOut() {
             try {
-                console.log('🚀 Initialisation de SYNERGIA v3.0...');
-                
-                // Initialiser Firebase
-                await window.firebaseService.initialize();
-                
-                // Initialiser le router
-                window.router.init();
-                
-                // Surveillance de l'authentification
-                window.firebaseService.getAuth().onAuthStateChanged((user) => {
-                    console.log('👤 État auth changé:', user ? user.email : 'Déconnecté');
-                    updateStatus();
-                });
-                
-                console.log('✅ SYNERGIA v3.0 initialisé !');
-                
+                await authManager.signOut();
+                router.navigate('/login');
             } catch (error) {
-                console.error('❌ Erreur d\'initialisation:', error);
-                document.getElementById('app').innerHTML = `
-                    <div class="init-error">
-                        <div class="error-container">
-                            <h1>❌ Erreur d'initialisation</h1>
-                            <p>Une erreur est survenue lors du démarrage.</p>
-                            <details>
-                                <summary>Détails de l'erreur</summary>
-                                <pre>${error.message}\n${error.stack}</pre>
-                            </details>
-                            <button onclick="window.location.reload()" class="btn btn-primary">
-                                Recharger la page
-                            </button>
-                        </div>
-                    </div>
-                `;
+                alert('Erreur de déconnexion: ' + error.message);
             }
         }
 
-        // Démarrage automatique
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 SYNERGIA v3.0 - Phase 2 chargée');
+        });
     </script>
 </body>
 </html>

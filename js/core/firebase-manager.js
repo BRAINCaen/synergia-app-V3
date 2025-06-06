@@ -194,6 +194,10 @@ class FirebaseManager {
     isAdmin() {
         return this.currentUser?.email === 'alan.boehme61@gmail.com';
     }
+    // Indique si un utilisateur est actuellement authentifié
+    isAuthenticated() {
+        return !!this.currentUser;
+    }
 
     async checkConnection() {
         try {
@@ -236,6 +240,87 @@ class FirebaseManager {
     }
 }
 
+    // === CRUD génériques ===
+    async getCollection(collection, orderBy = null, limitCount = null) {
+        await this.waitForReady();
+
+        let query = this.db.collection(collection);
+
+        if (orderBy) {
+            const { field, direction = 'asc' } = orderBy;
+            query = query.orderBy(field, direction);
+        }
+
+        if (limitCount) {
+            query = query.limit(limitCount);
+        }
+
+        const snapshot = await query.get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async getDocument(collection, docId) {
+        await this.waitForReady();
+        const doc = await this.db.collection(collection).doc(docId).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    }
+
+    async addDocument(collection, data) {
+        await this.waitForReady();
+        const ref = await this.db.collection(collection).add({
+            ...data,
+            createdAt: this.serverTimestamp(),
+            updatedAt: this.serverTimestamp(),
+        });
+        return ref.id;
+    }
+
+    async updateDocument(collection, docId, data) {
+        await this.waitForReady();
+        await this.db.collection(collection).doc(docId).update({
+            ...data,
+            updatedAt: this.serverTimestamp(),
+        });
+        return true;
+    }
+
+    async deleteDocument(collection, docId) {
+        await this.waitForReady();
+        await this.db.collection(collection).doc(docId).delete();
+        return true;
+    }
+
+    onSnapshot(collection, callback, options = {}) {
+        let query = this.db.collection(collection);
+
+        if (options.where) {
+            for (const cond of options.where) {
+                query = query.where(cond.field, cond.operator, cond.value);
+            }
+        }
+
+        if (options.orderBy) {
+            const { field, direction = 'asc' } = options.orderBy;
+            query = query.orderBy(field, direction);
+        }
+
+        if (options.limit) {
+            query = query.limit(options.limit);
+        }
+
+        const unsubscribe = query.onSnapshot(snapshot => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            callback(data);
+        });
+
+        return unsubscribe;
+    }
+
+    logEvent(eventName, params = {}) {
+        if (this.analytics) {
+            this.analytics.logEvent(eventName, params);
+        }
+    }
 // Instance globale
 window.firebaseManager = new FirebaseManager();
 

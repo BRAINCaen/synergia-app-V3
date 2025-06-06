@@ -1,577 +1,512 @@
+/**
+ * TeamManager pour SYNERGIA v3.0
+ * Fichier: src/js/managers/TeamManager.js
+ * 
+ * Gestion complète des équipes avec CRUD, rôles et statistiques
+ */
 class TeamManager {
     constructor() {
+        this.firestore = null;
         this.members = [];
-        this.currentUser = null;
+        this.listeners = new Set();
+        this.eventEmitter = new EventTarget();
+        this.isInitialized = false;
+        
         this.init();
     }
 
+    /**
+     * Initialise le TeamManager
+     */
     async init() {
-        console.log('✅ Team Manager initialisé');
-        await this.loadMembers();
-        this.setupEventListeners();
-    }
-
-    async loadMembers() {
         try {
-            const user = auth.currentUser;
-            if (!user) {
-                console.log('❌ Utilisateur non connecté pour charger les membres');
-                return;
-            }
-
-            const membersRef = collection(db, 'teams', user.uid, 'members');
-            const snapshot = await getDocs(membersRef);
+            // Attendre que Firebase soit disponible
+            await this.waitForFirebase();
+            this.firestore = window.firebaseService.getFirestore();
             
-            this.members = [];
-            snapshot.forEach(doc => {
-                const memberData = doc.data();
-                this.members.push({
-                    id: doc.id,
-                    name: memberData.name || '',
-                    email: memberData.email || '',
-                    role: memberData.role || 'Membre',
-                    avatar: memberData.avatar || 'assets/default-avatar.png',
-                    status: memberData.status || 'offline',
-                    joinDate: memberData.joinDate || new Date(),
-                    xp: memberData.xp || 0,
-                    level: memberData.level || 1,
-                    badges: memberData.badges || []
-                });
-            });
-
-            console.log(`✅ ${this.members.length} membres chargés depuis Firebase`);
-            this.renderMembers();
+            this.isInitialized = true;
+            console.log('✅ TeamManager initialisé');
+            
+            this.emit('team:ready');
+            
         } catch (error) {
-            console.error('❌ Erreur lors du chargement des membres:', error);
-            // Charger des données de démonstration en cas d'erreur
-            this.loadDemoMembers();
+            console.error('❌ Erreur TeamManager:', error);
+            throw error;
         }
     }
 
-    loadDemoMembers() {
-        this.members = [
-            {
-                id: 'demo1',
-                name: 'Allan Boehme',
-                email: 'alan.boehme61@gmail.com',
-                role: 'Manager',
-                avatar: 'assets/avatars/alan.jpg',
-                status: 'online',
-                joinDate: new Date('2024-01-15'),
-                xp: 1250,
-                level: 5,
-                badges: ['early_bird', 'team_player', 'innovator']
-            },
-            {
-                id: 'demo2',
-                name: 'Marie Dubois',
-                email: 'marie.dubois@synergia.com',
-                role: 'Développeur',
-                avatar: 'assets/avatars/marie.jpg',
-                status: 'online',
-                joinDate: new Date('2024-02-01'),
-                xp: 980,
-                level: 4,
-                badges: ['code_master', 'team_player']
-            },
-            {
-                id: 'demo3',
-                name: 'Thomas Martin',
-                email: 'thomas.martin@synergia.com',
-                role: 'Designer',
-                avatar: 'assets/avatars/thomas.jpg',
-                status: 'away',
-                joinDate: new Date('2024-03-10'),
-                xp: 750,
-                level: 3,
-                badges: ['creative', 'perfectionist']
-            }
-        ];
-        console.log('👥 Membres de démonstration chargés');
-        this.renderMembers();
-    }
-
-    setupEventListeners() {
-        // Recherche de membres
-        const searchInput = document.getElementById('team-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.filterAndRenderMembers(e.target.value);
-            });
-        }
-
-        // Bouton d'ajout de membre
-        const addMemberBtn = document.getElementById('add-member-btn');
-        if (addMemberBtn) {
-            addMemberBtn.addEventListener('click', () => {
-                this.showAddMemberModal();
-            });
-        }
-
-        // Modal d'ajout de membre
-        const addMemberModal = document.getElementById('add-member-modal');
-        const addMemberForm = document.getElementById('add-member-form');
-        const cancelAddBtn = document.getElementById('cancel-add-member');
-
-        if (addMemberForm) {
-            addMemberForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.addMember();
-            });
-        }
-
-        if (cancelAddBtn) {
-            cancelAddBtn.addEventListener('click', () => {
-                this.hideAddMemberModal();
-            });
-        }
-
-        // Fermer modal en cliquant à l'extérieur
-        if (addMemberModal) {
-            addMemberModal.addEventListener('click', (e) => {
-                if (e.target === addMemberModal) {
-                    this.hideAddMemberModal();
+    /**
+     * Attend que Firebase soit disponible
+     */
+    async waitForFirebase() {
+        return new Promise((resolve) => {
+            const check = () => {
+                if (window.firebaseService && window.firebaseService.isInitialized) {
+                    resolve();
+                } else {
+                    setTimeout(check, 100);
                 }
-            });
-        }
-    }
-
-   // HOTFIX IMMÉDIAT - Remplacer la méthode filterAndRenderMembers ligne ~5480
-
-filterAndRenderMembers(searchTerm = '') {
-    try {
-        // Protection contre les données undefined/null
-        if (!this.members || !Array.isArray(this.members)) {
-            console.warn('⚠️ Aucun membre à filtrer');
-            this.renderMembers([]);
-            return;
-        }
-
-        const filteredMembers = this.members.filter(member => {
-            // Vérification que member existe
-            if (!member) return false;
-            
-            // Protection contre toutes les propriétés undefined
-            const name = (member.name || '').toString().toLowerCase();
-            const email = (member.email || '').toString().toLowerCase();
-            const role = (member.role || '').toString().toLowerCase();
-            
-            const search = (searchTerm || '').toString().toLowerCase();
-            
-            return name.includes(search) ||
-                   email.includes(search) ||
-                   role.includes(search);
+            };
+            check();
         });
-        
-        this.renderMembers(filteredMembers);
-        
-    } catch (error) {
-        console.error('❌ Erreur lors du filtrage des membres:', error);
-        // En cas d'erreur, afficher tous les membres sans filtrage
-        this.renderMembers(this.members || []);
-    }
-}
-
-    renderMembers(membersToRender = this.members) {
-        const container = document.getElementById('team-members-list');
-        if (!container) {
-            console.warn('⚠️ Container team-members-list non trouvé');
-            return;
-        }
-
-        container.innerHTML = '';
-
-        if (membersToRender.length === 0) {
-            container.innerHTML = `
-                <div class="no-members">
-                    <i class="fas fa-users"></i>
-                    <p>Aucun membre trouvé</p>
-                </div>
-            `;
-            return;
-        }
-
-        membersToRender.forEach(member => {
-            const memberCard = this.createMemberCard(member);
-            container.appendChild(memberCard);
-        });
-
-        console.log(`👥 ${membersToRender.length} membres d'équipe chargés`);
     }
 
-    createMemberCard(member) {
-        const card = document.createElement('div');
-        card.className = 'team-member-card';
-        card.dataset.memberId = member.id;
-
-        const statusClass = member.status === 'online' ? 'online' : 
-                           member.status === 'away' ? 'away' : 'offline';
-
-        card.innerHTML = `
-            <div class="member-avatar">
-                <img src="${member.avatar}" alt="${member.name}" onerror="this.src='assets/default-avatar.png'">
-                <div class="status-indicator ${statusClass}"></div>
-            </div>
-            <div class="member-info">
-                <h3>${member.name}</h3>
-                <p class="member-role">${member.role}</p>
-                <p class="member-email">${member.email}</p>
-                <div class="member-stats">
-                    <span class="member-level">Niveau ${member.level}</span>
-                    <span class="member-xp">${member.xp} XP</span>
-                </div>
-                <div class="member-badges">
-                    ${member.badges.map(badge => `<span class="badge ${badge}">${this.getBadgeName(badge)}</span>`).join('')}
-                </div>
-            </div>
-            <div class="member-actions">
-                <button class="btn-icon" onclick="teamManager.sendMessage('${member.id}')" title="Envoyer un message">
-                    <i class="fas fa-envelope"></i>
-                </button>
-                <button class="btn-icon" onclick="teamManager.showMemberOptions('${member.id}')" title="Plus d'options">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
-        `;
-
-        return card;
-    }
-
-    getBadgeName(badgeId) {
-        const badges = {
-            'early_bird': 'Lève-tôt',
-            'team_player': 'Équipier',
-            'innovator': 'Innovateur',
-            'code_master': 'Maître du Code',
-            'creative': 'Créatif',
-            'perfectionist': 'Perfectionniste',
-            'leader': 'Leader',
-            'mentor': 'Mentor'
-        };
-        return badges[badgeId] || badgeId;
-    }
-
-    showAddMemberModal() {
-        console.log('INFO: Fonctionnalité d\'ajout de membre - En développement');
-        const modal = document.getElementById('add-member-modal');
-        if (modal) {
-            modal.style.display = 'flex';
-        }
-    }
-
-    hideAddMemberModal() {
-        const modal = document.getElementById('add-member-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-        
-        // Reset form
-        const form = document.getElementById('add-member-form');
-        if (form) {
-            form.reset();
-        }
-    }
-
-    async addMember() {
+    /**
+     * Charge tous les membres de l'équipe
+     * @returns {Promise<Array>}
+     */
+    async loadTeamMembers() {
         try {
-            const name = document.getElementById('member-name').value.trim();
-            const email = document.getElementById('member-email').value.trim();
-            const role = document.getElementById('member-role').value;
+            console.log('📄 Chargement des membres...');
+            
+            const snapshot = await this.firestore.collection('users')
+                .orderBy('displayName')
+                .get();
+            
+            this.members = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                // Convertir les timestamps Firestore
+                createdAt: doc.data().createdAt?.toDate(),
+                updatedAt: doc.data().updatedAt?.toDate(),
+                lastSeen: doc.data().lastSeen?.toDate()
+            }));
+            
+            console.log(`✅ ${this.members.length} membres chargés`);
+            this.emit('team:loaded', this.members);
+            
+            return this.members;
+        } catch (error) {
+            console.error('❌ Erreur chargement équipe:', error);
+            this.handleError(error);
+            throw error;
+        }
+    }
 
-            if (!name || !email) {
-                alert('Veuillez remplir tous les champs requis');
-                return;
+    /**
+     * Ajoute un nouveau membre à l'équipe
+     * @param {Object} memberData - Données du membre
+     * @returns {Promise<Object>}
+     */
+    async addMember(memberData) {
+        try {
+            console.log('➕ Ajout membre:', memberData.email);
+            
+            // Validation des données
+            this.validateMemberData(memberData);
+            
+            // Vérifier si l'email existe déjà
+            const existingUser = await this.findMemberByEmail(memberData.email);
+            if (existingUser) {
+                throw new Error('Un utilisateur avec cet email existe déjà');
             }
 
-            const user = auth.currentUser;
-            if (!user) {
-                alert('Vous devez être connecté pour ajouter un membre');
-                return;
-            }
-
-            const newMember = {
-                name,
-                email,
-                role,
-                avatar: 'assets/default-avatar.png',
-                status: 'offline',
-                joinDate: new Date(),
+            // Préparer les données du nouveau membre
+            const newMemberData = {
+                email: memberData.email.toLowerCase().trim(),
+                displayName: memberData.displayName?.trim() || '',
+                role: memberData.role || 'employee',
+                department: memberData.department?.trim() || '',
+                position: memberData.position?.trim() || '',
+                status: 'invited', // invited, active, inactive
+                
+                // Gamification
                 xp: 0,
                 level: 1,
-                badges: []
+                badges: [],
+                
+                // Métadonnées
+                photoURL: '',
+                phone: memberData.phone?.trim() || '',
+                
+                // Timestamps
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                invitedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                invitedBy: window.authManager?.getCurrentUser()?.uid || null,
+                
+                // Préférences par défaut
+                preferences: {
+                    theme: 'dark',
+                    notifications: true,
+                    language: 'fr'
+                }
             };
 
-            // Ajouter à Firebase
-            const membersRef = collection(db, 'teams', user.uid, 'members');
-            const docRef = await addDoc(membersRef, newMember);
+            // Ajouter en base
+            const docRef = await this.firestore.collection('users').add(newMemberData);
             
             // Ajouter à la liste locale
-            newMember.id = docRef.id;
+            const newMember = { 
+                id: docRef.id, 
+                ...newMemberData,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                invitedAt: new Date()
+            };
+            
             this.members.push(newMember);
-
-            // Rafraîchir l'affichage
-            this.renderMembers();
-            this.hideAddMemberModal();
-
-            console.log('✅ Nouveau membre ajouté:', name);
-            alert(`Membre ${name} ajouté avec succès !`);
-
+            
+            console.log('✅ Membre ajouté:', newMember.email);
+            this.emit('member:added', newMember);
+            
+            return newMember;
+            
         } catch (error) {
-            console.error('❌ Erreur lors de l\'ajout du membre:', error);
-            alert('Erreur lors de l\'ajout du membre');
+            console.error('❌ Erreur ajout membre:', error);
+            this.handleError(error);
+            throw error;
         }
     }
 
-    sendMessage(memberId) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member) {
-            console.log(`INFO: Message à ${member.name}`);
-            // Intégration avec le Chat Manager
-            if (window.chatManager) {
-                window.chatManager.startPrivateChat(memberId);
-            }
-        }
-    }
-
-    showMemberOptions(memberId) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member) {
-            console.log(`INFO: Options pour ${member.name}`);
-            // Afficher un menu contextuel avec les options
-            this.showMemberContextMenu(member);
-        }
-    }
-
-    showMemberContextMenu(member) {
-        // Créer un menu contextuel dynamique
-        const existingMenu = document.querySelector('.member-context-menu');
-        if (existingMenu) {
-            existingMenu.remove();
-        }
-
-        const menu = document.createElement('div');
-        menu.className = 'member-context-menu';
-        menu.innerHTML = `
-            <div class="context-menu-item" onclick="teamManager.viewMemberProfile('${member.id}')">
-                <i class="fas fa-user"></i> Voir le profil
-            </div>
-            <div class="context-menu-item" onclick="teamManager.sendMessage('${member.id}')">
-                <i class="fas fa-envelope"></i> Envoyer un message
-            </div>
-            <div class="context-menu-item" onclick="teamManager.assignTask('${member.id}')">
-                <i class="fas fa-tasks"></i> Assigner une tâche
-            </div>
-            <div class="context-menu-item" onclick="teamManager.viewMemberStats('${member.id}')">
-                <i class="fas fa-chart-bar"></i> Voir les statistiques
-            </div>
-        `;
-
-        document.body.appendChild(menu);
-
-        // Positionner le menu
-        const event = window.event;
-        if (event) {
-            menu.style.left = event.pageX + 'px';
-            menu.style.top = event.pageY + 'px';
-        }
-
-        // Fermer le menu en cliquant ailleurs
-        setTimeout(() => {
-            document.addEventListener('click', function closeMenu() {
-                menu.remove();
-                document.removeEventListener('click', closeMenu);
-            });
-        }, 100);
-    }
-
-    viewMemberProfile(memberId) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member) {
-            console.log(`INFO: Profil de ${member.name}`);
-            // Afficher le profil détaillé du membre
-            this.showMemberProfileModal(member);
-        }
-    }
-
-    showMemberProfileModal(member) {
-        // Créer une modal de profil dynamique
-        const modalHtml = `
-            <div id="member-profile-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close" onclick="document.getElementById('member-profile-modal').remove()">&times;</span>
-                    <div class="member-profile">
-                        <div class="profile-header">
-                            <img src="${member.avatar}" alt="${member.name}" class="profile-avatar">
-                            <div class="profile-info">
-                                <h2>${member.name}</h2>
-                                <p class="profile-role">${member.role}</p>
-                                <p class="profile-email">${member.email}</p>
-                            </div>
-                        </div>
-                        <div class="profile-stats">
-                            <div class="stat">
-                                <h3>Niveau</h3>
-                                <p>${member.level}</p>
-                            </div>
-                            <div class="stat">
-                                <h3>Expérience</h3>
-                                <p>${member.xp} XP</p>
-                            </div>
-                            <div class="stat">
-                                <h3>Date d'arrivée</h3>
-                                <p>${new Date(member.joinDate).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                        <div class="profile-badges">
-                            <h3>Badges obtenus</h3>
-                            <div class="badges-list">
-                                ${member.badges.map(badge => `
-                                    <span class="badge ${badge}">${this.getBadgeName(badge)}</span>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    assignTask(memberId) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member) {
-            console.log(`INFO: Assigner une tâche à ${member.name}`);
-            // Intégration avec le système de tâches/quêtes
-            if (window.questManager) {
-                window.questManager.showAssignQuestModal(memberId);
-            }
-        }
-    }
-
-    viewMemberStats(memberId) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member) {
-            console.log(`INFO: Statistiques de ${member.name}`);
-            // Intégration avec Analytics Manager
-            if (window.analyticsManager) {
-                window.analyticsManager.showMemberAnalytics(memberId);
-            }
-        }
-    }
-
-    // Méthodes pour l'intégration avec d'autres managers
-    updateMemberXP(memberId, xpGained) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member) {
-            member.xp += xpGained;
-            
-            // Vérifier si le membre monte de niveau
-            const newLevel = Math.floor(member.xp / 250) + 1;
-            if (newLevel > member.level) {
-                member.level = newLevel;
-                console.log(`🎉 ${member.name} monte au niveau ${newLevel}!`);
-                this.showLevelUpNotification(member);
-            }
-
-            // Sauvegarder en Firebase
-            this.saveMemberToFirebase(member);
-            
-            // Rafraîchir l'affichage
-            this.renderMembers();
-        }
-    }
-
-    addBadgeToMember(memberId, badgeId) {
-        const member = this.members.find(m => m.id === memberId);
-        if (member && !member.badges.includes(badgeId)) {
-            member.badges.push(badgeId);
-            console.log(`🏆 ${member.name} obtient le badge: ${this.getBadgeName(badgeId)}`);
-            
-            // Sauvegarder en Firebase
-            this.saveMemberToFirebase(member);
-            
-            // Rafraîchir l'affichage
-            this.renderMembers();
-
-            // Afficher notification
-            this.showBadgeNotification(member, badgeId);
-        }
-    }
-
-    showLevelUpNotification(member) {
-        // Afficher une notification de montée de niveau
-        const notification = document.createElement('div');
-        notification.className = 'level-up-notification';
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-star"></i>
-                <h3>Niveau supérieur !</h3>
-                <p>${member.name} atteint le niveau ${member.level}</p>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
-    }
-
-    showBadgeNotification(member, badgeId) {
-        // Afficher une notification de nouveau badge
-        const notification = document.createElement('div');
-        notification.className = 'badge-notification';
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-trophy"></i>
-                <h3>Nouveau badge !</h3>
-                <p>${member.name} obtient: ${this.getBadgeName(badgeId)}</p>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
-    }
-
-    async saveMemberToFirebase(member) {
+    /**
+     * Met à jour un membre existant
+     * @param {string} memberId - ID du membre
+     * @param {Object} updates - Données à mettre à jour
+     * @returns {Promise<Object>}
+     */
+    async updateMember(memberId, updates) {
         try {
-            const user = auth.currentUser;
-            if (!user) return;
+            console.log('🔄 Mise à jour membre:', memberId);
+            
+            // Validation
+            if (!memberId) {
+                throw new Error('ID du membre requis');
+            }
 
-            const memberRef = doc(db, 'teams', user.uid, 'members', member.id);
-            await updateDoc(memberRef, {
-                name: member.name,
-                email: member.email,
-                role: member.role,
-                avatar: member.avatar,
-                status: member.status,
-                xp: member.xp,
-                level: member.level,
-                badges: member.badges
-            });
+            // Préparer les données de mise à jour
+            const updateData = {
+                ...updates,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
 
-            console.log(`✅ Membre ${member.name} sauvegardé`);
+            // Nettoyer les données
+            if (updateData.email) {
+                updateData.email = updateData.email.toLowerCase().trim();
+            }
+            if (updateData.displayName) {
+                updateData.displayName = updateData.displayName.trim();
+            }
+            if (updateData.department) {
+                updateData.department = updateData.department.trim();
+            }
+            if (updateData.position) {
+                updateData.position = updateData.position.trim();
+            }
+
+            // Mettre à jour en base
+            await this.firestore.collection('users').doc(memberId).update(updateData);
+            
+            // Mettre à jour localement
+            const memberIndex = this.members.findIndex(m => m.id === memberId);
+            if (memberIndex !== -1) {
+                this.members[memberIndex] = { 
+                    ...this.members[memberIndex], 
+                    ...updates,
+                    updatedAt: new Date()
+                };
+                
+                console.log('✅ Membre mis à jour:', this.members[memberIndex].email);
+                this.emit('member:updated', this.members[memberIndex]);
+                
+                return this.members[memberIndex];
+            }
+            
+            throw new Error('Membre non trouvé localement');
+            
         } catch (error) {
-            console.error('❌ Erreur sauvegarde membre:', error);
+            console.error('❌ Erreur mise à jour membre:', error);
+            this.handleError(error);
+            throw error;
         }
     }
 
-    // Méthode pour obtenir un membre par ID
+    /**
+     * Supprime un membre de l'équipe
+     * @param {string} memberId - ID du membre à supprimer
+     * @returns {Promise<boolean>}
+     */
+    async deleteMember(memberId) {
+        try {
+            console.log('🗑️ Suppression membre:', memberId);
+            
+            if (!memberId) {
+                throw new Error('ID du membre requis');
+            }
+
+            // Vérifier que ce n'est pas l'utilisateur actuel
+            const currentUser = window.authManager?.getCurrentUser();
+            if (currentUser && currentUser.uid === memberId) {
+                throw new Error('Impossible de supprimer votre propre compte');
+            }
+
+            // Supprimer de la base
+            await this.firestore.collection('users').doc(memberId).delete();
+            
+            // Supprimer localement
+            const memberIndex = this.members.findIndex(m => m.id === memberId);
+            if (memberIndex !== -1) {
+                const deletedMember = this.members[memberIndex];
+                this.members.splice(memberIndex, 1);
+                
+                console.log('✅ Membre supprimé:', deletedMember.email);
+                this.emit('member:deleted', { id: memberId, member: deletedMember });
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Erreur suppression membre:', error);
+            this.handleError(error);
+            throw error;
+        }
+    }
+
+    /**
+     * Recherche des membres par nom ou email
+     * @param {string} query - Terme de recherche
+     * @returns {Promise<Array>}
+     */
+    async searchMembers(query) {
+        try {
+            if (!query || query.length < 2) {
+                return this.members;
+            }
+
+            const searchTerm = query.toLowerCase().trim();
+            
+            // Recherche locale d'abord
+            const localResults = this.members.filter(member => 
+                member.email.toLowerCase().includes(searchTerm) ||
+                member.displayName?.toLowerCase().includes(searchTerm) ||
+                member.department?.toLowerCase().includes(searchTerm) ||
+                member.position?.toLowerCase().includes(searchTerm)
+            );
+
+            // Si pas assez de résultats, recherche en base
+            if (localResults.length < 5) {
+                const snapshot = await this.firestore.collection('users')
+                    .where('email', '>=', searchTerm)
+                    .where('email', '<=', searchTerm + '\uf8ff')
+                    .limit(10)
+                    .get();
+                
+                const dbResults = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Fusionner et dédoublonner
+                const allResults = [...localResults];
+                dbResults.forEach(dbResult => {
+                    if (!allResults.find(r => r.id === dbResult.id)) {
+                        allResults.push(dbResult);
+                    }
+                });
+
+                return allResults;
+            }
+
+            return localResults;
+            
+        } catch (error) {
+            console.error('❌ Erreur recherche membres:', error);
+            return this.members.filter(member => 
+                member.email.toLowerCase().includes(query.toLowerCase()) ||
+                member.displayName?.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+    }
+
+    /**
+     * Trouve un membre par email
+     * @param {string} email 
+     * @returns {Promise<Object|null>}
+     */
+    async findMemberByEmail(email) {
+        try {
+            const snapshot = await this.firestore.collection('users')
+                .where('email', '==', email.toLowerCase().trim())
+                .limit(1)
+                .get();
+            
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                return { id: doc.id, ...doc.data() };
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('❌ Erreur recherche par email:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Valide les données d'un membre
+     * @param {Object} memberData 
+     */
+    validateMemberData(memberData) {
+        if (!memberData.email) {
+            throw new Error('Email requis');
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(memberData.email)) {
+            throw new Error('Format d\'email invalide');
+        }
+
+        const validRoles = ['admin', 'manager', 'employee'];
+        if (memberData.role && !validRoles.includes(memberData.role)) {
+            throw new Error('Rôle invalide');
+        }
+    }
+
+    /**
+     * Récupère tous les membres
+     * @returns {Array}
+     */
+    getMembers() {
+        return [...this.members];
+    }
+
+    /**
+     * Récupère les membres par rôle
+     * @param {string} role 
+     * @returns {Array}
+     */
+    getMembersByRole(role) {
+        return this.members.filter(member => member.role === role);
+    }
+
+    /**
+     * Récupère les membres par département
+     * @param {string} department 
+     * @returns {Array}
+     */
+    getMembersByDepartment(department) {
+        return this.members.filter(member => member.department === department);
+    }
+
+    /**
+     * Récupère les membres actifs
+     * @returns {Array}
+     */
+    getActiveMembers() {
+        return this.members.filter(member => member.status === 'active');
+    }
+
+    /**
+     * Récupère les statistiques de l'équipe
+     * @returns {Object}
+     */
+    getTeamStats() {
+        const total = this.members.length;
+        const active = this.members.filter(m => m.status === 'active').length;
+        const invited = this.members.filter(m => m.status === 'invited').length;
+        const inactive = this.members.filter(m => m.status === 'inactive').length;
+        
+        const departments = [...new Set(
+            this.members
+                .map(m => m.department)
+                .filter(d => d && d.trim())
+        )];
+        
+        const roles = {
+            admin: this.members.filter(m => m.role === 'admin').length,
+            manager: this.members.filter(m => m.role === 'manager').length,
+            employee: this.members.filter(m => m.role === 'employee').length
+        };
+        
+        return {
+            total,
+            active,
+            invited,
+            inactive,
+            departments: departments.length,
+            departmentsList: departments,
+            roles
+        };
+    }
+
+    /**
+     * Récupère un membre par ID
+     * @param {string} memberId 
+     * @returns {Object|null}
+     */
     getMemberById(memberId) {
-        return this.members.find(m => m.id === memberId);
+        return this.members.find(member => member.id === memberId) || null;
     }
 
-    // Méthode pour obtenir tous les membres
-    getAllMembers() {
-        return this.members;
+    /**
+     * Vérifie si un utilisateur peut gérer l'équipe
+     * @param {Object} user - Utilisateur à vérifier
+     * @returns {boolean}
+     */
+    canManageTeam(user) {
+        if (!user) return false;
+        
+        const userProfile = window.authManager?.getUserProfile();
+        if (!userProfile) return false;
+        
+        return ['admin', 'manager'].includes(userProfile.role);
     }
 
-    // Méthode pour rafraîchir la liste des membres
-    async refreshMembers() {
-        await this.loadMembers();
+    /**
+     * Gestion des erreurs
+     * @param {Error} error 
+     */
+    handleError(error) {
+        const errorInfo = {
+            type: 'team',
+            code: error.code || 'unknown',
+            message: error.message,
+            timestamp: new Date()
+        };
+        
+        this.emit('team:error', errorInfo);
+    }
+
+    /**
+     * Émet un événement
+     * @param {string} eventName 
+     * @param {*} data 
+     */
+    emit(eventName, data = null) {
+        const event = new CustomEvent(eventName, { detail: data });
+        this.eventEmitter.dispatchEvent(event);
+        
+        // Aussi émettre sur window pour compatibilité
+        window.dispatchEvent(event);
+    }
+
+    /**
+     * Écoute un événement
+     * @param {string} eventName 
+     * @param {Function} callback 
+     */
+    on(eventName, callback) {
+        this.eventEmitter.addEventListener(eventName, callback);
+    }
+
+    /**
+     * Supprime un écouteur d'événement
+     * @param {string} eventName 
+     * @param {Function} callback 
+     */
+    off(eventName, callback) {
+        this.eventEmitter.removeEventListener(eventName, callback);
+    }
+
+    /**
+     * Nettoyage lors de la destruction
+     */
+    destroy() {
+        this.members = [];
+        this.listeners.clear();
+        console.log('🧹 TeamManager nettoyé');
     }
 }
+
+// Export pour utilisation globale
+window.TeamManager = TeamManager;

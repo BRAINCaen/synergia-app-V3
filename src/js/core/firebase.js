@@ -26,6 +26,12 @@ class FirebaseService {
             this.auth = firebase.auth();
             this.firestore = firebase.firestore();
             
+            // Initialisation d'Analytics si activé
+            if (config.measurementId && typeof firebase.analytics !== 'undefined') {
+                this.analytics = firebase.analytics();
+                console.log('Firebase Analytics activé');
+            }
+            
             // Configuration de persistance
             await this.configurePersistence();
             

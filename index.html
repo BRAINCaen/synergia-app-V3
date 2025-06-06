@@ -26,7 +26,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- STYLES INTÉGRÉS (À EXTRAIRE PLUS TARD) -->
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- STYLES INTÉGRÉS -->
     <style>
         /* Variables CSS */
         :root {
@@ -447,6 +450,128 @@
             border: 1px solid var(--glass-border);
             margin-bottom: 20px;
         }
+
+        /* Login page styles */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--glass-border);
+        }
+
+        .divider span {
+            background: var(--secondary-color);
+            padding: 0 15px;
+            color: var(--text-muted);
+        }
+
+        /* Hero section */
+        .hero-section {
+            text-align: center;
+            padding: 100px 0;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--accent-color), #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .hero-actions {
+            margin-top: 40px;
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .quick-actions .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            flex-direction: column;
+            min-width: auto;
+        }
+
+        .quick-actions .btn i {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        /* Activity list */
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+            gap: 15px;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .activity-item span {
+            flex: 1;
+        }
+
+        .activity-item small {
+            color: var(--text-muted);
+        }
         
         /* Responsive */
         @media (max-width: 768px) {
@@ -459,6 +584,7 @@
             .current-time { font-size: 36px; }
             .badge-buttons { flex-direction: column; align-items: center; }
             .btn-lg { width: 100%; }
+            .hero-section h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -552,29 +678,66 @@
     <!-- MODULES IMPORT     -->
     <!-- ================== -->
     
-    <!-- Firebase Service -->
+    <!-- Firebase Service (doit être chargé en premier) -->
     <script src="src/js/core/firebase-service.js"></script>
     
-    <!-- Managers -->
+    <!-- Managers (après Firebase) -->
     <script src="src/js/managers/AuthManager.js"></script>
     <script src="src/js/managers/team-manager.js"></script>
     <script src="src/js/managers/badging-manager.js"></script>
     
-    <!-- Router -->
+    <!-- Router (après les managers) -->
     <script src="src/js/core/router.js"></script>
     
     <!-- ================================ -->
-    <!-- INITIALISATION DES MANAGERS     -->
+    <!-- INITIALISATION DES SERVICES     -->
     <!-- ================================ -->
     <script>
-        // Initialisation des services globaux
-        window.firebaseService = new FirebaseService();
-        window.authManager = new AuthManager();
-        window.teamManager = new TeamManager();
-        window.badgingManager = new BadgingManager();
-        window.router = new Router();
-        
-        console.log('🚀 SYNERGIA v3.0 Phase 4 - Modules chargés');
+        // Fonction pour initialiser l'application
+        async function initializeApp() {
+            try {
+                console.log('🚀 SYNERGIA v3.0 - Initialisation...');
+
+                // Initialiser Firebase Service
+                window.firebaseService = new FirebaseService();
+                await window.firebaseService.waitForInitialization();
+
+                // Initialiser les managers
+                window.authManager = new AuthManager();
+                window.teamManager = new TeamManager();
+                window.badgingManager = new BadgingManager();
+                
+                // Initialiser le router
+                window.router = new Router();
+                
+                console.log('✅ SYNERGIA v3.0 - Tous les services initialisés');
+                
+            } catch (error) {
+                console.error('❌ Erreur d\'initialisation:', error);
+                
+                // Afficher une erreur à l'utilisateur
+                const app = document.getElementById('app');
+                app.innerHTML = `
+                    <div class="container">
+                        <div class="card" style="text-align: center; margin-top: 50px;">
+                            <h2 style="color: var(--danger-color);">Erreur d'initialisation</h2>
+                            <p>Une erreur s'est produite lors du chargement de l'application.</p>
+                            <p style="color: var(--text-muted); font-size: 14px;">${error.message}</p>
+                            <button onclick="location.reload()" class="btn btn-primary">
+                                Recharger la page
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Démarrer l'initialisation quand le DOM est prêt
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
     </script>
 
     <!-- ================================ -->
@@ -589,21 +752,39 @@
         // ==================
         async function handleGoogleLogin() {
             try {
-                await authManager.signInWithGoogle();
-                router.navigate('/dashboard');
+                const loginBtn = document.querySelector('[onclick="handleGoogleLogin()"]');
+                if (loginBtn) {
+                    loginBtn.textContent = 'Connexion...';
+                    loginBtn.disabled = true;
+                }
+
+                await window.authManager.signInWithGoogle();
+                
+                console.log('✅ Connexion Google réussie');
+                
             } catch (error) {
+                console.error('❌ Erreur connexion:', error);
                 alert('Erreur de connexion: ' + error.message);
+                
+                const loginBtn = document.querySelector('[onclick="handleGoogleLogin()"]');
+                if (loginBtn) {
+                    loginBtn.innerHTML = '<i class="fab fa-google"></i> Continuer avec Google';
+                    loginBtn.disabled = false;
+                }
             }
         }
 
         async function handleSignOut() {
             try {
                 if (window.badgingManager) {
-                    badgingManager.stopClock();
+                    window.badgingManager.stopClock();
                 }
-                await authManager.signOut();
-                router.navigate('/login');
+                await window.authManager.signOut();
+                
+                console.log('✅ Déconnexion réussie');
+                
             } catch (error) {
+                console.error('❌ Erreur déconnexion:', error);
                 alert('Erreur de déconnexion: ' + error.message);
             }
         }
@@ -672,16 +853,16 @@
 
                 switch(pendingBadgeAction) {
                     case 'checkin':
-                        result = await badgingManager.checkIn(note);
+                        result = await window.badgingManager.checkIn(note);
                         break;
                     case 'checkout':
-                        result = await badgingManager.checkOut(note);
+                        result = await window.badgingManager.checkOut(note);
                         break;
                     case 'breakstart':
-                        result = await badgingManager.startBreak(note);
+                        result = await window.badgingManager.startBreak(note);
                         break;
                     case 'breakend':
-                        result = await badgingManager.endBreak(note);
+                        result = await window.badgingManager.endBreak(note);
                         break;
                 }
 
@@ -695,15 +876,16 @@
                         'breakend': 'Fin de pause enregistrée !'
                     };
                     
-                    alert(messages[pendingBadgeAction]);
+                    // Créer une notification toast
+                    showToast(messages[pendingBadgeAction], 'success');
                 }
 
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
 
             } catch (error) {
-                console.error('Erreur lors du pointage:', error);
-                alert('Erreur: ' + error.message);
+                console.error('❌ Erreur lors du pointage:', error);
+                showToast('Erreur: ' + error.message, 'error');
                 
                 const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
                 submitBtn.textContent = 'Confirmer';
@@ -725,7 +907,7 @@
         }
 
         async function editMember(memberId) {
-            const members = teamManager.getMembers();
+            const members = window.teamManager.getMembers();
             const member = members.find(m => m.id === memberId);
             
             if (!member) return;
@@ -742,26 +924,123 @@
         }
 
         async function deleteMemberConfirm(memberId) {
-            const members = teamManager.getMembers();
+            const members = window.teamManager.getMembers();
             const member = members.find(m => m.id === memberId);
             
             if (!member) return;
             
             if (confirm(`Êtes-vous sûr de vouloir supprimer ${member.displayName || member.email} ?`)) {
                 try {
-                    await teamManager.deleteMember(memberId);
-                    alert('Membre supprimé avec succès');
+                    await window.teamManager.deleteMember(memberId);
+                    showToast('Membre supprimé avec succès', 'success');
                 } catch (error) {
-                    alert('Erreur lors de la suppression: ' + error.message);
+                    showToast('Erreur lors de la suppression: ' + error.message, 'error');
                 }
             }
         }
 
         // ==================
-        // INITIALISATION
+        // SYSTÈME DE NOTIFICATIONS TOAST
+        // ==================
+        function showToast(message, type = 'info') {
+            // Supprimer les anciens toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+
+            // Créer le nouveau toast
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-${getToastIcon(type)}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            // Ajouter les styles du toast
+            const style = document.createElement('style');
+            style.textContent = `
+                .toast {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--glass-bg-strong);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid var(--glass-border);
+                    border-radius: var(--border-radius);
+                    padding: 16px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    color: var(--text-light);
+                    z-index: 10000;
+                    animation: slideInRight 0.3s ease-out;
+                    max-width: 400px;
+                    min-width: 300px;
+                }
+                .toast-success { border-left: 4px solid var(--success-color); }
+                .toast-error { border-left: 4px solid var(--danger-color); }
+                .toast-warning { border-left: 4px solid var(--warning-color); }
+                .toast-info { border-left: 4px solid var(--info-color); }
+                .toast-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex: 1;
+                }
+                .toast-close {
+                    background: none;
+                    border: none;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    padding: 4px;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                }
+                .toast-close:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: var(--text-light);
+                }
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            
+            if (!document.querySelector('style[data-toast-styles]')) {
+                style.setAttribute('data-toast-styles', 'true');
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(toast);
+
+            // Auto-suppression après 5 secondes
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function getToastIcon(type) {
+            const icons = {
+                'success': 'check-circle',
+                'error': 'exclamation-circle',
+                'warning': 'exclamation-triangle',
+                'info': 'info-circle'
+            };
+            return icons[type] || icons.info;
+        }
+
+        // ==================
+        // GESTIONNAIRES D'ÉVÉNEMENTS
         // ==================
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 SYNERGIA v3.0 Phase 4 - Interface chargée');
+            console.log('🚀 SYNERGIA v3.0 - Interface chargée');
 
             // Gestionnaire du formulaire d'équipe
             const teamForm = document.getElementById('teamForm');
@@ -781,17 +1060,17 @@
                         const editId = teamForm.dataset.editId;
                         
                         if (editId) {
-                            await teamManager.updateMember(editId, formData);
-                            alert('Membre modifié avec succès');
+                            await window.teamManager.updateMember(editId, formData);
+                            showToast('Membre modifié avec succès', 'success');
                             delete teamForm.dataset.editId;
                         } else {
-                            await teamManager.addMember(formData);
-                            alert('Membre ajouté avec succès');
+                            await window.teamManager.addMember(formData);
+                            showToast('Membre ajouté avec succès', 'success');
                         }
                         
                         closeTeamModal();
                     } catch (error) {
-                        alert('Erreur: ' + error.message);
+                        showToast('Erreur: ' + error.message, 'error');
                     }
                 });
             }
@@ -831,25 +1110,28 @@
                     closeBadgeNoteModal();
                 }
                 
-                if (e.ctrlKey && window.location.hash.includes('/badging')) {
-                    switch(e.key.toLowerCase()) {
-                        case 'i':
-                            e.preventDefault();
-                            handleCheckIn();
-                            break;
-                        case 'o':
-                            e.preventDefault();
-                            handleCheckOut();
-                            break;
-                        case 'p':
-                            e.preventDefault();
-                            const status = badgingManager?.getCurrentStatus();
-                            if (status === 'working') {
-                                handleBreakStart();
-                            } else if (status === 'on-break') {
-                                handleBreakEnd();
-                            }
-                            break;
+                // Raccourcis pour le pointage (uniquement sur la page badging)
+                if (window.router && window.router.getCurrentRoute() === '/badging') {
+                    if (e.ctrlKey) {
+                        switch(e.key.toLowerCase()) {
+                            case 'i':
+                                e.preventDefault();
+                                handleCheckIn();
+                                break;
+                            case 'o':
+                                e.preventDefault();
+                                handleCheckOut();
+                                break;
+                            case 'p':
+                                e.preventDefault();
+                                const status = window.badgingManager?.getCurrentStatus();
+                                if (status === 'working') {
+                                    handleBreakStart();
+                                } else if (status === 'on-break') {
+                                    handleBreakEnd();
+                                }
+                                break;
+                        }
                     }
                 }
             });
@@ -857,10 +1139,174 @@
             // Nettoyage lors de la fermeture
             window.addEventListener('beforeunload', () => {
                 if (window.badgingManager) {
-                    badgingManager.stopClock();
+                    window.badgingManager.stopClock();
+                }
+            });
+
+            // Gestionnaire de formulaire de connexion par email
+            document.addEventListener('submit', (e) => {
+                if (e.target.id === 'loginForm') {
+                    e.preventDefault();
+                    handleEmailLogin(e.target);
                 }
             });
         });
+
+        // ==================
+        // CONNEXION PAR EMAIL
+        // ==================
+        async function handleEmailLogin(form) {
+            const formData = new FormData(form);
+            const email = formData.get('email') || form.querySelector('input[type="email"]').value;
+            const password = formData.get('password') || form.querySelector('input[type="password"]').value;
+            
+            if (!email || !password) {
+                showToast('Email et mot de passe requis', 'error');
+                return;
+            }
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            try {
+                submitBtn.textContent = 'Connexion...';
+                submitBtn.disabled = true;
+
+                await window.authManager.signInWithEmail(email, password);
+                
+                console.log('✅ Connexion email réussie');
+                
+            } catch (error) {
+                console.error('❌ Erreur connexion email:', error);
+                showToast('Erreur de connexion: ' + error.message, 'error');
+                
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // ==================
+        // UTILITAIRES GLOBAUX
+        // ==================
+        
+        // Fonction pour formater une date
+        function formatDate(date) {
+            if (!date) return '';
+            if (typeof date === 'string') date = new Date(date);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        // Fonction pour formater une heure
+        function formatTime(date) {
+            if (!date) return '';
+            if (typeof date === 'string') date = new Date(date);
+            return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Fonction pour calculer la différence de temps
+        function timeDifference(start, end) {
+            if (!start || !end) return '';
+            
+            const startTime = new Date(start);
+            const endTime = new Date(end);
+            const diff = endTime - startTime;
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return `${hours}h${minutes.toString().padStart(2, '0')}`;
+        }
+
+        // Fonction pour obtenir le statut de présence
+        function getPresenceStatus(lastSeen) {
+            if (!lastSeen) return 'offline';
+            
+            const now = new Date();
+            const lastSeenDate = new Date(lastSeen);
+            const diff = now - lastSeenDate;
+            
+            // En ligne si vu dans les 5 dernières minutes
+            if (diff < 5 * 60 * 1000) return 'online';
+            
+            // Absent si vu dans les 30 dernières minutes
+            if (diff < 30 * 60 * 1000) return 'away';
+            
+            return 'offline';
+        }
+
+        // Fonction pour capitaliser la première lettre
+        function capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Fonction pour tronquer un texte
+        function truncate(str, length = 50) {
+            if (!str || str.length <= length) return str;
+            return str.substring(0, length) + '...';
+        }
+
+        // ==================
+        // GESTION DES ERREURS GLOBALES
+        // ==================
+        window.addEventListener('error', (e) => {
+            console.error('❌ Erreur JavaScript:', e.error);
+            
+            // Ne pas montrer les erreurs de chargement de ressources externes
+            if (e.filename && e.filename.includes('googleapis.com')) {
+                return;
+            }
+            
+            // Afficher une notification pour les erreurs importantes
+            if (e.error && e.error.message) {
+                showToast('Une erreur inattendue s\'est produite', 'error');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('❌ Promesse rejetée:', e.reason);
+            
+            // Gérer les erreurs Firebase spécifiques
+            if (e.reason && e.reason.code) {
+                const firebaseErrors = {
+                    'auth/network-request-failed': 'Problème de connexion réseau',
+                    'firestore/unavailable': 'Service temporairement indisponible',
+                    'auth/too-many-requests': 'Trop de tentatives, réessayez plus tard'
+                };
+                
+                const message = firebaseErrors[e.reason.code] || 'Erreur de service';
+                showToast(message, 'error');
+                
+                // Empêcher l'affichage dans la console du navigateur
+                e.preventDefault();
+            }
+        });
+
+        // ==================
+        // INFORMATIONS DE DEBUG
+        // ==================
+        console.log(`
+    🚀 SYNERGIA v3.0 - Phase 4
+    
+    📋 Modules chargés:
+    - Firebase Service
+    - Auth Manager  
+    - Team Manager
+    - Badging Manager
+    - Router
+    
+    🎯 Raccourcis clavier (page pointage):
+    - Ctrl+I: Pointage arrivée
+    - Ctrl+O: Pointage sortie  
+    - Ctrl+P: Pause/Reprise
+    - Escape: Fermer modales
+    
+    🔧 Debug:
+    window.authManager
+    window.teamManager
+    window.badgingManager
+    window.router
+        `);
     </script>
 </body>
 </html>

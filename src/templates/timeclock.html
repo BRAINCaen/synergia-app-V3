@@ -1,0 +1,439 @@
+<!-- src/templates/timeclock.html -->
+<div id="timeclock-page" class="page-content">
+    <!-- Header avec raccourcis clavier -->
+    <div class="page-header">
+        <h1>💼 Pointage</h1>
+        <div class="shortcuts-info">
+            <small>
+                Raccourcis: Ctrl+I (Arrivée), Ctrl+O (Sortie), Ctrl+P (Pause), Ctrl+E (Export)
+            </small>
+        </div>
+    </div>
+
+    <!-- En-tête avec statut actuel -->
+    <div class="timeclock-header">
+        <div class="current-status" id="current-status">
+            <div class="status-icon" id="status-icon">⏰</div>
+            <div class="status-info">
+                <h2 id="status-title">Non pointé</h2>
+                <p id="status-subtitle">Cliquez pour pointer votre arrivée</p>
+                <div id="current-session-timer" class="session-timer" style="display: none;">
+                    <span id="work-timer">00:00</span>
+                    <span id="break-indicator" style="display: none;">📱 En pause</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions de pointage -->
+    <div class="timeclock-actions">
+        <!-- Pointage principal -->
+        <div class="main-actions">
+            <button id="clock-in-btn" class="action-btn primary" style="display: none;">
+                <i class="icon">🕐</i>
+                <span>Pointer l'arrivée</span>
+                <small>Ctrl+I</small>
+            </button>
+            
+            <button id="clock-out-btn" class="action-btn danger" style="display: none;">
+                <i class="icon">🏠</i>
+                <span>Pointer la sortie</span>
+                <small>Ctrl+O</small>
+            </button>
+            
+            <button id="training-btn" class="action-btn secondary">
+                <i class="icon">📚</i>
+                <span>En formation</span>
+                <small>7h auto</small>
+            </button>
+        </div>
+
+        <!-- Actions de pause -->
+        <div class="break-actions" id="break-actions" style="display: none;">
+            <button id="start-break-btn" class="action-btn secondary">
+                <i class="icon">⏸️</i>
+                <span>Commencer une pause</span>
+                <small>Ctrl+P</small>
+            </button>
+            
+            <button id="end-break-btn" class="action-btn success" style="display: none;">
+                <i class="icon">▶️</i>
+                <span>Terminer la pause</span>
+                <small>Ctrl+P</small>
+            </button>
+        </div>
+
+        <!-- Options distanciel -->
+        <div class="remote-options">
+            <label class="checkbox-container">
+                <input type="checkbox" id="remote-work-checkbox">
+                <span class="checkmark"></span>
+                Travail à distance
+            </label>
+            <button id="location-btn" class="icon-btn" title="Enregistrer la localisation actuelle">📍</button>
+            <div id="location-status" class="location-status" style="display: none;">
+                <span class="location-text">📍 Position enregistrée</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone de commentaires -->
+    <div class="comment-section" id="comment-section" style="display: none;">
+        <h3 id="comment-title">Commentaire</h3>
+        <textarea 
+            id="comment-input" 
+            placeholder="Ajouter un commentaire (optionnel)..." 
+            rows="3"
+            maxlength="500"
+        ></textarea>
+        <div class="character-count">
+            <span id="char-count">0</span>/500 caractères
+        </div>
+        <div class="comment-actions">
+            <button id="comment-cancel" class="btn secondary">
+                Annuler <small>Échap</small>
+            </button>
+            <button id="comment-confirm" class="btn primary">
+                Confirmer <small>Entrée</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistiques du jour -->
+    <div class="daily-stats">
+        <h3>📊 Aujourd'hui</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🕒</div>
+                <div class="stat-value" id="today-work-time">00:00</div>
+                <div class="stat-label">Temps travaillé</div>
+                <div class="stat-target">Objectif: 8h00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏸️</div>
+                <div class="stat-value" id="today-break-time">00:00</div>
+                <div class="stat-label">Temps pause</div>
+                <div class="stat-target">Recommandé: 1h00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏰</div>
+                <div class="stat-value" id="today-overtime">00:00</div>
+                <div class="stat-label">Heures sup.</div>
+                <div class="stat-progress" id="overtime-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique -->
+    <div class="timeclock-history">
+        <div class="history-header">
+            <h3>📈 Historique des pointages</h3>
+            <div class="history-controls">
+                <select id="period-select">
+                    <option value="week">Cette semaine</option>
+                    <option value="month">Ce mois</option>
+                    <option value="quarter">Ce trimestre</option>
+                    <option value="custom">Période personnalisée</option>
+                </select>
+                <button id="refresh-btn" class="btn secondary" title="Actualiser">
+                    🔄
+                </button>
+                <button id="export-btn" class="btn secondary">
+                    📥 Exporter <small>Ctrl+E</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtres personnalisés -->
+        <div class="custom-period" id="custom-period" style="display: none;">
+            <div class="date-inputs">
+                <label>Du:</label>
+                <input type="date" id="start-date">
+                <label>Au:</label>
+                <input type="date" id="end-date">
+                <button id="apply-filter" class="btn primary">Appliquer</button>
+                <button id="reset-filter" class="btn secondary">Réinitialiser</button>
+            </div>
+        </div>
+
+        <!-- Résumé de la période -->
+        <div class="period-summary">
+            <div class="summary-header">
+                <h4>📋 Résumé de la période</h4>
+                <div class="summary-actions">
+                    <button id="summary-details" class="btn-link">Voir détails</button>
+                </div>
+            </div>
+            <div class="summary-stats">
+                <div class="summary-item">
+                    <span class="summary-icon">⏱️</span>
+                    <span class="summary-label">Temps total:</span>
+                    <span class="summary-value" id="period-total-time">00:00</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">📅</span>
+                    <span class="summary-label">Jours travaillés:</span>
+                    <span class="summary-value" id="period-days-worked">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">⏰</span>
+                    <span class="summary-label">Heures sup.:</span>
+                    <span class="summary-value" id="period-overtime">00:00</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">📚</span>
+                    <span class="summary-label">Jours formation:</span>
+                    <span class="summary-value" id="period-training-days">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">📱</span>
+                    <span class="summary-label">Jours distanciel:</span>
+                    <span class="summary-value" id="period-remote-days">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-icon">🕐</span>
+                    <span class="summary-label">Retards:</span>
+                    <span class="summary-value" id="period-late-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="entries-filters">
+            <div class="filter-group">
+                <input 
+                    type="text" 
+                    id="search-entries" 
+                    placeholder="Rechercher dans les commentaires..."
+                    class="search-input"
+                >
+                <button id="clear-search" class="btn-icon" title="Effacer">❌</button>
+            </div>
+            <div class="filter-toggles">
+                <label class="toggle-filter">
+                    <input type="checkbox" id="filter-remote" checked>
+                    <span>📱 Distanciel</span>
+                </label>
+                <label class="toggle-filter">
+                    <input type="checkbox" id="filter-training" checked>
+                    <span>📚 Formation</span>
+                </label>
+                <label class="toggle-filter">
+                    <input type="checkbox" id="filter-late" checked>
+                    <span>⏰ Retards</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Liste des entrées -->
+        <div class="entries-container">
+            <div class="entries-loading" id="entries-loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Chargement des données...</p>
+            </div>
+            <div class="entries-list" id="entries-list">
+                <!-- Les entrées seront chargées ici -->
+            </div>
+            <div class="entries-empty" id="entries-empty" style="display: none;">
+                <div class="empty-icon">📭</div>
+                <p>Aucun pointage trouvé pour cette période</p>
+                <button id="create-first-entry" class="btn primary">Faire mon premier pointage</button>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="entries-pagination" id="entries-pagination" style="display: none;">
+            <button id="prev-page" class="btn secondary">← Précédent</button>
+            <span id="page-info">Page 1 sur 1</span>
+            <button id="next-page" class="btn secondary">Suivant →</button>
+        </div>
+    </div>
+
+    <!-- Modal d'export -->
+    <div id="export-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📥 Exporter les données</h3>
+                <button class="modal-close" id="export-modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="form-group">
+                        <label>Format d'export:</label>
+                        <select id="export-format">
+                            <option value="csv">📊 CSV (Excel, Calc)</option>
+                            <option value="json">💾 JSON (Données brutes)</option>
+                            <option value="pdf">📄 PDF (Rapport)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="export-period">
+                    <div class="form-group">
+                        <label>Période à exporter:</label>
+                        <div class="date-range">
+                            <input type="date" id="export-start-date">
+                            <span>à</span>
+                            <input type="date" id="export-end-date">
+                        </div>
+                    </div>
+                </div>
+                <div class="export-options-advanced">
+                    <h4>Options avancées</h4>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="export-include-breaks" checked>
+                        <span>Inclure le détail des pauses</span>
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="export-include-comments" checked>
+                        <span>Inclure les commentaires</span>
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="export-include-location">
+                        <span>Inclure les données de localisation</span>
+                    </label>
+                </div>
+                <div class="export-preview">
+                    <h4>Aperçu de l'export</h4>
+                    <div id="export-summary">
+                        <p><strong>Période:</strong> <span id="export-period-text">-</span></p>
+                        <p><strong>Nombre d'entrées:</strong> <span id="export-entries-count">0</span></p>
+                        <p><strong>Taille estimée:</strong> <span id="export-size-estimate">-</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="export-cancel" class="btn secondary">Annuler</button>
+                <button id="export-download" class="btn primary">
+                    <span class="btn-text">Télécharger</span>
+                    <span class="btn-loading" style="display: none;">⏳ Génération...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation admin -->
+    <div id="admin-edit-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Modifier le pointage (Admin)</h3>
+                <button class="modal-close" id="admin-modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-warning">
+                    ⚠️ Cette action est réservée aux administrateurs et sera tracée dans les logs.
+                </div>
+                <div class="form-group">
+                    <label for="admin-clock-in">Heure d'arrivée:</label>
+                    <input type="datetime-local" id="admin-clock-in" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-clock-out">Heure de sortie:</label>
+                    <input type="datetime-local" id="admin-clock-out">
+                    <small>Laisser vide si le pointage est toujours en cours</small>
+                </div>
+                <div class="form-group">
+                    <label for="admin-comment">Motif de la modification: *</label>
+                    <textarea 
+                        id="admin-comment" 
+                        rows="3" 
+                        placeholder="Expliquez la raison de cette modification..."
+                        required
+                        maxlength="500"
+                    ></textarea>
+                    <small>Ce commentaire sera visible dans l'historique des modifications</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="admin-cancel" class="btn secondary">Annuler</button>
+                <button id="admin-save" class="btn danger">
+                    💾 Sauvegarder les modifications
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de détails d'une entrée -->
+    <div id="entry-details-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="entry-details-title">📋 Détails du pointage</h3>
+                <button class="modal-close" id="entry-details-close">×</button>
+            </div>
+            <div class="modal-body" id="entry-details-content">
+                <!-- Contenu généré dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button id="entry-details-close-btn" class="btn primary">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template pour les entrées d'historique -->
+<template id="entry-template">
+    <div class="entry-item" data-entry-id="">
+        <div class="entry-header">
+            <div class="entry-date-section">
+                <div class="entry-date"></div>
+                <div class="entry-day"></div>
+            </div>
+            <div class="entry-badges">
+                <span class="badge remote" style="display: none;">📱 Distanciel</span>
+                <span class="badge training" style="display: none;">📚 Formation</span>
+                <span class="badge late" style="display: none;">⏰ Retard</span>
+                <span class="badge modified" style="display: none;">✏️ Modifié</span>
+            </div>
+            <div class="entry-summary">
+                <span class="entry-times">
+                    <span class="clock-in-time"></span> → <span class="clock-out-time"></span>
+                </span>
+                <span class="entry-duration"></span>
+            </div>
+            <div class="entry-actions">
+                <button class="details-btn" title="Voir les détails">👁️</button>
+                <button class="admin-edit-btn" style="display: none;" title="Modifier (Admin)">✏️</button>
+            </div>
+        </div>
+        <div class="entry-details" style="display: none;">
+            <div class="details-grid">
+                <div class="detail-item">
+                    <strong>🕐 Arrivée:</strong>
+                    <span class="clock-in-detail"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>🏠 Sortie:</strong>
+                    <span class="clock-out-detail"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>⏱️ Travaillé:</strong>
+                    <span class="work-duration"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>⏸️ Pauses:</strong>
+                    <span class="break-duration"></span>
+                </div>
+            </div>
+            <div class="comments-section" style="display: none;">
+                <div class="comment-in"></div>
+                <div class="comment-out"></div>
+            </div>
+            <div class="breaks-section" style="display: none;">
+                <strong>📋 Détail des pauses:</strong>
+                <div class="breaks-list"></div>
+            </div>
+            <div class="admin-info" style="display: none;">
+                <div class="admin-comment"></div>
+                <div class="admin-modified-by"></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Template pour les pauses -->
+<template id="break-template">
+    <div class="break-item">
+        <span class="break-time"></span>
+        <span class="break-duration"></span>
+        <span class="break-reason"></span>
+    </div>
+</template>

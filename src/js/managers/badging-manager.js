@@ -1,57 +1,33 @@
-/* 
- * BadgingManager.js
- * Système de pointage entrée/sortie - Phase 4 SYNERGIA v3.0
- * 
- * Fonctionnalités :
- * - Pointage arrivée/sortie
- * - Gestion des pauses
- * - Calcul automatique des heures
- * - Historique des pointages
- * - Horloge temps réel
+/**
+ * BadgingManager - Gestionnaire de pointage simple pour SYNERGIA v3.0
+ * Fichier: src/js/managers/BadgingManager.js
  */
 
-class BadgingManager {
+import firebaseService from '../core/firebase-service.js';
+import Logger from '../core/logger.js';
+
+export class BadgingManager {
     constructor() {
-        this.firestore = null;
         this.currentTimesheet = null;
-        this.timesheets = [];
-        this.isInitialized = false;
         this.clockInterval = null;
-        this.init();
+        this.isInitialized = false;
+        this.status = 'not-started'; // not-started, working, on-break, finished
     }
 
-    async init() {
+    async initialize() {
         try {
-            console.log('⏰ Initialisation BadgingManager...');
-            await this.waitForFirebase();
-            this.firestore = window.firebaseService.getFirestore();
             this.isInitialized = true;
-            
-            // Charger la feuille de temps du jour
-            await this.loadTodaysTimesheet();
-            
-            console.log('✅ BadgingManager initialisé');
+            Logger.info('BadgingManager initialized');
         } catch (error) {
-            console.error('❌ Erreur BadgingManager:', error);
+            Logger.error('Error initializing BadgingManager:', error);
+            throw error;
         }
-    }
-
-    async waitForFirebase() {
-        return new Promise((resolve) => {
-            const check = () => {
-                if (window.firebaseService && window.firebaseService.isInitialized) {
-                    resolve();
-                } else {
-                    setTimeout(check, 100);
-                }
-            };
-            check();
-        });
     }
 
     // ==================
     // GESTION DE L'HORLOGE
     // ==================
+
     startClock() {
         this.updateClock();
         this.clockInterval = setInterval(() => {
@@ -70,11 +46,11 @@ class BadgingManager {
         const now = new Date();
         const timeElement = document.getElementById('currentTime');
         const dateElement = document.getElementById('currentDate');
-        
+
         if (timeElement) {
             timeElement.textContent = now.toLocaleTimeString('fr-FR');
         }
-        
+
         if (dateElement) {
             dateElement.textContent = now.toLocaleDateString('fr-FR', {
                 weekday: 'long',
@@ -86,287 +62,189 @@ class BadgingManager {
     }
 
     // ==================
-    // GESTION DES TIMESHEETS
-    // ==================
-    async loadTodaysTimesheet() {
-        try {
-            const user = window.authManager.getCurrentUser();
-            if (!user) return;
-
-            const today = this.getDateString(new Date());
-            
-            const snapshot = await this.firestore.collection('timesheets')
-                .where('userId', '==', user.uid)
-                .where('date', '==', today)
-                .limit(1)
-                .get();
-            
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
-                this.currentTimesheet = { 
-                    id: doc.id, 
-                    ...doc.data(),
-                    checkIn: doc.data().checkIn?.toDate(),
-                    checkOut: doc.data().checkOut?.toDate(),
-                    breakStart: doc.data().breakStart?.toDate(),
-                    breakEnd: doc.data().breakEnd?.toDate()
-                };
-            } else {
-                this.currentTimesheet = null;
-            }
-            
-            this.emit('timesheet:loaded', this.currentTimesheet);
-            console.log('✅ Feuille de temps du jour chargée');
-        } catch (error) {
-            console.error('❌ Erreur chargement timesheet:', error);
-        }
-    }
-
-    async loadTimesheets(userId = null, startDate = null, endDate = null) {
-        try {
-            const user = window.authManager.getCurrentUser();
-            const targetUserId = userId || user?.uid;
-            
-            if (!targetUserId) throw new Error('Utilisateur non spécifié');
-
-            let query = this.firestore.collection('timesheets')
-                .where('userId', '==', targetUserId);
-
-            if (startDate) {
-                query = query.where('date', '>=', this.getDateString(startDate));
-            }
-            
-            if (endDate) {
-                query = query.where('date', '<=', this.getDateString(endDate));
-            }
-
-            const snapshot = await query.orderBy('date', 'desc').limit(30).get();
-            
-            this.timesheets = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                checkIn: doc.data().checkIn?.toDate(),
-                checkOut: doc.data().checkOut?.toDate(),
-                breakStart: doc.data().breakStart?.toDate(),
-                breakEnd: doc.data().breakEnd?.toDate(),
-                createdAt: doc.data().createdAt?.toDate(),
-                updatedAt: doc.data().updatedAt?.toDate()
-            }));
-            
-            console.log(`✅ ${this.timesheets.length} feuilles de temps chargées`);
-            this.emit('timesheets:loaded', this.timesheets);
-            
-            return this.timesheets;
-        } catch (error) {
-            console.error('❌ Erreur chargement timesheets:', error);
-            throw error;
-        }
-    }
-
-    // ==================
     // ACTIONS DE POINTAGE
     // ==================
-    async checkIn(note = '') {
+
+    async checkIn() {
         try {
-            const user = window.authManager.getCurrentUser();
+            const user = firebaseService.getCurrentUser();
             if (!user) throw new Error('Utilisateur non connecté');
 
-            if (this.currentTimesheet && this.currentTimesheet.checkIn) {
-                throw new Error('Vous avez déjà pointé votre arrivée aujourd\'hui');
+            if (this.currentTimesheet && !this.currentTimesheet.checkOut) {
+                throw new Error('Vous êtes déjà pointé');
             }
 
             const now = new Date();
-            const today = this.getDateString(now);
-            
             const timesheetData = {
                 userId: user.uid,
-                date: today,
-                checkIn: firebase.firestore.Timestamp.fromDate(now),
+                date: now.toISOString().split('T')[0],
+                checkIn: now.toISOString(),
                 checkOut: null,
-                breakStart: null,
-                breakEnd: null,
+                breaks: [],
                 totalHours: 0,
-                status: this.calculateStatus(now),
-                notes: note,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                status: 'working',
+                createdAt: now.toISOString(),
+                updatedAt: now.toISOString()
             };
 
-            if (this.currentTimesheet) {
-                // Mettre à jour existant
-                await this.firestore.collection('timesheets')
-                    .doc(this.currentTimesheet.id)
-                    .update({
-                        checkIn: timesheetData.checkIn,
-                        status: timesheetData.status,
-                        notes: note,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                
-                this.currentTimesheet.checkIn = now;
-                this.currentTimesheet.status = timesheetData.status;
-                this.currentTimesheet.notes = note;
-            } else {
-                // Créer nouveau
-                const docRef = await this.firestore.collection('timesheets').add(timesheetData);
-                this.currentTimesheet = {
-                    id: docRef.id,
-                    ...timesheetData,
-                    checkIn: now,
-                    createdAt: now,
-                    updatedAt: now
-                };
-            }
+            const timesheetRef = await firebaseService.addDocument('timesheets', timesheetData);
+            this.currentTimesheet = { id: timesheetRef.id, ...timesheetData };
+            this.status = 'working';
 
-            console.log('✅ Pointage d\'arrivée enregistré');
-            this.emit('badge:checkin', this.currentTimesheet);
-            
+            this.emitEvent('badge:checkin', this.currentTimesheet);
+            Logger.info('Check-in successful');
+
             return this.currentTimesheet;
+
         } catch (error) {
-            console.error('❌ Erreur check-in:', error);
+            Logger.error('Check-in error:', error);
             throw error;
         }
     }
 
-    async checkOut(note = '') {
+    async checkOut() {
         try {
-            const user = window.authManager.getCurrentUser();
-            if (!user) throw new Error('Utilisateur non connecté');
-
-            if (!this.currentTimesheet || !this.currentTimesheet.checkIn) {
-                throw new Error('Vous devez d\'abord pointer votre arrivée');
-            }
-
-            if (this.currentTimesheet.checkOut) {
-                throw new Error('Vous avez déjà pointé votre sortie aujourd\'hui');
+            if (!this.currentTimesheet || this.currentTimesheet.checkOut) {
+                throw new Error('Aucun pointage d\'arrivée trouvé');
             }
 
             const now = new Date();
-            const totalHours = this.calculateTotalHours(this.currentTimesheet.checkIn, now);
-            
+            const checkInTime = new Date(this.currentTimesheet.checkIn);
+            const totalHours = (now - checkInTime) / (1000 * 60 * 60); // en heures
+
             const updateData = {
-                checkOut: firebase.firestore.Timestamp.fromDate(now),
+                checkOut: now.toISOString(),
                 totalHours: totalHours,
-                notes: note || this.currentTimesheet.notes,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                status: 'finished',
+                updatedAt: now.toISOString()
             };
 
-            await this.firestore.collection('timesheets')
-                .doc(this.currentTimesheet.id)
-                .update(updateData);
-            
-            this.currentTimesheet.checkOut = now;
-            this.currentTimesheet.totalHours = totalHours;
-            this.currentTimesheet.notes = note || this.currentTimesheet.notes;
+            await firebaseService.updateDocument('timesheets', this.currentTimesheet.id, updateData);
+            Object.assign(this.currentTimesheet, updateData);
+            this.status = 'finished';
 
-            console.log('✅ Pointage de sortie enregistré');
-            this.emit('badge:checkout', this.currentTimesheet);
-            
+            this.emitEvent('badge:checkout', this.currentTimesheet);
+            Logger.info('Check-out successful');
+
             return this.currentTimesheet;
+
         } catch (error) {
-            console.error('❌ Erreur check-out:', error);
+            Logger.error('Check-out error:', error);
             throw error;
         }
     }
 
-    async startBreak(note = '') {
+    async startBreak() {
         try {
-            if (!this.currentTimesheet || !this.currentTimesheet.checkIn) {
-                throw new Error('Vous devez d\'abord pointer votre arrivée');
-            }
-
-            if (this.currentTimesheet.breakStart && !this.currentTimesheet.breakEnd) {
-                throw new Error('Vous êtes déjà en pause');
+            if (!this.currentTimesheet || this.currentTimesheet.checkOut) {
+                throw new Error('Aucune session active');
             }
 
             const now = new Date();
-            
-            await this.firestore.collection('timesheets')
-                .doc(this.currentTimesheet.id)
-                .update({
-                    breakStart: firebase.firestore.Timestamp.fromDate(now),
-                    breakEnd: null,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            
-            this.currentTimesheet.breakStart = now;
-            this.currentTimesheet.breakEnd = null;
+            const breakData = {
+                startTime: now.toISOString(),
+                endTime: null
+            };
 
-            console.log('✅ Début de pause enregistré');
-            this.emit('badge:breakstart', this.currentTimesheet);
-            
-            return this.currentTimesheet;
+            this.currentTimesheet.breaks = this.currentTimesheet.breaks || [];
+            this.currentTimesheet.breaks.push(breakData);
+            this.status = 'on-break';
+
+            await firebaseService.updateDocument('timesheets', this.currentTimesheet.id, {
+                breaks: this.currentTimesheet.breaks,
+                status: 'on-break',
+                updatedAt: now.toISOString()
+            });
+
+            this.emitEvent('badge:breakstart', breakData);
+            Logger.info('Break started');
+
+            return breakData;
+
         } catch (error) {
-            console.error('❌ Erreur début pause:', error);
+            Logger.error('Start break error:', error);
             throw error;
         }
     }
 
-    async endBreak(note = '') {
+    async endBreak() {
         try {
-            if (!this.currentTimesheet || !this.currentTimesheet.breakStart) {
-                throw new Error('Vous devez d\'abord commencer une pause');
-            }
-
-            if (this.currentTimesheet.breakEnd) {
-                throw new Error('Vous avez déjà terminé votre pause');
+            if (!this.currentTimesheet || this.status !== 'on-break') {
+                throw new Error('Aucune pause en cours');
             }
 
             const now = new Date();
+            const currentBreak = this.currentTimesheet.breaks[this.currentTimesheet.breaks.length - 1];
             
-            await this.firestore.collection('timesheets')
-                .doc(this.currentTimesheet.id)
-                .update({
-                    breakEnd: firebase.firestore.Timestamp.fromDate(now),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            
-            this.currentTimesheet.breakEnd = now;
+            if (currentBreak && !currentBreak.endTime) {
+                currentBreak.endTime = now.toISOString();
+                this.status = 'working';
 
-            console.log('✅ Fin de pause enregistrée');
-            this.emit('badge:breakend', this.currentTimesheet);
-            
-            return this.currentTimesheet;
+                await firebaseService.updateDocument('timesheets', this.currentTimesheet.id, {
+                    breaks: this.currentTimesheet.breaks,
+                    status: 'working',
+                    updatedAt: now.toISOString()
+                });
+
+                this.emitEvent('badge:breakend', currentBreak);
+                Logger.info('Break ended');
+
+                return currentBreak;
+            }
+
         } catch (error) {
-            console.error('❌ Erreur fin pause:', error);
+            Logger.error('End break error:', error);
             throw error;
         }
     }
 
     // ==================
-    // CALCULS ET UTILITAIRES
+    // DONNÉES ET STATISTIQUES
     // ==================
-    calculateStatus(checkInTime) {
-        const hour = checkInTime.getHours();
-        const minute = checkInTime.getMinutes();
-        
-        // Considérer 9h00 comme l'heure normale
-        if (hour < 9 || (hour === 9 && minute === 0)) {
-            return 'present';
-        } else if (hour === 9 && minute <= 15) {
-            return 'present'; // Tolérance de 15 minutes
+
+    async loadTodaysTimesheet() {
+        try {
+            const user = firebaseService.getCurrentUser();
+            if (!user) return null;
+
+            const today = new Date().toISOString().split('T')[0];
+            const timesheets = await firebaseService.queryDocuments('timesheets', [
+                ['userId', '==', user.uid],
+                ['date', '==', today]
+            ]);
+
+            if (timesheets.length > 0) {
+                this.currentTimesheet = timesheets[0];
+                this.updateStatus();
+            }
+
+            return this.currentTimesheet;
+
+        } catch (error) {
+            Logger.error('Error loading today\'s timesheet:', error);
+            return null;
+        }
+    }
+
+    updateStatus() {
+        if (!this.currentTimesheet) {
+            this.status = 'not-started';
+        } else if (this.currentTimesheet.checkOut) {
+            this.status = 'finished';
+        } else if (this.isCurrentlyOnBreak()) {
+            this.status = 'on-break';
         } else {
-            return 'late';
+            this.status = 'working';
         }
     }
 
-    calculateTotalHours(checkIn, checkOut) {
-        if (!checkIn || !checkOut) return 0;
-        
-        const diffMs = checkOut.getTime() - checkIn.getTime();
-        const diffHours = diffMs / (1000 * 60 * 60);
-        
-        return Math.round(diffHours * 100) / 100; // Arrondir à 2 décimales
-    }
+    isCurrentlyOnBreak() {
+        if (!this.currentTimesheet || !this.currentTimesheet.breaks) {
+            return false;
+        }
 
-    getCurrentStatus() {
-        if (!this.currentTimesheet) return 'not-started';
-        
-        if (this.currentTimesheet.checkOut) return 'finished';
-        if (this.currentTimesheet.breakStart && !this.currentTimesheet.breakEnd) return 'on-break';
-        if (this.currentTimesheet.checkIn) return 'working';
-        
-        return 'not-started';
+        const lastBreak = this.currentTimesheet.breaks[this.currentTimesheet.breaks.length - 1];
+        return lastBreak && lastBreak.startTime && !lastBreak.endTime;
     }
 
     getTodaysStats() {
@@ -375,46 +253,88 @@ class BadgingManager {
                 checkIn: null,
                 checkOut: null,
                 totalHours: 0,
-                status: 'not-started',
                 breakDuration: 0
             };
         }
 
-        let breakDuration = 0;
-        if (this.currentTimesheet.breakStart && this.currentTimesheet.breakEnd) {
-            breakDuration = (this.currentTimesheet.breakEnd.getTime() - this.currentTimesheet.breakStart.getTime()) / (1000 * 60);
-        }
-
-        return {
+        const stats = {
             checkIn: this.currentTimesheet.checkIn,
             checkOut: this.currentTimesheet.checkOut,
             totalHours: this.currentTimesheet.totalHours || 0,
-            status: this.currentTimesheet.status || 'present',
-            breakDuration: Math.round(breakDuration)
+            breakDuration: this.calculateBreakDuration()
         };
+
+        return stats;
     }
 
-    getDateString(date) {
-        return date.toISOString().split('T')[0];
+    calculateBreakDuration() {
+        if (!this.currentTimesheet || !this.currentTimesheet.breaks) {
+            return 0;
+        }
+
+        return this.currentTimesheet.breaks.reduce((total, breakItem) => {
+            if (breakItem.startTime && breakItem.endTime) {
+                const start = new Date(breakItem.startTime);
+                const end = new Date(breakItem.endTime);
+                return total + (end - start) / (1000 * 60); // en minutes
+            }
+            return total;
+        }, 0);
+    }
+
+    getCurrentStatus() {
+        return this.status;
+    }
+
+    async getWeeklyStats() {
+        try {
+            const user = firebaseService.getCurrentUser();
+            if (!user) return null;
+
+            const now = new Date();
+            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+            const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+
+            const timesheets = await firebaseService.queryDocuments('timesheets', [
+                ['userId', '==', user.uid],
+                ['date', '>=', startOfWeek.toISOString().split('T')[0]],
+                ['date', '<=', endOfWeek.toISOString().split('T')[0]]
+            ]);
+
+            const totalHours = timesheets.reduce((sum, sheet) => sum + (sheet.totalHours || 0), 0);
+            const daysWorked = timesheets.filter(sheet => sheet.checkIn).length;
+
+            return {
+                totalHours,
+                daysWorked,
+                timesheets
+            };
+
+        } catch (error) {
+            Logger.error('Error getting weekly stats:', error);
+            return null;
+        }
     }
 
     // ==================
-    // GETTERS
+    // ÉVÉNEMENTS
     // ==================
-    getCurrentTimesheet() { return this.currentTimesheet; }
-    getTimesheets() { return [...this.timesheets]; }
+
+    emitEvent(eventName, data) {
+        const event = new CustomEvent(eventName, { detail: data });
+        window.dispatchEvent(event);
+    }
 
     // ==================
-    // EVENTS
+    // NETTOYAGE
     // ==================
-    emit(eventName, data) {
-        window.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+
+    destroy() {
+        this.stopClock();
+        this.currentTimesheet = null;
+        this.isInitialized = false;
+        Logger.info('BadgingManager destroyed');
     }
 }
 
-// Export pour réutilisation
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = BadgingManager;
-} else {
-    window.BadgingManager = BadgingManager;
-}
+export default BadgingManager;

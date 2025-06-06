@@ -1,311 +1,312 @@
-/**
- * Router SPA pour SYNERGIA v3.0
- * Gestion de la navigation sans rechargement
+/* 
+ * router-badging.js
+ * Intégration des routes et méthodes pour le BadgingManager
+ * À ajouter dans src/js/core/router.js
  */
-class SynergiaRouter {
-    constructor() {
-        this.routes = new Map();
-        this.currentRoute = null;
-        this.middleware = [];
-        this.container = null;
-        
-        // Initialisation
-        this.init();
-    }
 
-    /**
-     * Initialise le router
-     */
-    init() {
-        this.container = document.getElementById('page-container');
-        
-        // Écoute les changements d'URL
-        window.addEventListener('hashchange', () => this.handleRouteChange());
-        window.addEventListener('load', () => this.handleRouteChange());
-        
-        // Gestion des liens internes
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-link]')) {
-                e.preventDefault();
-                this.navigate(e.target.getAttribute('href') || e.target.dataset.link);
-            }
-        });
-    }
+// ==================
+// MÉTHODES À AJOUTER AU ROUTER
+// ==================
 
-    /**
-     * Définit une route
-     * @param {string} path - Chemin de la route
-     * @param {Object} config - Configuration de la route
-     */
-    addRoute(path, config) {
-        const routePattern = this.pathToRegex(path);
-        this.routes.set(path, {
-            ...config,
-            pattern: routePattern,
-            originalPath: path
-        });
+// Dans la méthode render() du Router, ajouter ce case :
+/*
+case '/badging':
+    if (isAuthenticated) {
+        app.innerHTML = this.renderBadging();
+        this.loadBadgingData();
+    } else {
+        this.navigate('/login');
     }
+    break;
+*/
 
-    /**
-     * Convertit un chemin en regex pour la correspondance
-     * @param {string} path 
-     * @returns {RegExp}
-     */
-    pathToRegex(path) {
-        const paramNames = [];
-        const regexPath = path
-            .replace(/:([^/]+)/g, (match, paramName) => {
-                paramNames.push(paramName);
-                return '([^/]+)';
-            })
-            .replace(/\*/g, '(.*)');
-        
-        return {
-            regex: new RegExp(`^${regexPath}$`),
-            paramNames
-        };
-    }
+// Méthodes à ajouter à la classe Router :
 
-    /**
-     * Ajoute un middleware global
-     * @param {Function} fn - Fonction middleware
-     */
-    use(fn) {
-        this.middleware.push(fn);
-    }
-
-    /**
-     * Navigation vers une route
-     * @param {string} path - Chemin de destination
-     * @param {Object} options - Options de navigation
-     */
-    async navigate(path, options = {}) {
-        const { replace = false, state = null } = options;
-        
-        // Mise à jour de l'URL
-        if (replace) {
-            window.location.replace(`#${path}`);
-        } else {
-            window.location.hash = path;
+async loadBadgingData() {
+    try {
+        // Attendre que BadgingManager soit initialisé
+        while (!window.badgingManager || !window.badgingManager.isInitialized) {
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        // Stockage de l'état si fourni
-        if (state) {
-            history.replaceState(state, '', window.location.href);
-        }
-    }
-
-    /**
-     * Gère les changements de route
-     */
-    async handleRouteChange() {
-        const hash = window.location.hash.slice(1) || '/';
-        const route = this.matchRoute(hash);
-        
-        if (!route) {
-            console.warn(`Route non trouvée: ${hash}`);
-            this.navigate('/404', { replace: true });
-            return;
-        }
-
-        try {
-            // Exécution des middlewares
-            for (const middleware of this.middleware) {
-                const result = await middleware(route);
-                if (result === false) {
-                    return; // Middleware a bloqué la navigation
-                }
-            }
-
-            // Chargement de la vue
-            await this.loadRoute(route);
-            
-        } catch (error) {
-            console.error('Erreur lors du chargement de la route:', error);
-            this.navigate('/error', { replace: true });
-        }
-    }
-
-    /**
-     * Trouve la route correspondante
-     * @param {string} path 
-     * @returns {Object|null}
-     */
-    matchRoute(path) {
-        for (const [routePath, config] of this.routes) {
-            const match = config.pattern.regex.exec(path);
-            if (match) {
-                const params = {};
-                config.pattern.paramNames.forEach((name, index) => {
-                    params[name] = match[index + 1];
-                });
-                
-                return {
-                    ...config,
-                    params,
-                    path: routePath,
-                    fullPath: path
-                };
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Charge et affiche une route
-     * @param {Object} route 
-     */
-    async loadRoute(route) {
-        this.currentRoute = route;
-        
-        // Loading state
-        this.showLoading();
-        
-        try {
-            let content = '';
-            
-            // Si c'est un composant fonction
-            if (typeof route.component === 'function') {
-                content = await route.component(route.params);
-            }
-            // Si c'est une chaîne HTML
-            else if (typeof route.component === 'string') {
-                content = route.component;
-            }
-            // Si c'est un chemin vers un template
-            else if (route.template) {
-                content = await this.loadTemplate(route.template);
-            }
-            
-            // Affichage du contenu
-            this.container.innerHTML = content;
-            
-            // Exécution du callback onLoad
-            if (route.onLoad) {
-                await route.onLoad(route.params);
-            }
-            
-            // Mise à jour du titre
-            if (route.title) {
-                document.title = `SYNERGIA - ${route.title}`;
-            }
-            
-            // Mise à jour de la navigation active
-            this.updateActiveNavigation(route.path);
-            
-        } catch (error) {
-            console.error('Erreur lors du chargement de la route:', error);
-            this.showError(error);
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    /**
-     * Charge un template depuis un fichier
-     * @param {string} templatePath 
-     * @returns {Promise<string>}
-     */
-    async loadTemplate(templatePath) {
-        try {
-            const response = await fetch(templatePath);
-            if (!response.ok) {
-                throw new Error(`Template non trouvé: ${templatePath}`);
-            }
-            return await response.text();
-        } catch (error) {
-            console.error('Erreur de chargement du template:', error);
-            return '<div class="error">Template non disponible</div>';
-        }
-    }
-
-    /**
-     * Affiche l'état de chargement
-     */
-    showLoading() {
-        this.container.innerHTML = `
-            <div class="loading-container">
-                <div class="loading-spinner"></div>
-                <p>Chargement...</p>
-            </div>
-        `;
-    }
-
-    /**
-     * Masque l'état de chargement
-     */
-    hideLoading() {
-        // Le contenu remplace automatiquement le loading
-    }
-
-    /**
-     * Affiche une erreur
-     * @param {Error} error 
-     */
-    showError(error) {
-        this.container.innerHTML = `
-            <div class="error-container">
-                <h2>Une erreur est survenue</h2>
-                <p>${error.message}</p>
-                <button onclick="router.navigate('/')" class="btn btn-primary">
-                    Retour à l'accueil
-                </button>
-            </div>
-        `;
-    }
-
-    /**
-     * Met à jour la navigation active
-     * @param {string} routePath 
-     */
-    updateActiveNavigation(routePath) {
-        // Supprime toutes les classes actives
-        document.querySelectorAll('.nav-item.active').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // Ajoute la classe active à l'élément correspondant
-        const navItem = document.querySelector(`[data-route="${routePath}"]`);
-        if (navItem) {
-            navItem.classList.add('active');
-        }
-    }
-
-    /**
-     * Retour en arrière
-     */
-    back() {
-        window.history.back();
-    }
-
-    /**
-     * Redirection
-     * @param {string} path 
-     */
-    redirect(path) {
-        this.navigate(path, { replace: true });
-    }
-
-    /**
-     * Récupère la route actuelle
-     * @returns {Object|null}
-     */
-    getCurrentRoute() {
-        return this.currentRoute;
-    }
-
-    /**
-     * Vérifie si on est sur une route spécifique
-     * @param {string} path 
-     * @returns {boolean}
-     */
-    isCurrentRoute(path) {
-        return this.currentRoute && this.currentRoute.path === path;
+        await badgingManager.loadTodaysTimesheet();
+        await badgingManager.loadTimesheets();
+        this.updateBadgingView();
+    } catch (error) {
+        console.error('Erreur chargement badging:', error);
     }
 }
 
-// Instance globale du router
-const router = new SynergiaRouter();
+updateBadgingView() {
+    const stats = badgingManager.getTodaysStats();
+    this.updateBadgingStats(stats);
+    this.updateBadgingButtons();
+    this.updateTimesheetsTable();
+}
 
-// Export pour les modules
-window.SynergiaRouter = router;
+updateBadgingStats(stats) {
+    const elements = {
+        checkinTime: document.getElementById('checkinTime'),
+        checkoutTime: document.getElementById('checkoutTime'),
+        totalHours: document.getElementById('totalHours'),
+        breakDuration: document.getElementById('breakDuration')
+    };
+
+    if (elements.checkinTime) {
+        elements.checkinTime.textContent = stats.checkIn ? 
+            stats.checkIn.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+    }
+    
+    if (elements.checkoutTime) {
+        elements.checkoutTime.textContent = stats.checkOut ? 
+            stats.checkOut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+    }
+    
+    if (elements.totalHours) {
+        elements.totalHours.textContent = stats.totalHours ? 
+            `${stats.totalHours}h` : '0h';
+    }
+    
+    if (elements.breakDuration) {
+        elements.breakDuration.textContent = stats.breakDuration ? 
+            `${stats.breakDuration}min` : '0min';
+    }
+}
+
+updateBadgingButtons() {
+    const status = badgingManager.getCurrentStatus();
+    const buttons = {
+        checkin: document.getElementById('checkinBtn'),
+        checkout: document.getElementById('checkoutBtn'),
+        breakStart: document.getElementById('breakStartBtn'),
+        breakEnd: document.getElementById('breakEndBtn')
+    };
+
+    // Reset all buttons
+    Object.values(buttons).forEach(btn => {
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('btn-success', 'btn-warning', 'btn-danger');
+            btn.classList.add('btn-secondary');
+        }
+    });
+
+    switch(status) {
+        case 'not-started':
+            if (buttons.checkin) {
+                buttons.checkin.disabled = false;
+                buttons.checkin.classList.remove('btn-secondary');
+                buttons.checkin.classList.add('btn-success');
+            }
+            if (buttons.checkout) buttons.checkout.disabled = true;
+            if (buttons.breakStart) buttons.breakStart.disabled = true;
+            if (buttons.breakEnd) buttons.breakEnd.disabled = true;
+            break;
+            
+        case 'working':
+            if (buttons.checkin) buttons.checkin.disabled = true;
+            if (buttons.checkout) {
+                buttons.checkout.disabled = false;
+                buttons.checkout.classList.remove('btn-secondary');
+                buttons.checkout.classList.add('btn-danger');
+            }
+            if (buttons.breakStart) {
+                buttons.breakStart.disabled = false;
+                buttons.breakStart.classList.remove('btn-secondary');
+                buttons.breakStart.classList.add('btn-warning');
+            }
+            if (buttons.breakEnd) buttons.breakEnd.disabled = true;
+            break;
+            
+        case 'on-break':
+            if (buttons.checkin) buttons.checkin.disabled = true;
+            if (buttons.checkout) buttons.checkout.disabled = true;
+            if (buttons.breakStart) buttons.breakStart.disabled = true;
+            if (buttons.breakEnd) {
+                buttons.breakEnd.disabled = false;
+                buttons.breakEnd.classList.remove('btn-secondary');
+                buttons.breakEnd.classList.add('btn-success');
+            }
+            break;
+            
+        case 'finished':
+            Object.values(buttons).forEach(btn => {
+                if (btn) btn.disabled = true;
+            });
+            break;
+    }
+}
+
+updateTimesheetsTable() {
+    const tbody = document.getElementById('timesheetsTableBody');
+    if (!tbody) return;
+    
+    const timesheets = badgingManager.getTimesheets().slice(0, 10);
+    
+    if (timesheets.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    Aucun pointage enregistré
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = timesheets.map(timesheet => `
+        <tr>
+            <td>${new Date(timesheet.date).toLocaleDateString('fr-FR')}</td>
+            <td>${timesheet.checkIn ? timesheet.checkIn.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+            <td>${timesheet.checkOut ? timesheet.checkOut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+            <td>${timesheet.totalHours ? `${timesheet.totalHours}h` : '-'}</td>
+            <td><span class="status-badge status-${timesheet.status}">${this.getStatusLabel(timesheet.status)}</span></td>
+            <td>${timesheet.notes || '-'}</td>
+        </tr>
+    `).join('');
+}
+
+renderBadging() {
+    return `
+        <div class="container">
+            ${this.renderHeader()}
+            ${this.renderNavigation('/badging')}
+            
+            <div class="grid grid-2">
+                <!-- Widget Horloge et Pointage -->
+                <div class="clock-widget">
+                    <div class="current-time" id="currentTime">--:--:--</div>
+                    <div class="current-date" id="currentDate">Chargement...</div>
+                    
+                    <div class="badge-buttons">
+                        <button id="checkinBtn" onclick="handleCheckIn()" class="btn btn-lg btn-success">
+                            🟢 Arrivée
+                        </button>
+                        <button id="checkoutBtn" onclick="handleCheckOut()" class="btn btn-lg btn-danger">
+                            🔴 Sortie
+                        </button>
+                    </div>
+                    
+                    <div class="badge-buttons" style="margin-top: 16px;">
+                        <button id="breakStartBtn" onclick="handleBreakStart()" class="btn btn-lg btn-warning">
+                            ⏸️ Pause
+                        </button>
+                        <button id="breakEndBtn" onclick="handleBreakEnd()" class="btn btn-lg btn-success">
+                            ▶️ Reprise
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Statistiques du jour -->
+                <div class="card">
+                    <h3>📊 Aujourd'hui</h3>
+                    
+                    <div class="badge-status">
+                        <div class="time-label">Arrivée</div>
+                        <div class="time-display" id="checkinTime">--:--</div>
+                    </div>
+                    
+                    <div class="badge-status">
+                        <div class="time-label">Sortie</div>
+                        <div class="time-display" id="checkoutTime">--:--</div>
+                    </div>
+                    
+                    <div class="hours-summary">
+                        <div>
+                            <div class="time-label">Heures travaillées</div>
+                            <div class="time-display" id="totalHours">0h</div>
+                        </div>
+                        <div>
+                            <div class="time-label">Temps de pause</div>
+                            <div class="time-display" id="breakDuration">0min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Historique des pointages -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📋 Historique des pointages</h2>
+                    <button onclick="badgingManager.loadTimesheets()" class="btn btn-secondary">
+                        🔄 Actualiser
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Arrivée</th>
+                                <th>Sortie</th>
+                                <th>Heures</th>
+                                <th>Statut</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timesheetsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px;">
+                                    <div class="loading-spinner"></div>
+                                    <p style="margin-top: 16px;">Chargement de l'historique...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Mise à jour de renderNavigation pour inclure le lien Badging actif
+renderNavigation(activePath) {
+    return `
+        <div class="nav-tabs">
+            <a href="#/dashboard" class="nav-tab ${activePath === '/dashboard' ? 'active' : ''}">📊 Dashboard</a>
+            <a href="#/profile" class="nav-tab ${activePath === '/profile' ? 'active' : ''}">👤 Profil</a>
+            <a href="#/team" class="nav-tab ${activePath === '/team' ? 'active' : ''}">👥 Équipe</a>
+            <a href="#/badging" class="nav-tab ${activePath === '/badging' ? 'active' : ''}">⏰ Pointage</a>
+            <button class="nav-tab" onclick="alert('Bientôt disponible!')">💬 Chat</button>
+            <button class="nav-tab" onclick="alert('Bientôt disponible!')">📅 Planning</button>
+        </div>
+    `;
+}
+
+// Event listeners à ajouter dans la méthode init() du Router
+setupBadgingListeners() {
+    if (window.badgingManager && window.badgingManager.isInitialized) {
+        window.addEventListener('timesheet:loaded', () => {
+            if (window.location.hash.includes('/badging')) {
+                this.updateBadgingView();
+            }
+        });
+
+        window.addEventListener('badge:checkin', () => {
+            if (window.location.hash.includes('/badging')) {
+                this.updateBadgingView();
+            }
+        });
+
+        window.addEventListener('badge:checkout', () => {
+            if (window.location.hash.includes('/badging')) {
+                this.updateBadgingView();
+            }
+        });
+
+        window.addEventListener('badge:breakstart', () => {
+            if (window.location.hash.includes('/badging')) {
+                this.updateBadgingView();
+            }
+        });
+
+        window.addEventListener('badge:breakend', () => {
+            if (window.location.hash.includes('/badging')) {
+                this.updateBadgingView();
+            }
+        });
+    } else {
+        setTimeout(() => this.setupBadgingListeners(), 100);
+    }
+}

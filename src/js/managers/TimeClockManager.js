@@ -1,7 +1,7 @@
 // src/js/managers/TimeClockManager.js
-import { EventBus } from '../core/eventbus.js';
-import { FirebaseService } from '../core/firebase-service.js';
-import { Logger } from '../core/logger.js';
+import EventBus from '../core/eventbus.js';
+import firebaseService from '../core/firebase-service.js'; // Import par défaut
+import Logger from '../core/logger.js';
 
 export class TimeClockManager {
     constructor() {
@@ -38,7 +38,7 @@ export class TimeClockManager {
     // Pointage d'arrivée
     async clockIn(comment = '', isRemote = false, location = null) {
         try {
-            const user = FirebaseService.getCurrentUser();
+            const user = firebaseService.getCurrentUser(); // Utilisation de l'instance
             if (!user) throw new Error('Utilisateur non connecté');
 
             if (this.currentSession && !this.currentSession.clockOut) {
@@ -62,7 +62,7 @@ export class TimeClockManager {
                 updatedAt: now.toISOString()
             };
 
-            const sessionRef = await FirebaseService.addDocument('timeclock_sessions', sessionData);
+            const sessionRef = await firebaseService.addDocument('timeclock_sessions', sessionData);
             this.currentSession = { id: sessionRef.id, ...sessionData };
             
             // Vérifier les retards par rapport au planning
@@ -102,7 +102,7 @@ export class TimeClockManager {
                 updatedAt: now.toISOString()
             };
 
-            await FirebaseService.updateDocument('timeclock_sessions', this.currentSession.id, updateData);
+            await firebaseService.updateDocument('timeclock_sessions', this.currentSession.id, updateData);
             
             Object.assign(this.currentSession, updateData);
             
@@ -144,7 +144,7 @@ export class TimeClockManager {
             this.currentBreakStart = now;
             this.isOnBreak = true;
 
-            await FirebaseService.updateDocument('timeclock_sessions', this.currentSession.id, {
+            await firebaseService.updateDocument('timeclock_sessions', this.currentSession.id, {
                 breaks: this.currentSession.breaks,
                 updatedAt: now.toISOString()
             });
@@ -173,7 +173,7 @@ export class TimeClockManager {
             currentBreak.endTime = now.toISOString();
             currentBreak.duration = Math.floor(duration / 1000 / 60); // en minutes
 
-            await FirebaseService.updateDocument('timeclock_sessions', this.currentSession.id, {
+            await firebaseService.updateDocument('timeclock_sessions', this.currentSession.id, {
                 breaks: this.currentSession.breaks,
                 updatedAt: now.toISOString()
             });
@@ -194,7 +194,7 @@ export class TimeClockManager {
     // Pointage formation (alternants)
     async clockTraining(comment = '') {
         try {
-            const user = FirebaseService.getCurrentUser();
+            const user = firebaseService.getCurrentUser();
             if (!user) throw new Error('Utilisateur non connecté');
 
             const now = new Date();
@@ -214,7 +214,7 @@ export class TimeClockManager {
                 updatedAt: now.toISOString()
             };
 
-            const sessionRef = await FirebaseService.addDocument('timeclock_sessions', trainingData);
+            const sessionRef = await firebaseService.addDocument('timeclock_sessions', trainingData);
             
             EventBus.emit('timeclock:trainingClocked', { id: sessionRef.id, ...trainingData });
             Logger.info('Training day clocked', trainingData);
@@ -229,10 +229,10 @@ export class TimeClockManager {
     // Charger la session courante
     async loadCurrentSession() {
         try {
-            const user = FirebaseService.getCurrentUser();
+            const user = firebaseService.getCurrentUser();
             if (!user) return;
 
-            const sessions = await FirebaseService.queryDocuments('timeclock_sessions', [
+            const sessions = await firebaseService.queryDocuments('timeclock_sessions', [
                 ['userId', '==', user.uid],
                 ['clockOut', '==', null]
             ]);
@@ -255,7 +255,7 @@ export class TimeClockManager {
     // Charger l'historique des pointages
     async loadTimeEntries(startDate = null, endDate = null) {
         try {
-            const user = FirebaseService.getCurrentUser();
+            const user = firebaseService.getCurrentUser();
             if (!user) return [];
 
             let query = [['userId', '==', user.uid]];
@@ -267,7 +267,7 @@ export class TimeClockManager {
                 query.push(['createdAt', '<=', endDate.toISOString()]);
             }
 
-            this.timeEntries = await FirebaseService.queryDocuments('timeclock_sessions', query, [['createdAt', 'desc']]);
+            this.timeEntries = await firebaseService.queryDocuments('timeclock_sessions', query, [['createdAt', 'desc']]);
             
             EventBus.emit('timeclock:entriesLoaded', this.timeEntries);
             return this.timeEntries;
@@ -305,12 +305,18 @@ export class TimeClockManager {
             totalOvertime: 0,
             totalLateTime: 0,
             daysWorked: entries.length,
-            trainingDays: 0
+            trainingDays: 0,
+            remoteDays: 0,
+            lateCount: 0
         };
 
         entries.forEach(entry => {
             if (entry.isTraining) {
                 stats.trainingDays++;
+            }
+            
+            if (entry.isRemote) {
+                stats.remoteDays++;
             }
             
             stats.totalWorkTime += entry.totalWorkTime || 0;
@@ -365,7 +371,7 @@ export class TimeClockManager {
     // Récupérer le planning pour une date
     async getPlanningForDate(date) {
         try {
-            const user = FirebaseService.getCurrentUser();
+            const user = firebaseService.getCurrentUser();
             if (!user) return null;
 
             const startOfDay = new Date(date);
@@ -374,7 +380,7 @@ export class TimeClockManager {
             const endOfDay = new Date(date);
             endOfDay.setHours(23, 59, 59, 999);
 
-            const planningEntries = await FirebaseService.queryDocuments('planning', [
+            const planningEntries = await firebaseService.queryDocuments('planning', [
                 ['userId', '==', user.uid],
                 ['date', '>=', startOfDay.toISOString()],
                 ['date', '<=', endOfDay.toISOString()]
@@ -436,12 +442,12 @@ export class TimeClockManager {
     // Méthodes d'administration
     async updateTimeEntry(entryId, updateData) {
         try {
-            const user = FirebaseService.getCurrentUser();
+            const user = firebaseService.getCurrentUser();
             if (!user || !user.isAdmin) {
                 throw new Error('Accès administrateur requis');
             }
 
-            await FirebaseService.updateDocument('timeclock_sessions', entryId, {
+            await firebaseService.updateDocument('timeclock_sessions', entryId, {
                 ...updateData,
                 updatedAt: new Date().toISOString(),
                 modifiedBy: user.uid

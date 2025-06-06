@@ -36,7 +36,7 @@ const APP_CONFIG = {
     // Paramètres Firebase
     firebase: {
         enableOffline: true,
-        enableAnalytics: false,
+        enableAnalytics: true, // Activé car vous avez un measurementId
         enablePerformance: false
     },
     

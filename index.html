@@ -524,20 +524,30 @@
             constructor() {
                 this.currentUser = null;
                 this.userProfile = null;
+                this.isInitialized = false;
                 this.init();
             }
 
             async init() {
-                await firebaseService.initialize();
-                this.auth = firebaseService.getAuth();
-                this.firestore = firebaseService.getFirestore();
-                
-                this.auth.onAuthStateChanged((user) => {
-                    this.handleAuthStateChange(user);
-                });
+                try {
+                    console.log('🔐 Initialisation AuthManager...');
+                    await firebaseService.initialize();
+                    this.auth = firebaseService.getAuth();
+                    this.firestore = firebaseService.getFirestore();
+                    
+                    this.auth.onAuthStateChanged((user) => {
+                        this.handleAuthStateChange(user);
+                    });
+                    
+                    this.isInitialized = true;
+                    console.log('✅ AuthManager initialisé');
+                } catch (error) {
+                    console.error('❌ Erreur AuthManager:', error);
+                }
             }
 
             async handleAuthStateChange(user) {
+                console.log('👤 Changement état auth:', user ? user.email : 'Déconnecté');
                 this.currentUser = user;
                 
                 if (user) {
@@ -553,6 +563,11 @@
                     profile: this.userProfile,
                     isAuthenticated: !!user
                 });
+                
+                // Déclencher le rendu du router
+                if (window.router) {
+                    window.router.render();
+                }
             }
 
             async signInWithGoogle() {
@@ -876,7 +891,22 @@
                 const hash = window.location.hash.slice(1) || '/';
                 const app = document.getElementById('app');
                 
+                console.log('📄 Rendu page:', hash);
+                
+                // Vérifier si l'AuthManager est prêt
+                if (!window.authManager || !window.authManager.isInitialized) {
+                    console.log('⏳ Attente AuthManager...');
+                    app.innerHTML = `
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <p>Initialisation de l'authentification...</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 const isAuthenticated = authManager.isAuthenticated();
+                console.log('🔐 Utilisateur authentifié:', isAuthenticated);
                 
                 switch(hash) {
                     case '/':
@@ -1172,35 +1202,53 @@
             }
 
             init() {
+                console.log('🧭 Initialisation Router...');
                 window.addEventListener('hashchange', () => this.render());
                 
-                authManager.on?.('auth:stateChanged', () => {
-                    this.render();
-                });
-
-                teamManager.on?.('team:loaded', () => {
-                    if (window.location.hash.includes('/team')) {
-                        this.updateTeamView();
+                // Attendre que l'AuthManager soit prêt
+                const waitForAuth = () => {
+                    if (window.authManager && window.authManager.isInitialized) {
+                        console.log('✅ Router prêt - premier rendu');
+                        this.render();
+                    } else {
+                        setTimeout(waitForAuth, 100);
                     }
-                });
+                };
+                
+                waitForAuth();
+                
+                // Écouter les événements du TeamManager
+                const setupTeamListeners = () => {
+                    if (window.teamManager && window.teamManager.isInitialized) {
+                        teamManager.on?.('team:loaded', () => {
+                            if (window.location.hash.includes('/team')) {
+                                this.updateTeamView();
+                            }
+                        });
 
-                teamManager.on?.('member:added', () => {
-                    if (window.location.hash.includes('/team')) {
-                        this.loadTeamData();
-                    }
-                });
+                        teamManager.on?.('member:added', () => {
+                            if (window.location.hash.includes('/team')) {
+                                this.loadTeamData();
+                            }
+                        });
 
-                teamManager.on?.('member:updated', () => {
-                    if (window.location.hash.includes('/team')) {
-                        this.loadTeamData();
-                    }
-                });
+                        teamManager.on?.('member:updated', () => {
+                            if (window.location.hash.includes('/team')) {
+                                this.loadTeamData();
+                            }
+                        });
 
-                teamManager.on?.('member:deleted', () => {
-                    if (window.location.hash.includes('/team')) {
-                        this.loadTeamData();
+                        teamManager.on?.('member:deleted', () => {
+                            if (window.location.hash.includes('/team')) {
+                                this.loadTeamData();
+                            }
+                        });
+                    } else {
+                        setTimeout(setupTeamListeners, 100);
                     }
-                });
+                };
+                
+                setupTeamListeners();
             }
         }
 

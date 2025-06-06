@@ -1,676 +1,493 @@
-// src/js/controllers/timeclock-controller.js
-import { TimeClockManager } from '../managers/TimeClockManager.js';
-import { EventBus } from '../core/eventbus.js';
-import { Logger } from '../core/logger.js';
+// src/js/controllers/timeclock-controller.js - Contrôleur de pointage corrigé
 
-export class TimeClockController {
-    constructor() {
-        this.timeClockManager = new TimeClockManager();
-        this.currentAction = null;
-        this.workTimer = null;
-        this.currentLocation = null;
-        this.selectedEntryId = null;
-        
-        this.initializeElements();
-        this.setupEventListeners();
-        this.updateDisplay();
-        this.startTimers();
+class TimeClockController {
+  constructor() {
+    this.isInitialized = false;
+    this.elements = new Map();
+    this.timers = new Map();
+    this.eventListeners = new Map();
+    this.currentSession = null;
+    this.isOnBreak = false;
+    
+    // Bind des méthodes pour conserver le contexte
+    this.handleCheckIn = this.handleCheckIn.bind(this);
+    this.handleCheckOut = this.handleCheckOut.bind(this);
+    this.handleBreakStart = this.handleBreakStart.bind(this);
+    this.handleBreakEnd = this.handleBreakEnd.bind(this);
+    this.updateClock = this.updateClock.bind(this);
+    
+    this.safeInitialize();
+  }
+
+  async safeInitialize() {
+    try {
+      await this.waitForDOM();
+      await this.initialize();
+      Logger.info('TimeClockController: Initialisation réussie', null, 'TimeClockController');
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur d\'initialisation', error, 'TimeClockController');
+      this.showErrorMessage('Erreur lors de l\'initialisation du système de pointage');
+    }
+  }
+
+  // Attendre que le DOM soit prêt
+  waitForDOM() {
+    return new Promise((resolve) => {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', resolve);
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  async initialize() {
+    try {
+      // Vérifier les dépendances
+      await this.checkDependencies();
+      
+      // Initialiser les éléments DOM
+      this.cacheDOMElements();
+      
+      // Configurer les event listeners
+      this.setupEventListeners();
+      
+      // Démarrer l'horloge
+      this.startClock();
+      
+      // Charger l'état actuel
+      await this.loadCurrentState();
+      
+      this.isInitialized = true;
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors de l\'initialisation', error, 'TimeClockController');
+      throw error;
+    }
+  }
+
+  // Vérifier que les dépendances sont disponibles
+  async checkDependencies() {
+    const dependencies = [
+      { name: 'Logger', object: window.Logger },
+      { name: 'firebase', object: window.firebase },
+      { name: 'BadgingManager', object: window.BadgingManager }
+    ];
+
+    for (const dep of dependencies) {
+      if (!dep.object) {
+        throw new Error(`Dépendance manquante: ${dep.name}`);
+      }
     }
 
-    initializeElements() {
-        // Status elements
-        this.statusIcon = document.getElementById('status-icon');
-        this.statusTitle = document.getElementById('status-title');
-        this.statusSubtitle = document.getElementById('status-subtitle');
-        this.sessionTimer = document.getElementById('current-session-timer');
-        this.workTimerEl = document.getElementById('work-timer');
-        this.breakIndicator = document.getElementById('break-indicator');
+    // Vérifier que Firebase est initialisé
+    if (!firebase.apps.length) {
+      throw new Error('Firebase n\'est pas initialisé');
+    }
+  }
 
-        // Action buttons
-        this.clockInBtn = document.getElementById('clock-in-btn');
-        this.clockOutBtn = document.getElementById('clock-out-btn');
-        this.trainingBtn = document.getElementById('training-btn');
-        this.startBreakBtn = document.getElementById('start-break-btn');
-        this.endBreakBtn = document.getElementById('end-break-btn');
-        this.breakActions = document.getElementById('break-actions');
+  // Cacher les éléments DOM nécessaires
+  cacheDOMElements() {
+    const elementIds = [
+      'check-in-btn',
+      'check-out-btn',
+      'break-start-btn',
+      'break-end-btn',
+      'current-time',
+      'current-date',
+      'current-status',
+      'work-timer',
+      'break-indicator',
+      'comment-input',
+      'remote-work-checkbox'
+    ];
 
-        // Options
-        this.remoteCheckbox = document.getElementById('remote-work-checkbox');
-        this.locationBtn = document.getElementById('location-btn');
+    elementIds.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        this.elements.set(id, element);
+        Logger.debug(`TimeClockController: Élément '${id}' trouvé`, null, 'TimeClockController');
+      } else {
+        Logger.warn(`TimeClockController: Élément '${id}' non trouvé`, null, 'TimeClockController');
+      }
+    });
 
-        // Comment section
-        this.commentSection = document.getElementById('comment-section');
-        this.commentTitle = document.getElementById('comment-title');
-        this.commentInput = document.getElementById('comment-input');
-        this.commentCancel = document.getElementById('comment-cancel');
-        this.commentConfirm = document.getElementById('comment-confirm');
+    // Vérifier les éléments critiques
+    const criticalElements = ['current-time', 'current-status'];
+    const missingCritical = criticalElements.filter(id => !this.elements.has(id));
+    
+    if (missingCritical.length > 0) {
+      throw new Error(`Éléments critiques manquants: ${missingCritical.join(', ')}`);
+    }
+  }
 
-        // Stats
-        this.todayWorkTime = document.getElementById('today-work-time');
-        this.todayBreakTime = document.getElementById('today-break-time');
-        this.todayOvertime = document.getElementById('today-overtime');
+  // Configurer les event listeners
+  setupEventListeners() {
+    const buttonConfigs = [
+      { id: 'check-in-btn', handler: this.handleCheckIn },
+      { id: 'check-out-btn', handler: this.handleCheckOut },
+      { id: 'break-start-btn', handler: this.handleBreakStart },
+      { id: 'break-end-btn', handler: this.handleBreakEnd }
+    ];
 
-        // History
-        this.periodSelect = document.getElementById('period-select');
-        this.customPeriod = document.getElementById('custom-period');
-        this.startDateInput = document.getElementById('start-date');
-        this.endDateInput = document.getElementById('end-date');
-        this.applyFilterBtn = document.getElementById('apply-filter');
-        this.exportBtn = document.getElementById('export-btn');
-        this.entriesList = document.getElementById('entries-list');
+    buttonConfigs.forEach(config => {
+      const element = this.elements.get(config.id);
+      if (element) {
+        element.addEventListener('click', config.handler);
+        this.eventListeners.set(config.id, config.handler);
+        Logger.debug(`TimeClockController: Event listener ajouté pour '${config.id}'`, null, 'TimeClockController');
+      }
+    });
 
-        // Period summary
-        this.periodTotalTime = document.getElementById('period-total-time');
-        this.periodDaysWorked = document.getElementById('period-days-worked');
-        this.periodOvertime = document.getElementById('period-overtime');
-        this.periodTrainingDays = document.getElementById('period-training-days');
+    // Event listener pour les raccourcis clavier
+    document.addEventListener('keydown', this.handleKeyboardShortcuts.bind(this));
+  }
 
-        // Modals
-        this.exportModal = document.getElementById('export-modal');
-        this.adminEditModal = document.getElementById('admin-edit-modal');
-
-        // Templates
-        this.entryTemplate = document.getElementById('entry-template');
+  // Démarrer l'horloge
+  startClock() {
+    if (this.timers.has('clock')) {
+      clearInterval(this.timers.get('clock'));
     }
 
-    setupEventListeners() {
-        // Action buttons
-        this.clockInBtn.addEventListener('click', () => this.handleClockIn());
-        this.clockOutBtn.addEventListener('click', () => this.handleClockOut());
-        this.trainingBtn.addEventListener('click', () => this.handleTraining());
-        this.startBreakBtn.addEventListener('click', () => this.handleStartBreak());
-        this.endBreakBtn.addEventListener('click', () => this.handleEndBreak());
+    const clockTimer = setInterval(this.updateClock, 1000);
+    this.timers.set('clock', clockTimer);
+    
+    // Mettre à jour immédiatement
+    this.updateClock();
+    
+    Logger.debug('TimeClockController: Horloge démarrée', null, 'TimeClockController');
+  }
 
-        // Location
-        this.locationBtn.addEventListener('click', () => this.getCurrentLocation());
-
-        // Comment section
-        this.commentCancel.addEventListener('click', () => this.hideCommentSection());
-        this.commentConfirm.addEventListener('click', () => this.confirmAction());
-
-        // History controls
-        this.periodSelect.addEventListener('change', () => this.handlePeriodChange());
-        this.applyFilterBtn.addEventListener('click', () => this.applyCustomFilter());
-        this.exportBtn.addEventListener('click', () => this.showExportModal());
-
-        // Export modal
-        document.getElementById('export-modal-close').addEventListener('click', () => this.hideExportModal());
-        document.getElementById('export-cancel').addEventListener('click', () => this.hideExportModal());
-        document.getElementById('export-download').addEventListener('click', () => this.downloadExport());
-
-        // Admin modal
-        document.getElementById('admin-modal-close').addEventListener('click', () => this.hideAdminModal());
-        document.getElementById('admin-cancel').addEventListener('click', () => this.hideAdminModal());
-        document.getElementById('admin-save').addEventListener('click', () => this.saveAdminChanges());
-
-        // EventBus listeners
-        EventBus.on('timeclock:clockedIn', () => this.updateDisplay());
-        EventBus.on('timeclock:clockedOut', () => this.updateDisplay());
-        EventBus.on('timeclock:breakStarted', () => this.updateDisplay());
-        EventBus.on('timeclock:breakEnded', () => this.updateDisplay());
-        EventBus.on('timeclock:trainingClocked', () => this.updateDisplay());
-        EventBus.on('timeclock:entriesLoaded', () => this.renderEntries());
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
-    }
-
-    async updateDisplay() {
-        const currentSession = this.timeClockManager.getCurrentSession();
-        const isOnBreak = this.timeClockManager.isCurrentlyOnBreak();
-
-        // Update status
-        if (currentSession && !currentSession.clockOut) {
-            // Session active
-            this.statusIcon.textContent = isOnBreak ? '⏸️' : '🟢';
-            this.statusTitle.textContent = isOnBreak ? 'En pause' : 'En cours';
-            this.statusSubtitle.textContent = isOnBreak ? 
-                'Pause en cours depuis ' + this.formatTime(this.timeClockManager.getCurrentBreakDuration()) :
-                `Pointé depuis ${new Date(currentSession.clockIn).toLocaleTimeString('fr-FR')}`;
-            
-            this.sessionTimer.style.display = 'block';
-            this.breakIndicator.style.display = isOnBreak ? 'inline' : 'none';
-            
-            // Show/hide buttons
-            this.clockInBtn.style.display = 'none';
-            this.clockOutBtn.style.display = 'block';
-            this.breakActions.style.display = 'block';
-            this.startBreakBtn.style.display = isOnBreak ? 'none' : 'block';
-            this.endBreakBtn.style.display = isOnBreak ? 'block' : 'none';
-        } else {
-            // Pas de session active
-            this.statusIcon.textContent = '⏰';
-            this.statusTitle.textContent = 'Non pointé';
-            this.statusSubtitle.textContent = 'Cliquez pour pointer votre arrivée';
-            
-            this.sessionTimer.style.display = 'none';
-            
-            // Show/hide buttons
-            this.clockInBtn.style.display = 'block';
-            this.clockOutBtn.style.display = 'none';
-            this.breakActions.style.display = 'none';
-        }
-
-        // Update today's stats
-        await this.updateTodayStats();
-        
-        // Load and display history
-        await this.loadHistoryForPeriod();
-    }
-
-    async updateTodayStats() {
-        const today = new Date();
-        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-        
-        await this.timeClockManager.loadTimeEntries(startOfDay, endOfDay);
-        const todayEntries = this.timeClockManager.getTimeEntries();
-        const stats = this.timeClockManager.calculateStats(todayEntries);
-
-        this.todayWorkTime.textContent = this.formatDuration(stats.totalWorkTime);
-        this.todayBreakTime.textContent = this.formatDuration(stats.totalBreakTime);
-        this.todayOvertime.textContent = this.formatDuration(stats.totalOvertime);
-    }
-
-    startTimers() {
-        this.workTimer = setInterval(() => {
-            const currentSession = this.timeClockManager.getCurrentSession();
-            if (currentSession && !currentSession.clockOut) {
-                const startTime = new Date(currentSession.clockIn);
-                const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000 / 60);
-                const workTime = elapsed - this.timeClockManager.getCurrentBreakDuration();
-                this.workTimerEl.textContent = this.formatDuration(workTime);
-            }
-        }, 1000);
-    }
-
-    // Actions handlers
-    handleClockIn() {
-        this.currentAction = 'clockIn';
-        this.showCommentSection('Commentaire d\'arrivée (optionnel)');
-    }
-
-    handleClockOut() {
-        this.currentAction = 'clockOut';
-        this.showCommentSection('Commentaire de sortie (optionnel)');
-    }
-
-    handleTraining() {
-        this.currentAction = 'training';
-        this.showCommentSection('Commentaire de formation (optionnel)');
-    }
-
-    handleStartBreak() {
-        this.currentAction = 'startBreak';
-        this.showCommentSection('Raison de la pause (optionnel)');
-    }
-
-    async handleEndBreak() {
-        try {
-            await this.timeClockManager.endBreak();
-            this.showNotification('Pause terminée', 'success');
-        } catch (error) {
-            this.showNotification(error.message, 'error');
-        }
-    }
-
-    async confirmAction() {
-        const comment = this.commentInput.value.trim();
-        
-        try {
-            switch (this.currentAction) {
-                case 'clockIn':
-                    await this.timeClockManager.clockIn(
-                        comment, 
-                        this.remoteCheckbox.checked, 
-                        this.currentLocation
-                    );
-                    this.showNotification('Pointage d\'arrivée enregistré', 'success');
-                    break;
-                    
-                case 'clockOut':
-                    await this.timeClockManager.clockOut(comment);
-                    this.showNotification('Pointage de sortie enregistré', 'success');
-                    break;
-                    
-                case 'training':
-                    await this.timeClockManager.clockTraining(comment);
-                    this.showNotification('Journée de formation enregistrée', 'success');
-                    break;
-                    
-                case 'startBreak':
-                    await this.timeClockManager.startBreak(comment);
-                    this.showNotification('Pause commencée', 'success');
-                    break;
-            }
-            
-            this.hideCommentSection();
-        } catch (error) {
-            this.showNotification(error.message, 'error');
-        }
-    }
-
-    showCommentSection(title) {
-        this.commentTitle.textContent = title;
-        this.commentInput.value = '';
-        this.commentSection.style.display = 'block';
-        this.commentInput.focus();
-    }
-
-    hideCommentSection() {
-        this.commentSection.style.display = 'none';
-        this.currentAction = null;
-    }
-
-    async getCurrentLocation() {
-        if (!navigator.geolocation) {
-            this.showNotification('Géolocalisation non supportée', 'error');
-            return;
-        }
-
-        try {
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 300000
-                });
-            });
-
-            this.currentLocation = {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                accuracy: position.coords.accuracy,
-                timestamp: new Date().toISOString()
-            };
-
-            this.showNotification('Position enregistrée', 'success');
-        } catch (error) {
-            this.showNotification('Impossible d\'obtenir la position', 'error');
-        }
-    }
-
-    // History management
-    handlePeriodChange() {
-        const period = this.periodSelect.value;
-        
-        if (period === 'custom') {
-            this.customPeriod.style.display = 'block';
-            this.setDefaultDateRange();
-        } else {
-            this.customPeriod.style.display = 'none';
-            this.loadHistoryForPeriod();
-        }
-    }
-
-    setDefaultDateRange() {
-        const today = new Date();
-        const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-        
-        this.startDateInput.value = oneMonthAgo.toISOString().split('T')[0];
-        this.endDateInput.value = today.toISOString().split('T')[0];
-    }
-
-    async applyCustomFilter() {
-        const startDate = new Date(this.startDateInput.value);
-        const endDate = new Date(this.endDateInput.value);
-        
-        if (startDate > endDate) {
-            this.showNotification('La date de début doit être antérieure à la date de fin', 'error');
-            return;
-        }
-        
-        await this.timeClockManager.loadTimeEntries(startDate, endDate);
-        this.renderEntries();
-        this.updatePeriodSummary();
-    }
-
-    async loadHistoryForPeriod() {
-        const period = this.periodSelect.value;
-        let startDate, endDate;
-        
-        const today = new Date();
-        
-        switch (period) {
-            case 'week':
-                startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-                endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (6 - today.getDay()));
-                break;
-            case 'month':
-                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                break;
-            default:
-                return;
-        }
-        
-        await this.timeClockManager.loadTimeEntries(startDate, endDate);
-        this.renderEntries();
-        this.updatePeriodSummary();
-    }
-
-    updatePeriodSummary() {
-        const entries = this.timeClockManager.getTimeEntries();
-        const stats = this.timeClockManager.calculateStats(entries);
-        
-        this.periodTotalTime.textContent = this.formatDuration(stats.totalWorkTime);
-        this.periodDaysWorked.textContent = stats.daysWorked.toString();
-        this.periodOvertime.textContent = this.formatDuration(stats.totalOvertime);
-        this.periodTrainingDays.textContent = stats.trainingDays.toString();
-    }
-
-    renderEntries() {
-        const entries = this.timeClockManager.getTimeEntries();
-        this.entriesList.innerHTML = '';
-        
-        entries.forEach(entry => {
-            const entryEl = this.createEntryElement(entry);
-            this.entriesList.appendChild(entryEl);
+  // Mettre à jour l'affichage de l'horloge
+  updateClock() {
+    try {
+      const now = new Date();
+      
+      // Mettre à jour l'heure
+      const timeElement = this.elements.get('current-time');
+      if (timeElement) {
+        timeElement.textContent = now.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         });
-    }
+      }
 
-    createEntryElement(entry) {
-        const template = this.entryTemplate.content.cloneNode(true);
-        const entryEl = template.querySelector('.entry-item');
-        
-        entryEl.dataset.entryId = entry.id;
-        
-        // Date
-        const date = new Date(entry.createdAt);
-        entryEl.querySelector('.entry-date').textContent = date.toLocaleDateString('fr-FR', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long'
+      // Mettre à jour la date
+      const dateElement = this.elements.get('current-date');
+      if (dateElement) {
+        dateElement.textContent = now.toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
         });
-        
-        // Badges
-        if (entry.isRemote) {
-            entryEl.querySelector('.badge.remote').style.display = 'inline-block';
-        }
-        if (entry.isTraining) {
-            entryEl.querySelector('.badge.training').style.display = 'inline-block';
-        }
-        
-        // Times
-        entryEl.querySelector('.clock-in .time-value').textContent = 
-            new Date(entry.clockIn).toLocaleTimeString('fr-FR');
-        entryEl.querySelector('.clock-out .time-value').textContent = 
-            entry.clockOut ? new Date(entry.clockOut).toLocaleTimeString('fr-FR') : 'En cours';
-        
-        // Durations
-        entryEl.querySelector('.work-duration .duration-value').textContent = 
-            this.formatDuration(entry.totalWorkTime || 0);
-        entryEl.querySelector('.break-duration .duration-value').textContent = 
-            this.formatDuration(entry.totalBreakTime || 0);
-        
-        // Comments
-        if (entry.clockInComment || entry.clockOutComment) {
-            const commentsEl = entryEl.querySelector('.comments');
-            commentsEl.style.display = 'block';
-            
-            if (entry.clockInComment) {
-                commentsEl.querySelector('.comment-in').textContent = 
-                    `Arrivée: ${entry.clockInComment}`;
-            }
-            if (entry.clockOutComment) {
-                commentsEl.querySelector('.comment-out').textContent = 
-                    `Sortie: ${entry.clockOutComment}`;
-            }
-        }
-        
-        // Breaks details
-        if (entry.breaks && entry.breaks.length > 0) {
-            const breaksEl = entryEl.querySelector('.breaks-list');
-            breaksEl.style.display = 'block';
-            
-            const breaksContent = entryEl.querySelector('.breaks-content');
-            breaksContent.innerHTML = entry.breaks.map(breakItem => {
-                const start = new Date(breakItem.startTime).toLocaleTimeString('fr-FR');
-                const end = breakItem.endTime ? 
-                    new Date(breakItem.endTime).toLocaleTimeString('fr-FR') : 'En cours';
-                const duration = this.formatDuration(breakItem.duration || 0);
-                return `${start} - ${end} (${duration})${breakItem.reason ? ': ' + breakItem.reason : ''}`;
-            }).join('<br>');
-        }
-        
-        // Admin edit button
-        const user = this.getCurrentUser();
-        if (user && user.isAdmin) {
-            entryEl.querySelector('.admin-edit-btn').style.display = 'inline-block';
-            entryEl.querySelector('.admin-edit-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.showAdminEditModal(entry);
-            });
-        }
-        
-        // Toggle details
-        entryEl.querySelector('.entry-header').addEventListener('click', () => {
-            entryEl.classList.toggle('expanded');
-        });
-        
-        return entryEl;
+      }
+
+      // Mettre à jour le timer de travail si en session
+      this.updateWorkTimer();
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors de la mise à jour de l\'horloge', error, 'TimeClockController');
+    }
+  }
+
+  // Mettre à jour le timer de travail
+  updateWorkTimer() {
+    if (!this.currentSession || !this.currentSession.checkInTime) {
+      return;
     }
 
-    // Export functionality
-    showExportModal() {
-        const today = new Date();
-        const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-        
-        document.getElementById('export-start-date').value = oneMonthAgo.toISOString().split('T')[0];
-        document.getElementById('export-end-date').value = today.toISOString().split('T')[0];
-        
-        this.exportModal.style.display = 'flex';
+    try {
+      const checkInTime = this.currentSession.checkInTime.toDate();
+      const now = new Date();
+      const workDuration = Math.floor((now - checkInTime) / 1000);
+
+      const hours = Math.floor(workDuration / 3600);
+      const minutes = Math.floor((workDuration % 3600) / 60);
+      const seconds = workDuration % 60;
+
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      const timerElement = this.elements.get('work-timer');
+      if (timerElement) {
+        timerElement.textContent = formattedTime;
+      }
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors de la mise à jour du timer', error, 'TimeClockController');
+    }
+  }
+
+  // Charger l'état actuel depuis la base de données
+  async loadCurrentState() {
+    try {
+      if (!firebase.auth().currentUser) {
+        this.updateStatus('Non connecté', 'offline');
+        return;
+      }
+
+      // Utiliser BadgingManager pour charger l'état
+      if (window.BadgingManager) {
+        const badgingManager = new BadgingManager();
+        this.currentSession = await badgingManager.getCurrentSession();
+        this.updateUIFromSession();
+      }
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors du chargement de l\'état', error, 'TimeClockController');
+      this.updateStatus('Erreur de chargement', 'error');
+    }
+  }
+
+  // Mettre à jour l'interface depuis la session
+  updateUIFromSession() {
+    if (!this.currentSession) {
+      this.updateStatus('Pas de session active', 'offline');
+      this.enableButton('check-in-btn');
+      this.disableButton('check-out-btn');
+      this.disableButton('break-start-btn');
+      this.disableButton('break-end-btn');
+      return;
     }
 
-    hideExportModal() {
-        this.exportModal.style.display = 'none';
+    if (this.currentSession.status === 'active') {
+      this.updateStatus('En service', 'online');
+      this.disableButton('check-in-btn');
+      this.enableButton('check-out-btn');
+      this.enableButton('break-start-btn');
+      this.disableButton('break-end-btn');
+    } else if (this.currentSession.status === 'break') {
+      this.updateStatus('En pause', 'break');
+      this.isOnBreak = true;
+      this.disableButton('check-in-btn');
+      this.enableButton('check-out-btn');
+      this.disableButton('break-start-btn');
+      this.enableButton('break-end-btn');
+    }
+  }
+
+  // Gestionnaires d'événements
+  async handleCheckIn() {
+    try {
+      this.disableButton('check-in-btn');
+      
+      if (!firebase.auth().currentUser) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      const comment = this.getCommentValue();
+      const isRemote = this.getRemoteWorkValue();
+
+      if (window.BadgingManager) {
+        const badgingManager = new BadgingManager();
+        await badgingManager.checkIn(comment, isRemote);
+        
+        this.currentSession = await badgingManager.getCurrentSession();
+        this.updateUIFromSession();
+        
+        Logger.info('TimeClockController: Check-in réussi', null, 'TimeClockController');
+        this.showSuccessMessage('Pointage d\'entrée enregistré');
+      }
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors du check-in', error, 'TimeClockController');
+      this.showErrorMessage('Erreur lors du pointage d\'entrée');
+      this.enableButton('check-in-btn');
+    }
+  }
+
+  async handleCheckOut() {
+    try {
+      this.disableButton('check-out-btn');
+      
+      const comment = this.getCommentValue();
+
+      if (window.BadgingManager) {
+        const badgingManager = new BadgingManager();
+        await badgingManager.checkOut(comment);
+        
+        this.currentSession = null;
+        this.isOnBreak = false;
+        this.updateUIFromSession();
+        
+        Logger.info('TimeClockController: Check-out réussi', null, 'TimeClockController');
+        this.showSuccessMessage('Pointage de sortie enregistré');
+      }
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors du check-out', error, 'TimeClockController');
+      this.showErrorMessage('Erreur lors du pointage de sortie');
+      this.enableButton('check-out-btn');
+    }
+  }
+
+  async handleBreakStart() {
+    try {
+      this.disableButton('break-start-btn');
+      
+      if (window.BadgingManager) {
+        const badgingManager = new BadgingManager();
+        await badgingManager.startBreak();
+        
+        this.isOnBreak = true;
+        this.updateStatus('En pause', 'break');
+        this.enableButton('break-end-btn');
+        
+        Logger.info('TimeClockController: Début de pause', null, 'TimeClockController');
+        this.showSuccessMessage('Pause démarrée');
+      }
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors du début de pause', error, 'TimeClockController');
+      this.showErrorMessage('Erreur lors du début de pause');
+      this.enableButton('break-start-btn');
+    }
+  }
+
+  async handleBreakEnd() {
+    try {
+      this.disableButton('break-end-btn');
+      
+      if (window.BadgingManager) {
+        const badgingManager = new BadgingManager();
+        await badgingManager.endBreak();
+        
+        this.isOnBreak = false;
+        this.updateStatus('En service', 'online');
+        this.enableButton('break-start-btn');
+        
+        Logger.info('TimeClockController: Fin de pause', null, 'TimeClockController');
+        this.showSuccessMessage('Pause terminée');
+      }
+      
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors de la fin de pause', error, 'TimeClockController');
+      this.showErrorMessage('Erreur lors de la fin de pause');
+      this.enableButton('break-end-btn');
+    }
+  }
+
+  // Gestion des raccourcis clavier
+  handleKeyboardShortcuts(event) {
+    if (event.ctrlKey || event.metaKey) {
+      switch (event.key) {
+        case 'i':
+          event.preventDefault();
+          if (!this.elements.get('check-in-btn')?.disabled) {
+            this.handleCheckIn();
+          }
+          break;
+        case 'o':
+          event.preventDefault();
+          if (!this.elements.get('check-out-btn')?.disabled) {
+            this.handleCheckOut();
+          }
+          break;
+        case 'p':
+          event.preventDefault();
+          if (!this.isOnBreak && !this.elements.get('break-start-btn')?.disabled) {
+            this.handleBreakStart();
+          } else if (this.isOnBreak && !this.elements.get('break-end-btn')?.disabled) {
+            this.handleBreakEnd();
+          }
+          break;
+      }
+    }
+  }
+
+  // Méthodes utilitaires
+  updateStatus(status, type = 'info') {
+    const statusElement = this.elements.get('current-status');
+    if (statusElement) {
+      statusElement.textContent = status;
+      statusElement.className = `status ${type}`;
     }
 
-    downloadExport() {
-        const format = document.getElementById('export-format').value;
-        const startDate = new Date(document.getElementById('export-start-date').value);
-        const endDate = new Date(document.getElementById('export-end-date').value);
-        
-        if (startDate > endDate) {
-            this.showNotification('Dates invalides', 'error');
-            return;
+    const breakIndicator = this.elements.get('break-indicator');
+    if (breakIndicator) {
+      breakIndicator.style.display = this.isOnBreak ? 'block' : 'none';
+    }
+  }
+
+  enableButton(buttonId) {
+    const button = this.elements.get(buttonId);
+    if (button) {
+      button.disabled = false;
+      button.classList.remove('disabled');
+    }
+  }
+
+  disableButton(buttonId) {
+    const button = this.elements.get(buttonId);
+    if (button) {
+      button.disabled = true;
+      button.classList.add('disabled');
+    }
+  }
+
+  getCommentValue() {
+    const commentElement = this.elements.get('comment-input');
+    return commentElement ? commentElement.value.trim() : '';
+  }
+
+  getRemoteWorkValue() {
+    const remoteElement = this.elements.get('remote-work-checkbox');
+    return remoteElement ? remoteElement.checked : false;
+  }
+
+  showSuccessMessage(message) {
+    if (window.NotificationManager) {
+      window.NotificationManager.showSuccess(message);
+    } else {
+      console.log('✅', message);
+    }
+  }
+
+  showErrorMessage(message) {
+    if (window.NotificationManager) {
+      window.NotificationManager.showError(message);
+    } else {
+      console.error('❌', message);
+    }
+  }
+
+  // Nettoyage
+  destroy() {
+    try {
+      // Arrêter tous les timers
+      this.timers.forEach((timer, key) => {
+        clearInterval(timer);
+        Logger.debug(`TimeClockController: Timer '${key}' arrêté`, null, 'TimeClockController');
+      });
+      this.timers.clear();
+
+      // Supprimer tous les event listeners
+      this.eventListeners.forEach((handler, elementId) => {
+        const element = this.elements.get(elementId);
+        if (element) {
+          element.removeEventListener('click', handler);
         }
-        
-        try {
-            const data = this.timeClockManager.exportData(startDate, endDate, format);
-            const filename = `pointages_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}.${format}`;
-            
-            this.downloadFile(data, filename, format === 'csv' ? 'text/csv' : 'application/json');
-            this.hideExportModal();
-            this.showNotification('Export téléchargé', 'success');
-        } catch (error) {
-            this.showNotification('Erreur lors de l\'export', 'error');
-        }
-    }
+      });
+      this.eventListeners.clear();
 
-    downloadFile(data, filename, mimeType) {
-        const blob = new Blob([data], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        URL.revokeObjectURL(url);
-    }
+      // Supprimer l'event listener du clavier
+      document.removeEventListener('keydown', this.handleKeyboardShortcuts);
 
-    // Admin functionality
-    showAdminEditModal(entry) {
-        this.selectedEntryId = entry.id;
-        
-        document.getElementById('admin-clock-in').value = 
-            this.formatDateForInput(new Date(entry.clockIn));
-        document.getElementById('admin-clock-out').value = 
-            entry.clockOut ? this.formatDateForInput(new Date(entry.clockOut)) : '';
-        document.getElementById('admin-comment').value = '';
-        
-        this.adminEditModal.style.display = 'flex';
+      this.elements.clear();
+      this.isInitialized = false;
+      
+      Logger.info('TimeClockController: Nettoyage terminé', null, 'TimeClockController');
+    } catch (error) {
+      Logger.error('TimeClockController: Erreur lors du nettoyage', error, 'TimeClockController');
     }
-
-    hideAdminModal() {
-        this.adminEditModal.style.display = 'none';
-        this.selectedEntryId = null;
-    }
-
-    async saveAdminChanges() {
-        if (!this.selectedEntryId) return;
-        
-        const clockIn = document.getElementById('admin-clock-in').value;
-        const clockOut = document.getElementById('admin-clock-out').value;
-        const comment = document.getElementById('admin-comment').value;
-        
-        if (!clockIn) {
-            this.showNotification('Heure d\'arrivée requise', 'error');
-            return;
-        }
-        
-        if (!comment.trim()) {
-            this.showNotification('Commentaire de modification requis', 'error');
-            return;
-        }
-        
-        try {
-            const updateData = {
-                clockIn: new Date(clockIn).toISOString(),
-                adminComment: comment,
-                lastModified: new Date().toISOString()
-            };
-            
-            if (clockOut) {
-                updateData.clockOut = new Date(clockOut).toISOString();
-                
-                // Recalculate work time
-                const clockInTime = new Date(clockIn);
-                const clockOutTime = new Date(clockOut);
-                const entry = this.timeClockManager.getTimeEntries().find(e => e.id === this.selectedEntryId);
-                updateData.totalWorkTime = this.timeClockManager.calculateWorkTime(
-                    clockInTime, 
-                    clockOutTime, 
-                    entry.breaks || []
-                );
-            }
-            
-            await this.timeClockManager.updateTimeEntry(this.selectedEntryId, updateData);
-            await this.loadHistoryForPeriod();
-            
-            this.hideAdminModal();
-            this.showNotification('Pointage modifié avec succès', 'success');
-        } catch (error) {
-            this.showNotification(error.message, 'error');
-        }
-    }
-
-    // Keyboard shortcuts
-    handleKeyboardShortcuts(e) {
-        if (e.ctrlKey || e.metaKey) {
-            switch (e.key) {
-                case 'i':
-                    e.preventDefault();
-                    if (this.clockInBtn.style.display !== 'none') {
-                        this.handleClockIn();
-                    }
-                    break;
-                case 'o':
-                    e.preventDefault();
-                    if (this.clockOutBtn.style.display !== 'none') {
-                        this.handleClockOut();
-                    }
-                    break;
-                case 'p':
-                    e.preventDefault();
-                    if (this.startBreakBtn.style.display !== 'none') {
-                        this.handleStartBreak();
-                    } else if (this.endBreakBtn.style.display !== 'none') {
-                        this.handleEndBreak();
-                    }
-                    break;
-                case 'e':
-                    e.preventDefault();
-                    this.showExportModal();
-                    break;
-            }
-        }
-        
-        if (e.key === 'Escape') {
-            if (this.commentSection.style.display !== 'none') {
-                this.hideCommentSection();
-            }
-            if (this.exportModal.style.display !== 'none') {
-                this.hideExportModal();
-            }
-            if (this.adminEditModal.style.display !== 'none') {
-                this.hideAdminModal();
-            }
-        }
-    }
-
-    // Utility methods
-    formatDuration(minutes) {
-        if (!minutes || minutes < 0) return '00:00';
-        
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-    }
-
-    formatTime(minutes) {
-        if (!minutes || minutes < 0) return '0 min';
-        
-        if (minutes < 60) {
-            return `${minutes} min`;
-        } else {
-            const hours = Math.floor(minutes / 60);
-            const mins = minutes % 60;
-            return mins > 0 ? `${hours}h${mins.toString().padStart(2, '0')}` : `${hours}h`;
-        }
-    }
-
-    formatDateForInput(date) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-
-    showNotification(message, type = 'info') {
-        EventBus.emit('notification:show', {
-            message: message,
-            type: type,
-            duration: 3000
-        });
-    }
-
-    getCurrentUser() {
-        // À adapter selon votre système d'authentification
-        return {
-            uid: 'current-user-id',
-            isAdmin: false // Récupérer depuis AuthManager
-        };
-    }
-
-    // Cleanup
-    destroy() {
-        if (this.workTimer) {
-            clearInterval(this.workTimer);
-        }
-        
-        // Remove event listeners
-        EventBus.off('timeclock:clockedIn');
-        EventBus.off('timeclock:clockedOut');
-        EventBus.off('timeclock:breakStarted');
-        EventBus.off('timeclock:breakEnded');
-        EventBus.off('timeclock:trainingClocked');
-        EventBus.off('timeclock:entriesLoaded');
-    }
+  }
 }
+
+// Exporter la classe
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = TimeClockController;
+} else if (typeof window !== 'undefined') {
+  window.TimeClockController = TimeClockController;
+}
+
+Logger.debug('TimeClockController: Classe chargée', null, 'TimeClockController');

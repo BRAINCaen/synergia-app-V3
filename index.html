@@ -9,12 +9,103 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1a1a2e">
     
-    <!-- CSS Variables et Base -->
-    <link rel="stylesheet" href="./src/styles/variables.css">
-    <link rel="stylesheet" href="./src/styles/base.css">
-    <link rel="stylesheet" href="./src/styles/components.css">
+    <!-- CSS existant (gardez vos styles actuels) -->
+    <style>
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #e94560;
+            --text-light: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 20px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: var(--glass-bg);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        #app {
+            min-height: 100vh;
+        }
+        
+        .init-error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        details {
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
     
-    <!-- Firebase CDN (pour corriger l'erreur de module) -->
+    <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -23,56 +114,289 @@
 <body>
     <!-- App Container -->
     <div id="app">
-        <!-- Navigation -->
-        <nav id="sidebar" class="sidebar"></nav>
-        
-        <!-- Main Content -->
-        <main id="main-content" class="main-content">
-            <div id="page-container"></div>
-        </main>
-        
-        <!-- Modal Container -->
-        <div id="modal-container"></div>
-        
-        <!-- Toast Container -->
-        <div id="toast-container"></div>
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Chargement de SYNERGIA v3.0...</p>
+        </div>
     </div>
 
-    <!-- Core Scripts -->
-    <script src="./src/js/core/config.js"></script>
-    <script src="./src/js/core/firebase.js"></script>
-    <script src="./src/js/core/router.js"></script>
-    <script src="./src/js/core/utils.js"></script>
-    
-    <!-- Managers -->
-    <script src="./src/js/managers/AuthManager.js"></script>
-    <script src="./src/js/managers/TeamManager.js"></script>
-    <script src="./src/js/managers/BadgingManager.js"></script>
-    <script src="./src/js/managers/ChatManager.js"></script>
-    <script src="./src/js/managers/PlanningManager.js"></script>
-    <script src="./src/js/managers/QuestManager.js"></script>
-    <script src="./src/js/managers/StoreManager.js"></script>
-    <script src="./src/js/managers/NotificationManager.js"></script>
-    
-    <!-- Components -->
-    <script src="./src/js/components/Navigation.js"></script>
-    <script src="./src/js/components/Modal.js"></script>
-    <script src="./src/js/components/Toast.js"></script>
-    <script src="./src/js/components/DataTable.js"></script>
-    <script src="./src/js/components/Chart.js"></script>
-    
-    <!-- Views -->
-    <script src="./src/js/views/Dashboard.js"></script>
-    <script src="./src/js/views/Team.js"></script>
-    <script src="./src/js/views/Badging.js"></script>
-    <script src="./src/js/views/Chat.js"></script>
-    <script src="./src/js/views/Planning.js"></script>
-    <script src="./src/js/views/Quests.js"></script>
-    <script src="./src/js/views/Store.js"></script>
-    <script src="./src/js/views/Settings.js"></script>
-    
-    <!-- App Initialization -->
-    <script src="./src/js/app.js"></script>
-    <script src="./src/js/main.js"></script>
+    <!-- Configuration Firebase inline -->
+    <script>
+        // Configuration Firebase - SYNERGIA
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+            authDomain: "synergia-app-f27e7.firebaseapp.com",
+            projectId: "synergia-app-f27e7",
+            storageBucket: "synergia-app-f27e7.firebasestorage.app",
+            messagingSenderId: "201912738922",
+            appId: "1:201912738922:web:2fcc1e49293bb632899613",
+            measurementId: "G-EGJ79SCMWX"
+        };
+
+        // Configuration générale
+        const APP_CONFIG = {
+            name: 'SYNERGIA v3.0',
+            version: '3.0.0',
+            environment: 'production',
+            debug: true // Pour voir les logs pendant la migration
+        };
+
+        window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+        window.APP_CONFIG = APP_CONFIG;
+    </script>
+
+    <!-- Service Firebase minimal -->
+    <script>
+        class FirebaseService {
+            constructor() {
+                this.app = null;
+                this.auth = null;
+                this.firestore = null;
+                this.isInitialized = false;
+            }
+
+            async initialize() {
+                try {
+                    console.log('🔥 Initialisation Firebase...');
+                    
+                    // Attendre que Firebase soit disponible
+                    await this.waitForFirebase();
+                    
+                    // Initialiser Firebase
+                    this.app = firebase.initializeApp(FIREBASE_CONFIG);
+                    this.auth = firebase.auth();
+                    this.firestore = firebase.firestore();
+                    
+                    // Analytics
+                    if (typeof firebase.analytics !== 'undefined') {
+                        this.analytics = firebase.analytics();
+                    }
+                    
+                    // Configuration de base
+                    await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    
+                    this.isInitialized = true;
+                    console.log('✅ Firebase initialisé');
+                    
+                    window.dispatchEvent(new CustomEvent('firebase:initialized'));
+                    
+                } catch (error) {
+                    console.error('❌ Erreur Firebase:', error);
+                    throw error;
+                }
+            }
+
+            waitForFirebase() {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 50;
+                    
+                    const check = () => {
+                        if (typeof firebase !== 'undefined') {
+                            resolve();
+                        } else if (attempts < maxAttempts) {
+                            attempts++;
+                            setTimeout(check, 100);
+                        } else {
+                            reject(new Error('Firebase non disponible'));
+                        }
+                    };
+                    
+                    check();
+                });
+            }
+
+            getAuth() {
+                return this.auth;
+            }
+
+            getFirestore() {
+                return this.firestore;
+            }
+        }
+
+        window.firebaseService = new FirebaseService();
+    </script>
+
+    <!-- Router minimal -->
+    <script>
+        class MinimalRouter {
+            constructor() {
+                this.currentPath = '/';
+            }
+
+            navigate(path) {
+                console.log('🧭 Navigation vers:', path);
+                window.location.hash = path;
+                this.currentPath = path;
+                this.render();
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                const hash = window.location.hash.slice(1) || '/';
+                
+                console.log('📄 Rendu de la page:', hash);
+                
+                switch(hash) {
+                    case '/':
+                    case '/dashboard':
+                        app.innerHTML = this.renderDashboard();
+                        break;
+                    case '/login':
+                        app.innerHTML = this.renderLogin();
+                        break;
+                    default:
+                        app.innerHTML = this.render404();
+                }
+            }
+
+            renderDashboard() {
+                return `
+                    <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+                        <h1>🚀 SYNERGIA v3.0 - Dashboard</h1>
+                        <div style="background: var(--glass-bg); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <h2>✅ Migration réussie !</h2>
+                            <p>La structure de base fonctionne. Prêt pour la suite de la migration.</p>
+                            <button onclick="router.navigate('/login')" class="btn btn-primary">
+                                Test Login
+                            </button>
+                        </div>
+                        
+                        <div style="background: var(--glass-bg); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <h3>📊 État Firebase</h3>
+                            <p>Connexion: <span id="firebase-status">🔄 Vérification...</span></p>
+                            <p>Utilisateur: <span id="user-status">🔄 Vérification...</span></p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderLogin() {
+                return `
+                    <div style="padding: 20px; max-width: 400px; margin: 100px auto;">
+                        <div style="background: var(--glass-bg); padding: 30px; border-radius: 10px; text-align: center;">
+                            <h1>🔐 Connexion</h1>
+                            <button onclick="testGoogleLogin()" class="btn btn-primary" style="width: 100%; margin: 10px 0;">
+                                Connexion Google
+                            </button>
+                            <button onclick="router.navigate('/dashboard')" class="btn" style="background: #666; color: white; width: 100%;">
+                                Retour Dashboard
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            render404() {
+                return `
+                    <div style="padding: 20px; text-align: center;">
+                        <h1>404 - Page non trouvée</h1>
+                        <button onclick="router.navigate('/dashboard')" class="btn btn-primary">
+                            Retour à l'accueil
+                        </button>
+                    </div>
+                `;
+            }
+
+            init() {
+                window.addEventListener('hashchange', () => this.render());
+                this.render();
+            }
+        }
+
+        window.router = new MinimalRouter();
+    </script>
+
+    <!-- Fonctions de test -->
+    <script>
+        async function testGoogleLogin() {
+            try {
+                console.log('🔐 Test de connexion Google...');
+                
+                if (!window.firebaseService.isInitialized) {
+                    alert('Firebase pas encore initialisé, patientez...');
+                    return;
+                }
+                
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+                
+                const result = await window.firebaseService.getAuth().signInWithPopup(provider);
+                console.log('✅ Connexion réussie:', result.user.email);
+                alert(`Connecté en tant que ${result.user.displayName}`);
+                
+                router.navigate('/dashboard');
+                
+            } catch (error) {
+                console.error('❌ Erreur de connexion:', error);
+                alert('Erreur de connexion: ' + error.message);
+            }
+        }
+
+        function updateStatus() {
+            const firebaseStatus = document.getElementById('firebase-status');
+            const userStatus = document.getElementById('user-status');
+            
+            if (firebaseStatus) {
+                firebaseStatus.textContent = window.firebaseService.isInitialized ? '✅ Connecté' : '❌ Déconnecté';
+            }
+            
+            if (userStatus) {
+                const user = window.firebaseService.getAuth()?.currentUser;
+                if (userStatus) {
+                    userStatus.textContent = user ? `✅ ${user.displayName || user.email}` : '❌ Non connecté';
+                }
+            }
+        }
+
+        // Mise à jour périodique du statut
+        setInterval(updateStatus, 1000);
+    </script>
+
+    <!-- Initialisation de l'app -->
+    <script>
+        async function initApp() {
+            try {
+                console.log('🚀 Initialisation de SYNERGIA v3.0...');
+                
+                // Initialiser Firebase
+                await window.firebaseService.initialize();
+                
+                // Initialiser le router
+                window.router.init();
+                
+                // Surveillance de l'authentification
+                window.firebaseService.getAuth().onAuthStateChanged((user) => {
+                    console.log('👤 État auth changé:', user ? user.email : 'Déconnecté');
+                    updateStatus();
+                });
+                
+                console.log('✅ SYNERGIA v3.0 initialisé !');
+                
+            } catch (error) {
+                console.error('❌ Erreur d\'initialisation:', error);
+                document.getElementById('app').innerHTML = `
+                    <div class="init-error">
+                        <div class="error-container">
+                            <h1>❌ Erreur d'initialisation</h1>
+                            <p>Une erreur est survenue lors du démarrage.</p>
+                            <details>
+                                <summary>Détails de l'erreur</summary>
+                                <pre>${error.message}\n${error.stack}</pre>
+                            </details>
+                            <button onclick="window.location.reload()" class="btn btn-primary">
+                                Recharger la page
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Démarrage automatique
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>

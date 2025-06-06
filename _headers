@@ -1,5 +1,85 @@
+# _headers - Configuration pour Netlify
+# Correction des problèmes CSP et configuration sécurisée pour SYNERGIA v3.0
+
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://content.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseapp.com https://*.cloudfunctions.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://content.googleapis.com https://firebaseinstallations.googleapis.com https://firebaseremoteconfig.googleapis.com https://firebaselogging-pa.googleapis.com https://*.google-analytics.com https://region1.google-analytics.com wss://*.firebaseio.com wss://*.firebaseapp.com; frame-src 'self' https://accounts.google.com https://content.googleapis.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://*.googleapis.com https://*.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self';
-  X-Frame-Options: SAMEORIGIN
+  # Content Security Policy corrigée
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  
+  # Headers de sécurité
+  X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  
+  # Cache Control
+  Cache-Control: public, max-age=3600
+  
+  # Compression
+  Content-Encoding: gzip
+
+# Fichiers CSS - Type MIME correct
+/*.css
+  Content-Type: text/css; charset=utf-8
+  Cache-Control: public, max-age=86400
+
+# Fichiers JavaScript
+/*.js
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: public, max-age=86400
+
+# Fichiers JSON
+/*.json
+  Content-Type: application/json; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+# Service Worker - pas de cache
+/sw.js
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Manifest PWA
+/manifest.json
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=86400
+
+# Images
+/*.png
+  Content-Type: image/png
+  Cache-Control: public, max-age=604800
+
+/*.jpg
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=604800
+
+/*.jpeg
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=604800
+
+/*.svg
+  Content-Type: image/svg+xml
+  Cache-Control: public, max-age=604800
+
+/*.ico
+  Content-Type: image/x-icon
+  Cache-Control: public, max-age=604800
+
+# Templates HTML
+/src/templates/*
+  Content-Type: text/html; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+# API Routes (si utilisées)
+/api/*
+  Cache-Control: no-cache
+  Content-Type: application/json; charset=utf-8
+
+# Page offline
+/offline.html
+  Cache-Control: public, max-age=86400
+
+# Configuration spéciale pour les modules CSS
+/src/styles/modules/*
+  Content-Type: text/css; charset=utf-8
+  Cache-Control: public, max-age=86400
+  X-Content-Type-Options: nosniff

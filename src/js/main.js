@@ -1,322 +1,382 @@
 /**
- * Point d'entrée principal de SYNERGIA v3.0
+ * Point d'entrée principal pour SYNERGIA v3.0
  * Fichier: src/js/main.js
  */
 
+// État global de l'application
+window.SYNERGIA = {
+    version: '3.0.4',
+    initialized: false,
+    modules: {},
+    config: null
+};
+
+/**
+ * Classe principale de l'application
+ */
 class SynergiaApp {
     constructor() {
-        this.isInitialized = false;
         this.modules = new Map();
+        this.isInitialized = false;
+        this.loadingSteps = [
+            'Configuration',
+            'Firebase',
+            'Authentification', 
+            'Équipe',
+            'Pointage',
+            'Router'
+        ];
+        this.currentStep = 0;
     }
 
     /**
      * Initialise l'application
      */
-    async init() {
+    async initialize() {
         try {
-            console.log('🚀 Initialisation de SYNERGIA v3.0...');
+            console.log('🚀 SYNERGIA v3.0 - Démarrage de l\'initialisation');
             
-            // 1. Initialisation Firebase
-            await this.initFirebase();
+            this.updateLoadingStatus('Chargement de la configuration...');
+            await this.loadConfiguration();
             
-            // 2. Initialisation du router
-            await this.initRouter();
+            this.updateLoadingStatus('Initialisation Firebase...');
+            await this.initializeFirebase();
             
-            // 3. Initialisation des managers
-            await this.initManagers();
+            this.updateLoadingStatus('Configuration de l\'authentification...');
+            await this.initializeAuth();
             
-            // 4. Initialisation de l'interface
-            await this.initUI();
+            this.updateLoadingStatus('Chargement des managers...');
+            await this.initializeManagers();
             
-            // 5. Démarrage de l'application
-            await this.start();
+            this.updateLoadingStatus('Démarrage du router...');
+            await this.initializeRouter();
+            
+            this.updateLoadingStatus('Finalisation...');
+            await this.finalizeInitialization();
             
             this.isInitialized = true;
-            console.log('✅ SYNERGIA v3.0 initialisé avec succès');
+            console.log('✅ SYNERGIA v3.0 - Initialisation terminée avec succès');
             
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation:', error);
-            this.showInitError(error);
+            this.showError(error);
         }
+    }
+
+    /**
+     * Charge la configuration
+     */
+    async loadConfiguration() {
+        if (!window.FIREBASE_CONFIG) {
+            throw new Error('Configuration Firebase manquante');
+        }
+        
+        window.SYNERGIA.config = {
+            firebase: window.FIREBASE_CONFIG,
+            app: window.APP_CONFIG || {}
+        };
+        
+        console.log('✅ Configuration chargée');
     }
 
     /**
      * Initialise Firebase
      */
-    async initFirebase() {
-        console.log('🔥 Initialisation Firebase...');
+    async initializeFirebase() {
+        if (typeof FirebaseService === 'undefined') {
+            throw new Error('FirebaseService non disponible');
+        }
         
-        // Attendre que les scripts Firebase soient chargés
-        await this.waitForFirebase();
+        if (!window.firebaseService) {
+            window.firebaseService = new FirebaseService();
+        }
         
-        // Initialiser le service Firebase
-        await firebaseService.initialize(FIREBASE_CONFIG);
+        await window.firebaseService.waitForInitialization();
+        this.modules.set('firebase', window.firebaseService);
         
-        console.log('✅ Firebase initialisé');
+        console.log('✅ Firebase Service prêt');
     }
 
     /**
-     * Attend que Firebase soit disponible
+     * Initialise l'authentification
      */
-    waitForFirebase() {
-        return new Promise((resolve, reject) => {
-            const checkFirebase = () => {
-                if (typeof firebase !== 'undefined') {
-                    resolve();
-                } else {
-                    setTimeout(checkFirebase, 100);
-                }
-            };
-            
-            checkFirebase();
-            
-            // Timeout après 10 secondes
-            setTimeout(() => {
-                reject(new Error('Firebase non disponible après 10 secondes'));
-            }, 10000);
-        });
+    async initializeAuth() {
+        if (typeof AuthManager === 'undefined') {
+            console.warn('⚠️ AuthManager non disponible');
+            return;
+        }
+        
+        window.authManager = new AuthManager();
+        await window.authManager.init();
+        this.modules.set('auth', window.authManager);
+        
+        console.log('✅ Auth Manager prêt');
     }
 
     /**
-     * Initialise le système de routing
+     * Initialise les managers
      */
-    async initRouter() {
-        console.log('🧭 Initialisation du router...');
+    async initializeManagers() {
+        // Team Manager
+        if (typeof TeamManager !== 'undefined') {
+            window.teamManager = new TeamManager();
+            this.modules.set('team', window.teamManager);
+            console.log('✅ Team Manager prêt');
+        } else {
+            console.warn('⚠️ TeamManager non disponible');
+        }
         
-        // Middleware d'authentification
-        router.use(async (route) => {
-            // Vérifier si la route nécessite une authentification
-            if (route.requireAuth && !this.isUserAuthenticated()) {
-                router.navigate('/login', { replace: true });
-                return false;
+        // Badging Manager
+        if (typeof BadgingManager !== 'undefined') {
+            window.badgingManager = new BadgingManager();
+            this.modules.set('badging', window.badgingManager);
+            console.log('✅ Badging Manager prêt');
+        } else {
+            console.warn('⚠️ BadgingManager non disponible');
+        }
+        
+        // Autres managers optionnels
+        if (typeof ChatManager !== 'undefined') {
+            window.chatManager = new ChatManager();
+            this.modules.set('chat', window.chatManager);
+            console.log('✅ Chat Manager prêt');
+        }
+        
+        if (typeof PlanningManager !== 'undefined') {
+            window.planningManager = new PlanningManager();
+            this.modules.set('planning', window.planningManager);
+            console.log('✅ Planning Manager prêt');
+        }
+        
+        if (typeof NotificationManager !== 'undefined') {
+            window.notificationManager = new NotificationManager();
+            this.modules.set('notifications', window.notificationManager);
+            console.log('✅ Notification Manager prêt');
+        }
+        
+        if (typeof QuestManager !== 'undefined') {
+            window.questManager = new QuestManager();
+            this.modules.set('quests', window.questManager);
+            console.log('✅ Quest Manager prêt');
+        }
+    }
+
+    /**
+     * Initialise le router
+     */
+    async initializeRouter() {
+        if (typeof Router === 'undefined') {
+            throw new Error('Router non disponible');
+        }
+        
+        window.router = new Router();
+        this.modules.set('router', window.router);
+        
+        console.log('✅ Router prêt');
+    }
+
+    /**
+     * Finalise l'initialisation
+     */
+    async finalizeInitialization() {
+        // Configurer les gestionnaires d'événements globaux
+        this.setupGlobalEventHandlers();
+        
+        // Sauvegarder les modules dans SYNERGIA global
+        window.SYNERGIA.modules = Object.fromEntries(this.modules);
+        window.SYNERGIA.initialized = true;
+        
+        // Émettre l'événement d'initialisation terminée
+        window.dispatchEvent(new CustomEvent('synergia:ready', {
+            detail: { 
+                version: window.SYNERGIA.version,
+                modules: Array.from(this.modules.keys())
             }
-            return true;
-        });
-
-        // Définition des routes
-        this.defineRoutes();
+        }));
         
-        console.log('✅ Router initialisé');
+        console.log('🎉 SYNERGIA v3.0 prêt à l\'utilisation');
     }
 
     /**
-     * Définit toutes les routes de l'application
+     * Configure les gestionnaires d'événements globaux
      */
-    defineRoutes() {
-        // Route d'accueil
-        router.addRoute('/', {
-            title: 'Accueil',
-            component: () => this.getModule('Dashboard').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Dashboard').init()
+    setupGlobalEventHandlers() {
+        // Gestion des erreurs globales
+        window.addEventListener('error', (e) => {
+            console.error('❌ Erreur JavaScript globale:', e.error);
+            this.handleGlobalError(e.error);
         });
 
-        // Dashboard
-        router.addRoute('/dashboard', {
-            title: 'Tableau de bord',
-            component: () => this.getModule('Dashboard').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Dashboard').init()
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('❌ Promesse rejetée:', e.reason);
+            this.handleGlobalError(e.reason);
         });
 
-        // Équipe
-        router.addRoute('/team', {
-            title: 'Gestion d\'équipe',
-            component: () => this.getModule('Team').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Team').init()
-        });
-
-        // Badging
-        router.addRoute('/badging', {
-            title: 'Pointage',
-            component: () => this.getModule('Badging').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Badging').init()
-        });
-
-        // Chat
-        router.addRoute('/chat', {
-            title: 'Messages',
-            component: () => this.getModule('Chat').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Chat').init()
-        });
-
-        // Planning
-        router.addRoute('/planning', {
-            title: 'Planning',
-            component: () => this.getModule('Planning').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Planning').init()
-        });
-
-        // Quêtes
-        router.addRoute('/quests', {
-            title: 'Quêtes',
-            component: () => this.getModule('Quests').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Quests').init()
-        });
-
-        // Boutique
-        router.addRoute('/store', {
-            title: 'Boutique',
-            component: () => this.getModule('Store').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Store').init()
-        });
-
-        // Paramètres
-        router.addRoute('/settings', {
-            title: 'Paramètres',
-            component: () => this.getModule('Settings').render(),
-            requireAuth: true,
-            onLoad: () => this.getModule('Settings').init()
-        });
-
-        // Authentification
-        router.addRoute('/login', {
-            title: 'Connexion',
-            component: () => this.getModule('Auth').renderLogin(),
-            requireAuth: false,
-            onLoad: () => this.getModule('Auth').initLogin()
-        });
-
-        // Pages d'erreur
-        router.addRoute('/404', {
-            title: 'Page non trouvée',
-            component: () => '<div class="error-page"><h1>404 - Page non trouvée</h1></div>',
-            requireAuth: false
-        });
-
-        router.addRoute('/error', {
-            title: 'Erreur',
-            component: () => '<div class="error-page"><h1>Une erreur est survenue</h1></div>',
-            requireAuth: false
-        });
-    }
-
-    /**
-     * Initialise tous les managers
-     */
-    async initManagers() {
-        console.log('👥 Initialisation des managers...');
-        
-        // Attendre que Firebase soit prêt
-        await firebaseService.waitForInitialization();
-        
-        // Initialisation des managers dans l'ordre de dépendance
-        this.modules.set('Auth', new AuthManager());
-        this.modules.set('Team', new TeamManager());
-        this.modules.set('Badging', new BadgingManager());
-        this.modules.set('Chat', new ChatManager());
-        this.modules.set('Planning', new PlanningManager());
-        this.modules.set('Quest', new QuestManager());
-        this.modules.set('Store', new StoreManager());
-        this.modules.set('Notification', new NotificationManager());
-        
-        // Initialisation des vues
-        this.modules.set('Dashboard', new Dashboard());
-        this.modules.set('Settings', new Settings());
-        
-        console.log('✅ Managers initialisés');
-    }
-
-    /**
-     * Initialise l'interface utilisateur
-     */
-    async initUI() {
-        console.log('🎨 Initialisation de l\'interface...');
-        
-        // Initialisation de la navigation
-        const navigation = new Navigation();
-        await navigation.init();
-        
-        // Initialisation des composants globaux
-        window.Modal = new Modal();
-        window.Toast = new Toast();
-        
-        console.log('✅ Interface initialisée');
-    }
-
-    /**
-     * Démarre l'application
-     */
-    async start() {
-        console.log('🎯 Démarrage de l\'application...');
-        
-        // Vérification de l'état d'authentification
-        firebaseService.authUtils.onAuthStateChanged((user) => {
-            if (user) {
-                console.log('👤 Utilisateur connecté:', user.email);
-                // Rediriger vers le dashboard si on est sur login
-                if (window.location.hash === '#/login') {
-                    router.navigate('/dashboard');
-                }
+        // Gestion de la visibilité de la page
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.onPageHidden();
             } else {
-                console.log('👤 Utilisateur non connecté');
-                // Rediriger vers login si pas connecté
-                if (!window.location.hash.includes('/login')) {
-                    router.navigate('/login');
-                }
+                this.onPageVisible();
             }
         });
-        
-        // Démarrage initial du router
-        if (!window.location.hash) {
-            router.navigate('/dashboard');
+
+        // Gestion avant fermeture
+        window.addEventListener('beforeunload', (e) => {
+            this.onBeforeUnload(e);
+        });
+
+        console.log('✅ Gestionnaires d\'événements globaux configurés');
+    }
+
+    /**
+     * Met à jour le statut de chargement
+     */
+    updateLoadingStatus(message) {
+        const loadingText = document.querySelector('.loading-container p');
+        if (loadingText) {
+            loadingText.textContent = message;
         }
         
-        console.log('✅ Application démarrée');
+        console.log(`📋 ${message}`);
+        this.currentStep++;
     }
 
     /**
-     * Récupère un module/manager
-     * @param {string} name 
-     * @returns {Object}
+     * Affiche une erreur
      */
-    getModule(name) {
-        const module = this.modules.get(name);
-        if (!module) {
-            throw new Error(`Module '${name}' non trouvé`);
-        }
-        return module;
-    }
-
-    /**
-     * Vérifie si l'utilisateur est authentifié
-     * @returns {boolean}
-     */
-    isUserAuthenticated() {
-        return firebaseService.authUtils.currentUser() !== null;
-    }
-
-    /**
-     * Affiche une erreur d'initialisation
-     * @param {Error} error 
-     */
-    showInitError(error) {
-        document.body.innerHTML = `
-            <div class="init-error">
-                <div class="error-container">
-                    <h1>❌ Erreur d'initialisation</h1>
-                    <p>Une erreur est survenue lors du démarrage de l'application.</p>
-                    <details>
-                        <summary>Détails de l'erreur</summary>
-                        <pre>${error.message}</pre>
-                    </details>
-                    <button onclick="window.location.reload()" class="btn btn-primary">
-                        Recharger la page
-                    </button>
+    showError(error) {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+            <div class="container">
+                <div class="card" style="text-align: center; margin-top: 50px; border-color: var(--danger-color);">
+                    <h2 style="color: var(--danger-color);">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Erreur d'initialisation
+                    </h2>
+                    <p style="margin: 20px 0;">Une erreur s'est produite lors du démarrage de l'application.</p>
+                    <div style="background: var(--glass-bg-strong); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left;">
+                        <strong>Détails :</strong><br>
+                        <code style="color: var(--danger-color);">${error.message}</code>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <button onclick="location.reload()" class="btn btn-primary">
+                            <i class="fas fa-sync"></i>
+                            Recharger l'application
+                        </button>
+                        <button onclick="app.showDebugInfo()" class="btn btn-secondary" style="margin-left: 10px;">
+                            <i class="fas fa-bug"></i>
+                            Informations de debug
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
     }
+
+    /**
+     * Affiche les informations de debug
+     */
+    showDebugInfo() {
+        const debugInfo = {
+            version: window.SYNERGIA.version,
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            modulesLoaded: Array.from(this.modules.keys()),
+            modulesAvailable: {
+                FirebaseService: typeof FirebaseService !== 'undefined',
+                AuthManager: typeof AuthManager !== 'undefined',
+                TeamManager: typeof TeamManager !== 'undefined',
+                BadgingManager: typeof BadgingManager !== 'undefined',
+                Router: typeof Router !== 'undefined'
+            },
+            firebase: {
+                available: typeof firebase !== 'undefined',
+                initialized: this.modules.has('firebase')
+            },
+            errors: this.errors || [],
+            timestamp: new Date().toISOString()
+        };
+
+        console.log('🐛 SYNERGIA Debug Info:', debugInfo);
+        
+        // Afficher dans une fenêtre modal
+        alert(`Debug Info exportées dans la console.\n\nVersion: ${debugInfo.version}\nModules: ${debugInfo.modulesLoaded.join(', ')}`);
+    }
+
+    /**
+     * Gestion des erreurs globales
+     */
+    handleGlobalError(error) {
+        if (!this.errors) this.errors = [];
+        
+        this.errors.push({
+            error: error.toString(),
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+        });
+
+        // Garder seulement les 10 dernières erreurs
+        if (this.errors.length > 10) {
+            this.errors = this.errors.slice(-10);
+        }
+    }
+
+    /**
+     * Quand la page devient cachée
+     */
+    onPageHidden() {
+        // Arrêter les timers si nécessaire
+        if (window.badgingManager && typeof window.badgingManager.stopClock === 'function') {
+            window.badgingManager.stopClock();
+        }
+        
+        console.log('👁️ Page cachée - timers arrêtés');
+    }
+
+    /**
+     * Quand la page redevient visible
+     */
+    onPageVisible() {
+        // Redémarrer les timers si nécessaire
+        if (window.badgingManager && typeof window.badgingManager.startClock === 'function') {
+            window.badgingManager.startClock();
+        }
+        
+        console.log('👁️ Page visible - timers redémarrés');
+    }
+
+    /**
+     * Avant fermeture de la page
+     */
+    onBeforeUnload(e) {
+        // Nettoyer les resources si nécessaire
+        this.modules.forEach(module => {
+            if (typeof module.cleanup === 'function') {
+                module.cleanup();
+            }
+        });
+    }
+
+    /**
+     * API publique pour vérifier l'état
+     */
+    getStatus() {
+        return {
+            initialized: this.isInitialized,
+            modules: Array.from(this.modules.keys()),
+            version: window.SYNERGIA.version
+        };
+    }
 }
 
-// Initialisation automatique quand le DOM est prêt
+// Initialisation automatique
 document.addEventListener('DOMContentLoaded', async () => {
     window.app = new SynergiaApp();
-    await window.app.init();
+    await window.app.initialize();
 });
+
+// Export pour les tests
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SynergiaApp;
+}

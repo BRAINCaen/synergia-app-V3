@@ -1,439 +1,391 @@
-<!-- src/templates/timeclock.html -->
-<div id="timeclock-page" class="page-content">
-    <!-- Header avec raccourcis clavier -->
-    <div class="page-header">
-        <h1>💼 Pointage</h1>
-        <div class="shortcuts-info">
-            <small>
-                Raccourcis: Ctrl+I (Arrivée), Ctrl+O (Sortie), Ctrl+P (Pause), Ctrl+E (Export)
-            </small>
-        </div>
+<!-- src/templates/timeclock.html - Template de pointage SYNERGIA v3.0 -->
+
+<div class="timeclock-page">
+  <!-- En-tête avec horloge -->
+  <div class="clock-widget">
+    <div class="clock-display">
+      <div id="current-time" class="current-time">--:--:--</div>
+      <div id="current-date" class="current-date">Chargement...</div>
     </div>
-
-    <!-- En-tête avec statut actuel -->
-    <div class="timeclock-header">
-        <div class="current-status" id="current-status">
-            <div class="status-icon" id="status-icon">⏰</div>
-            <div class="status-info">
-                <h2 id="status-title">Non pointé</h2>
-                <p id="status-subtitle">Cliquez pour pointer votre arrivée</p>
-                <div id="current-session-timer" class="session-timer" style="display: none;">
-                    <span id="work-timer">00:00</span>
-                    <span id="break-indicator" style="display: none;">📱 En pause</span>
-                </div>
-            </div>
-        </div>
+    
+    <div class="status-section">
+      <div id="current-status" class="current-status">Initialisation...</div>
+      <div id="work-timer" class="work-timer">00:00:00</div>
+      <div id="break-indicator" class="break-indicator" style="display: none;">
+        <i class="fas fa-pause"></i> En pause
+      </div>
     </div>
-
-    <!-- Actions de pointage -->
-    <div class="timeclock-actions">
-        <!-- Pointage principal -->
-        <div class="main-actions">
-            <button id="clock-in-btn" class="action-btn primary" style="display: none;">
-                <i class="icon">🕐</i>
-                <span>Pointer l'arrivée</span>
-                <small>Ctrl+I</small>
-            </button>
-            
-            <button id="clock-out-btn" class="action-btn danger" style="display: none;">
-                <i class="icon">🏠</i>
-                <span>Pointer la sortie</span>
-                <small>Ctrl+O</small>
-            </button>
-            
-            <button id="training-btn" class="action-btn secondary">
-                <i class="icon">📚</i>
-                <span>En formation</span>
-                <small>7h auto</small>
-            </button>
-        </div>
-
-        <!-- Actions de pause -->
-        <div class="break-actions" id="break-actions" style="display: none;">
-            <button id="start-break-btn" class="action-btn secondary">
-                <i class="icon">⏸️</i>
-                <span>Commencer une pause</span>
-                <small>Ctrl+P</small>
-            </button>
-            
-            <button id="end-break-btn" class="action-btn success" style="display: none;">
-                <i class="icon">▶️</i>
-                <span>Terminer la pause</span>
-                <small>Ctrl+P</small>
-            </button>
-        </div>
-
-        <!-- Options distanciel -->
-        <div class="remote-options">
-            <label class="checkbox-container">
-                <input type="checkbox" id="remote-work-checkbox">
-                <span class="checkmark"></span>
-                Travail à distance
-            </label>
-            <button id="location-btn" class="icon-btn" title="Enregistrer la localisation actuelle">📍</button>
-            <div id="location-status" class="location-status" style="display: none;">
-                <span class="location-text">📍 Position enregistrée</span>
-            </div>
-        </div>
+    
+    <!-- Boutons de pointage principaux -->
+    <div class="badge-buttons">
+      <button id="check-in-btn" class="btn btn-success btn-lg" title="Ctrl+I">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Entrée</span>
+      </button>
+      
+      <button id="check-out-btn" class="btn btn-danger btn-lg" disabled title="Ctrl+O">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Sortie</span>
+      </button>
     </div>
+    
+    <!-- Boutons de pause -->
+    <div class="break-buttons">
+      <button id="break-start-btn" class="btn btn-warning btn-lg" disabled title="Ctrl+P">
+        <i class="fas fa-pause"></i>
+        <span>Pause</span>
+      </button>
+      
+      <button id="break-end-btn" class="btn btn-info btn-lg" disabled style="display: none;" title="Ctrl+P">
+        <i class="fas fa-play"></i>
+        <span>Reprise</span>
+      </button>
+    </div>
+  </div>
 
-    <!-- Zone de commentaires -->
-    <div class="comment-section" id="comment-section" style="display: none;">
-        <h3 id="comment-title">Commentaire</h3>
+  <!-- Section commentaires et options -->
+  <div class="card timeclock-options">
+    <div class="card-header">
+      <h3><i class="fas fa-cog"></i> Options de pointage</h3>
+    </div>
+    
+    <div class="card-body">
+      <!-- Zone de commentaire -->
+      <div class="form-group">
+        <label for="comment-input" class="form-label">
+          <i class="fas fa-comment"></i> Commentaire (optionnel)
+        </label>
         <textarea 
-            id="comment-input" 
-            placeholder="Ajouter un commentaire (optionnel)..." 
-            rows="3"
-            maxlength="500"
+          id="comment-input" 
+          class="form-control" 
+          rows="3" 
+          placeholder="Ajoutez un commentaire à votre pointage..."
+          maxlength="500"
         ></textarea>
-        <div class="character-count">
-            <span id="char-count">0</span>/500 caractères
+        <div class="form-help">
+          <span id="comment-counter">0</span>/500 caractères
         </div>
-        <div class="comment-actions">
-            <button id="comment-cancel" class="btn secondary">
-                Annuler <small>Échap</small>
-            </button>
-            <button id="comment-confirm" class="btn primary">
-                Confirmer <small>Entrée</small>
-            </button>
+      </div>
+      
+      <!-- Options de travail -->
+      <div class="work-options">
+        <div class="option-item">
+          <label class="checkbox-container">
+            <input type="checkbox" id="remote-work-checkbox">
+            <span class="checkmark"></span>
+            <span class="option-text">
+              <i class="fas fa-home"></i> Travail à distance
+            </span>
+          </label>
         </div>
+        
+        <div class="option-item">
+          <label class="checkbox-container">
+            <input type="checkbox" id="training-checkbox">
+            <span class="checkmark"></span>
+            <span class="option-text">
+              <i class="fas fa-graduation-cap"></i> Formation
+            </span>
+          </label>
+        </div>
+        
+        <div class="option-item">
+          <label class="checkbox-container">
+            <input type="checkbox" id="overtime-checkbox">
+            <span class="checkmark"></span>
+            <span class="option-text">
+              <i class="fas fa-clock"></i> Heures supplémentaires
+            </span>
+          </label>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Statistiques du jour -->
-    <div class="daily-stats">
-        <h3>📊 Aujourd'hui</h3>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">🕒</div>
-                <div class="stat-value" id="today-work-time">00:00</div>
-                <div class="stat-label">Temps travaillé</div>
-                <div class="stat-target">Objectif: 8h00</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⏸️</div>
-                <div class="stat-value" id="today-break-time">00:00</div>
-                <div class="stat-label">Temps pause</div>
-                <div class="stat-target">Recommandé: 1h00</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⏰</div>
-                <div class="stat-value" id="today-overtime">00:00</div>
-                <div class="stat-label">Heures sup.</div>
-                <div class="stat-progress" id="overtime-progress"></div>
-            </div>
-        </div>
+  <!-- Statistiques du jour -->
+  <div class="card daily-stats">
+    <div class="card-header">
+      <h3><i class="fas fa-chart-line"></i> Statistiques du jour</h3>
+      <button id="refresh-stats-btn" class="btn btn-sm btn-secondary" title="Actualiser">
+        <i class="fas fa-sync-alt"></i>
+      </button>
     </div>
-
-    <!-- Historique -->
-    <div class="timeclock-history">
-        <div class="history-header">
-            <h3>📈 Historique des pointages</h3>
-            <div class="history-controls">
-                <select id="period-select">
-                    <option value="week">Cette semaine</option>
-                    <option value="month">Ce mois</option>
-                    <option value="quarter">Ce trimestre</option>
-                    <option value="custom">Période personnalisée</option>
-                </select>
-                <button id="refresh-btn" class="btn secondary" title="Actualiser">
-                    🔄
-                </button>
-                <button id="export-btn" class="btn secondary">
-                    📥 Exporter <small>Ctrl+E</small>
-                </button>
-            </div>
+    
+    <div class="card-body">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-clock text-primary"></i>
+          </div>
+          <div class="stat-content">
+            <div id="total-work-time" class="stat-value">00:00:00</div>
+            <div class="stat-label">Temps travaillé</div>
+          </div>
         </div>
-
-        <!-- Filtres personnalisés -->
-        <div class="custom-period" id="custom-period" style="display: none;">
-            <div class="date-inputs">
-                <label>Du:</label>
-                <input type="date" id="start-date">
-                <label>Au:</label>
-                <input type="date" id="end-date">
-                <button id="apply-filter" class="btn primary">Appliquer</button>
-                <button id="reset-filter" class="btn secondary">Réinitialiser</button>
-            </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-pause text-warning"></i>
+          </div>
+          <div class="stat-content">
+            <div id="total-break-time" class="stat-value">00:00:00</div>
+            <div class="stat-label">Temps de pause</div>
+          </div>
         </div>
-
-        <!-- Résumé de la période -->
-        <div class="period-summary">
-            <div class="summary-header">
-                <h4>📋 Résumé de la période</h4>
-                <div class="summary-actions">
-                    <button id="summary-details" class="btn-link">Voir détails</button>
-                </div>
-            </div>
-            <div class="summary-stats">
-                <div class="summary-item">
-                    <span class="summary-icon">⏱️</span>
-                    <span class="summary-label">Temps total:</span>
-                    <span class="summary-value" id="period-total-time">00:00</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">📅</span>
-                    <span class="summary-label">Jours travaillés:</span>
-                    <span class="summary-value" id="period-days-worked">0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">⏰</span>
-                    <span class="summary-label">Heures sup.:</span>
-                    <span class="summary-value" id="period-overtime">00:00</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">📚</span>
-                    <span class="summary-label">Jours formation:</span>
-                    <span class="summary-value" id="period-training-days">0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">📱</span>
-                    <span class="summary-label">Jours distanciel:</span>
-                    <span class="summary-value" id="period-remote-days">0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-icon">🕐</span>
-                    <span class="summary-label">Retards:</span>
-                    <span class="summary-value" id="period-late-count">0</span>
-                </div>
-            </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-calendar-check text-success"></i>
+          </div>
+          <div class="stat-content">
+            <div id="expected-hours" class="stat-value">08:00:00</div>
+            <div class="stat-label">Heures prévues</div>
+          </div>
         </div>
-
-        <!-- Filtres et recherche -->
-        <div class="entries-filters">
-            <div class="filter-group">
-                <input 
-                    type="text" 
-                    id="search-entries" 
-                    placeholder="Rechercher dans les commentaires..."
-                    class="search-input"
-                >
-                <button id="clear-search" class="btn-icon" title="Effacer">❌</button>
-            </div>
-            <div class="filter-toggles">
-                <label class="toggle-filter">
-                    <input type="checkbox" id="filter-remote" checked>
-                    <span>📱 Distanciel</span>
-                </label>
-                <label class="toggle-filter">
-                    <input type="checkbox" id="filter-training" checked>
-                    <span>📚 Formation</span>
-                </label>
-                <label class="toggle-filter">
-                    <input type="checkbox" id="filter-late" checked>
-                    <span>⏰ Retards</span>
-                </label>
-            </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-percentage text-info"></i>
+          </div>
+          <div class="stat-content">
+            <div id="completion-rate" class="stat-value">0%</div>
+            <div class="stat-label">Progression</div>
+          </div>
         </div>
-
-        <!-- Liste des entrées -->
-        <div class="entries-container">
-            <div class="entries-loading" id="entries-loading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>Chargement des données...</p>
-            </div>
-            <div class="entries-list" id="entries-list">
-                <!-- Les entrées seront chargées ici -->
-            </div>
-            <div class="entries-empty" id="entries-empty" style="display: none;">
-                <div class="empty-icon">📭</div>
-                <p>Aucun pointage trouvé pour cette période</p>
-                <button id="create-first-entry" class="btn primary">Faire mon premier pointage</button>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="entries-pagination" id="entries-pagination" style="display: none;">
-            <button id="prev-page" class="btn secondary">← Précédent</button>
-            <span id="page-info">Page 1 sur 1</span>
-            <button id="next-page" class="btn secondary">Suivant →</button>
-        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Modal d'export -->
-    <div id="export-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>📥 Exporter les données</h3>
-                <button class="modal-close" id="export-modal-close">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="export-options">
-                    <div class="form-group">
-                        <label>Format d'export:</label>
-                        <select id="export-format">
-                            <option value="csv">📊 CSV (Excel, Calc)</option>
-                            <option value="json">💾 JSON (Données brutes)</option>
-                            <option value="pdf">📄 PDF (Rapport)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="export-period">
-                    <div class="form-group">
-                        <label>Période à exporter:</label>
-                        <div class="date-range">
-                            <input type="date" id="export-start-date">
-                            <span>à</span>
-                            <input type="date" id="export-end-date">
-                        </div>
-                    </div>
-                </div>
-                <div class="export-options-advanced">
-                    <h4>Options avancées</h4>
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="export-include-breaks" checked>
-                        <span>Inclure le détail des pauses</span>
-                    </label>
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="export-include-comments" checked>
-                        <span>Inclure les commentaires</span>
-                    </label>
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="export-include-location">
-                        <span>Inclure les données de localisation</span>
-                    </label>
-                </div>
-                <div class="export-preview">
-                    <h4>Aperçu de l'export</h4>
-                    <div id="export-summary">
-                        <p><strong>Période:</strong> <span id="export-period-text">-</span></p>
-                        <p><strong>Nombre d'entrées:</strong> <span id="export-entries-count">0</span></p>
-                        <p><strong>Taille estimée:</strong> <span id="export-size-estimate">-</span></p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="export-cancel" class="btn secondary">Annuler</button>
-                <button id="export-download" class="btn primary">
-                    <span class="btn-text">Télécharger</span>
-                    <span class="btn-loading" style="display: none;">⏳ Génération...</span>
-                </button>
-            </div>
-        </div>
+  <!-- Actions rapides -->
+  <div class="card quick-actions">
+    <div class="card-header">
+      <h3><i class="fas fa-bolt"></i> Actions rapides</h3>
     </div>
+    
+    <div class="card-body">
+      <div class="action-buttons">
+        <button id="view-history-btn" class="btn btn-outline-primary">
+          <i class="fas fa-history"></i>
+          Historique
+        </button>
+        
+        <button id="export-data-btn" class="btn btn-outline-secondary">
+          <i class="fas fa-download"></i>
+          Exporter
+        </button>
+        
+        <button id="settings-btn" class="btn btn-outline-info">
+          <i class="fas fa-cog"></i>
+          Paramètres
+        </button>
+        
+        <button id="help-btn" class="btn btn-outline-warning" title="Ctrl+H">
+          <i class="fas fa-question-circle"></i>
+          Aide
+        </button>
+      </div>
+    </div>
+  </div>
 
-    <!-- Modal de confirmation admin -->
-    <div id="admin-edit-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>✏️ Modifier le pointage (Admin)</h3>
-                <button class="modal-close" id="admin-modal-close">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="admin-warning">
-                    ⚠️ Cette action est réservée aux administrateurs et sera tracée dans les logs.
-                </div>
-                <div class="form-group">
-                    <label for="admin-clock-in">Heure d'arrivée:</label>
-                    <input type="datetime-local" id="admin-clock-in" required>
-                </div>
-                <div class="form-group">
-                    <label for="admin-clock-out">Heure de sortie:</label>
-                    <input type="datetime-local" id="admin-clock-out">
-                    <small>Laisser vide si le pointage est toujours en cours</small>
-                </div>
-                <div class="form-group">
-                    <label for="admin-comment">Motif de la modification: *</label>
-                    <textarea 
-                        id="admin-comment" 
-                        rows="3" 
-                        placeholder="Expliquez la raison de cette modification..."
-                        required
-                        maxlength="500"
-                    ></textarea>
-                    <small>Ce commentaire sera visible dans l'historique des modifications</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="admin-cancel" class="btn secondary">Annuler</button>
-                <button id="admin-save" class="btn danger">
-                    💾 Sauvegarder les modifications
-                </button>
-            </div>
-        </div>
-    </div>
+  <!-- Zone de notifications -->
+  <div id="timeclock-notifications" class="notifications-zone"></div>
 
-    <!-- Modal de détails d'une entrée -->
-    <div id="entry-details-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="entry-details-title">📋 Détails du pointage</h3>
-                <button class="modal-close" id="entry-details-close">×</button>
-            </div>
-            <div class="modal-body" id="entry-details-content">
-                <!-- Contenu généré dynamiquement -->
-            </div>
-            <div class="modal-footer">
-                <button id="entry-details-close-btn" class="btn primary">Fermer</button>
-            </div>
-        </div>
+  <!-- Indicateur de connexion -->
+  <div id="connection-status" class="connection-status">
+    <div class="status-indicator">
+      <i class="fas fa-wifi"></i>
+      <span id="connection-text">Connexion...</span>
     </div>
+  </div>
 </div>
 
-<!-- Template pour les entrées d'historique -->
-<template id="entry-template">
-    <div class="entry-item" data-entry-id="">
-        <div class="entry-header">
-            <div class="entry-date-section">
-                <div class="entry-date"></div>
-                <div class="entry-day"></div>
-            </div>
-            <div class="entry-badges">
-                <span class="badge remote" style="display: none;">📱 Distanciel</span>
-                <span class="badge training" style="display: none;">📚 Formation</span>
-                <span class="badge late" style="display: none;">⏰ Retard</span>
-                <span class="badge modified" style="display: none;">✏️ Modifié</span>
-            </div>
-            <div class="entry-summary">
-                <span class="entry-times">
-                    <span class="clock-in-time"></span> → <span class="clock-out-time"></span>
-                </span>
-                <span class="entry-duration"></span>
-            </div>
-            <div class="entry-actions">
-                <button class="details-btn" title="Voir les détails">👁️</button>
-                <button class="admin-edit-btn" style="display: none;" title="Modifier (Admin)">✏️</button>
-            </div>
-        </div>
-        <div class="entry-details" style="display: none;">
-            <div class="details-grid">
-                <div class="detail-item">
-                    <strong>🕐 Arrivée:</strong>
-                    <span class="clock-in-detail"></span>
-                </div>
-                <div class="detail-item">
-                    <strong>🏠 Sortie:</strong>
-                    <span class="clock-out-detail"></span>
-                </div>
-                <div class="detail-item">
-                    <strong>⏱️ Travaillé:</strong>
-                    <span class="work-duration"></span>
-                </div>
-                <div class="detail-item">
-                    <strong>⏸️ Pauses:</strong>
-                    <span class="break-duration"></span>
-                </div>
-            </div>
-            <div class="comments-section" style="display: none;">
-                <div class="comment-in"></div>
-                <div class="comment-out"></div>
-            </div>
-            <div class="breaks-section" style="display: none;">
-                <strong>📋 Détail des pauses:</strong>
-                <div class="breaks-list"></div>
-            </div>
-            <div class="admin-info" style="display: none;">
-                <div class="admin-comment"></div>
-                <div class="admin-modified-by"></div>
-            </div>
-        </div>
-    </div>
-</template>
+<!-- Scripts pour l'interactivité du template -->
+<script>
+(function() {
+  'use strict';
+  
+  // Compteur de caractères pour le commentaire
+  const commentInput = document.getElementById('comment-input');
+  const commentCounter = document.getElementById('comment-counter');
+  
+  if (commentInput && commentCounter) {
+    commentInput.addEventListener('input', function() {
+      const length = this.value.length;
+      commentCounter.textContent = length;
+      
+      if (length > 450) {
+        commentCounter.style.color = '#dc3545';
+      } else if (length > 400) {
+        commentCounter.style.color = '#ffc107';
+      } else {
+        commentCounter.style.color = '#6c757d';
+      }
+    });
+  }
 
-<!-- Template pour les pauses -->
-<template id="break-template">
-    <div class="break-item">
-        <span class="break-time"></span>
-        <span class="break-duration"></span>
-        <span class="break-reason"></span>
-    </div>
-</template>
+  // Animation des boutons au clic
+  document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', function() {
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        this.style.transform = '';
+      }, 150);
+    });
+  });
+
+  // Gestion du bouton d'aide
+  const helpBtn = document.getElementById('help-btn');
+  if (helpBtn) {
+    helpBtn.addEventListener('click', function() {
+      if (window.timeClockModule && window.timeClockModule.showHelp) {
+        window.timeClockModule.showHelp();
+      }
+    });
+  }
+
+  // Gestion du bouton de rafraîchissement des stats
+  const refreshStatsBtn = document.getElementById('refresh-stats-btn');
+  if (refreshStatsBtn) {
+    refreshStatsBtn.addEventListener('click', function() {
+      const icon = this.querySelector('i');
+      icon.style.animation = 'spin 1s linear';
+      
+      setTimeout(() => {
+        icon.style.animation = '';
+      }, 1000);
+      
+      if (window.timeClockModule && window.timeClockModule.refreshModule) {
+        window.timeClockModule.refreshModule();
+      }
+    });
+  }
+
+  // Mise à jour de l'indicateur de connexion
+  function updateConnectionStatus() {
+    const statusElement = document.getElementById('connection-status');
+    const textElement = document.getElementById('connection-text');
+    
+    if (navigator.onLine) {
+      statusElement.className = 'connection-status online';
+      textElement.textContent = 'En ligne';
+    } else {
+      statusElement.className = 'connection-status offline';
+      textElement.textContent = 'Hors ligne';
+    }
+  }
+
+  // Écouter les changements de connexion
+  window.addEventListener('online', updateConnectionStatus);
+  window.addEventListener('offline', updateConnectionStatus);
+  
+  // Initialiser le statut
+  updateConnectionStatus();
+
+  // Animation des stats au chargement
+  function animateStats() {
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      
+      setTimeout(() => {
+        card.style.transition = 'all 0.3s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+  }
+
+  // Démarrer les animations après un court délai
+  setTimeout(animateStats, 500);
+
+  // Debug: Logger le chargement du template
+  if (typeof Logger !== 'undefined') {
+    Logger.info('Template timeclock chargé et initialisé', null, 'Template');
+  } else {
+    console.log('Template timeclock chargé et initialisé');
+  }
+})();
+</script>
+
+<!-- Styles CSS pour l'animation spin -->
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.connection-status {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.connection-status.online {
+  background: rgba(40, 167, 69, 0.9);
+  color: white;
+}
+
+.connection-status.offline {
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notifications-zone {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  z-index: 1050;
+  pointer-events: none;
+}
+
+.option-item {
+  margin-bottom: 12px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.checkbox-container:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container input:checked + .checkmark {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.option-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+</style>

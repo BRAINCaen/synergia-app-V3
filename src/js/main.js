@@ -380,3 +380,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SynergiaApp;
 }
+import { timeClockModule } from './src/js/modules/timeclock-init.js';
+await timeClockModule.initialize();

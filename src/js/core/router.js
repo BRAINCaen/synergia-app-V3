@@ -1,4 +1,78 @@
 /**
+     * Charge les données de l'équipe
+     */
+    async loadTeamData() {
+        try {
+            if (window.teamManager) {
+                const members = await window.teamManager.loadTeamMembers();
+                this.renderTeamList(members);
+                this.updateTeamStats(members);
+            }
+        } catch (error) {
+            console.error('❌ Erreur chargement équipe:', error);
+            const teamList = document.getElementById('team-list');
+            if (teamList) {
+                teamList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erreur de chargement</h3>
+                        <p>Impossible de charger les membres de l'équipe</p>
+                        <button onclick="window.router.loadTeamData()" class="btn btn-primary">
+                            Réessayer
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    /**
+     * Rendu de la liste des membres
+     */
+    renderTeamList(members) {
+        const teamList = document.getElementById('team-list');
+        if (!teamList) return;
+
+        if (members.length === 0) {
+            teamList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>Aucun membre</h3>
+                    <p>Commencez par ajouter des membres à votre équipe</p>
+                    <button onclick="openAddMemberModal()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Ajouter un membre
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        const membersHTML = members.map(member => {
+            const presenceStatus = this.getPresenceStatus(member.lastSeen);
+            const avatar = member.photoURL || this.getDefaultAvatar(member.displayName, member.email);
+            
+            return `
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <img src="${avatar}" alt="${member.displayName || member.email}" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">
+                            ${(member.displayName || member.email).charAt(0).toUpperCase()}
+                        </div>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">${member.displayName || 'Nom non défini'}</div>
+                        <div class="member-email">${member.email}</div>
+                        <div class="member-meta">
+                            <span class="status-badge status-${member.role || 'employee'}">${this.formatRole(member.role)}</span>
+                            ${member.department ? `<span class="text-muted"><i class="fas fa-building"></i> ${member.department}</span>` : ''}
+                            ${member.position ? `<span class="text-muted"><i class="fas fa-briefcase"></i> ${member.position}</span>` : ''}
+                            <span class="status-dot ${presenceStatus}"></span>
+                            <span class="text-muted">${this.formatPresenceStatus(presenceStatus)}</span>
+                        </div>
+                    </div>
+                /**
  * Router pour SYNERGIA v3.0
  * Fichier: src/js/core/router.js
  * 
@@ -738,10 +812,111 @@ class Router {
             if (window.badgingManager) {
                 window.badgingManager.startClock();
                 await window.badgingManager.loadTodaysTimesheet();
+                this.updateBadgingStatus();
+                
+                // Écouter les changements de statut
+                window.addEventListener('badge:checkin', () => this.updateBadgingStatus());
+                window.addEventListener('badge:checkout', () => this.updateBadgingStatus());
+                window.addEventListener('badge:breakstart', () => this.updateBadgingStatus());
+                window.addEventListener('badge:breakend', () => this.updateBadgingStatus());
             }
         } catch (error) {
             console.error('❌ Erreur chargement pointage:', error);
         }
+    }
+
+    /**
+     * Met à jour l'affichage du statut de pointage
+     */
+    updateBadgingStatus() {
+        const statusContainer = document.getElementById('today-status');
+        if (!statusContainer) return;
+
+        if (!window.badgingManager) {
+            statusContainer.innerHTML = `
+                <div class="text-center">
+                    <p class="text-muted">Service de pointage non disponible</p>
+                </div>
+            `;
+            return;
+        }
+
+        const stats = window.badgingManager.getTodaysStats();
+        const currentStatus = window.badgingManager.getCurrentStatus();
+
+        let statusHTML = '';
+        let statusColor = '';
+        let statusText = '';
+
+        switch (currentStatus) {
+            case 'not-started':
+                statusColor = 'text-muted';
+                statusText = 'Pas encore pointé';
+                break;
+            case 'working':
+                statusColor = 'text-success';
+                statusText = 'Au travail';
+                break;
+            case 'on-break':
+                statusColor = 'text-warning';
+                statusText = 'En pause';
+                break;
+            case 'finished':
+                statusColor = 'text-info';
+                statusText = 'Journée terminée';
+                break;
+        }
+
+        statusHTML = `
+            <div class="status-overview">
+                <div class="current-status">
+                    <h4>Statut actuel</h4>
+                    <p class="${statusColor}">
+                        <i class="fas fa-circle"></i>
+                        ${statusText}
+                    </p>
+                </div>
+                
+                ${stats.checkIn ? `
+                    <div class="time-info">
+                        <div class="time-label">Arrivée</div>
+                        <div class="time-display">${this.formatTime(stats.checkIn)}</div>
+                    </div>
+                ` : ''}
+                
+                ${stats.checkOut ? `
+                    <div class="time-info">
+                        <div class="time-label">Sortie</div>
+                        <div class="time-display">${this.formatTime(stats.checkOut)}</div>
+                    </div>
+                ` : ''}
+                
+                ${stats.totalHours > 0 ? `
+                    <div class="time-info">
+                        <div class="time-label">Temps total</div>
+                        <div class="time-display">${this.formatHours(stats.totalHours)}</div>
+                    </div>
+                ` : ''}
+                
+                ${stats.breakDuration > 0 ? `
+                    <div class="time-info">
+                        <div class="time-label">Pause total</div>
+                        <div class="time-display">${stats.breakDuration} min</div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        statusContainer.innerHTML = statusHTML;
+    }
+
+    /**
+     * Formate les heures
+     */
+    formatHours(hours) {
+        const h = Math.floor(hours);
+        const m = Math.round((hours - h) * 60);
+        return `${h}h${m.toString().padStart(2, '0')}`;
     }
 
     /**
@@ -750,11 +925,179 @@ class Router {
     async loadTeamData() {
         try {
             if (window.teamManager) {
-                await window.teamManager.loadTeamMembers();
+                const members = await window.teamManager.loadTeamMembers();
+                this.renderTeamList(members);
+                this.updateTeamStats(members);
             }
         } catch (error) {
             console.error('❌ Erreur chargement équipe:', error);
+            const teamList = document.getElementById('team-list');
+            if (teamList) {
+                teamList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erreur de chargement</h3>
+                        <p>Impossible de charger les membres de l'équipe</p>
+                        <button onclick="window.router.loadTeamData()" class="btn btn-primary">
+                            Réessayer
+                        </button>
+                    </div>
+                `;
+            }
         }
+    }
+
+    /**
+     * Rendu de la liste des membres
+     */
+    renderTeamList(members) {
+        const teamList = document.getElementById('team-list');
+        if (!teamList) return;
+
+        if (members.length === 0) {
+            teamList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>Aucun membre</h3>
+                    <p>Commencez par ajouter des membres à votre équipe</p>
+                    <button onclick="openAddMemberModal()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Ajouter un membre
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        const membersHTML = members.map(member => {
+            const presenceStatus = this.getPresenceStatus(member.lastSeen);
+            const avatar = member.photoURL || this.getDefaultAvatar(member.displayName, member.email);
+            
+            return `
+                <div class="team-member">
+                    <div class="member-avatar">
+                        <img src="${avatar}" alt="${member.displayName || member.email}" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">
+                            ${(member.displayName || member.email).charAt(0).toUpperCase()}
+                        </div>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">${member.displayName || 'Nom non défini'}</div>
+                        <div class="member-email">${member.email}</div>
+                        <div class="member-meta">
+                            <span class="status-badge status-${member.role || 'employee'}">${this.formatRole(member.role)}</span>
+                            ${member.department ? `<span class="text-muted"><i class="fas fa-building"></i> ${member.department}</span>` : ''}
+                            ${member.position ? `<span class="text-muted"><i class="fas fa-briefcase"></i> ${member.position}</span>` : ''}
+                            <span class="status-dot ${presenceStatus}"></span>
+                            <span class="text-muted">${this.formatPresenceStatus(presenceStatus)}</span>
+                        </div>
+                    </div>
+                    <div class="member-actions">
+                        <button onclick="editMember('${member.id}')" class="btn btn-icon btn-sm" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteMemberConfirm('${member.id}')" class="btn btn-icon btn-sm btn-danger" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        teamList.innerHTML = membersHTML;
+    }
+
+    /**
+     * Met à jour les statistiques de l'équipe
+     */
+    updateTeamStats(members) {
+        const stats = this.calculateTeamStats(members);
+        
+        const elements = {
+            'team-total': stats.total,
+            'team-active': stats.active,
+            'team-departments': stats.departments,
+            'team-online': stats.online
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
+    }
+
+    /**
+     * Calcule les statistiques de l'équipe
+     */
+    calculateTeamStats(members) {
+        const total = members.length;
+        const active = members.filter(m => m.status !== 'inactive').length;
+        const departments = [...new Set(members.map(m => m.department).filter(d => d))].length;
+        const online = members.filter(m => this.getPresenceStatus(m.lastSeen) === 'online').length;
+
+        return { total, active, departments, online };
+    }
+
+    /**
+     * Formate le rôle pour affichage
+     */
+    formatRole(role) {
+        const roles = {
+            'admin': 'Administrateur',
+            'manager': 'Manager',
+            'employee': 'Employé'
+        };
+        return roles[role] || 'Employé';
+    }
+
+    /**
+     * Formate le statut de présence
+     */
+    formatPresenceStatus(status) {
+        const statuses = {
+            'online': 'En ligne',
+            'away': 'Absent',
+            'offline': 'Hors ligne'
+        };
+        return statuses[status] || 'Hors ligne';
+    }
+
+    /**
+     * Obtient le statut de présence
+     */
+    getPresenceStatus(lastSeen) {
+        if (!lastSeen) return 'offline';
+        
+        const now = new Date();
+        const lastSeenDate = new Date(lastSeen);
+        const diff = now - lastSeenDate;
+        
+        // En ligne si vu dans les 5 dernières minutes
+        if (diff < 5 * 60 * 1000) return 'online';
+        
+        // Absent si vu dans les 30 dernières minutes
+        if (diff < 30 * 60 * 1000) return 'away';
+        
+        return 'offline';
+    }
+
+    /**
+     * Génère un avatar par défaut
+     */
+    getDefaultAvatar(name, email) {
+        const initial = name ? name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
+        const colors = ['#e94560', '#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c'];
+        const color = colors[Math.abs(email.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % colors.length];
+        
+        return `data:image/svg+xml,${encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+                <rect width="50" height="50" fill="${color}" rx="25"/>
+                <text x="25" y="32" font-family="Arial" font-size="20" font-weight="bold" fill="white" text-anchor="middle">${initial}</text>
+            </svg>
+        `)}`;
     }
 
     /**
@@ -799,6 +1142,15 @@ class Router {
     // ==================
     // UTILITAIRES
     // ==================
+
+    /**
+     * Formate une heure
+     */
+    formatTime(date) {
+        if (!date) return '';
+        if (typeof date === 'string') date = new Date(date);
+        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
 
     /**
      * Émet un événement

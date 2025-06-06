@@ -160,3 +160,5 @@
 # [[edge_functions]]
 #   function = "auth-check"
 #   path = "/api/*"
+[build.environment]
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"

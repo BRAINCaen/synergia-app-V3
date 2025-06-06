@@ -1,0 +1,389 @@
+/* css/variables.css */
+/* Design System SYNERGIA v3.0 */
+
+:root {
+/* css/variables.css */
+/* Design System SYNERGIA v3.0 */
+
+:root {
+    /* === COULEURS PRINCIPALES === */
+    --primary-color: #6d28d9;
+    --primary-light: #8b5cf6;
+    --primary-dark: #5b21b6;
+    --secondary-color: #7c3aed;
+    --accent-color: #a78bfa;
+    
+    /* === COULEURS DE STATUT === */
+    --success-color: #10b981;
+    --success-light: #34d399;
+    --success-dark: #065f46;
+    
+    --warning-color: #f59e0b;
+    --warning-light: #fbbf24;
+    --warning-dark: #92400e;
+    
+    --error-color: #ef4444;
+    --error-light: #f87171;
+    --error-dark: #dc2626;
+    
+    --info-color: #3b82f6;
+    --info-light: #60a5fa;
+    --info-dark: #1d4ed8;
+    
+    /* === COULEURS DE FOND === */
+    --bg-primary: #0a0a0f;
+    --bg-secondary: rgba(10, 10, 20, 0.98);
+    --bg-tertiary: rgba(15, 15, 25, 0.95);
+    --bg-card: rgba(15, 15, 25, 0.95);
+    --bg-modal: rgba(0, 0, 0, 0.8);
+    --bg-overlay: rgba(0, 0, 0, 0.5);
+    
+    /* === COULEURS DE TEXTE === */
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.5);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --text-inverse: #1f2937;
+    
+    /* === COULEURS DE BORDURE === */
+    --border-color: rgba(139, 92, 246, 0.2);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --border-medium: rgba(255, 255, 255, 0.2);
+    --border-strong: rgba(255, 255, 255, 0.3);
+    
+    /* === OMBRES === */
+    --shadow-color: rgba(109, 40, 217, 0.3);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+    --shadow-glow: 0 0 20px var(--shadow-color);
+    --shadow-glow-strong: 0 0 30px var(--shadow-color);
+    
+    /* === TYPOGRAPHIE === */
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+    
+    /* Tailles de police */
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 3rem;        /* 48px */
+    
+    /* Hauteurs de ligne */
+    --leading-tight: 1.25;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.75;
+    
+    /* Poids de police */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* === ESPACEMENT === */
+    --space-1: 0.25rem;      /* 4px */
+    --space-2: 0.5rem;       /* 8px */
+    --space-3: 0.75rem;      /* 12px */
+    --space-4: 1rem;         /* 16px */
+    --space-5: 1.25rem;      /* 20px */
+    --space-6: 1.5rem;       /* 24px */
+    --space-8: 2rem;         /* 32px */
+    --space-10: 2.5rem;      /* 40px */
+    --space-12: 3rem;        /* 48px */
+    --space-16: 4rem;        /* 64px */
+    --space-20: 5rem;        /* 80px */
+    --space-24: 6rem;        /* 96px */
+    
+    /* === RAYONS DE BORDURE === */
+    --radius-sm: 0.125rem;   /* 2px */
+    --radius-md: 0.375rem;   /* 6px */
+    --radius-lg: 0.5rem;     /* 8px */
+    --radius-xl: 0.75rem;    /* 12px */
+    --radius-2xl: 1rem;      /* 16px */
+    --radius-3xl: 1.5rem;    /* 24px */
+    --radius-full: 9999px;
+    
+    /* === TRANSITIONS === */
+    --transition: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
+    --transition-slow: all 0.5s ease;
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* === DIMENSIONS === */
+    --nav-height: 60px;
+    --header-height: 80px;
+    --sidebar-width: 280px;
+    --sidebar-width-collapsed: 60px;
+    
+    /* === Z-INDEX === */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-toast: 1080;
+    
+    /* === BREAKPOINTS === */
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+    
+    /* === COULEURS RÔLES === */
+    --role-admin: #dc2626;
+    --role-manager: #7c3aed;
+    --role-employee: #059669;
+    --role-intern: #0ea5e9;
+    --role-entretien: #f59e0b;
+    --role-accueil: #8b5cf6;
+    --role-animation: #ef4444;
+    --role-securite: #374151;
+    
+    /* === COULEURS PRIORITÉS === */
+    --priority-low: var(--success-color);
+    --priority-normal: #6b7280;
+    --priority-high: var(--warning-color);
+    --priority-urgent: var(--error-color);
+    
+    /* === COULEURS STATUT === */
+    --status-active: var(--success-color);
+    --status-inactive: #6b7280;
+    --status-pending: var(--warning-color);
+    --status-error: var(--error-color);
+    
+    /* === GRADIENTS === */
+    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
+    --gradient-warning: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-light) 100%);
+    --gradient-error: linear-gradient(135deg, var(--error-color) 0%, var(--error-light) 100%);
+    --gradient-card: linear-gradient(145deg, rgba(15, 15, 25, 0.95) 0%, rgba(20, 20, 35, 0.9) 100%);
+    
+    /* === ANIMATIONS === */
+    --animation-spin: spin 1s linear infinite;
+    --animation-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animation-bounce: bounce 1s infinite;
+    --animation-fade-in: fadeIn 0.3s ease-out;
+    --animation-slide-up: slideUp 0.3s ease-out;
+    --animation-slide-down: slideDown 0.3s ease-out;
+    
+    /* === FILTRES === */
+    --filter-blur: blur(8px);
+    --filter-brightness: brightness(1.1);
+    --filter-contrast: contrast(1.1);
+    --filter-saturate: saturate(1.2);
+    --filter-glow: drop-shadow(0 0 10px var(--primary-color));
+    
+    /* === VARIABLES CALCULÉES === */
+    --content-max-width: 1200px;
+    --sidebar-transition: transform 0.3s ease;
+    --modal-backdrop-opacity: 0.8;
+    --card-padding: var(--space-6);
+    --button-padding-x: var(--space-6);
+    --button-padding-y: var(--space-3);
+    --input-padding-x: var(--space-4);
+    --input-padding-y: var(--space-3);
+}
+
+/* === VARIABLES DARK MODE === */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+}
+
+/* === VARIABLES MOBILE === */
+@media (max-width: 768px) {
+    :root {
+        --nav-height: 70px;
+        --header-height: 60px;
+        --sidebar-width: 100vw;
+        --card-padding: var(--space-4);
+        --space-section: var(--space-8);
+    }
+}
+
+/* === VARIABLES HIGH CONTRAST === */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: rgba(255, 255, 255, 0.5);
+        --text-secondary: rgba(255, 255, 255, 0.9);
+        --bg-card: rgba(15, 15, 25, 1);
+    }
+}
+
+/* === VARIABLES REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition: none;
+        --transition-fast: none;
+        --transition-slow: none;
+        --animation-spin: none;
+        --animation-pulse: none;
+        --animation-bounce: none;
+    }
+}
+
+/* === KEYFRAMES === */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% { transform: translate3d(0, 0, 0); }
+    40%, 43% { transform: translate3d(0, -30px, 0); }
+    70% { transform: translate3d(0, -15px, 0); }
+    90% { transform: translate3d(0, -4px, 0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideDown {
+    from { 
+        opacity: 0; 
+        transform: translateY(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromBottom {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* === UTILITAIRES CSS === */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.not-sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* === PRINT STYLES === */
+@media print {
+    :root {
+        --bg-primary: white;
+        --bg-secondary: white;
+        --bg-card: white;
+        --text-primary: black;
+        --text-secondary: #333;
+        --border-color: #ccc;
+    }
+} PRINCIPALES === */
+    --primary-color: #6d28d9;
+    --primary-light: #8b5cf6;
+    --primary-dark: #5b21b6;
+    --secondary-color: #7c3aed;
+    --accent-color: #a78bfa;
+    
+    /* === COULEURS DE STATUT === */
+    --success-color: #10b981;
+    --success-light: #34d399;
+    --success-dark: #065f46;
+    
+    --warning-color: #f59e0b;
+    --warning-light: #fbbf24;
+    --warning-dark: #92400e;
+    
+    --error-color: #ef4444;
+    --error-light: #f87171;
+    --error-dark: #dc2626;
+    
+    --info-color: #3b82f6;
+    --info-light: #60a5fa;
+    --info-dark: #1d4ed8;
+    
+    /* === COULEURS

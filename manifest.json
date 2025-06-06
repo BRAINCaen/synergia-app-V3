@@ -4,62 +4,24 @@
   "description": "Plateforme de gestion d'équipe nouvelle génération",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#e94560",
+  "background_color": "#667eea",
+  "theme_color": "#764ba2",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "fr",
-  "categories": ["productivity", "business"],
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23e94560' rx='20'/%3E%3Ctext x='96' y='120' font-family='Arial' font-size='80' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E",
+      "src": "assets/images/logo.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23e94560' rx='50'/%3E%3Ctext x='256' y='320' font-family='Arial' font-size='200' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "assets/images/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
     }
   ],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'%3E%3Crect width='540' height='720' fill='%231a1a2e'/%3E%3Ctext x='270' y='360' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ESYNERGIA v3.0%3C/text%3E%3C/svg%3E",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Pointage",
-      "short_name": "Pointage",
-      "description": "Accès rapide au pointage",
-      "url": "/#/badging",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%2328a745' rx='10'/%3E%3Ctext x='48' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3E⏰%3C/text%3E%3C/svg%3E",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Équipe",
-      "short_name": "Équipe",
-      "description": "Gestion de l'équipe",
-      "url": "/#/team",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%2317a2b8' rx='10'/%3E%3Ctext x='48' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3E👥%3C/text%3E%3C/svg%3E",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    }
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false
+  "categories": ["business", "productivity"],
+  "lang": "fr",
+  "dir": "ltr"
 }

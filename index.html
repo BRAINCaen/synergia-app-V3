@@ -3,12 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://content.googleapis.com https://firebaseinstallations.googleapis.com https://firebaseremoteconfig.googleapis.com https://firebaselogging-pa.googleapis.com https://region1.google-analytics.com wss://*.firebaseio.com wss://*.firebaseapp.com; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
     <title>SYNERGIA v3.0</title>
+    
+    <!-- CSP corrigé pour Google OAuth -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googletagmanager.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebase.googleapis.com https://content.googleapis.com https://firebaseinstallations.googleapis.com https://firebaseremoteconfig.googleapis.com https://firebaselogging-pa.googleapis.com https://region1.google-analytics.com wss://*.firebaseio.com wss://*.firebaseapp.com;
+        frame-src 'self' https://accounts.google.com https://*.firebaseapp.com;
+        img-src 'self' data: https:;
+    ">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1a1a2e">
+    
+    <!-- Polices (optionnel, peut être retiré pour éviter les erreurs) -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
     
     <!-- CSS existant (gardez vos styles actuels) -->
     <style>
@@ -23,7 +36,7 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: var(--text-light);
             min-height: 100vh;
@@ -110,7 +123,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <!-- Analytics optionnel - peut être commenté pour éviter les erreurs CSP -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script> -->
 </head>
 <body>
     <!-- App Container -->
@@ -168,10 +182,10 @@
                     this.auth = firebase.auth();
                     this.firestore = firebase.firestore();
                     
-                    // Analytics
-                    if (typeof firebase.analytics !== 'undefined') {
-                        this.analytics = firebase.analytics();
-                    }
+                    // Analytics (optionnel)
+                    // if (typeof firebase.analytics !== 'undefined') {
+                    //     this.analytics = firebase.analytics();
+                    // }
                     
                     // Configuration de base
                     await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
@@ -279,7 +293,7 @@
                         <div style="background: var(--glass-bg); padding: 30px; border-radius: 10px; text-align: center;">
                             <h1>🔐 Connexion</h1>
                             <button onclick="testGoogleLogin()" class="btn btn-primary" style="width: 100%; margin: 10px 0;">
-                                Connexion Google
+                                🚀 Connexion Google
                             </button>
                             <button onclick="router.navigate('/dashboard')" class="btn" style="background: #666; color: white; width: 100%;">
                                 Retour Dashboard
@@ -324,15 +338,30 @@
                 provider.addScope('email');
                 provider.addScope('profile');
                 
+                // Configuration pour éviter les erreurs de popup
+                provider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                
                 const result = await window.firebaseService.getAuth().signInWithPopup(provider);
                 console.log('✅ Connexion réussie:', result.user.email);
-                alert(`Connecté en tant que ${result.user.displayName}`);
+                alert(`Connecté en tant que ${result.user.displayName || result.user.email}`);
                 
                 router.navigate('/dashboard');
                 
             } catch (error) {
                 console.error('❌ Erreur de connexion:', error);
-                alert('Erreur de connexion: ' + error.message);
+                
+                let message = 'Erreur de connexion';
+                if (error.code === 'auth/unauthorized-domain') {
+                    message = 'Domaine non autorisé. Ajoutez papaya-seahorse-cec6c7.netlify.app dans Firebase Console → Authentication → Settings → Authorized domains';
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    message = 'Connexion annulée par l\'utilisateur';
+                } else if (error.code === 'auth/internal-error') {
+                    message = 'Erreur interne. Vérifiez la configuration CSP et les domaines autorisés.';
+                }
+                
+                alert(message);
             }
         }
 

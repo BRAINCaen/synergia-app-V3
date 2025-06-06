@@ -1,9 +1,13 @@
 /* 
  * BadgingManager.js
- * À extraire vers src/js/managers/BadgingManager.js
+ * Système de pointage entrée/sortie - Phase 4 SYNERGIA v3.0
  * 
- * Gestion du système de pointage entrée/sortie
- * Phase 4 - SYNERGIA v3.0
+ * Fonctionnalités :
+ * - Pointage arrivée/sortie
+ * - Gestion des pauses
+ * - Calcul automatique des heures
+ * - Historique des pointages
+ * - Horloge temps réel
  */
 
 class BadgingManager {
@@ -18,18 +22,15 @@ class BadgingManager {
 
     async init() {
         try {
+            console.log('⏰ Initialisation BadgingManager...');
             await this.waitForFirebase();
-            this.firestore = firebaseService.getFirestore();
+            this.firestore = window.firebaseService.getFirestore();
             this.isInitialized = true;
-            console.log('✅ BadgingManager initialisé');
             
             // Charger la feuille de temps du jour
             await this.loadTodaysTimesheet();
             
-            // Démarrer l'horloge si on est sur la page badging
-            if (window.location.hash.includes('/badging')) {
-                this.startClock();
-            }
+            console.log('✅ BadgingManager initialisé');
         } catch (error) {
             console.error('❌ Erreur BadgingManager:', error);
         }
@@ -89,7 +90,7 @@ class BadgingManager {
     // ==================
     async loadTodaysTimesheet() {
         try {
-            const user = authManager.getCurrentUser();
+            const user = window.authManager.getCurrentUser();
             if (!user) return;
 
             const today = this.getDateString(new Date());
@@ -123,7 +124,7 @@ class BadgingManager {
 
     async loadTimesheets(userId = null, startDate = null, endDate = null) {
         try {
-            const user = authManager.getCurrentUser();
+            const user = window.authManager.getCurrentUser();
             const targetUserId = userId || user?.uid;
             
             if (!targetUserId) throw new Error('Utilisateur non spécifié');
@@ -167,7 +168,7 @@ class BadgingManager {
     // ==================
     async checkIn(note = '') {
         try {
-            const user = authManager.getCurrentUser();
+            const user = window.authManager.getCurrentUser();
             if (!user) throw new Error('Utilisateur non connecté');
 
             if (this.currentTimesheet && this.currentTimesheet.checkIn) {
@@ -229,7 +230,7 @@ class BadgingManager {
 
     async checkOut(note = '') {
         try {
-            const user = authManager.getCurrentUser();
+            const user = window.authManager.getCurrentUser();
             if (!user) throw new Error('Utilisateur non connecté');
 
             if (!this.currentTimesheet || !this.currentTimesheet.checkIn) {
@@ -411,7 +412,7 @@ class BadgingManager {
     }
 }
 
-// Export pour utilisation modulaire
+// Export pour réutilisation
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = BadgingManager;
 } else {

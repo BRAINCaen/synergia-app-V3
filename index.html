@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGIA v3.0 - Gestion d'équipe moderne</title>
+    
+    <!-- Meta tags -->
+    <meta name="description" content="Système de gestion d'équipe avec gamification et pointage en temps réel">
+    <meta name="theme-color" content="#6d28d9">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/src/styles/main.css">
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-content">
+            <h1><i class="fas fa-bolt"></i> SYNERGIA</h1>
+            <p>Chargement de l'application...</p>
+            <div class="loading-progress" id="loading-progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" class="app-container" style="display: none;">
+        
+        <!-- Navigation -->
+        <nav id="main-navigation" class="main-nav">
+            <!-- Navigation sera injectée par NavigationComponent -->
+        </nav>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            
+            <!-- Header -->
+            <header id="page-header" class="page-header">
+                <!-- Header sera injecté par chaque vue -->
+            </header>
+
+            <!-- Content Area -->
+            <section id="content-area" class="content-area">
+                <!-- Contenu dynamique des vues -->
+                <div id="view-container" class="view-container">
+                    <!-- Les vues seront chargées ici -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Sidebar (optional) -->
+        <aside id="sidebar" class="sidebar" style="display: none;">
+            <!-- Sidebar contextuelle -->
+        </aside>
+
+    </div>
+
+    <!-- Modales Container -->
+    <div id="modals-container" class="modals-container">
+        <!-- Modales dynamiques -->
+    </div>
+
+    <!-- Notifications Container -->
+    <div id="notifications-container" class="notifications-container">
+        <!-- Notifications toast -->
+    </div>
+
+    <!-- Chat Overlay -->
+    <div id="chat-overlay" class="chat-overlay" style="display: none;">
+        <!-- Chat flottant -->
+    </div>
+
+    <!-- Core Scripts -->
+    <script type="module" src="/src/js/main.js"></script>
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>

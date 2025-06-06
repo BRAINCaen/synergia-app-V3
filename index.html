@@ -18,7 +18,6 @@
     
     <!-- PWA -->
     <link rel="manifest" href="./manifest.json">
-    <link rel="stylesheet" href="src/styles/modules/badging.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e94560'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     <meta name="theme-color" content="#1a1a2e">
     
@@ -31,7 +30,7 @@
     <!-- CSS VARIABLES & BASE STYLES -->
     <!-- =========================== -->
     <style>
-        /* Variables CSS (à extraire vers src/styles/variables.css plus tard) */
+        /* Variables CSS */
         :root {
             --primary-color: #1a1a2e;
             --secondary-color: #16213e;
@@ -55,7 +54,7 @@
             --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
         
-        /* Base styles (à extraire vers src/styles/base.css plus tard) */
+        /* Base styles */
         * {
             margin: 0;
             padding: 0;
@@ -75,7 +74,7 @@
             padding: 20px;
         }
         
-        /* Component styles (à extraire vers src/styles/components.css plus tard) */
+        /* Component styles */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -111,6 +110,7 @@
             border: 1px solid var(--glass-border); 
         }
         .btn-sm { padding: 8px 16px; font-size: 14px; min-width: auto; }
+        .btn-lg { padding: 16px 32px; font-size: 18px; min-width: 180px; }
         
         .status-badge {
             display: inline-block;
@@ -126,6 +126,9 @@
         .status-admin { background: var(--danger-color); color: white; }
         .status-manager { background: var(--warning-color); color: #000; }
         .status-employee { background: var(--info-color); color: white; }
+        .status-present { background: var(--success-color); color: white; }
+        .status-absent { background: var(--danger-color); color: white; }
+        .status-late { background: var(--warning-color); color: #000; }
         
         .user-profile {
             display: flex;
@@ -218,7 +221,7 @@
             border-color: var(--accent-color);
         }
         
-        /* Table styles (à extraire vers src/styles/modules/team.css plus tard) */
+        /* Table styles */
         .table-container {
             overflow-x: auto;
             border-radius: var(--border-radius);
@@ -360,6 +363,10 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
         
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
         /* Stats cards */
         .stats-card {
             background: var(--glass-bg);
@@ -380,6 +387,68 @@
             color: var(--text-secondary);
             font-size: 14px;
         }
+
+        /* Badging specific styles */
+        .clock-widget {
+            background: var(--glass-bg-strong);
+            padding: 40px;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .current-time {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .current-date {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        
+        .badge-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .badge-status {
+            background: var(--glass-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+        
+        .time-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-light);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .time-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .hours-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--glass-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
         
         /* Responsive */
         @media (max-width: 768px) {
@@ -389,6 +458,9 @@
             .nav-tab { white-space: nowrap; }
             .table-container { font-size: 14px; }
             .modal-content { margin: 10px; padding: 20px; }
+            .current-time { font-size: 36px; }
+            .badge-buttons { flex-direction: column; align-items: center; }
+            .btn-lg { width: 100%; }
         }
     </style>
 </head>
@@ -399,25 +471,7 @@
             <p>Chargement de SYNERGIA v3.0...</p>
         </div>
     </div>
-<!-- Modal pour ajouter une note de pointage -->
-<div id="badgeNoteModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">Ajouter une note</h2>
-            <button class="close" onclick="closeBadgeNoteModal()">&times;</button>
-        </div>
-        <form id="badgeNoteForm">
-            <div class="form-group">
-                <label class="form-label">Note (optionnelle)</label>
-                <textarea id="badgeNote" class="form-control" rows="3" placeholder="Raison du retard, projet spécial, etc."></textarea>
-            </div>
-            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
-                <button type="button" onclick="closeBadgeNoteModal()" class="btn btn-secondary">Annuler</button>
-                <button type="submit" class="btn btn-primary">Confirmer</button>
-            </div>
-        </form>
-    </div>
-</div>
+
     <!-- Modal pour l'équipe -->
     <div id="teamModal" class="modal">
         <div class="modal-content">
@@ -458,6 +512,26 @@
         </div>
     </div>
 
+    <!-- Modal pour ajouter une note de pointage -->
+    <div id="badgeNoteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ajouter une note</h2>
+                <button class="close" onclick="closeBadgeNoteModal()">&times;</button>
+            </div>
+            <form id="badgeNoteForm">
+                <div class="form-group">
+                    <label class="form-label">Note (optionnelle)</label>
+                    <textarea id="badgeNote" class="form-control" rows="3" placeholder="Raison du retard, projet spécial, etc."></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px;">
+                    <button type="button" onclick="closeBadgeNoteModal()" class="btn btn-secondary">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Confirmer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ========================= -->
     <!-- CONFIGURATION & FIREBASE  -->
     <!-- ========================= -->
@@ -480,7 +554,6 @@
     <!-- FIREBASE SERVICE   -->
     <!-- ================== -->
     <script>
-        /* À extraire vers src/js/core/firebase.js plus tard */
         class FirebaseService {
             constructor() {
                 this.app = null;
@@ -497,8 +570,6 @@
                     this.app = firebase.initializeApp(FIREBASE_CONFIG);
                     this.auth = firebase.auth();
                     this.firestore = firebase.firestore();
-                    
-                    // Pas de setPersistence ici pour éviter l'erreur
                     
                     this.isInitialized = true;
                     console.log('✅ Firebase initialisé');
@@ -538,7 +609,6 @@
     <!-- AUTH MANAGER     -->
     <!-- ================ -->
     <script>
-        /* À extraire vers src/js/managers/AuthManager.js plus tard */
         class AuthManager {
             constructor() {
                 this.currentUser = null;
@@ -583,7 +653,6 @@
                     isAuthenticated: !!user
                 });
                 
-                // Déclencher le rendu du router
                 if (window.router) {
                     window.router.render();
                 }
@@ -683,7 +752,6 @@
     <!-- TEAM MANAGER     -->
     <!-- ================ -->
     <script>
-        /* À extraire vers src/js/managers/TeamManager.js plus tard */
         class TeamManager {
             constructor() {
                 this.firestore = null;
@@ -746,7 +814,6 @@
                 try {
                     console.log('➕ Ajout membre:', memberData.email);
                     
-                    // Vérifier si l'email existe déjà
                     const existingUser = await this.findMemberByEmail(memberData.email);
                     if (existingUser) {
                         throw new Error('Un utilisateur avec cet email existe déjà');
@@ -888,6 +955,390 @@
         }
 
         window.teamManager = new TeamManager();
+    </script>
+
+    <!-- =================== -->
+    <!-- BADGING MANAGER     -->
+    <!-- =================== -->
+    <script>
+        class BadgingManager {
+            constructor() {
+                this.firestore = null;
+                this.currentTimesheet = null;
+                this.timesheets = [];
+                this.isInitialized = false;
+                this.clockInterval = null;
+                this.init();
+            }
+
+            async init() {
+                try {
+                    await this.waitForFirebase();
+                    this.firestore = firebaseService.getFirestore();
+                    this.isInitialized = true;
+                    console.log('✅ BadgingManager initialisé');
+                    
+                    await this.loadTodaysTimesheet();
+                } catch (error) {
+                    console.error('❌ Erreur BadgingManager:', error);
+                }
+            }
+
+            async waitForFirebase() {
+                return new Promise((resolve) => {
+                    const check = () => {
+                        if (window.firebaseService && window.firebaseService.isInitialized) {
+                            resolve();
+                        } else {
+                            setTimeout(check, 100);
+                        }
+                    };
+                    check();
+                });
+            }
+
+            startClock() {
+                this.updateClock();
+                this.clockInterval = setInterval(() => {
+                    this.updateClock();
+                }, 1000);
+            }
+
+            stopClock() {
+                if (this.clockInterval) {
+                    clearInterval(this.clockInterval);
+                    this.clockInterval = null;
+                }
+            }
+
+            updateClock() {
+                const now = new Date();
+                const timeElement = document.getElementById('currentTime');
+                const dateElement = document.getElementById('currentDate');
+                
+                if (timeElement) {
+                    timeElement.textContent = now.toLocaleTimeString('fr-FR');
+                }
+                
+                if (dateElement) {
+                    dateElement.textContent = now.toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+            }
+
+            async loadTodaysTimesheet() {
+                try {
+                    const user = authManager.getCurrentUser();
+                    if (!user) return;
+
+                    const today = this.getDateString(new Date());
+                    
+                    const snapshot = await this.firestore.collection('timesheets')
+                        .where('userId', '==', user.uid)
+                        .where('date', '==', today)
+                        .limit(1)
+                        .get();
+                    
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        this.currentTimesheet = { 
+                            id: doc.id, 
+                            ...doc.data(),
+                            checkIn: doc.data().checkIn?.toDate(),
+                            checkOut: doc.data().checkOut?.toDate(),
+                            breakStart: doc.data().breakStart?.toDate(),
+                            breakEnd: doc.data().breakEnd?.toDate()
+                        };
+                    } else {
+                        this.currentTimesheet = null;
+                    }
+                    
+                    this.emit('timesheet:loaded', this.currentTimesheet);
+                    console.log('✅ Feuille de temps du jour chargée');
+                } catch (error) {
+                    console.error('❌ Erreur chargement timesheet:', error);
+                }
+            }
+
+            async checkIn(note = '') {
+                try {
+                    const user = authManager.getCurrentUser();
+                    if (!user) throw new Error('Utilisateur non connecté');
+
+                    if (this.currentTimesheet && this.currentTimesheet.checkIn) {
+                        throw new Error('Vous avez déjà pointé votre arrivée aujourd\'hui');
+                    }
+
+                    const now = new Date();
+                    const today = this.getDateString(now);
+                    
+                    const timesheetData = {
+                        userId: user.uid,
+                        date: today,
+                        checkIn: firebase.firestore.Timestamp.fromDate(now),
+                        checkOut: null,
+                        breakStart: null,
+                        breakEnd: null,
+                        totalHours: 0,
+                        status: this.calculateStatus(now),
+                        notes: note,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    if (this.currentTimesheet) {
+                        await this.firestore.collection('timesheets')
+                            .doc(this.currentTimesheet.id)
+                            .update({
+                                checkIn: timesheetData.checkIn,
+                                status: timesheetData.status,
+                                notes: note,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        
+                        this.currentTimesheet.checkIn = now;
+                        this.currentTimesheet.status = timesheetData.status;
+                        this.currentTimesheet.notes = note;
+                    } else {
+                        const docRef = await this.firestore.collection('timesheets').add(timesheetData);
+                        this.currentTimesheet = {
+                            id: docRef.id,
+                            ...timesheetData,
+                            checkIn: now,
+                            createdAt: now,
+                            updatedAt: now
+                        };
+                    }
+
+                    console.log('✅ Pointage d\'arrivée enregistré');
+                    this.emit('badge:checkin', this.currentTimesheet);
+                    
+                    return this.currentTimesheet;
+                } catch (error) {
+                    console.error('❌ Erreur check-in:', error);
+                    throw error;
+                }
+            }
+
+            async checkOut(note = '') {
+                try {
+                    const user = authManager.getCurrentUser();
+                    if (!user) throw new Error('Utilisateur non connecté');
+
+                    if (!this.currentTimesheet || !this.currentTimesheet.checkIn) {
+                        throw new Error('Vous devez d\'abord pointer votre arrivée');
+                    }
+
+                    if (this.currentTimesheet.checkOut) {
+                        throw new Error('Vous avez déjà pointé votre sortie aujourd\'hui');
+                    }
+
+                    const now = new Date();
+                    const totalHours = this.calculateTotalHours(this.currentTimesheet.checkIn, now);
+                    
+                    const updateData = {
+                        checkOut: firebase.firestore.Timestamp.fromDate(now),
+                        totalHours: totalHours,
+                        notes: note || this.currentTimesheet.notes,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await this.firestore.collection('timesheets')
+                        .doc(this.currentTimesheet.id)
+                        .update(updateData);
+                    
+                    this.currentTimesheet.checkOut = now;
+                    this.currentTimesheet.totalHours = totalHours;
+                    this.currentTimesheet.notes = note || this.currentTimesheet.notes;
+
+                    console.log('✅ Pointage de sortie enregistré');
+                    this.emit('badge:checkout', this.currentTimesheet);
+                    
+                    return this.currentTimesheet;
+                } catch (error) {
+                    console.error('❌ Erreur check-out:', error);
+                    throw error;
+                }
+            }
+
+            async startBreak(note = '') {
+                try {
+                    if (!this.currentTimesheet || !this.currentTimesheet.checkIn) {
+                        throw new Error('Vous devez d\'abord pointer votre arrivée');
+                    }
+
+                    if (this.currentTimesheet.breakStart && !this.currentTimesheet.breakEnd) {
+                        throw new Error('Vous êtes déjà en pause');
+                    }
+
+                    const now = new Date();
+                    
+                    await this.firestore.collection('timesheets')
+                        .doc(this.currentTimesheet.id)
+                        .update({
+                            breakStart: firebase.firestore.Timestamp.fromDate(now),
+                            breakEnd: null,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    
+                    this.currentTimesheet.breakStart = now;
+                    this.currentTimesheet.breakEnd = null;
+
+                    console.log('✅ Début de pause enregistré');
+                    this.emit('badge:breakstart', this.currentTimesheet);
+                    
+                    return this.currentTimesheet;
+                } catch (error) {
+                    console.error('❌ Erreur début pause:', error);
+                    throw error;
+                }
+            }
+
+            async endBreak(note = '') {
+                try {
+                    if (!this.currentTimesheet || !this.currentTimesheet.breakStart) {
+                        throw new Error('Vous devez d\'abord commencer une pause');
+                    }
+
+                    if (this.currentTimesheet.breakEnd) {
+                        throw new Error('Vous avez déjà terminé votre pause');
+                    }
+
+                    const now = new Date();
+                    
+                    await this.firestore.collection('timesheets')
+                        .doc(this.currentTimesheet.id)
+                        .update({
+                            breakEnd: firebase.firestore.Timestamp.fromDate(now),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    
+                    this.currentTimesheet.breakEnd = now;
+
+                    console.log('✅ Fin de pause enregistrée');
+                    this.emit('badge:breakend', this.currentTimesheet);
+                    
+                    return this.currentTimesheet;
+                } catch (error) {
+                    console.error('❌ Erreur fin pause:', error);
+                    throw error;
+                }
+            }
+
+            async loadTimesheets(userId = null, startDate = null, endDate = null) {
+                try {
+                    const user = authManager.getCurrentUser();
+                    const targetUserId = userId || user?.uid;
+                    
+                    if (!targetUserId) throw new Error('Utilisateur non spécifié');
+
+                    let query = this.firestore.collection('timesheets')
+                        .where('userId', '==', targetUserId);
+
+                    if (startDate) {
+                        query = query.where('date', '>=', this.getDateString(startDate));
+                    }
+                    
+                    if (endDate) {
+                        query = query.where('date', '<=', this.getDateString(endDate));
+                    }
+
+                    const snapshot = await query.orderBy('date', 'desc').limit(30).get();
+                    
+                    this.timesheets = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        checkIn: doc.data().checkIn?.toDate(),
+                        checkOut: doc.data().checkOut?.toDate(),
+                        breakStart: doc.data().breakStart?.toDate(),
+                        breakEnd: doc.data().breakEnd?.toDate(),
+                        createdAt: doc.data().createdAt?.toDate(),
+                        updatedAt: doc.data().updatedAt?.toDate()
+                    }));
+                    
+                    console.log(`✅ ${this.timesheets.length} feuilles de temps chargées`);
+                    this.emit('timesheets:loaded', this.timesheets);
+                    
+                    return this.timesheets;
+                } catch (error) {
+                    console.error('❌ Erreur chargement timesheets:', error);
+                    throw error;
+                }
+            }
+
+            calculateStatus(checkInTime) {
+                const hour = checkInTime.getHours();
+                const minute = checkInTime.getMinutes();
+                
+                if (hour < 9 || (hour === 9 && minute === 0)) {
+                    return 'present';
+                } else if (hour === 9 && minute <= 15) {
+                    return 'present';
+                } else {
+                    return 'late';
+                }
+            }
+
+            calculateTotalHours(checkIn, checkOut) {
+                if (!checkIn || !checkOut) return 0;
+                
+                const diffMs = checkOut.getTime() - checkIn.getTime();
+                const diffHours = diffMs / (1000 * 60 * 60);
+                
+                return Math.round(diffHours * 100) / 100;
+            }
+
+            getCurrentStatus() {
+                if (!this.currentTimesheet) return 'not-started';
+                
+                if (this.currentTimesheet.checkOut) return 'finished';
+                if (this.currentTimesheet.breakStart && !this.currentTimesheet.breakEnd) return 'on-break';
+                if (this.currentTimesheet.checkIn) return 'working';
+                
+                return 'not-started';
+            }
+
+            getTodaysStats() {
+                if (!this.currentTimesheet) {
+                    return {
+                        checkIn: null,
+                        checkOut: null,
+                        totalHours: 0,
+                        status: 'not-started',
+                        breakDuration: 0
+                    };
+                }
+
+                let breakDuration = 0;
+                if (this.currentTimesheet.breakStart && this.currentTimesheet.breakEnd) {
+                    breakDuration = (this.currentTimesheet.breakEnd.getTime() - this.currentTimesheet.breakStart.getTime()) / (1000 * 60);
+                }
+
+                return {
+                    checkIn: this.currentTimesheet.checkIn,
+                    checkOut: this.currentTimesheet.checkOut,
+                    totalHours: this.currentTimesheet.totalHours || 0,
+                    status: this.currentTimesheet.status || 'present',
+                    breakDuration: Math.round(breakDuration)
+                };
+            }
+
+            getDateString(date) {
+                return date.toISOString().split('T')[0];
+            }
+
+            getCurrentTimesheet() { return this.currentTimesheet; }
+            getTimesheets() { return [...this.timesheets]; }
+
+            emit(eventName, data) {
+                window.dispatchEvent(new CustomEvent(eventName, { detail: data }));
+            }
+        }
+
         window.badgingManager = new BadgingManager();
     </script>
 
@@ -895,7 +1346,6 @@
     <!-- ROUTER       -->
     <!-- ============ -->
     <script>
-        /* À extraire vers src/js/core/router.js plus tard */
         class Router {
             constructor() {
                 this.currentPath = '/';
@@ -913,7 +1363,6 @@
                 
                 console.log('📄 Rendu page:', hash);
                 
-                // Vérifier si l'AuthManager est prêt
                 if (!window.authManager || !window.authManager.isInitialized) {
                     console.log('⏳ Attente AuthManager...');
                     app.innerHTML = `
@@ -955,6 +1404,14 @@
                             this.navigate('/login');
                         }
                         break;
+                    case '/badging':
+                        if (isAuthenticated) {
+                            app.innerHTML = this.renderBadging();
+                            this.loadBadgingData();
+                        } else {
+                            this.navigate('/login');
+                        }
+                        break;
                     default:
                         app.innerHTML = this.render404();
                 }
@@ -969,11 +1426,155 @@
                 }
             }
 
+            async loadBadgingData() {
+                try {
+                    while (!window.badgingManager || !window.badgingManager.isInitialized) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                    
+                    await badgingManager.loadTodaysTimesheet();
+                    await badgingManager.loadTimesheets();
+                    this.updateBadgingView();
+                    
+                    // Démarrer l'horloge
+                    badgingManager.startClock();
+                } catch (error) {
+                    console.error('Erreur chargement badging:', error);
+                }
+            }
+
+            updateBadgingView() {
+                const stats = badgingManager.getTodaysStats();
+                this.updateBadgingStats(stats);
+                this.updateBadgingButtons();
+                this.updateTimesheetsTable();
+            }
+
+            updateBadgingStats(stats) {
+                const elements = {
+                    checkinTime: document.getElementById('checkinTime'),
+                    checkoutTime: document.getElementById('checkoutTime'),
+                    totalHours: document.getElementById('totalHours'),
+                    breakDuration: document.getElementById('breakDuration')
+                };
+
+                if (elements.checkinTime) {
+                    elements.checkinTime.textContent = stats.checkIn ? 
+                        stats.checkIn.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                }
+                
+                if (elements.checkoutTime) {
+                    elements.checkoutTime.textContent = stats.checkOut ? 
+                        stats.checkOut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                }
+                
+                if (elements.totalHours) {
+                    elements.totalHours.textContent = stats.totalHours ? 
+                        `${stats.totalHours}h` : '0h';
+                }
+                
+                if (elements.breakDuration) {
+                    elements.breakDuration.textContent = stats.breakDuration ? 
+                        `${stats.breakDuration}min` : '0min';
+                }
+            }
+
+            updateBadgingButtons() {
+                const status = badgingManager.getCurrentStatus();
+                const buttons = {
+                    checkin: document.getElementById('checkinBtn'),
+                    checkout: document.getElementById('checkoutBtn'),
+                    breakStart: document.getElementById('breakStartBtn'),
+                    breakEnd: document.getElementById('breakEndBtn')
+                };
+
+                Object.values(buttons).forEach(btn => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.classList.remove('btn-success', 'btn-warning', 'btn-danger');
+                        btn.classList.add('btn-secondary');
+                    }
+                });
+
+                switch(status) {
+                    case 'not-started':
+                        if (buttons.checkin) {
+                            buttons.checkin.disabled = false;
+                            buttons.checkin.classList.remove('btn-secondary');
+                            buttons.checkin.classList.add('btn-success');
+                        }
+                        if (buttons.checkout) buttons.checkout.disabled = true;
+                        if (buttons.breakStart) buttons.breakStart.disabled = true;
+                        if (buttons.breakEnd) buttons.breakEnd.disabled = true;
+                        break;
+                        
+                    case 'working':
+                        if (buttons.checkin) buttons.checkin.disabled = true;
+                        if (buttons.checkout) {
+                            buttons.checkout.disabled = false;
+                            buttons.checkout.classList.remove('btn-secondary');
+                            buttons.checkout.classList.add('btn-danger');
+                        }
+                        if (buttons.breakStart) {
+                            buttons.breakStart.disabled = false;
+                            buttons.breakStart.classList.remove('btn-secondary');
+                            buttons.breakStart.classList.add('btn-warning');
+                        }
+                        if (buttons.breakEnd) buttons.breakEnd.disabled = true;
+                        break;
+                        
+                    case 'on-break':
+                        if (buttons.checkin) buttons.checkin.disabled = true;
+                        if (buttons.checkout) buttons.checkout.disabled = true;
+                        if (buttons.breakStart) buttons.breakStart.disabled = true;
+                        if (buttons.breakEnd) {
+                            buttons.breakEnd.disabled = false;
+                            buttons.breakEnd.classList.remove('btn-secondary');
+                            buttons.breakEnd.classList.add('btn-success');
+                        }
+                        break;
+                        
+                    case 'finished':
+                        Object.values(buttons).forEach(btn => {
+                            if (btn) btn.disabled = true;
+                        });
+                        break;
+                }
+            }
+
+            updateTimesheetsTable() {
+                const tbody = document.getElementById('timesheetsTableBody');
+                if (!tbody) return;
+                
+                const timesheets = badgingManager.getTimesheets().slice(0, 10);
+                
+                if (timesheets.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                Aucun pointage enregistré
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = timesheets.map(timesheet => `
+                    <tr>
+                        <td>${new Date(timesheet.date).toLocaleDateString('fr-FR')}</td>
+                        <td>${timesheet.checkIn ? timesheet.checkIn.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+                        <td>${timesheet.checkOut ? timesheet.checkOut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+                        <td>${timesheet.totalHours ? `${timesheet.totalHours}h` : '-'}</td>
+                        <td><span class="status-badge status-${timesheet.status}">${this.getStatusLabel(timesheet.status)}</span></td>
+                        <td>${timesheet.notes || '-'}</td>
+                    </tr>
+                `).join('');
+            }
+
             updateTeamView() {
                 const stats = teamManager.getTeamStats();
                 const members = teamManager.getMembers();
                 
-                // Mettre à jour les statistiques
                 if (document.getElementById('totalMembers')) {
                     document.getElementById('totalMembers').textContent = stats.total;
                     document.getElementById('activeMembers').textContent = stats.active;
@@ -981,7 +1582,6 @@
                     document.getElementById('totalDepartments').textContent = stats.departments;
                 }
                 
-                // Mettre à jour la table
                 this.renderMembersTable(members);
             }
 
@@ -1023,51 +1623,160 @@
             }
 
             getStatusLabel(status) {
-                const labels = { 'active': 'Actif', 'invited': 'Invité', 'inactive': 'Inactif' };
+                const labels = { 
+                    'active': 'Actif', 
+                    'invited': 'Invité', 
+                    'inactive': 'Inactif',
+                    'present': 'Présent',
+                    'absent': 'Absent',
+                    'late': 'Retard'
+                };
                 return labels[status] || status;
             }
 
             renderDashboard() {
-                const user = authManager.getCurrentUser();
-                
                 return `
                     <div class="container">
                         ${this.renderHeader()}
                         ${this.renderNavigation('/dashboard')}
                         
-                        <div class="grid grid-3">
+                        <div class="grid grid-4">
                             <div class="stats-card">
                                 <div class="stats-number">✅</div>
-                                <div class="stats-label">Phase 3 Complète</div>
+                                <div class="stats-label">Phase 4 Active</div>
                             </div>
                             <div class="stats-card">
-                                <div class="stats-number">🚀</div>
-                                <div class="stats-label">TeamManager Actif</div>
+                                <div class="stats-number">⏰</div>
+                                <div class="stats-label">BadgingManager</div>
                             </div>
                             <div class="stats-card">
                                 <div class="stats-number">👥</div>
-                                <div class="stats-label">Gestion d'Équipe</div>
+                                <div class="stats-label">TeamManager</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-number">🚀</div>
+                                <div class="stats-label">Opérationnel</div>
                             </div>
                         </div>
                         
                         <div class="card">
-                            <h2>🎉 Phase 3 - TeamManager terminée !</h2>
-                            <p>Le système de gestion d'équipe est maintenant opérationnel.</p>
+                            <h2>🎉 Phase 4 - BadgingManager implémentée !</h2>
+                            <p>Le système de pointage et de gestion des horaires est maintenant disponible.</p>
                             
                             <div style="margin: 20px 0;">
                                 <h3>Nouvelles fonctionnalités :</h3>
                                 <ul style="margin: 16px 0; padding-left: 20px; color: var(--text-secondary);">
-                                    <li>✅ Gestion complète des membres d'équipe</li>
-                                    <li>✅ Ajout/modification/suppression de membres</li>
-                                    <li>✅ Gestion des rôles et départements</li>
-                                    <li>✅ Interface moderne avec tableaux et modales</li>
-                                    <li>✅ Statistiques d'équipe en temps réel</li>
+                                    <li>⏰ Système de pointage entrée/sortie</li>
+                                    <li>☕ Gestion des pauses</li>
+                                    <li>📊 Calcul automatique des heures</li>
+                                    <li>📋 Historique des pointages</li>
+                                    <li>⌚ Horloge temps réel</li>
+                                    <li>📝 Ajout de notes sur les pointages</li>
                                 </ul>
                             </div>
                             
-                            <button onclick="router.navigate('/team')" class="btn btn-primary">
-                                👥 Voir l'équipe
-                            </button>
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                <button onclick="router.navigate('/badging')" class="btn btn-primary">
+                                    ⏰ Pointage
+                                </button>
+                                <button onclick="router.navigate('/team')" class="btn btn-secondary">
+                                    👥 Équipe
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderBadging() {
+                return `
+                    <div class="container">
+                        ${this.renderHeader()}
+                        ${this.renderNavigation('/badging')}
+                        
+                        <div class="grid grid-2">
+                            <!-- Widget Horloge et Pointage -->
+                            <div class="clock-widget">
+                                <div class="current-time" id="currentTime">--:--:--</div>
+                                <div class="current-date" id="currentDate">Chargement...</div>
+                                
+                                <div class="badge-buttons">
+                                    <button id="checkinBtn" onclick="handleCheckIn()" class="btn btn-lg btn-success">
+                                        🟢 Arrivée
+                                    </button>
+                                    <button id="checkoutBtn" onclick="handleCheckOut()" class="btn btn-lg btn-danger">
+                                        🔴 Sortie
+                                    </button>
+                                </div>
+                                
+                                <div class="badge-buttons" style="margin-top: 16px;">
+                                    <button id="breakStartBtn" onclick="handleBreakStart()" class="btn btn-lg btn-warning">
+                                        ⏸️ Pause
+                                    </button>
+                                    <button id="breakEndBtn" onclick="handleBreakEnd()" class="btn btn-lg btn-success">
+                                        ▶️ Reprise
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Statistiques du jour -->
+                            <div class="card">
+                                <h3>📊 Aujourd'hui</h3>
+                                
+                                <div class="badge-status">
+                                    <div class="time-label">Arrivée</div>
+                                    <div class="time-display" id="checkinTime">--:--</div>
+                                </div>
+                                
+                                <div class="badge-status">
+                                    <div class="time-label">Sortie</div>
+                                    <div class="time-display" id="checkoutTime">--:--</div>
+                                </div>
+                                
+                                <div class="hours-summary">
+                                    <div>
+                                        <div class="time-label">Heures travaillées</div>
+                                        <div class="time-display" id="totalHours">0h</div>
+                                    </div>
+                                    <div>
+                                        <div class="time-label">Temps de pause</div>
+                                        <div class="time-display" id="breakDuration">0min</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Historique des pointages -->
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h2>📋 Historique des pointages</h2>
+                                <button onclick="badgingManager.loadTimesheets()" class="btn btn-secondary">
+                                    🔄 Actualiser
+                                </button>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Arrivée</th>
+                                            <th>Sortie</th>
+                                            <th>Heures</th>
+                                            <th>Statut</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="timesheetsTableBody">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 40px;">
+                                                <div class="loading-spinner"></div>
+                                                <p style="margin-top: 16px;">Chargement de l'historique...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1203,9 +1912,9 @@
                         <a href="#/dashboard" class="nav-tab ${activePath === '/dashboard' ? 'active' : ''}">📊 Dashboard</a>
                         <a href="#/profile" class="nav-tab ${activePath === '/profile' ? 'active' : ''}">👤 Profil</a>
                         <a href="#/team" class="nav-tab ${activePath === '/team' ? 'active' : ''}">👥 Équipe</a>
-                        <button class="nav-tab" onclick="alert('Bientôt disponible!')">⏰ Badging</button>
-                        <button class="nav-tab" onclick="alert('Bientôt disponible!')">💬 Chat</button>
-                        <button class="nav-tab" onclick="alert('Bientôt disponible!')">📅 Planning</button>
+                        <a href="#/badging" class="nav-tab ${activePath === '/badging' ? 'active' : ''}">⏰ Pointage</a>
+                        <button class="nav-tab" onclick="alert('Phase 5 - Bientôt disponible!')">💬 Chat</button>
+                        <button class="nav-tab" onclick="alert('Phase 6 - Bientôt disponible!')">📅 Planning</button>
                     </div>
                 `;
             }
@@ -1225,7 +1934,6 @@
                 console.log('🧭 Initialisation Router...');
                 window.addEventListener('hashchange', () => this.render());
                 
-                // Attendre que l'AuthManager soit prêt
                 const waitForAuth = () => {
                     if (window.authManager && window.authManager.isInitialized) {
                         console.log('✅ Router prêt - premier rendu');
@@ -1237,38 +1945,66 @@
                 
                 waitForAuth();
                 
-                // Écouter les événements du TeamManager
-                const setupTeamListeners = () => {
-                    if (window.teamManager && window.teamManager.isInitialized) {
-                        teamManager.on?.('team:loaded', () => {
-                            if (window.location.hash.includes('/team')) {
-                                this.updateTeamView();
-                            }
-                        });
+                // Event listeners pour les managers
+                this.setupEventListeners();
+            }
 
-                        teamManager.on?.('member:added', () => {
-                            if (window.location.hash.includes('/team')) {
-                                this.loadTeamData();
-                            }
-                        });
-
-                        teamManager.on?.('member:updated', () => {
-                            if (window.location.hash.includes('/team')) {
-                                this.loadTeamData();
-                            }
-                        });
-
-                        teamManager.on?.('member:deleted', () => {
-                            if (window.location.hash.includes('/team')) {
-                                this.loadTeamData();
-                            }
-                        });
-                    } else {
-                        setTimeout(setupTeamListeners, 100);
+            setupEventListeners() {
+                // Team events
+                window.addEventListener('team:loaded', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.updateTeamView();
                     }
-                };
-                
-                setupTeamListeners();
+                });
+
+                window.addEventListener('member:added', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.loadTeamData();
+                    }
+                });
+
+                window.addEventListener('member:updated', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.loadTeamData();
+                    }
+                });
+
+                window.addEventListener('member:deleted', () => {
+                    if (window.location.hash.includes('/team')) {
+                        this.loadTeamData();
+                    }
+                });
+
+                // Badging events
+                window.addEventListener('timesheet:loaded', () => {
+                    if (window.location.hash.includes('/badging')) {
+                        this.updateBadgingView();
+                    }
+                });
+
+                window.addEventListener('badge:checkin', () => {
+                    if (window.location.hash.includes('/badging')) {
+                        this.updateBadgingView();
+                    }
+                });
+
+                window.addEventListener('badge:checkout', () => {
+                    if (window.location.hash.includes('/badging')) {
+                        this.updateBadgingView();
+                    }
+                });
+
+                window.addEventListener('badge:breakstart', () => {
+                    if (window.location.hash.includes('/badging')) {
+                        this.updateBadgingView();
+                    }
+                });
+
+                window.addEventListener('badge:breakend', () => {
+                    if (window.location.hash.includes('/badging')) {
+                        this.updateBadgingView();
+                    }
+                });
             }
         }
 
@@ -1279,6 +2015,12 @@
     <!-- FONCTIONS D'INTERACTION          -->
     <!-- ================================ -->
     <script>
+        // Variables globales pour les modales de pointage
+        let pendingBadgeAction = null;
+
+        // ==================
+        // FONCTIONS D'AUTHENTIFICATION
+        // ==================
         async function handleGoogleLogin() {
             try {
                 await authManager.signInWithGoogle();
@@ -1290,328 +2032,123 @@
 
         async function handleSignOut() {
             try {
+                // Arrêter l'horloge si elle tourne
+                if (window.badgingManager) {
+                    badgingManager.stopClock();
+                }
                 await authManager.signOut();
                 router.navigate('/login');
             } catch (error) {
                 alert('Erreur de déconnexion: ' + error.message);
             }
         }
-        <script src="src/js/managers/BadgingManager.js"></script>
-/* 
- * badging-interactions.js
- * Fonctions d'interaction pour le BadgingManager
- * À ajouter dans la section des interactions de l'index.html
- */
 
-// Variables globales pour les modales de pointage
-let pendingBadgeAction = null;
-let pendingBadgeNote = '';
-
-// ==================
-// FONCTIONS DE POINTAGE
-// ==================
-
-function handleCheckIn() {
-    pendingBadgeAction = 'checkin';
-    openBadgeNoteModal('Pointage d\'arrivée', 'Ajouter une note pour votre arrivée (optionnel)');
-}
-
-function handleCheckOut() {
-    pendingBadgeAction = 'checkout';
-    openBadgeNoteModal('Pointage de sortie', 'Ajouter une note pour votre sortie (optionnel)');
-}
-
-function handleBreakStart() {
-    pendingBadgeAction = 'breakstart';
-    openBadgeNoteModal('Début de pause', 'Motif de la pause (optionnel)');
-}
-
-function handleBreakEnd() {
-    pendingBadgeAction = 'breakend';
-    openBadgeNoteModal('Fin de pause', 'Retour de pause');
-}
-
-// ==================
-// GESTION DES MODALES
-// ==================
-
-function openBadgeNoteModal(title, placeholder = '') {
-    const modal = document.getElementById('badgeNoteModal');
-    const titleElement = modal.querySelector('.modal-title');
-    const noteInput = document.getElementById('badgeNote');
-    
-    if (titleElement) titleElement.textContent = title;
-    if (noteInput) {
-        noteInput.value = '';
-        noteInput.placeholder = placeholder;
-    }
-    
-    modal.classList.add('show');
-    
-    // Focus sur le textarea si il existe
-    setTimeout(() => {
-        if (noteInput) noteInput.focus();
-    }, 100);
-}
-
-function closeBadgeNoteModal() {
-    const modal = document.getElementById('badgeNoteModal');
-    modal.classList.remove('show');
-    pendingBadgeAction = null;
-    pendingBadgeNote = '';
-}
-
-async function executeBadgeAction() {
-    if (!pendingBadgeAction) return;
-
-    try {
-        const note = document.getElementById('badgeNote').value.trim();
-        let result;
-
-        // Afficher un indicateur de chargement sur le bouton
-        const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Enregistrement...';
-        submitBtn.disabled = true;
-
-        switch(pendingBadgeAction) {
-            case 'checkin':
-                result = await badgingManager.checkIn(note);
-                break;
-            case 'checkout':
-                result = await badgingManager.checkOut(note);
-                break;
-            case 'breakstart':
-                result = await badgingManager.startBreak(note);
-                break;
-            case 'breakend':
-                result = await badgingManager.endBreak(note);
-                break;
+        // ==================
+        // FONCTIONS DE POINTAGE
+        // ==================
+        function handleCheckIn() {
+            pendingBadgeAction = 'checkin';
+            openBadgeNoteModal('Pointage d\'arrivée', 'Ajouter une note pour votre arrivée (optionnel)');
         }
 
-        if (result) {
-            closeBadgeNoteModal();
+        function handleCheckOut() {
+            pendingBadgeAction = 'checkout';
+            openBadgeNoteModal('Pointage de sortie', 'Ajouter une note pour votre sortie (optionnel)');
+        }
+
+        function handleBreakStart() {
+            pendingBadgeAction = 'breakstart';
+            openBadgeNoteModal('Début de pause', 'Motif de la pause (optionnel)');
+        }
+
+        function handleBreakEnd() {
+            pendingBadgeAction = 'breakend';
+            openBadgeNoteModal('Fin de pause', 'Retour de pause');
+        }
+
+        // ==================
+        // GESTION DES MODALES
+        // ==================
+        function openBadgeNoteModal(title, placeholder = '') {
+            const modal = document.getElementById('badgeNoteModal');
+            const titleElement = modal.querySelector('.modal-title');
+            const noteInput = document.getElementById('badgeNote');
             
-            // Afficher message de succès avec notification native si disponible
-            const messages = {
-                'checkin': 'Arrivée enregistrée avec succès !',
-                'checkout': 'Sortie enregistrée avec succès !',
-                'breakstart': 'Début de pause enregistré !',
-                'breakend': 'Fin de pause enregistrée !'
-            };
+            if (titleElement) titleElement.textContent = title;
+            if (noteInput) {
+                noteInput.value = '';
+                noteInput.placeholder = placeholder;
+            }
             
-            showNotification(messages[pendingBadgeAction], 'success');
+            modal.classList.add('show');
             
-            // Démarrer l'horloge si on arrive
-            if (pendingBadgeAction === 'checkin' && window.badgingManager) {
-                badgingManager.startClock();
+            setTimeout(() => {
+                if (noteInput) noteInput.focus();
+            }, 100);
+        }
+
+        function closeBadgeNoteModal() {
+            const modal = document.getElementById('badgeNoteModal');
+            modal.classList.remove('show');
+            pendingBadgeAction = null;
+        }
+
+        async function executeBadgeAction() {
+            if (!pendingBadgeAction) return;
+
+            try {
+                const note = document.getElementById('badgeNote').value.trim();
+                let result;
+
+                const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Enregistrement...';
+                submitBtn.disabled = true;
+
+                switch(pendingBadgeAction) {
+                    case 'checkin':
+                        result = await badgingManager.checkIn(note);
+                        break;
+                    case 'checkout':
+                        result = await badgingManager.checkOut(note);
+                        break;
+                    case 'breakstart':
+                        result = await badgingManager.startBreak(note);
+                        break;
+                    case 'breakend':
+                        result = await badgingManager.endBreak(note);
+                        break;
+                }
+
+                if (result) {
+                    closeBadgeNoteModal();
+                    
+                    const messages = {
+                        'checkin': 'Arrivée enregistrée avec succès !',
+                        'checkout': 'Sortie enregistrée avec succès !',
+                        'breakstart': 'Début de pause enregistré !',
+                        'breakend': 'Fin de pause enregistrée !'
+                    };
+                    
+                    alert(messages[pendingBadgeAction]);
+                }
+
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Erreur lors du pointage:', error);
+                alert('Erreur: ' + error.message);
+                
+                const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
+                submitBtn.textContent = 'Confirmer';
+                submitBtn.disabled = false;
             }
         }
 
-        // Restaurer le bouton
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-
-    } catch (error) {
-        console.error('Erreur lors du pointage:', error);
-        showNotification('Erreur: ' + error.message, 'error');
-        
-        // Restaurer le bouton en cas d'erreur
-        const submitBtn = document.querySelector('#badgeNoteForm button[type="submit"]');
-        submitBtn.textContent = 'Confirmer';
-        submitBtn.disabled = false;
-    }
-}
-
-// ==================
-// FONCTIONS UTILITAIRES
-// ==================
-
-function showNotification(message, type = 'info') {
-    // Utiliser les notifications natives du navigateur si disponibles
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('SYNERGIA - Pointage', {
-            body: message,
-            icon: '/favicon.ico'
-        });
-    }
-    
-    // Fallback : simple alert
-    alert(message);
-}
-
-function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-}
-
-// ==================
-// FONCTIONS DE GESTION DES HORAIRES
-// ==================
-
-function formatTime(date) {
-    if (!date) return '--:--';
-    return date.toLocaleTimeString('fr-FR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    });
-}
-
-function formatDuration(minutes) {
-    if (!minutes || minutes <= 0) return '0min';
-    
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    
-    if (hours > 0) {
-        return `${hours}h${mins > 0 ? mins + 'min' : ''}`;
-    }
-    return `${mins}min`;
-}
-
-function calculateWorkingTime(checkIn, checkOut, breakDuration = 0) {
-    if (!checkIn || !checkOut) return 0;
-    
-    const totalMs = checkOut.getTime() - checkIn.getTime();
-    const totalMinutes = totalMs / (1000 * 60);
-    const workingMinutes = totalMinutes - breakDuration;
-    
-    return Math.max(0, workingMinutes);
-}
-
-// ==================
-// EXPORT FUNCTIONS
-// ==================
-
-async function exportTimesheets(format = 'csv') {
-    try {
-        const timesheets = badgingManager.getTimesheets();
-        
-        if (timesheets.length === 0) {
-            alert('Aucune donnée à exporter');
-            return;
-        }
-        
-        let content = '';
-        let filename = '';
-        
-        if (format === 'csv') {
-            content = generateCSV(timesheets);
-            filename = `pointages_${new Date().toISOString().split('T')[0]}.csv`;
-        } else if (format === 'json') {
-            content = JSON.stringify(timesheets, null, 2);
-            filename = `pointages_${new Date().toISOString().split('T')[0]}.json`;
-        }
-        
-        downloadFile(content, filename, format === 'csv' ? 'text/csv' : 'application/json');
-        
-    } catch (error) {
-        console.error('Erreur export:', error);
-        alert('Erreur lors de l\'export: ' + error.message);
-    }
-}
-
-function generateCSV(timesheets) {
-    const headers = ['Date', 'Arrivée', 'Sortie', 'Heures', 'Statut', 'Notes'];
-    const rows = timesheets.map(ts => [
-        ts.date,
-        formatTime(ts.checkIn),
-        formatTime(ts.checkOut),
-        ts.totalHours || 0,
-        ts.status || '',
-        ts.notes || ''
-    ]);
-    
-    return [headers, ...rows]
-        .map(row => row.map(field => `"${field}"`).join(','))
-        .join('\n');
-}
-
-function downloadFile(content, filename, mimeType) {
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    URL.revokeObjectURL(url);
-}
-
-// ==================
-// INITIALISATION
-// ==================
-
-// Fonction d'initialisation à appeler au chargement
-function initBadgingInteractions() {
-    console.log('🔧 Initialisation des interactions BadgingManager');
-    
-    // Demander permission pour les notifications
-    requestNotificationPermission();
-    
-    // Gestionnaire du formulaire de note de pointage
-    const badgeNoteForm = document.getElementById('badgeNoteForm');
-    if (badgeNoteForm) {
-        badgeNoteForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await executeBadgeAction();
-        });
-    }
-    
-    // Fermer la modale en cliquant à côté
-    const badgeNoteModal = document.getElementById('badgeNoteModal');
-    if (badgeNoteModal) {
-        badgeNoteModal.addEventListener('click', (e) => {
-            if (e.target.id === 'badgeNoteModal') {
-                closeBadgeNoteModal();
-            }
-        });
-    }
-    
-    // Raccourcis clavier
-    document.addEventListener('keydown', (e) => {
-        // Échap pour fermer les modales
-        if (e.key === 'Escape') {
-            closeBadgeNoteModal();
-        }
-        
-        // Raccourcis pour le pointage (Ctrl + touches)
-        if (e.ctrlKey && window.location.hash.includes('/badging')) {
-            switch(e.key.toLowerCase()) {
-                case 'i': // Ctrl+I pour arrivée (In)
-                    e.preventDefault();
-                    handleCheckIn();
-                    break;
-                case 'o': // Ctrl+O pour sortie (Out)
-                    e.preventDefault();
-                    handleCheckOut();
-                    break;
-                case 'p': // Ctrl+P pour pause
-                    e.preventDefault();
-                    const status = badgingManager?.getCurrentStatus();
-                    if (status === 'working') {
-                        handleBreakStart();
-                    } else if (status === 'on-break') {
-                        handleBreakEnd();
-                    }
-                    break;
-            }
-        }
-    });
-    
-    console.log('✅ Interactions BadgingManager initialisées');
-}
-
-// Auto-initialisation quand le DOM est prêt
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBadgingInteractions);
-} else {
-    initBadgingInteractions();
-}
+        // ==================
+        // FONCTIONS ÉQUIPE
+        // ==================
         function openAddMemberModal() {
             document.getElementById('modalTitle').textContent = 'Ajouter un membre';
             document.getElementById('teamForm').reset();
@@ -1655,50 +2192,109 @@ if (document.readyState === 'loading') {
             }
         }
 
-        // Gestionnaire du formulaire
+        // ==================
+        // INITIALISATION
+        // ==================
         document.addEventListener('DOMContentLoaded', () => {
-            const teamForm = document.getElementById('teamForm');
-            
-            teamForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const formData = {
-                    email: document.getElementById('memberEmail').value,
-                    displayName: document.getElementById('memberName').value,
-                    role: document.getElementById('memberRole').value,
-                    department: document.getElementById('memberDepartment').value,
-                    position: document.getElementById('memberPosition').value
-                };
-                
-                try {
-                    const editId = teamForm.dataset.editId;
-                    
-                    if (editId) {
-                        await teamManager.updateMember(editId, formData);
-                        alert('Membre modifié avec succès');
-                        delete teamForm.dataset.editId;
-                    } else {
-                        await teamManager.addMember(formData);
-                        alert('Membre ajouté avec succès');
-                    }
-                    
-                    closeTeamModal();
-                } catch (error) {
-                    alert('Erreur: ' + error.message);
-                }
-            });
-            
-            // Fermer la modale en cliquant à côté
-            document.getElementById('teamModal').addEventListener('click', (e) => {
-                if (e.target.id === 'teamModal') {
-                    closeTeamModal();
-                }
-            });
-        });
+            console.log('🚀 SYNERGIA v3.0 Phase 4 - BadgingManager chargé');
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 SYNERGIA v3.0 - Solution hybride chargée');
+            // Gestionnaire du formulaire d'équipe
+            const teamForm = document.getElementById('teamForm');
+            if (teamForm) {
+                teamForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        email: document.getElementById('memberEmail').value,
+                        displayName: document.getElementById('memberName').value,
+                        role: document.getElementById('memberRole').value,
+                        department: document.getElementById('memberDepartment').value,
+                        position: document.getElementById('memberPosition').value
+                    };
+                    
+                    try {
+                        const editId = teamForm.dataset.editId;
+                        
+                        if (editId) {
+                            await teamManager.updateMember(editId, formData);
+                            alert('Membre modifié avec succès');
+                            delete teamForm.dataset.editId;
+                        } else {
+                            await teamManager.addMember(formData);
+                            alert('Membre ajouté avec succès');
+                        }
+                        
+                        closeTeamModal();
+                    } catch (error) {
+                        alert('Erreur: ' + error.message);
+                    }
+                });
+            }
+
+            // Gestionnaire du formulaire de note de pointage
+            const badgeNoteForm = document.getElementById('badgeNoteForm');
+            if (badgeNoteForm) {
+                badgeNoteForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await executeBadgeAction();
+                });
+            }
+            
+            // Fermer les modales en cliquant à côté
+            const teamModal = document.getElementById('teamModal');
+            if (teamModal) {
+                teamModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'teamModal') {
+                        closeTeamModal();
+                    }
+                });
+            }
+
+            const badgeNoteModal = document.getElementById('badgeNoteModal');
+            if (badgeNoteModal) {
+                badgeNoteModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'badgeNoteModal') {
+                        closeBadgeNoteModal();
+                    }
+                });
+            }
+
+            // Raccourcis clavier
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeTeamModal();
+                    closeBadgeNoteModal();
+                }
+                
+                if (e.ctrlKey && window.location.hash.includes('/badging')) {
+                    switch(e.key.toLowerCase()) {
+                        case 'i':
+                            e.preventDefault();
+                            handleCheckIn();
+                            break;
+                        case 'o':
+                            e.preventDefault();
+                            handleCheckOut();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            const status = badgingManager?.getCurrentStatus();
+                            if (status === 'working') {
+                                handleBreakStart();
+                            } else if (status === 'on-break') {
+                                handleBreakEnd();
+                            }
+                            break;
+                    }
+                }
+            });
+
+            // Nettoyage lors de la fermeture
+            window.addEventListener('beforeunload', () => {
+                if (window.badgingManager) {
+                    badgingManager.stopClock();
+                }
+            });
         });
     </script>
 </body>

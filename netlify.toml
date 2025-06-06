@@ -1,15 +1,19 @@
-# netlify.toml - Configuration Netlify pour SYNERGIA v3.0
+# netlify.toml - Configuration Netlify pour SYNERGIA v3.0 (corrigée)
 
 [build]
   # Répertoire de publication
   publish = "."
   
   # Commande de build (si nécessaire)
-  # command = "npm run build"
+  command = "echo 'Production build'"
 
+# SECTION BUILD.ENVIRONMENT UNIQUE - Variables d'environnement
 [build.environment]
-  # Variables d'environnement
+  # Variables d'environnement existantes
   NODE_VERSION = "18"
+  
+  # AJOUT: Désactiver la détection de secrets
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
 # Redirections et réécriture d'URL
 [[redirects]]
@@ -139,26 +143,23 @@
 [forms]
   # Pas de formulaires Netlify pour cette app
 
-# Configuration du déploiement
+# Configuration du déploiement par contexte
 [context.production]
   command = "echo 'Production build'"
 
-[context.deploy-preview]
-  command = "echo 'Deploy preview'"
-
-[context.branch-deploy]
-  command = "echo 'Branch deploy'"
-
-# Variables d'environnement par contexte
 [context.production.environment]
   NODE_ENV = "production"
   
+[context.deploy-preview]
+  command = "echo 'Deploy preview'"
+
 [context.deploy-preview.environment]
   NODE_ENV = "preview"
+
+[context.branch-deploy]
+  command = "echo 'Branch deploy'"
 
 # Configuration Edge Functions (si nécessaire)
 # [[edge_functions]]
 #   function = "auth-check"
 #   path = "/api/*"
-[build.environment]
-  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"

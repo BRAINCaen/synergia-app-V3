@@ -3,90 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGIA v3.0 - Gestion d'équipe moderne</title>
+    <title>SYNERGIA v3.0</title>
     
-    <!-- Meta tags -->
-    <meta name="description" content="Système de gestion d'équipe avec gamification et pointage en temps réel">
-    <meta name="theme-color" content="#6d28d9">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <!-- CSS Variables et Base -->
+    <link rel="stylesheet" href="./src/styles/variables.css">
+    <link rel="stylesheet" href="./src/styles/base.css">
+    <link rel="stylesheet" href="./src/styles/components.css">
     
-    <!-- External Libraries (seulement Font Awesome) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
+    <!-- Firebase CDN (temporaire pour corriger l'erreur) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-spinner"></div>
-        <div class="loading-content">
-            <h1><i class="fas fa-bolt"></i> SYNERGIA</h1>
-            <p>Chargement de l'application avec Vite...</p>
-            <div class="loading-progress" id="loading-progress">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- App Container -->
-    <div id="app" class="app-container" style="display: none;">
-        
+    <div id="app">
         <!-- Navigation -->
-        <nav id="main-navigation" class="main-nav">
-            <!-- Navigation sera injectée par NavigationComponent -->
-        </nav>
-
+        <nav id="sidebar" class="sidebar"></nav>
+        
         <!-- Main Content -->
         <main id="main-content" class="main-content">
-            
-            <!-- Header -->
-            <header id="page-header" class="page-header">
-                <!-- Header sera injecté par chaque vue -->
-            </header>
-
-            <!-- Content Area -->
-            <section id="content-area" class="content-area">
-                <!-- Contenu dynamique des vues -->
-                <div id="view-container" class="view-container">
-                    <div style="text-align: center; padding: 50px; color: white;">
-                        <h2>🚀 SYNERGIA v3.0 avec Vite</h2>
-                        <p>Migration réussie ! Firebase chargé via ES6 modules.</p>
-                        <div id="firebase-status" style="margin-top: 20px; padding: 10px; background: rgba(16, 185, 129, 0.2); border-radius: 8px;">
-                            ✅ Firebase initialisé
-                        </div>
-                    </div>
-                </div>
-            </section>
-
+            <div id="page-container"></div>
         </main>
-
-        <!-- Sidebar (optional) -->
-        <aside id="sidebar" class="sidebar" style="display: none;">
-            <!-- Sidebar contextuelle -->
-        </aside>
-
+        
+        <!-- Modal Container -->
+        <div id="modal-container"></div>
+        
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
     </div>
 
-    <!-- Modales Container -->
-    <div id="modals-container" class="modals-container">
-        <!-- Modales dynamiques -->
-    </div>
-
-    <!-- Notifications Container -->
-    <div id="notifications-container" class="notifications-container">
-        <!-- Notifications toast -->
-    </div>
-
-    <!-- Chat Overlay -->
-    <div id="chat-overlay" class="chat-overlay" style="display: none;">
-        <!-- Chat flottant -->
-    </div>
-
-    <!-- POINT D'ENTRÉE VITE - REMPLACE TOUS LES ANCIENS SCRIPTS -->
-    <script type="module" src="/src/js/main.js"></script>
+    <!-- Core Scripts -->
+    <script src="./src/js/core/config.js"></script>
+    <script src="./src/js/core/firebase.js"></script>
+    <script src="./src/js/core/router.js"></script>
+    <script src="./src/js/core/utils.js"></script>
+    
+    <!-- Managers -->
+    <script src="./src/js/managers/AuthManager.js"></script>
+    <script src="./src/js/managers/TeamManager.js"></script>
+    <script src="./src/js/managers/BadgingManager.js"></script>
+    <script src="./src/js/managers/ChatManager.js"></script>
+    <script src="./src/js/managers/PlanningManager.js"></script>
+    <script src="./src/js/managers/QuestManager.js"></script>
+    <script src="./src/js/managers/StoreManager.js"></script>
+    <script src="./src/js/managers/NotificationManager.js"></script>
+    
+    <!-- Components -->
+    <script src="./src/js/components/Navigation.js"></script>
+    <script src="./src/js/components/Modal.js"></script>
+    <script src="./src/js/components/Toast.js"></script>
+    <script src="./src/js/components/DataTable.js"></script>
+    <script src="./src/js/components/Chart.js"></script>
+    
+    <!-- Views -->
+    <script src="./src/js/views/Dashboard.js"></script>
+    <script src="./src/js/views/Team.js"></script>
+    <script src="./src/js/views/Badging.js"></script>
+    <script src="./src/js/views/Chat.js"></script>
+    <script src="./src/js/views/Planning.js"></script>
+    <script src="./src/js/views/Quests.js"></script>
+    <script src="./src/js/views/Store.js"></script>
+    <script src="./src/js/views/Settings.js"></script>
+    
+    <!-- App Initialization -->
+    <script src="./src/js/app.js"></script>
+    <script src="./src/js/main.js"></script>
 </body>
 </html>

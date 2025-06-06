@@ -1,226 +1,185 @@
 // src/js/main.js
 // Point d'entrée principal SYNERGIA v3.0 avec Vite
 
-// Import Firebase ES6 avec chemins absolus
+console.log('🚀 Démarrage SYNERGIA avec Vite...')
+
+// Import Firebase ES6 (remplace TOUS les CDN)
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 import { getAnalytics } from 'firebase/analytics'
 
-// Import Chart.js ES6
-import {
-    Chart,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    BarElement
-} from 'chart.js'
-
-// Registrer les composants Chart.js
-Chart.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-)
-
-// Exposer Chart globalement pour compatibilité
-window.Chart = Chart
-
-// Import des styles CSS
-import '../styles/main.css'
-
 // Configuration Firebase avec variables Vite
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "synergia-app-f27e7.firebaseapp.com",
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "synergia-app-f27e7",
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "synergia-app-f27e7.appspot.com",
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "201912738922",
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:201912738922:web:2fcc1e49293bb632899613",
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-EGJ79SCMWX"
 }
 
-// Configuration globale
-const CONFIG = {
-    version: '3.0.0',
-    environment: import.meta.env.DEV ? 'development' : 'production',
-    debug: import.meta.env.DEV,
-    firebase: firebaseConfig
-}
+console.log('🔥 Configuration Firebase:', firebaseConfig)
 
 // Initialiser Firebase
-console.log('🔥 Initialisation Firebase avec Vite...')
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const db = getFirestore(app)
 const storage = getStorage(app)
 const analytics = getAnalytics(app)
 
-// Exposer Firebase globalement pour compatibilité avec ton code existant
+console.log('✅ Firebase initialisé avec Vite!')
+
+// Exposer Firebase globalement pour compatibilité avec l'ancien code
 window.firebase = {
     app,
     auth: () => auth,
     firestore: () => db,
     storage: () => storage,
-    analytics: () => analytics
+    analytics: () => analytics,
+    // Ajout des fonctions compat
+    initializeApp: () => app,
+    getAuth: () => auth,
+    getFirestore: () => db
 }
 
-// Exposer les instances directement aussi
+// Exposer les instances directement
 window.auth = auth
 window.db = db
 window.storage = storage
+window.analytics = analytics
 
-console.log('✅ Firebase initialisé avec Vite!')
-
-// Logger simple pour remplacer temporairement
+// Logger
 const logger = {
-    info: (...args) => console.log('📘', ...args),
-    error: (...args) => console.error('❌', ...args),
-    warn: (...args) => console.warn('⚠️', ...args)
+    info: (...args) => console.log('📘 INFO:', ...args),
+    error: (...args) => console.error('❌ ERROR:', ...args),
+    warn: (...args) => console.warn('⚠️ WARN:', ...args)
 }
 
-// Animation de la barre de progression
+// Animation de chargement
 function animateLoadingProgress() {
     const progressBar = document.getElementById('progress-bar')
     if (!progressBar) return
     
     const steps = [
-        { percent: 20, duration: 300, label: 'Initialisation Firebase...' },
-        { percent: 40, duration: 200, label: 'Chargement des modules...' },
-        { percent: 60, duration: 300, label: 'Configuration Vite...' },
-        { percent: 80, duration: 200, label: 'Préparation de l\'interface...' },
-        { percent: 100, duration: 150, label: 'Finalisation...' }
+        { percent: 25, duration: 200, label: 'Initialisation Firebase...' },
+        { percent: 50, duration: 300, label: 'Configuration Vite...' },
+        { percent: 75, duration: 200, label: 'Chargement des modules...' },
+        { percent: 100, duration: 300, label: 'Finalisation...' }
     ]
     
     let currentStep = 0
     
     function nextStep() {
-        if (currentStep >= steps.length) return
+        if (currentStep >= steps.length) {
+            setTimeout(showApp, 500)
+            return
+        }
         
         const step = steps[currentStep]
         progressBar.style.width = `${step.percent}%`
         
         const statusElement = document.querySelector('.loading-content p')
-        if (statusElement && step.label) {
+        if (statusElement) {
             statusElement.textContent = step.label
         }
         
         currentStep++
-        
-        if (currentStep < steps.length) {
-            setTimeout(nextStep, step.duration)
-        } else {
-            // Quand terminé, charger l'ancienne logique
-            setTimeout(loadLegacyApp, 300)
-        }
+        setTimeout(nextStep, step.duration)
     }
     
-    setTimeout(nextStep, 100)
+    nextStep()
 }
 
-// Masquer l'écran de chargement
-function hideLoadingScreen() {
+// Afficher l'application
+function showApp() {
     const loadingScreen = document.getElementById('loading-screen')
     const appContainer = document.getElementById('app')
+    const firebaseStatus = document.getElementById('firebase-status')
+    
+    if (firebaseStatus) {
+        firebaseStatus.innerHTML = `
+            ✅ Firebase initialisé via Vite<br>
+            🔥 Auth: ${auth ? 'OK' : 'KO'}<br>
+            📄 Firestore: ${db ? 'OK' : 'KO'}<br>
+            📊 Analytics: ${analytics ? 'OK' : 'KO'}
+        `
+    }
     
     if (loadingScreen && appContainer) {
         loadingScreen.style.opacity = '0'
-        loadingScreen.style.transform = 'scale(0.95)'
-        
         setTimeout(() => {
             loadingScreen.style.display = 'none'
             appContainer.style.display = 'grid'
-            
-            appContainer.style.opacity = '0'
-            appContainer.style.transform = 'translateY(20px)'
-            
-            requestAnimationFrame(() => {
-                appContainer.style.transition = 'all 0.5s ease'
-                appContainer.style.opacity = '1'
-                appContainer.style.transform = 'translateY(0)'
-            })
+            appContainer.style.opacity = '1'
         }, 300)
     }
+    
+    logger.info('✅ SYNERGIA v3.0 démarré avec Vite!')
 }
 
-// Charger l'ancienne logique (temporaire, pour migration progressive)
-async function loadLegacyApp() {
-    try {
-        logger.info('🚀 Démarrage SYNERGIA v3.0 avec Vite')
-        
-        // Émettre l'événement firebase:ready pour les anciens managers
-        document.dispatchEvent(new CustomEvent('firebase:ready', { 
-            detail: { auth, db, storage, analytics } 
-        }))
-        
-        // Importer et démarrer tes managers existants
-        // (On les importera progressivement)
-        
-        // Pour l'instant, juste afficher l'app
-        hideLoadingScreen()
-        
-        logger.info('✅ SYNERGIA démarré avec Vite!')
-        
-        // Exposer pour debug
-        if (CONFIG.debug) {
-            window.CONFIG = CONFIG
-            logger.info('🔧 Mode debug - Firebase et Config disponibles sur window')
-        }
-        
-    } catch (error) {
-        logger.error('❌ Erreur lors de l\'initialisation:', error)
-        showCriticalError(error)
-    }
-}
-
-// Affichage d'erreur critique
-function showCriticalError(error) {
+// Gestion d'erreur
+function showError(error) {
+    logger.error('Erreur critique:', error)
+    
     const loadingScreen = document.getElementById('loading-screen')
     if (loadingScreen) {
         loadingScreen.innerHTML = `
-            <div style="text-align: center; color: white; max-width: 500px; padding: 2rem;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 2rem; color: #ef4444;"></i>
-                <h1>Erreur de démarrage</h1>
-                <p>Une erreur critique a empêché le démarrage de SYNERGIA.</p>
-                ${CONFIG.debug ? `
-                    <details style="margin-top: 2rem; text-align: left;">
-                        <summary>Détails de l'erreur (mode debug)</summary>
-                        <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; overflow: auto; margin-top: 1rem;">${error.stack || error.message}</pre>
-                    </details>
-                ` : ''}
-                <button onclick="location.reload()" style="margin-top: 2rem; padding: 1rem 2rem; background: #6d28d9; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">
-                    Recharger l'application
+            <div style="text-align: center; color: white; padding: 2rem;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                <h2>Erreur de démarrage</h2>
+                <p>Impossible d'initialiser SYNERGIA</p>
+                <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: left; font-size: 0.8rem;">
+${error.message}</pre>
+                <button onclick="location.reload()" style="padding: 1rem 2rem; background: #6d28d9; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    Recharger
                 </button>
             </div>
         `
     }
 }
 
-// Hot Module Replacement pour le développement
+// Écouter l'état d'authentification
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        logger.info('👤 Utilisateur connecté:', user.email)
+        // Émettre l'événement pour compatibilité
+        document.dispatchEvent(new CustomEvent('auth:login', { detail: { user } }))
+    } else {
+        logger.info('👤 Utilisateur déconnecté')
+        document.dispatchEvent(new CustomEvent('auth:logout'))
+    }
+})
+
+// Émettre l'événement firebase:ready pour les anciens managers
+document.dispatchEvent(new CustomEvent('firebase:ready', {
+    detail: { auth, db, storage, analytics }
+}))
+
+// Hot Module Replacement pour le dev
 if (import.meta.hot) {
     import.meta.hot.accept()
     logger.info('🔥 Hot Module Replacement activé')
 }
 
-// Démarrage de l'application
+// Démarrage
 document.addEventListener('DOMContentLoaded', () => {
-    logger.info('DOM prêt avec Vite, initialisation Firebase...')
-    animateLoadingProgress()
+    logger.info('📄 DOM prêt, démarrage de l\'animation...')
+    
+    try {
+        animateLoadingProgress()
+    } catch (error) {
+        showError(error)
+    }
 })
 
-// Gestion du rechargement
-window.addEventListener('beforeunload', () => {
-    logger.info('Nettoyage avant fermeture...')
-})
+// Exposer pour debug
+if (import.meta.env.DEV) {
+    window.firebaseConfig = firebaseConfig
+    window.logger = logger
+    logger.info('🔧 Mode debug - Variables exposées sur window')
+}
 
-console.log('🚀 SYNERGIA v3.0 avec Vite - Point d\'entrée chargé!')
+console.log('🎯 Point d\'entrée Vite chargé - Firebase ready!')

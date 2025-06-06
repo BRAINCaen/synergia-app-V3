@@ -1,82 +1,6 @@
 /**
-     * Charge les données de l'équipe
-     */
-    async loadTeamData() {
-        try {
-            if (window.teamManager) {
-                const members = await window.teamManager.loadTeamMembers();
-                this.renderTeamList(members);
-                this.updateTeamStats(members);
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement équipe:', error);
-            const teamList = document.getElementById('team-list');
-            if (teamList) {
-                teamList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Erreur de chargement</h3>
-                        <p>Impossible de charger les membres de l'équipe</p>
-                        <button onclick="window.router.loadTeamData()" class="btn btn-primary">
-                            Réessayer
-                        </button>
-                    </div>
-                `;
-            }
-        }
-    }
-
-    /**
-     * Rendu de la liste des membres
-     */
-    renderTeamList(members) {
-        const teamList = document.getElementById('team-list');
-        if (!teamList) return;
-
-        if (members.length === 0) {
-            teamList.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>Aucun membre</h3>
-                    <p>Commencez par ajouter des membres à votre équipe</p>
-                    <button onclick="openAddMemberModal()" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Ajouter un membre
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        const membersHTML = members.map(member => {
-            const presenceStatus = this.getPresenceStatus(member.lastSeen);
-            const avatar = member.photoURL || this.getDefaultAvatar(member.displayName, member.email);
-            
-            return `
-                <div class="team-member">
-                    <div class="member-avatar">
-                        <img src="${avatar}" alt="${member.displayName || member.email}" 
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">
-                            ${(member.displayName || member.email).charAt(0).toUpperCase()}
-                        </div>
-                    </div>
-                    <div class="member-info">
-                        <div class="member-name">${member.displayName || 'Nom non défini'}</div>
-                        <div class="member-email">${member.email}</div>
-                        <div class="member-meta">
-                            <span class="status-badge status-${member.role || 'employee'}">${this.formatRole(member.role)}</span>
-                            ${member.department ? `<span class="text-muted"><i class="fas fa-building"></i> ${member.department}</span>` : ''}
-                            ${member.position ? `<span class="text-muted"><i class="fas fa-briefcase"></i> ${member.position}</span>` : ''}
-                            <span class="status-dot ${presenceStatus}"></span>
-                            <span class="text-muted">${this.formatPresenceStatus(presenceStatus)}</span>
-                        </div>
-                    </div>
-                /**
  * Router pour SYNERGIA v3.0
  * Fichier: src/js/core/router.js
- * 
- * Gestion de la navigation et des routes
  */
 class Router {
     constructor() {
@@ -87,9 +11,6 @@ class Router {
         this.init();
     }
 
-    /**
-     * Initialise le routeur
-     */
     init() {
         this.setupRoutes();
         this.setupEventListeners();
@@ -97,13 +18,9 @@ class Router {
         
         console.log('🧭 Router initialisé');
         
-        // Naviguer vers la route initiale
         this.handleInitialRoute();
     }
 
-    /**
-     * Configure les routes de l'application
-     */
     setupRoutes() {
         this.routes = {
             '/': {
@@ -119,7 +36,8 @@ class Router {
             '/dashboard': {
                 title: 'Tableau de bord',
                 render: () => this.renderDashboard(),
-                requiresAuth: true
+                requiresAuth: true,
+                onLoad: () => this.loadDashboardData()
             },
             '/badging': {
                 title: 'Pointage',
@@ -136,39 +54,26 @@ class Router {
             '/planning': {
                 title: 'Planning',
                 render: () => this.renderPlanning(),
-                requiresAuth: true,
-                onLoad: () => this.loadPlanningData()
+                requiresAuth: true
             },
             '/chat': {
                 title: 'Chat',
                 render: () => this.renderChat(),
-                requiresAuth: true,
-                onLoad: () => this.loadChatData()
+                requiresAuth: true
             },
             '/quests': {
                 title: 'Quêtes',
                 render: () => this.renderQuests(),
-                requiresAuth: true,
-                onLoad: () => this.loadQuestsData()
-            },
-            '/profile': {
-                title: 'Profil',
-                render: () => this.renderProfile(),
                 requiresAuth: true
             }
         };
     }
 
-    /**
-     * Configure les écouteurs d'événements
-     */
     setupEventListeners() {
-        // Navigation par hash
         window.addEventListener('hashchange', () => {
             this.handleRoute();
         });
 
-        // Navigation par popstate (historique)
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.route) {
                 this.navigate(e.state.route, false);
@@ -177,7 +82,6 @@ class Router {
             }
         });
 
-        // Liens de navigation
         document.addEventListener('click', (e) => {
             if (e.target.matches('[data-route]')) {
                 e.preventDefault();
@@ -186,33 +90,21 @@ class Router {
             }
         });
 
-        // Écouter les changements d'authentification
         window.addEventListener('auth:stateChanged', (e) => {
             this.handleAuthStateChange(e.detail);
         });
     }
 
-    /**
-     * Gère la route initiale au chargement
-     */
     handleInitialRoute() {
         const hash = window.location.hash.slice(1) || '/';
         this.navigate(hash, false);
     }
 
-    /**
-     * Gère les changements de route
-     */
     handleRoute() {
         const hash = window.location.hash.slice(1) || '/';
         this.navigate(hash, false);
     }
 
-    /**
-     * Navigue vers une route
-     * @param {string} path - Chemin de la route
-     * @param {boolean} pushState - Ajouter à l'historique
-     */
     navigate(path, pushState = true) {
         try {
             const route = this.routes[path];
@@ -223,52 +115,36 @@ class Router {
                 return;
             }
 
-            // Vérifier l'authentification
             if (route.requiresAuth && !this.isAuthenticated()) {
                 console.log('🔒 Authentification requise, redirection vers login');
                 this.navigate('/login');
                 return;
             }
 
-            // Éviter la navigation inutile
             if (this.currentRoute === path) {
                 return;
             }
 
             console.log(`🧭 Navigation vers: ${path}`);
 
-            // Nettoyer la route précédente
             this.cleanup();
-
-            // Mettre à jour l'état
             this.currentRoute = path;
             
-            // Mettre à jour l'URL
             if (pushState) {
                 window.history.pushState({ route: path }, route.title, `#${path}`);
             }
             window.location.hash = path;
 
-            // Mettre à jour le titre
             document.title = `${route.title} - SYNERGIA v3.0`;
 
-            // Rendre la page
             route.render();
 
-            // Charger les données spécifiques
             if (route.onLoad) {
                 route.onLoad();
             }
 
-            // Mettre à jour la navigation
             this.updateNavigation();
-
-            // Émettre événement
-            this.emit('route:changed', { 
-                path, 
-                route,
-                title: route.title 
-            });
+            this.emit('route:changed', { path, route, title: route.title });
 
         } catch (error) {
             console.error('❌ Erreur navigation:', error);
@@ -276,64 +152,43 @@ class Router {
         }
     }
 
-    /**
-     * Vérifie si l'utilisateur est authentifié
-     * @returns {boolean}
-     */
     isAuthenticated() {
         return window.authManager && window.authManager.isAuthenticated();
     }
 
-    /**
-     * Gère les changements d'état d'authentification
-     * @param {Object} authState 
-     */
     handleAuthStateChange(authState) {
         if (authState.isAuthenticated) {
-            // Utilisateur connecté
             if (this.currentRoute === '/login' || this.currentRoute === '/') {
                 this.navigate('/dashboard');
             }
         } else {
-            // Utilisateur déconnecté
             if (this.currentRoute !== '/login' && this.currentRoute !== '/') {
                 this.navigate('/login');
             }
         }
     }
 
-    /**
-     * Met à jour la navigation active
-     */
     updateNavigation() {
-        // Mettre à jour les onglets actifs
         document.querySelectorAll('.nav-tab').forEach(tab => {
             const route = tab.getAttribute('data-route');
             tab.classList.toggle('active', route === this.currentRoute);
         });
 
-        // Mettre à jour les liens de navigation
         document.querySelectorAll('[data-route]').forEach(link => {
             const route = link.getAttribute('data-route');
             link.classList.toggle('active', route === this.currentRoute);
         });
     }
 
-    /**
-     * Nettoie la route précédente
-     */
     cleanup() {
-        // Arrêter les timers ou processus en cours
         if (window.badgingManager) {
             window.badgingManager.stopClock();
         }
 
-        // Fermer les modales ouvertes
         document.querySelectorAll('.modal.show').forEach(modal => {
             modal.classList.remove('show');
         });
 
-        // Nettoyer les écouteurs temporaires
         document.querySelectorAll('[data-temp-listener]').forEach(el => {
             el.remove();
         });
@@ -343,9 +198,6 @@ class Router {
     // RENDU DES PAGES
     // ==================
 
-    /**
-     * Rend la page d'accueil
-     */
     renderHome() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -363,9 +215,6 @@ class Router {
         `;
     }
 
-    /**
-     * Rend la page de connexion
-     */
     renderLogin() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -382,24 +231,6 @@ class Router {
                                 <i class="fab fa-google"></i>
                                 Continuer avec Google
                             </button>
-                            
-                            <div class="divider">
-                                <span>ou</span>
-                            </div>
-                            
-                            <form id="loginForm" style="margin-top: 20px;">
-                                <div class="form-group">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" placeholder="votre.email@entreprise.com" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Mot de passe</label>
-                                    <input type="password" class="form-control" placeholder="••••••••" required>
-                                </div>
-                                <button type="submit" class="btn btn-secondary" style="width: 100%;">
-                                    Se connecter
-                                </button>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -407,9 +238,6 @@ class Router {
         `;
     }
 
-    /**
-     * Rend le tableau de bord
-     */
     renderDashboard() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -469,13 +297,8 @@ class Router {
                 </div>
             </div>
         `;
-
-        this.loadDashboardData();
     }
 
-    /**
-     * Rend la page de pointage
-     */
     renderBadging() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -523,9 +346,6 @@ class Router {
         `;
     }
 
-    /**
-     * Rend la page équipe
-     */
     renderTeam() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -573,9 +393,6 @@ class Router {
         `;
     }
 
-    /**
-     * Rend la page planning
-     */
     renderPlanning() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -584,44 +401,16 @@ class Router {
                 ${this.renderNavigation()}
                 
                 <div class="planning-content">
-                    <div class="planning-header">
-                        <div class="planning-nav">
-                            <button id="prev-period" class="btn btn-secondary">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <h2 id="current-period">Chargement...</h2>
-                            <button id="next-period" class="btn btn-secondary">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="planning-views">
-                            <button class="view-btn btn btn-sm" data-view="day">Jour</button>
-                            <button class="view-btn btn btn-sm active" data-view="week">Semaine</button>
-                            <button class="view-btn btn btn-sm" data-view="month">Mois</button>
-                        </div>
-                        
-                        <div class="planning-actions">
-                            <button id="add-shift-btn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Shift
-                            </button>
-                            <button id="add-event-btn" class="btn btn-success">
-                                <i class="fas fa-calendar-plus"></i> Événement
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="planning-container">
-                        <div class="loading-spinner"></div>
+                    <div class="empty-state">
+                        <i class="fas fa-calendar"></i>
+                        <h3>Planning</h3>
+                        <p>Fonctionnalité en développement</p>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    /**
-     * Rend la page chat
-     */
     renderChat() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -630,15 +419,16 @@ class Router {
                 ${this.renderNavigation()}
                 
                 <div class="chat-content">
-                    <p>Chat en développement...</p>
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <h3>Chat</h3>
+                        <p>Fonctionnalité en développement</p>
+                    </div>
                 </div>
             </div>
         `;
     }
 
-    /**
-     * Rend la page quêtes
-     */
     renderQuests() {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -647,32 +437,16 @@ class Router {
                 ${this.renderNavigation()}
                 
                 <div class="quests-content">
-                    <p>Quêtes en développement...</p>
+                    <div class="empty-state">
+                        <i class="fas fa-scroll"></i>
+                        <h3>Quêtes</h3>
+                        <p>Fonctionnalité en développement</p>
+                    </div>
                 </div>
             </div>
         `;
     }
 
-    /**
-     * Rend la page profil
-     */
-    renderProfile() {
-        const app = document.getElementById('app');
-        app.innerHTML = `
-            <div class="container">
-                ${this.renderHeader()}
-                ${this.renderNavigation()}
-                
-                <div class="profile-content">
-                    <p>Profil en développement...</p>
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Rend une page d'erreur
-     */
     renderError(message) {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -692,9 +466,6 @@ class Router {
     // COMPOSANTS COMMUNS
     // ==================
 
-    /**
-     * Rend l'en-tête de l'application
-     */
     renderHeader() {
         const user = window.authManager?.getCurrentUser();
         const userProfile = window.authManager?.getUserProfile();
@@ -710,12 +481,12 @@ class Router {
                             <div class="user-avatar">
                                 ${userProfile?.photoURL ? 
                                     `<img src="${userProfile.photoURL}" alt="Avatar">` : 
-                                    userProfile?.displayName?.charAt(0) || user.email.charAt(0)
+                                    (userProfile?.displayName?.charAt(0) || user.email.charAt(0)).toUpperCase()
                                 }
                             </div>
                             <div class="user-info">
                                 <span class="user-name">${userProfile?.displayName || user.email}</span>
-                                <span class="user-role status-badge status-${userProfile?.role || 'employee'}">${userProfile?.role || 'employee'}</span>
+                                <span class="user-role status-badge status-${userProfile?.role || 'employee'}">${this.formatRole(userProfile?.role)}</span>
                             </div>
                         </div>
                         <button onclick="handleSignOut()" class="btn btn-secondary btn-sm">
@@ -728,9 +499,6 @@ class Router {
         `;
     }
 
-    /**
-     * Rend la navigation principale
-     */
     renderNavigation() {
         return `
             <div class="nav-tabs">
@@ -766,18 +534,13 @@ class Router {
     // CHARGEMENT DES DONNÉES
     // ==================
 
-    /**
-     * Charge les données du tableau de bord
-     */
     async loadDashboardData() {
         try {
-            // Statistiques de base
             document.getElementById('dashboard-members').textContent = '5';
             document.getElementById('dashboard-present').textContent = '3';
             document.getElementById('dashboard-hours').textContent = '32h';
             document.getElementById('dashboard-quests').textContent = '2';
 
-            // Activité récente (exemple)
             const recentActivity = document.getElementById('recent-activity');
             recentActivity.innerHTML = `
                 <div class="activity-list">
@@ -804,9 +567,6 @@ class Router {
         }
     }
 
-    /**
-     * Charge les données de pointage
-     */
     async loadBadgingData() {
         try {
             if (window.badgingManager) {
@@ -814,7 +574,6 @@ class Router {
                 await window.badgingManager.loadTodaysTimesheet();
                 this.updateBadgingStatus();
                 
-                // Écouter les changements de statut
                 window.addEventListener('badge:checkin', () => this.updateBadgingStatus());
                 window.addEventListener('badge:checkout', () => this.updateBadgingStatus());
                 window.addEventListener('badge:breakstart', () => this.updateBadgingStatus());
@@ -825,9 +584,6 @@ class Router {
         }
     }
 
-    /**
-     * Met à jour l'affichage du statut de pointage
-     */
     updateBadgingStatus() {
         const statusContainer = document.getElementById('today-status');
         if (!statusContainer) return;
@@ -844,7 +600,6 @@ class Router {
         const stats = window.badgingManager.getTodaysStats();
         const currentStatus = window.badgingManager.getCurrentStatus();
 
-        let statusHTML = '';
         let statusColor = '';
         let statusText = '';
 
@@ -867,7 +622,7 @@ class Router {
                 break;
         }
 
-        statusHTML = `
+        const statusHTML = `
             <div class="status-overview">
                 <div class="current-status">
                     <h4>Statut actuel</h4>
@@ -910,18 +665,6 @@ class Router {
         statusContainer.innerHTML = statusHTML;
     }
 
-    /**
-     * Formate les heures
-     */
-    formatHours(hours) {
-        const h = Math.floor(hours);
-        const m = Math.round((hours - h) * 60);
-        return `${h}h${m.toString().padStart(2, '0')}`;
-    }
-
-    /**
-     * Charge les données de l'équipe
-     */
     async loadTeamData() {
         try {
             if (window.teamManager) {
@@ -947,9 +690,6 @@ class Router {
         }
     }
 
-    /**
-     * Rendu de la liste des membres
-     */
     renderTeamList(members) {
         const teamList = document.getElementById('team-list');
         if (!teamList) return;
@@ -1008,9 +748,6 @@ class Router {
         teamList.innerHTML = membersHTML;
     }
 
-    /**
-     * Met à jour les statistiques de l'équipe
-     */
     updateTeamStats(members) {
         const stats = this.calculateTeamStats(members);
         
@@ -1029,9 +766,6 @@ class Router {
         });
     }
 
-    /**
-     * Calcule les statistiques de l'équipe
-     */
     calculateTeamStats(members) {
         const total = members.length;
         const active = members.filter(m => m.status !== 'inactive').length;
@@ -1041,9 +775,10 @@ class Router {
         return { total, active, departments, online };
     }
 
-    /**
-     * Formate le rôle pour affichage
-     */
+    // ==================
+    // UTILITAIRES
+    // ==================
+
     formatRole(role) {
         const roles = {
             'admin': 'Administrateur',
@@ -1053,9 +788,6 @@ class Router {
         return roles[role] || 'Employé';
     }
 
-    /**
-     * Formate le statut de présence
-     */
     formatPresenceStatus(status) {
         const statuses = {
             'online': 'En ligne',
@@ -1065,9 +797,6 @@ class Router {
         return statuses[status] || 'Hors ligne';
     }
 
-    /**
-     * Obtient le statut de présence
-     */
     getPresenceStatus(lastSeen) {
         if (!lastSeen) return 'offline';
         
@@ -1075,18 +804,12 @@ class Router {
         const lastSeenDate = new Date(lastSeen);
         const diff = now - lastSeenDate;
         
-        // En ligne si vu dans les 5 dernières minutes
         if (diff < 5 * 60 * 1000) return 'online';
-        
-        // Absent si vu dans les 30 dernières minutes
         if (diff < 30 * 60 * 1000) return 'away';
         
         return 'offline';
     }
 
-    /**
-     * Génère un avatar par défaut
-     */
     getDefaultAvatar(name, email) {
         const initial = name ? name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
         const colors = ['#e94560', '#f39c12', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c'];
@@ -1100,87 +823,31 @@ class Router {
         `)}`;
     }
 
-    /**
-     * Charge les données du planning
-     */
-    async loadPlanningData() {
-        try {
-            if (window.planningManager) {
-                await window.planningManager.loadPlanningData();
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement planning:', error);
-        }
-    }
-
-    /**
-     * Charge les données du chat
-     */
-    async loadChatData() {
-        try {
-            if (window.chatManager) {
-                await window.chatManager.loadConversations();
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement chat:', error);
-        }
-    }
-
-    /**
-     * Charge les données des quêtes
-     */
-    async loadQuestsData() {
-        try {
-            if (window.questManager) {
-                await window.questManager.refreshUserQuests();
-            }
-        } catch (error) {
-            console.error('❌ Erreur chargement quêtes:', error);
-        }
-    }
-
-    // ==================
-    // UTILITAIRES
-    // ==================
-
-    /**
-     * Formate une heure
-     */
     formatTime(date) {
         if (!date) return '';
         if (typeof date === 'string') date = new Date(date);
         return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    /**
-     * Émet un événement
-     * @param {string} eventName 
-     * @param {*} data 
-     */
+    formatHours(hours) {
+        const h = Math.floor(hours);
+        const m = Math.round((hours - h) * 60);
+        return `${h}h${m.toString().padStart(2, '0')}`;
+    }
+
     emit(eventName, data) {
         const event = new CustomEvent(eventName, { detail: data });
         window.dispatchEvent(event);
     }
 
-    /**
-     * Récupère la route actuelle
-     * @returns {string}
-     */
     getCurrentRoute() {
         return this.currentRoute;
     }
 
-    /**
-     * Récupère toutes les routes
-     * @returns {Object}
-     */
     getRoutes() {
         return { ...this.routes };
     }
 
-    /**
-     * Nettoyage lors de la destruction
-     */
     destroy() {
         this.cleanup();
         this.routes = {};

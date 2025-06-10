@@ -44,3 +44,22 @@ export async function loadDashboard(containerId, user) {
     // Optionnel : planning à venir
     if (planningBtn) {
         planningBtn.onclick = () => {
+            content.innerHTML = `<div class="widget-card">Module planning à venir…</div>`;
+            homeBtn.classList.remove("active");
+            teamBtn.classList.remove("active");
+            planningBtn.classList.add("active");
+        };
+    }
+
+    // Déconnexion
+    const logoutBtn = document.getElementById("nav-logout");
+    const manager = new AuthManager(auth);
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+            await manager.signOut();
+        });
+    }
+
+    // Affiche l'accueil par défaut
+    showHome();
+}

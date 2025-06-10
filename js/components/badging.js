@@ -32,6 +32,51 @@ export async function loadBadgingComponent(containerId, user) {
         });
         commentInput.value = "";
     };
+badgeBtn.onclick = async () => {
+    const type = typeSelect.value;
+    const comment = commentInput.value.trim();
+    // Charge les types pour récupérer la règle
+    badgingManager.subscribeToTypes(types => {
+        const t = types.find(tt => tt.name === type);
+        if (t && t.rules) {
+            // Récupère la journée courante
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(startOfDay);
+            endOfDay.setHours(23, 59, 59, 999);
+
+            badgingManager.getPresencesByUserAndDate(user.email, startOfDay.getTime(), endOfDay.getTime())
+                .then(jourPresences => {
+                    // Calcule la durée totale, pauses, etc.
+                    // Exemple simplifié :
+                    const nbPres = jourPresences.length + 1;
+                    if (t.rules.maxPointagesPerDay && nbPres > t.rules.maxPointagesPerDay) {
+                        alert("⚠️ Tu as dépassé le nombre de pointages max pour ce type aujourd’hui !");
+                        return;
+                    }
+                    // Ajoute la présence
+                    badgingManager.addPresence({
+                        user: user.email,
+                        type,
+                        timestamp: Date.now(),
+                        comment,
+                        validated: false
+                    });
+                    commentInput.value = "";
+                });
+        } else {
+            // Pas de règles : badge normalement
+            badgingManager.addPresence({
+                user: user.email,
+                type,
+                timestamp: Date.now(),
+                comment,
+                validated: false
+            });
+            commentInput.value = "";
+        }
+    });
+};
 
     // Historique de pointage de l'utilisateur
     badgingManager.subscribeToUserPresences(user.email, presences => {

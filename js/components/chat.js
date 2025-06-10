@@ -1,53 +1,45 @@
 import { ChatManager } from "../managers/chat-manager.js";
-
 const chatManager = new ChatManager();
 
 export async function loadChatComponent(containerId, user) {
-    // Ajoute le bouton flottant chat si pas déjà là
-    if (!document.getElementById("chat-float-btn")) {
-        const btn = document.createElement("button");
-        btn.id = "chat-float-btn";
-        btn.innerHTML = '<span>💬</span>';
-        btn.title = "Ouvrir le chat";
-        document.body.appendChild(btn);
+    // Charge le HTML du chat multi-salons
+    const res = await fetch("js/components/chat.html");
+    const html = await res.text();
+    document.getElementById(containerId).innerHTML = html;
+
+    const roomsList = document.getElementById("chat-rooms-list");
+    const createRoomForm = document.getElementById("chat-create-room-form");
+    const createRoomInput = document.getElementById("chat-new-room");
+    const messagesDiv = document.getElementById("chat-messages");
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+
+    let currentRoomId = null;
+    let roomUnsub = null;
+
+    // Affiche la liste des salons
+    function renderRooms(rooms) {
+        roomsList.innerHTML = "";
+        rooms.forEach(room => {
+            const btn = document.createElement("button");
+            btn.className = "chat-room-btn";
+            btn.textContent = `#${room.name}`;
+            btn.onclick = () => switchRoom(room.id, room.name);
+            roomsList.appendChild(btn);
+        });
     }
-    // Ajoute le panneau chat si pas déjà là
-    if (!document.getElementById("chat-floating-panel")) {
-        const panel = document.createElement("div");
-        panel.id = "chat-floating-panel";
-        panel.innerHTML = `
-            <div id="chat-header">
-                <span>💬 Chat d'équipe</span>
-                <button id="chat-close-btn" title="Fermer">&times;</button>
-            </div>
-            <div id="chat-messages"></div>
-            <form id="chat-form" autocomplete="off">
-                <input id="chat-input" type="text" maxlength="300" placeholder="Écrire un message..." autocomplete="off" required>
-                <button type="submit" title="Envoyer">Envoyer</button>
-            </form>
-        `;
-        document.body.appendChild(panel);
+
+    // Passer à un salon (et charger les messages)
+    function switchRoom(roomId, roomName) {
+        if (roomUnsub) { roomUnsub(); }
+        currentRoomId = roomId;
+        document.getElementById("chat-current-room").textContent = "#" + roomName;
+        messagesDiv.innerHTML = "<em>Chargement…</em>";
+        roomUnsub = chatManager.subscribeToMessages(roomId, renderMessages);
     }
 
-    // Affiche ou cache le chat
-    const floatBtn = document.getElementById("chat-float-btn");
-    const panel = document.getElementById("chat-floating-panel");
-    const closeBtn = document.getElementById("chat-close-btn");
-
-    floatBtn.onclick = () => {
-        panel.classList.toggle("open");
-        if (panel.classList.contains("open")) {
-            setTimeout(() => {
-                const messagesDiv = document.getElementById("chat-messages");
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }, 120);
-        }
-    };
-    closeBtn.onclick = () => panel.classList.remove("open");
-
-    // Charge l'historique et live updates
+    // Affiche messages d'un salon
     function renderMessages(messages) {
-        const messagesDiv = document.getElementById("chat-messages");
         messagesDiv.innerHTML = "";
         messages.forEach(msg => {
             messagesDiv.innerHTML += `
@@ -63,21 +55,16 @@ export async function loadChatComponent(containerId, user) {
                 </div>
             `;
         });
-        // scroll auto
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    chatManager.subscribeToMessages(renderMessages);
-
     // Envoi message
-    const form = document.getElementById("chat-form");
-    const input = document.getElementById("chat-input");
-    form.onsubmit = async (e) => {
+    chatForm.onsubmit = async (e) => {
         e.preventDefault();
-        const text = input.value.trim();
-        if (!text) return;
-        input.value = "";
-        await chatManager.sendMessage({
+        const text = chatInput.value.trim();
+        if (!text || !currentRoomId) return;
+        chatInput.value = "";
+        await chatManager.sendMessage(currentRoomId, {
             email: user.email,
             name: user.displayName || user.email.split("@")[0],
             avatar: (user.photoURL ? `<img src="${user.photoURL}" style="width:1.7em;height:1.7em;border-radius:50%">` : user.displayName ? user.displayName[0].toUpperCase() : "👤"),
@@ -85,16 +72,22 @@ export async function loadChatComponent(containerId, user) {
             timestamp: Date.now()
         });
     };
-    // Enter pour envoyer
-    input.onkeydown = e => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            form.requestSubmit();
-            e.preventDefault();
-        }
+
+    // Créer salon
+    createRoomForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const name = createRoomInput.value.trim();
+        if (!name) return;
+        await chatManager.createRoom(name);
+        createRoomInput.value = "";
     };
 
-    // (Optionnel) charge aussi un panneau principal si tu veux
-    if (containerId && document.getElementById(containerId)) {
-        document.getElementById(containerId).innerHTML = "<div style='padding:2em;text-align:center;color:#8b8b8b'>Le chat est accessible en bas à droite 🗨️</div>";
-    }
+    // Affiche les salons en live
+    chatManager.subscribeToRooms(rooms => {
+        renderRooms(rooms);
+        // Par défaut, sélectionne le 1er salon s’il y en a
+        if (!currentRoomId && rooms.length) {
+            switchRoom(rooms[0].id, rooms[0].name);
+        }
+    });
 }

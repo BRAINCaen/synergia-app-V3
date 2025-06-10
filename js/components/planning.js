@@ -1,26 +1,53 @@
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { app } from "../core/firebase-manager.js";
+import { PlanningManager } from "../managers/planning-manager.js";
+const manager = new PlanningManager();
 
-const db = getFirestore(app);
-const PLANNING_COLLECTION = "planning";
+export async function loadPlanningComponent(containerId) {
+    const res = await fetch("js/components/planning.html");
+    const html = await res.text();
+    document.getElementById(containerId).innerHTML = html;
 
-export class PlanningManager {
-    subscribeToPlanning(callback) {
-        const q = collection(db, PLANNING_COLLECTION);
-        return onSnapshot(q, snapshot => {
-            const planning = [];
-            snapshot.forEach(doc => {
-                planning.push({ id: doc.id, ...doc.data() });
-            });
-            callback(planning);
+    function renderTable(planning) {
+        const tbody = document.getElementById("planning-table-body");
+        tbody.innerHTML = "";
+        planning.forEach(shift => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${shift.date}</td>
+                <td>${shift.name}</td>
+                <td>${shift.start}</td>
+                <td>${shift.end}</td>
+                <td>
+                    <button class="delete-btn" data-id="${shift.id}" style="color:#e53e3e;">Supprimer</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        Array.from(document.getElementsByClassName("delete-btn")).forEach(btn => {
+            btn.onclick = async () => {
+                await manager.deleteShift(btn.dataset.id);
+            };
         });
     }
 
-    async addShift(shift) {
-        await addDoc(collection(db, PLANNING_COLLECTION), shift);
-    }
+    manager.subscribeToPlanning(renderTable);
 
-    async deleteShift(id) {
-        await deleteDoc(doc(db, PLANNING_COLLECTION, id));
-    }
+    // Ajout shift (modal)
+    const modal = document.getElementById("planning-modal");
+    const addBtn = document.getElementById("add-shift-btn");
+    const cancelBtn = document.getElementById("planning-cancel-btn");
+    const form = document.getElementById("planning-form");
+
+    addBtn.onclick = () => { form.reset(); modal.style.display = "block"; };
+    cancelBtn.onclick = () => modal.style.display = "none";
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        await manager.addShift({
+            date: document.getElementById("shift-date").value,
+            name: document.getElementById("shift-name").value,
+            start: document.getElementById("shift-start").value,
+            end: document.getElementById("shift-end").value
+        });
+        modal.style.display = "none";
+    };
 }

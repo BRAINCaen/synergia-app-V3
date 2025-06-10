@@ -14,9 +14,14 @@ import { loadSettingsComponent } from "./settings.js";
 import { loadLeaderboardComponent } from "./leaderboard.js";
 
 export async function loadDashboard(containerId, user) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        alert("Erreur : container principal non trouvé.");
+        return;
+    }
     const res = await fetch("js/components/dashboard.html");
     const html = await res.text();
-    document.getElementById(containerId).innerHTML = html;
+    container.innerHTML = html;
 
     const homeBtn = document.getElementById("nav-home");
     const teamBtn = document.getElementById("nav-team");
@@ -31,41 +36,60 @@ export async function loadDashboard(containerId, user) {
     const profileBtn = document.getElementById("nav-profile");
     const settingsBtn = document.getElementById("nav-settings");
     const leaderboardBtn = document.getElementById("nav-leaderboard");
+    const logoutBtn = document.getElementById("nav-logout");
     const content = document.getElementById("dashboard-content");
+    const welcome = document.getElementById("dashboard-welcome");
 
-    function clearActive() {
-        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn, analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn].forEach(btn => btn?.classList.remove("active"));
+    if (user && welcome) {
+        welcome.innerHTML = `Bienvenue <b>${user.email}</b> 👋`;
     }
 
-    function showHome() { content.innerHTML = `<div id="dashboard-widgets"><div class="widget-card">Statistiques et widgets à venir…</div></div>`; clearActive(); homeBtn.classList.add("active"); }
-    async function showTeam() { content.innerHTML = ""; await loadTeamComponent("dashboard-content"); clearActive(); teamBtn.classList.add("active"); }
-    async function showPlanning() { content.innerHTML = ""; await loadPlanningComponent("dashboard-content"); clearActive(); planningBtn.classList.add("active"); }
-    async function showBadging() { content.innerHTML = ""; await loadBadgingComponent("dashboard-content", user); clearActive(); badgingBtn.classList.add("active"); }
-    async function showQuests() { content.innerHTML = ""; await loadQuestsComponent("dashboard-content"); clearActive(); questsBtn.classList.add("active"); }
-    async function showChat() { content.innerHTML = ""; await loadChatComponent("dashboard-content", user); clearActive(); chatBtn.classList.add("active"); }
-    async function showStore() { content.innerHTML = ""; await loadStoreComponent("dashboard-content"); clearActive(); storeBtn.classList.add("active"); }
-    async function showAnalytics() { content.innerHTML = ""; await loadAnalyticsComponent("dashboard-content"); clearActive(); analyticsBtn.classList.add("active"); }
-    async function showWallet() { content.innerHTML = ""; await loadWalletComponent("dashboard-content", user); clearActive(); walletBtn.classList.add("active"); }
-    async function showRoles() { content.innerHTML = ""; await loadRolesComponent("dashboard-content"); clearActive(); rolesBtn.classList.add("active"); }
-    async function showProfile() { content.innerHTML = ""; await loadProfileComponent("dashboard-content", user); clearActive(); profileBtn.classList.add("active"); }
-    async function showSettings() { content.innerHTML = ""; await loadSettingsComponent("dashboard-content", user); clearActive(); settingsBtn.classList.add("active"); }
-    async function showLeaderboard() { content.innerHTML = ""; await loadLeaderboardComponent("dashboard-content"); clearActive(); leaderboardBtn.classList.add("active"); }
+    function clearActive() {
+        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn,
+        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn]
+        .forEach(btn => btn?.classList.remove("active"));
+    }
 
-    homeBtn.onclick = showHome;
-    teamBtn.onclick = showTeam;
-    planningBtn.onclick = showPlanning;
-    badgingBtn.onclick = showBadging;
-    questsBtn.onclick = showQuests;
-    chatBtn.onclick = showChat;
-    storeBtn.onclick = showStore;
-    analyticsBtn.onclick = showAnalytics;
-    walletBtn.onclick = showWallet;
-    rolesBtn.onclick = showRoles;
-    profileBtn.onclick = showProfile;
-    settingsBtn.onclick = showSettings;
-    leaderboardBtn.onclick = showLeaderboard;
+    function showHome() {
+        content.innerHTML = `<div id="dashboard-widgets">
+            <div class="widget-card">Statistiques et widgets à venir…</div>
+        </div>`;
+        clearActive();
+        homeBtn?.classList.add("active");
+    }
+    async function showTeam() { content.innerHTML = ""; await loadTeamComponent("dashboard-content"); clearActive(); teamBtn?.classList.add("active"); }
+    async function showPlanning() { content.innerHTML = ""; await loadPlanningComponent("dashboard-content"); clearActive(); planningBtn?.classList.add("active"); }
+    async function showBadging() { content.innerHTML = ""; await loadBadgingComponent("dashboard-content", user); clearActive(); badgingBtn?.classList.add("active"); }
+    async function showQuests() { content.innerHTML = ""; await loadQuestsComponent("dashboard-content"); clearActive(); questsBtn?.classList.add("active"); }
+    async function showChat() { content.innerHTML = ""; await loadChatComponent("dashboard-content", user); clearActive(); chatBtn?.classList.add("active"); }
+    async function showStore() { content.innerHTML = ""; await loadStoreComponent("dashboard-content", user); clearActive(); storeBtn?.classList.add("active"); }
+    async function showAnalytics() { content.innerHTML = ""; await loadAnalyticsComponent("dashboard-content"); clearActive(); analyticsBtn?.classList.add("active"); }
+    async function showWallet() { content.innerHTML = ""; await loadWalletComponent("dashboard-content", user); clearActive(); walletBtn?.classList.add("active"); }
+    async function showRoles() { content.innerHTML = ""; await loadRolesComponent("dashboard-content"); clearActive(); rolesBtn?.classList.add("active"); }
+    async function showProfile() { content.innerHTML = ""; await loadProfileComponent("dashboard-content", user); clearActive(); profileBtn?.classList.add("active"); }
+    async function showSettings() { content.innerHTML = ""; await loadSettingsComponent("dashboard-content", user); clearActive(); settingsBtn?.classList.add("active"); }
+    async function showLeaderboard() { content.innerHTML = ""; await loadLeaderboardComponent("dashboard-content"); clearActive(); leaderboardBtn?.classList.add("active"); }
 
-    // Auth, etc. (garde ton code logout habituel)
-    // ...
+    if (homeBtn) homeBtn.onclick = showHome;
+    if (teamBtn) teamBtn.onclick = showTeam;
+    if (planningBtn) planningBtn.onclick = showPlanning;
+    if (badgingBtn) badgingBtn.onclick = showBadging;
+    if (questsBtn) questsBtn.onclick = showQuests;
+    if (chatBtn) chatBtn.onclick = showChat;
+    if (storeBtn) storeBtn.onclick = showStore;
+    if (analyticsBtn) analyticsBtn.onclick = showAnalytics;
+    if (walletBtn) walletBtn.onclick = showWallet;
+    if (rolesBtn) rolesBtn.onclick = showRoles;
+    if (profileBtn) profileBtn.onclick = showProfile;
+    if (settingsBtn) settingsBtn.onclick = showSettings;
+    if (leaderboardBtn) leaderboardBtn.onclick = showLeaderboard;
+
+    const manager = new AuthManager(auth);
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+            await manager.signOut();
+        });
+    }
+
     showHome();
 }

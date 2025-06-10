@@ -2,6 +2,7 @@ import { AuthManager } from "../managers/auth-manager.js";
 import { auth } from "../core/firebase-manager.js";
 import { loadTeamComponent } from "./team.js";
 import { loadPlanningComponent } from "./planning.js";
+import { loadBadgingComponent } from "./badging.js";
 
 export async function loadDashboard(containerId, user) {
     // Charge le HTML du dashboard
@@ -19,6 +20,7 @@ export async function loadDashboard(containerId, user) {
     const homeBtn = document.getElementById("nav-home");
     const teamBtn = document.getElementById("nav-team");
     const planningBtn = document.getElementById("nav-planning");
+    const badgingBtn = document.getElementById("nav-badging");
     const content = document.getElementById("dashboard-content");
 
     // Par défaut : accueil widgets
@@ -29,6 +31,7 @@ export async function loadDashboard(containerId, user) {
         homeBtn.classList.add("active");
         teamBtn.classList.remove("active");
         planningBtn.classList.remove("active");
+        badgingBtn.classList.remove("active");
     }
 
     async function showTeam() {
@@ -37,6 +40,7 @@ export async function loadDashboard(containerId, user) {
         homeBtn.classList.remove("active");
         teamBtn.classList.add("active");
         planningBtn.classList.remove("active");
+        badgingBtn.classList.remove("active");
     }
 
     async function showPlanning() {
@@ -45,11 +49,23 @@ export async function loadDashboard(containerId, user) {
         homeBtn.classList.remove("active");
         teamBtn.classList.remove("active");
         planningBtn.classList.add("active");
+        badgingBtn.classList.remove("active");
     }
 
+    async function showBadging() {
+        content.innerHTML = "";
+        await loadBadgingComponent("dashboard-content", user);
+        homeBtn.classList.remove("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.remove("active");
+        badgingBtn.classList.add("active");
+    }
+
+    // Assignation des événements du menu
     homeBtn.onclick = showHome;
     teamBtn.onclick = showTeam;
     planningBtn.onclick = showPlanning;
+    badgingBtn.onclick = showBadging;
 
     // Déconnexion
     const logoutBtn = document.getElementById("nav-logout");

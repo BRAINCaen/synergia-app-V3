@@ -289,3 +289,36 @@ body {
 #chat-form button:hover {
   background: #4c51bf;
 }
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 2500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 180px;
+  max-width: 350px;
+  padding: 1rem 1.3rem;
+  background: #667eea;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px #667eea22;
+  font-size: 1.05rem;
+  animation: fadein 0.3s;
+  pointer-events: all;
+  transition: opacity 0.4s;
+  opacity: 1;
+}
+.toast-info   { background: #667eea; }
+.toast-success{ background: #48bb78; }
+.toast-error  { background: #e53e3e; }
+.toast.hide   { opacity: 0; }
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(-12px);}
+  to   { opacity: 1; transform: translateY(0);}
+}

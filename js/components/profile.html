@@ -1,0 +1,21 @@
+<section id="profile-section">
+    <h1>Mon Profil</h1>
+    <div id="profile-card">
+        <div id="profile-avatar"></div>
+        <div id="profile-info">
+            <div><b>Email :</b> <span id="profile-email"></span></div>
+            <div><b>Nom :</b> <span id="profile-name"></span></div>
+            <div><b>Rôle :</b> <span id="profile-role"></span></div>
+        </div>
+        <button id="edit-profile-btn" style="margin-top:1.2rem;">Modifier le profil</button>
+    </div>
+    <div id="profile-modal" style="display:none;">
+        <form id="profile-form">
+            <h3>Modifier le profil</h3>
+            <input type="text" id="edit-name" placeholder="Nom" required>
+            <input type="text" id="edit-role" placeholder="Rôle">
+            <button type="submit">Enregistrer</button>
+            <button type="button" id="profile-cancel-btn">Annuler</button>
+        </form>
+    </div>
+</section>

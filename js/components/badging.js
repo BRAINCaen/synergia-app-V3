@@ -1,57 +1,56 @@
 import { BadgingManager } from "../managers/badging-manager.js";
-const manager = new BadgingManager();
+const badgingManager = new BadgingManager();
 
 export async function loadBadgingComponent(containerId, user) {
     const res = await fetch("js/components/badging.html");
     const html = await res.text();
     document.getElementById(containerId).innerHTML = html;
 
-    function renderTable(badges) {
-        const tbody = document.getElementById("badging-table-body");
-        tbody.innerHTML = "";
-        badges.forEach(badge => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${badge.date}</td>
-                <td>${badge.name}</td>
-                <td>${badge.type === "in" ? "Entrée" : "Sortie"}</td>
-                <td>${badge.time}</td>
-                <td>
-                    <button class="delete-btn" data-id="${badge.id}" style="color:#e53e3e;">Supprimer</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        Array.from(document.getElementsByClassName("delete-btn")).forEach(btn => {
-            btn.onclick = async () => {
-                await manager.deleteBadge(btn.dataset.id);
-            };
-        });
-    }
+    const typeSelect = document.getElementById("badge-type-select");
+    const commentInput = document.getElementById("badge-comment");
+    const badgeBtn = document.getElementById("badge-btn");
+    const historyDiv = document.getElementById("badge-history");
 
-    manager.subscribeToBadges(renderTable);
-
-    // Gestion badge in/out
-    const badgeInBtn = document.getElementById("badge-in-btn");
-    const badgeOutBtn = document.getElementById("badge-out-btn");
-
-    badgeInBtn.onclick = async () => {
-        const now = new Date();
-        await manager.addBadge({
-            date: now.toLocaleDateString(),
-            name: user?.email || "Moi",
-            type: "in",
-            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    // Charge les types de pointage
+    badgingManager.subscribeToTypes(types => {
+        typeSelect.innerHTML = "";
+        types.forEach(t => {
+            typeSelect.innerHTML += `<option value="${t.name}">${t.label || t.name}</option>`;
         });
+    });
+
+    // Pointage
+    badgeBtn.onclick = async () => {
+        const type = typeSelect.value;
+        const comment = commentInput.value.trim();
+        await badgingManager.addPresence({
+            user: user.email,
+            type,
+            timestamp: Date.now(),
+            comment,
+            validated: false
+        });
+        commentInput.value = "";
     };
 
-    badgeOutBtn.onclick = async () => {
-        const now = new Date();
-        await manager.addBadge({
-            date: now.toLocaleDateString(),
-            name: user?.email || "Moi",
-            type: "out",
-            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        });
-    };
+    // Historique de pointage de l'utilisateur
+    badgingManager.subscribeToUserPresences(user.email, presences => {
+        historyDiv.innerHTML = presences.length ? `
+            <table>
+                <thead><tr>
+                    <th>Date</th><th>Type</th><th>Commentaire</th><th>Statut</th>
+                </tr></thead>
+                <tbody>
+                    ${presences.map(p => `
+                        <tr>
+                          <td>${new Date(p.timestamp).toLocaleString()}</td>
+                          <td>${p.type}</td>
+                          <td>${p.comment || ""}</td>
+                          <td>${p.validated ? "✅" : "⏳"}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        ` : "<em>Aucun pointage enregistré.</em>";
+    });
 }

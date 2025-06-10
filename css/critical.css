@@ -962,3 +962,50 @@ input, select, textarea, button {
 #badge-history th, #badge-history td { text-align: left; }
 #badge-history th { background: #7e8fff17;}
 #badge-history td { background: rgba(255,255,255,0.62);}
+#badging-admin-section .admin-row {
+  display: flex;
+  gap: 2.2em;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 2em;
+}
+#admin-types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.admin-type-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  background: rgba(127,145,255,0.07);
+  border-radius: 0.7em;
+  padding: 0.5em 1em;
+  font-size: 1.02em;
+  justify-content: space-between;
+}
+.admin-type-row button {
+  background: none;
+  border: none;
+  font-size: 1.18em;
+  cursor: pointer;
+  color: #7e8fff;
+  margin-left: 0.2em;
+  transition: color 0.14s;
+}
+.admin-type-row button:hover { color: #e53e3e; }
+
+#admin-presences-table table { width: 100%; margin-top: 1em;}
+#admin-presences-table th, #admin-presences-table td { text-align: left; }
+#admin-presences-table th { background: #7e8fff17;}
+#admin-presences-table td { background: rgba(255,255,255,0.62);}
+#admin-presences-table button.validate-btn,
+#admin-presences-table button.refuse-btn {
+  background: none;
+  border: none;
+  font-size: 1.13em;
+  cursor: pointer;
+  margin: 0 0.15em;
+}
+#admin-presences-table button.validate-btn { color: #48bb78;}
+#admin-presences-table button.refuse-btn { color: #e53e3e;}

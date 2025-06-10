@@ -1,6 +1,7 @@
 import { AuthManager } from "../managers/auth-manager.js";
 import { auth } from "../core/firebase-manager.js";
 import { loadTeamComponent } from "./team.js";
+import { loadPlanningComponent } from "./planning.js";
 
 export async function loadDashboard(containerId, user) {
     // Charge le HTML du dashboard
@@ -38,18 +39,17 @@ export async function loadDashboard(containerId, user) {
         planningBtn.classList.remove("active");
     }
 
+    async function showPlanning() {
+        content.innerHTML = "";
+        await loadPlanningComponent("dashboard-content");
+        homeBtn.classList.remove("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.add("active");
+    }
+
     homeBtn.onclick = showHome;
     teamBtn.onclick = showTeam;
-
-    // Optionnel : planning à venir
-    if (planningBtn) {
-        planningBtn.onclick = () => {
-            content.innerHTML = `<div class="widget-card">Module planning à venir…</div>`;
-            homeBtn.classList.remove("active");
-            teamBtn.classList.remove("active");
-            planningBtn.classList.add("active");
-        };
-    }
+    planningBtn.onclick = showPlanning;
 
     // Déconnexion
     const logoutBtn = document.getElementById("nav-logout");
@@ -62,21 +62,4 @@ export async function loadDashboard(containerId, user) {
 
     // Affiche l'accueil par défaut
     showHome();
-}
-import { loadPlanningComponent } from "./planning.js";
-// ...déjà existant...
-
-export async function loadDashboard(containerId, user) {
-    // ...code existant...
-
-    async function showPlanning() {
-        content.innerHTML = "";
-        await loadPlanningComponent("dashboard-content");
-        homeBtn.classList.remove("active");
-        teamBtn.classList.remove("active");
-        planningBtn.classList.add("active");
-    }
-    // ...déjà existant...
-    planningBtn.onclick = showPlanning;
-    // ...déjà existant...
 }

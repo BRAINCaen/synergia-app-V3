@@ -1,3 +1,5 @@
+const { jsPDF } = window.jspdf;
+
 import { BadgingManager } from "../managers/badging-manager.js";
 const badgingManager = new BadgingManager();
 
@@ -131,7 +133,6 @@ row.querySelector(".admin-type-edit").onclick = () => {
         link.click();
     };
 }
-import { jsPDF } from "jspdf";
 
 exportBtnPdf.onclick = () => {
     const doc = new jsPDF();

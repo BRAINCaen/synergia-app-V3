@@ -6,6 +6,7 @@ import { loadBadgingComponent } from "./badging.js";
 import { loadQuestsComponent } from "./quests.js";
 import { loadChatComponent } from "./chat.js";
 import { loadStoreComponent } from "./store.js";
+import { loadAnalyticsComponent } from "./analytics.js";
 
 export async function loadDashboard(containerId, user) {
     const res = await fetch("js/components/dashboard.html");
@@ -24,91 +25,68 @@ export async function loadDashboard(containerId, user) {
     const questsBtn = document.getElementById("nav-quests");
     const chatBtn = document.getElementById("nav-chat");
     const storeBtn = document.getElementById("nav-store");
+    const analyticsBtn = document.getElementById("nav-analytics");
     const content = document.getElementById("dashboard-content");
+
+    function clearActive() {
+        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn, analyticsBtn].forEach(btn => btn?.classList.remove("active"));
+    }
 
     function showHome() {
         content.innerHTML = `<div id="dashboard-widgets">
             <div class="widget-card">Statistiques et widgets à venir…</div>
         </div>`;
+        clearActive();
         homeBtn.classList.add("active");
-        teamBtn.classList.remove("active");
-        planningBtn.classList.remove("active");
-        badgingBtn.classList.remove("active");
-        questsBtn.classList.remove("active");
-        chatBtn.classList.remove("active");
-        storeBtn.classList.remove("active");
     }
 
     async function showTeam() {
         content.innerHTML = "";
         await loadTeamComponent("dashboard-content");
-        homeBtn.classList.remove("active");
+        clearActive();
         teamBtn.classList.add("active");
-        planningBtn.classList.remove("active");
-        badgingBtn.classList.remove("active");
-        questsBtn.classList.remove("active");
-        chatBtn.classList.remove("active");
-        storeBtn.classList.remove("active");
     }
 
     async function showPlanning() {
         content.innerHTML = "";
         await loadPlanningComponent("dashboard-content");
-        homeBtn.classList.remove("active");
-        teamBtn.classList.remove("active");
+        clearActive();
         planningBtn.classList.add("active");
-        badgingBtn.classList.remove("active");
-        questsBtn.classList.remove("active");
-        chatBtn.classList.remove("active");
-        storeBtn.classList.remove("active");
     }
 
     async function showBadging() {
         content.innerHTML = "";
         await loadBadgingComponent("dashboard-content", user);
-        homeBtn.classList.remove("active");
-        teamBtn.classList.remove("active");
-        planningBtn.classList.remove("active");
+        clearActive();
         badgingBtn.classList.add("active");
-        questsBtn.classList.remove("active");
-        chatBtn.classList.remove("active");
-        storeBtn.classList.remove("active");
     }
 
     async function showQuests() {
         content.innerHTML = "";
         await loadQuestsComponent("dashboard-content");
-        homeBtn.classList.remove("active");
-        teamBtn.classList.remove("active");
-        planningBtn.classList.remove("active");
-        badgingBtn.classList.remove("active");
+        clearActive();
         questsBtn.classList.add("active");
-        chatBtn.classList.remove("active");
-        storeBtn.classList.remove("active");
     }
 
     async function showChat() {
         content.innerHTML = "";
         await loadChatComponent("dashboard-content", user);
-        homeBtn.classList.remove("active");
-        teamBtn.classList.remove("active");
-        planningBtn.classList.remove("active");
-        badgingBtn.classList.remove("active");
-        questsBtn.classList.remove("active");
+        clearActive();
         chatBtn.classList.add("active");
-        storeBtn.classList.remove("active");
     }
 
     async function showStore() {
         content.innerHTML = "";
         await loadStoreComponent("dashboard-content");
-        homeBtn.classList.remove("active");
-        teamBtn.classList.remove("active");
-        planningBtn.classList.remove("active");
-        badgingBtn.classList.remove("active");
-        questsBtn.classList.remove("active");
-        chatBtn.classList.remove("active");
+        clearActive();
         storeBtn.classList.add("active");
+    }
+
+    async function showAnalytics() {
+        content.innerHTML = "";
+        await loadAnalyticsComponent("dashboard-content");
+        clearActive();
+        analyticsBtn.classList.add("active");
     }
 
     homeBtn.onclick = showHome;
@@ -118,6 +96,7 @@ export async function loadDashboard(containerId, user) {
     questsBtn.onclick = showQuests;
     chatBtn.onclick = showChat;
     storeBtn.onclick = showStore;
+    analyticsBtn.onclick = showAnalytics;
 
     const logoutBtn = document.getElementById("nav-logout");
     const manager = new AuthManager(auth);

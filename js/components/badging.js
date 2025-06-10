@@ -1,26 +1,57 @@
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { app } from "../core/firebase-manager.js";
+import { BadgingManager } from "../managers/badging-manager.js";
+const manager = new BadgingManager();
 
-const db = getFirestore(app);
-const BADGING_COLLECTION = "badging";
+export async function loadBadgingComponent(containerId, user) {
+    const res = await fetch("js/components/badging.html");
+    const html = await res.text();
+    document.getElementById(containerId).innerHTML = html;
 
-export class BadgingManager {
-    subscribeToBadges(callback) {
-        const q = collection(db, BADGING_COLLECTION);
-        return onSnapshot(q, snapshot => {
-            const badges = [];
-            snapshot.forEach(doc => {
-                badges.push({ id: doc.id, ...doc.data() });
-            });
-            callback(badges);
+    function renderTable(badges) {
+        const tbody = document.getElementById("badging-table-body");
+        tbody.innerHTML = "";
+        badges.forEach(badge => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${badge.date}</td>
+                <td>${badge.name}</td>
+                <td>${badge.type === "in" ? "Entrée" : "Sortie"}</td>
+                <td>${badge.time}</td>
+                <td>
+                    <button class="delete-btn" data-id="${badge.id}" style="color:#e53e3e;">Supprimer</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        Array.from(document.getElementsByClassName("delete-btn")).forEach(btn => {
+            btn.onclick = async () => {
+                await manager.deleteBadge(btn.dataset.id);
+            };
         });
     }
 
-    async addBadge(badge) {
-        await addDoc(collection(db, BADGING_COLLECTION), badge);
-    }
+    manager.subscribeToBadges(renderTable);
 
-    async deleteBadge(id) {
-        await deleteDoc(doc(db, BADGING_COLLECTION, id));
-    }
+    // Gestion badge in/out
+    const badgeInBtn = document.getElementById("badge-in-btn");
+    const badgeOutBtn = document.getElementById("badge-out-btn");
+
+    badgeInBtn.onclick = async () => {
+        const now = new Date();
+        await manager.addBadge({
+            date: now.toLocaleDateString(),
+            name: user?.email || "Moi",
+            type: "in",
+            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+    };
+
+    badgeOutBtn.onclick = async () => {
+        const now = new Date();
+        await manager.addBadge({
+            date: now.toLocaleDateString(),
+            name: user?.email || "Moi",
+            type: "out",
+            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+    };
 }

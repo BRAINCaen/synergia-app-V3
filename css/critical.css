@@ -748,3 +748,18 @@ nav#dashboard-menu {
 nav#dashboard-menu button {
   white-space: nowrap;
 }
+nav#dashboard-menu {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: auto;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+nav#dashboard-menu button {
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  #dashboard-burger {
+    display: block;
+  }
+}

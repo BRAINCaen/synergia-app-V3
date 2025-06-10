@@ -4,7 +4,7 @@ import { app } from "../core/firebase-manager.js";
 const db = getFirestore(app);
 
 export class BadgingManager {
-    // Types de pointages (admin)
+    // Types de pointages & règles
     subscribeToTypes(callback) {
         return onSnapshot(collection(db, "pointage-types"), snapshot => {
             const types = [];
@@ -32,7 +32,6 @@ export class BadgingManager {
         });
     }
     subscribeToAllPresences(callback) {
-        // Pour admin
         const q = query(collection(db, "presences"), orderBy("timestamp", "desc"));
         return onSnapshot(q, snapshot => {
             const pres = [];
@@ -48,5 +47,19 @@ export class BadgingManager {
     }
     async deletePresence(id) {
         await deleteDoc(doc(db, "presences", id));
+    }
+
+    // Récupérer toutes les présences sur une plage (pour calculs)
+    async getPresencesByUserAndDate(email, dateMin, dateMax) {
+        const q = query(
+            collection(db, "presences"),
+            where("user", "==", email),
+            where("timestamp", ">=", dateMin),
+            where("timestamp", "<=", dateMax)
+        );
+        const snapshot = await getDocs(q);
+        const pres = [];
+        snapshot.forEach(doc => pres.push({ id: doc.id, ...doc.data() }));
+        return pres;
     }
 }

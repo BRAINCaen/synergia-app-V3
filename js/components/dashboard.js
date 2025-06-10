@@ -14,6 +14,7 @@ import { loadProfileComponent } from "./profile.js";
 import { loadSettingsComponent } from "./settings.js";
 import { loadLeaderboardComponent } from "./leaderboard.js";
 import { loadBadgingAdminComponent } from "./badging-admin.js";
+import { loadMonthlyRecapComponent } from "./monthly-recap.js";
 
 export async function loadDashboard(containerId, user) {
     const container = document.getElementById(containerId);
@@ -25,6 +26,7 @@ export async function loadDashboard(containerId, user) {
     const html = await res.text();
     container.innerHTML = html;
 
+    // Boutons du menu
     const homeBtn = document.getElementById("nav-home");
     const teamBtn = document.getElementById("nav-team");
     const planningBtn = document.getElementById("nav-planning");
@@ -38,8 +40,9 @@ export async function loadDashboard(containerId, user) {
     const profileBtn = document.getElementById("nav-profile");
     const settingsBtn = document.getElementById("nav-settings");
     const leaderboardBtn = document.getElementById("nav-leaderboard");
-    const logoutBtn = document.getElementById("nav-logout");
     const badgingAdminBtn = document.getElementById("nav-badging-admin");
+    const monthlyRecapBtn = document.getElementById("nav-monthly-recap");
+    const logoutBtn = document.getElementById("nav-logout");
     const content = document.getElementById("dashboard-content");
     const welcome = document.getElementById("dashboard-welcome");
 
@@ -49,7 +52,7 @@ export async function loadDashboard(containerId, user) {
 
     function clearActive() {
         [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn,
-        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn, badgingAdminBtn]
+        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn, badgingAdminBtn, monthlyRecapBtn]
         .forEach(btn => btn?.classList.remove("active"));
     }
 
@@ -73,7 +76,9 @@ export async function loadDashboard(containerId, user) {
     async function showSettings() { content.innerHTML = ""; await loadSettingsComponent("dashboard-content", user); clearActive(); settingsBtn?.classList.add("active"); }
     async function showLeaderboard() { content.innerHTML = ""; await loadLeaderboardComponent("dashboard-content"); clearActive(); leaderboardBtn?.classList.add("active"); }
     async function showBadgingAdmin() { content.innerHTML = ""; await loadBadgingAdminComponent("dashboard-content"); clearActive(); badgingAdminBtn?.classList.add("active"); }
+    async function showMonthlyRecap() { content.innerHTML = ""; await loadMonthlyRecapComponent("dashboard-content", user); clearActive(); monthlyRecapBtn?.classList.add("active"); }
 
+    // Affecte chaque bouton à la bonne fonction
     if (homeBtn) homeBtn.onclick = showHome;
     if (teamBtn) teamBtn.onclick = showTeam;
     if (planningBtn) planningBtn.onclick = showPlanning;
@@ -87,6 +92,7 @@ export async function loadDashboard(containerId, user) {
     if (profileBtn) profileBtn.onclick = showProfile;
     if (settingsBtn) settingsBtn.onclick = showSettings;
     if (leaderboardBtn) leaderboardBtn.onclick = showLeaderboard;
+    if (monthlyRecapBtn) monthlyRecapBtn.onclick = showMonthlyRecap;
 
     // --- MENU BURGER ---
     const burgerBtn = document.getElementById('dashboard-burger');
@@ -123,16 +129,14 @@ export async function loadDashboard(containerId, user) {
         });
     }
 
+    // Accueil par défaut
     showHome();
-}
-import { loadMonthlyRecapComponent } from "./monthly-recap.js";
 
-const monthlyRecapBtn = document.getElementById("nav-monthly-recap");
-if (monthlyRecapBtn) {
-    monthlyRecapBtn.onclick = () => {
-        content.innerHTML = "";
-        loadMonthlyRecapComponent("dashboard-content", user);
-        clearActive();
-        monthlyRecapBtn.classList.add("active");
-    };
+    // --- Déconnexion ---
+    const manager = new AuthManager(auth);
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+            await manager.signOut();
+        });
+    }
 }

@@ -1,5 +1,6 @@
 import { AuthManager } from "../managers/auth-manager.js";
 import { auth } from "../core/firebase-manager.js";
+import { isAdmin } from "../managers/user-manager.js";
 import { loadTeamComponent } from "./team.js";
 import { loadPlanningComponent } from "./planning.js";
 import { loadBadgingComponent } from "./badging.js";
@@ -12,37 +13,7 @@ import { loadRolesComponent } from "./roles.js";
 import { loadProfileComponent } from "./profile.js";
 import { loadSettingsComponent } from "./settings.js";
 import { loadLeaderboardComponent } from "./leaderboard.js";
-import { AuthManager } from "../managers/auth-manager.js";
-import { auth } from "../core/firebase-manager.js";
-import { isAdmin } from "../managers/user-manager.js";
 import { loadBadgingAdminComponent } from "./badging-admin.js";
-// ...autres imports...
-
-// ...autres fonctions...
-
-export async function loadDashboard(containerId, user) {
-    // ...chargement du dashboard HTML...
-    const badgingAdminBtn = document.getElementById("nav-badging-admin");
-    const content = document.getElementById("dashboard-content");
-
-    // (Affichage conditionnel du menu admin)
-    if (badgingAdminBtn) {
-        badgingAdminBtn.style.display = "none"; // caché par défaut
-        isAdmin(user.email).then(admin => {
-            if (admin) {
-                badgingAdminBtn.style.display = "";
-                badgingAdminBtn.onclick = () => {
-                    content.innerHTML = "";
-                    loadBadgingAdminComponent("dashboard-content");
-                    clearActive();
-                    badgingAdminBtn.classList.add("active");
-                };
-            }
-        });
-    }
-
-    // ...reste du code dashboard.js...
-}
 
 export async function loadDashboard(containerId, user) {
     const container = document.getElementById(containerId);
@@ -68,6 +39,7 @@ export async function loadDashboard(containerId, user) {
     const settingsBtn = document.getElementById("nav-settings");
     const leaderboardBtn = document.getElementById("nav-leaderboard");
     const logoutBtn = document.getElementById("nav-logout");
+    const badgingAdminBtn = document.getElementById("nav-badging-admin");
     const content = document.getElementById("dashboard-content");
     const welcome = document.getElementById("dashboard-welcome");
 
@@ -77,7 +49,7 @@ export async function loadDashboard(containerId, user) {
 
     function clearActive() {
         [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn,
-        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn]
+        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn, badgingAdminBtn]
         .forEach(btn => btn?.classList.remove("active"));
     }
 
@@ -100,6 +72,7 @@ export async function loadDashboard(containerId, user) {
     async function showProfile() { content.innerHTML = ""; await loadProfileComponent("dashboard-content", user); clearActive(); profileBtn?.classList.add("active"); }
     async function showSettings() { content.innerHTML = ""; await loadSettingsComponent("dashboard-content", user); clearActive(); settingsBtn?.classList.add("active"); }
     async function showLeaderboard() { content.innerHTML = ""; await loadLeaderboardComponent("dashboard-content"); clearActive(); leaderboardBtn?.classList.add("active"); }
+    async function showBadgingAdmin() { content.innerHTML = ""; await loadBadgingAdminComponent("dashboard-content"); clearActive(); badgingAdminBtn?.classList.add("active"); }
 
     if (homeBtn) homeBtn.onclick = showHome;
     if (teamBtn) teamBtn.onclick = showTeam;
@@ -114,13 +87,6 @@ export async function loadDashboard(containerId, user) {
     if (profileBtn) profileBtn.onclick = showProfile;
     if (settingsBtn) settingsBtn.onclick = showSettings;
     if (leaderboardBtn) leaderboardBtn.onclick = showLeaderboard;
-
-    const manager = new AuthManager(auth);
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", async () => {
-            await manager.signOut();
-        });
-    }
 
     // --- MENU BURGER ---
     const burgerBtn = document.getElementById('dashboard-burger');
@@ -144,6 +110,17 @@ export async function loadDashboard(containerId, user) {
         });
         window.addEventListener('resize', closeMenu);
         window.addEventListener('scroll', closeMenu);
+    }
+
+    // --- ADMIN BADGING ---
+    if (badgingAdminBtn) {
+        badgingAdminBtn.style.display = "none"; // caché par défaut
+        isAdmin(user.email).then(admin => {
+            if (admin) {
+                badgingAdminBtn.style.display = "";
+                badgingAdminBtn.onclick = showBadgingAdmin;
+            }
+        });
     }
 
     showHome();

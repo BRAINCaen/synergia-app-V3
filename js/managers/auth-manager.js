@@ -1,3 +1,9 @@
+import { 
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 export class AuthManager {
     constructor(firebaseAuth) {
         this.auth = firebaseAuth;
@@ -5,7 +11,7 @@ export class AuthManager {
 
     async signIn(email, password) {
         try {
-            const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
+            const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
             return userCredential.user;
         } catch (error) {
             throw error;
@@ -14,13 +20,13 @@ export class AuthManager {
 
     async signOut() {
         try {
-            await this.auth.signOut();
+            await signOut(this.auth);
         } catch (error) {
             console.error("Erreur de déconnexion :", error.message);
         }
     }
 
     onAuthChange(callback) {
-        this.auth.onAuthStateChanged(callback);
+        onAuthStateChanged(this.auth, callback);
     }
 }

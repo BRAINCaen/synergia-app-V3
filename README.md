@@ -6,3 +6,5 @@ Cette version contient :
 - Un exemple de composant injecté (`navigation.js`)
 
 📦 Prochaine étape : découper chaque section HTML/JS de l'ancien index en composants.
+
+Étape 2 : Module d'authentification ajouté (formulaire + gestionnaire)

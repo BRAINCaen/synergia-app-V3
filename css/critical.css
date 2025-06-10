@@ -315,3 +315,28 @@ nav#dashboard-menu button:hover {
   font-size: 0.99em;
   margin-left: 0.3em;
 }
+#leaderboard-section {
+  max-width: 620px;
+  margin: 0 auto;
+}
+.leaderboard-avatar {
+  background: #667eea;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.11rem;
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px #667eea14;
+}
+.leaderboard-rank {
+  color: #fff;
+  font-weight: bold;
+  padding: 0.23em 1em;
+  border-radius: 2em;
+  font-size: 0.99em;
+  margin-left: 0.3em;
+}

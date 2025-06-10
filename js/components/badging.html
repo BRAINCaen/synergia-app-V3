@@ -1,21 +1,11 @@
 <section id="badging-section">
-    <h1>Présence & Pointage</h1>
-    <div id="badging-actions">
-        <button id="badge-in-btn">Entrée</button>
-        <button id="badge-out-btn">Sortie</button>
-    </div>
-    <table id="badging-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Nom</th>
-                <th>Type</th>
-                <th>Heure</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="badging-table-body">
-            <!-- Pointages chargés dynamiquement -->
-        </tbody>
-    </table>
+  <h2>Pointage & Présence</h2>
+  <form id="badge-form" style="display:flex;gap:1em;align-items:center;">
+    <label for="badge-type-select">Type :</label>
+    <select id="badge-type-select"></select>
+    <input id="badge-comment" type="text" maxlength="80" placeholder="Commentaire (optionnel)">
+    <button id="badge-btn" type="button">Pointer</button>
+  </form>
+  <div style="margin:1.4em 0 1em 0;font-weight:500;">Mon historique</div>
+  <div id="badge-history"></div>
 </section>

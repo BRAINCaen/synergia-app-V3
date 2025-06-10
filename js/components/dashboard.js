@@ -5,6 +5,7 @@ import { loadPlanningComponent } from "./planning.js";
 import { loadBadgingComponent } from "./badging.js";
 import { loadQuestsComponent } from "./quests.js";
 import { loadChatComponent } from "./chat.js";
+import { loadStoreComponent } from "./store.js";
 
 export async function loadDashboard(containerId, user) {
     const res = await fetch("js/components/dashboard.html");
@@ -22,6 +23,7 @@ export async function loadDashboard(containerId, user) {
     const badgingBtn = document.getElementById("nav-badging");
     const questsBtn = document.getElementById("nav-quests");
     const chatBtn = document.getElementById("nav-chat");
+    const storeBtn = document.getElementById("nav-store");
     const content = document.getElementById("dashboard-content");
 
     function showHome() {
@@ -34,6 +36,7 @@ export async function loadDashboard(containerId, user) {
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
         chatBtn.classList.remove("active");
+        storeBtn.classList.remove("active");
     }
 
     async function showTeam() {
@@ -45,6 +48,7 @@ export async function loadDashboard(containerId, user) {
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
         chatBtn.classList.remove("active");
+        storeBtn.classList.remove("active");
     }
 
     async function showPlanning() {
@@ -56,6 +60,7 @@ export async function loadDashboard(containerId, user) {
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
         chatBtn.classList.remove("active");
+        storeBtn.classList.remove("active");
     }
 
     async function showBadging() {
@@ -67,6 +72,7 @@ export async function loadDashboard(containerId, user) {
         badgingBtn.classList.add("active");
         questsBtn.classList.remove("active");
         chatBtn.classList.remove("active");
+        storeBtn.classList.remove("active");
     }
 
     async function showQuests() {
@@ -78,6 +84,7 @@ export async function loadDashboard(containerId, user) {
         badgingBtn.classList.remove("active");
         questsBtn.classList.add("active");
         chatBtn.classList.remove("active");
+        storeBtn.classList.remove("active");
     }
 
     async function showChat() {
@@ -89,6 +96,19 @@ export async function loadDashboard(containerId, user) {
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
         chatBtn.classList.add("active");
+        storeBtn.classList.remove("active");
+    }
+
+    async function showStore() {
+        content.innerHTML = "";
+        await loadStoreComponent("dashboard-content");
+        homeBtn.classList.remove("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.remove("active");
+        badgingBtn.classList.remove("active");
+        questsBtn.classList.remove("active");
+        chatBtn.classList.remove("active");
+        storeBtn.classList.add("active");
     }
 
     homeBtn.onclick = showHome;
@@ -97,6 +117,7 @@ export async function loadDashboard(containerId, user) {
     badgingBtn.onclick = showBadging;
     questsBtn.onclick = showQuests;
     chatBtn.onclick = showChat;
+    storeBtn.onclick = showStore;
 
     const logoutBtn = document.getElementById("nav-logout");
     const manager = new AuthManager(auth);

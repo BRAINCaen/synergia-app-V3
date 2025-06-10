@@ -1,10 +1,20 @@
 <section id="chat-section">
-    <h1>Chat d'équipe</h1>
-    <div id="chat-window">
-        <ul id="chat-messages"></ul>
+    <div class="chat-sidebar">
+        <h3>Salons</h3>
+        <div id="chat-rooms-list"></div>
+        <form id="chat-create-room-form" style="margin-top:1em;">
+            <input id="chat-new-room" type="text" maxlength="40" placeholder="Nouveau salon (ex: jeux)" required>
+            <button type="submit" style="margin-top:0.3em;">Créer</button>
+        </form>
     </div>
-    <form id="chat-form" autocomplete="off">
-        <input type="text" id="chat-input" placeholder="Écris ton message..." maxlength="240" required>
-        <button type="submit">Envoyer</button>
-    </form>
+    <div class="chat-main">
+        <div class="chat-room-header">
+            <span id="chat-current-room" style="font-weight:600;">#Salon</span>
+        </div>
+        <div id="chat-messages"></div>
+        <form id="chat-form" autocomplete="off">
+            <input id="chat-input" type="text" maxlength="300" placeholder="Écrire un message..." autocomplete="off" required>
+            <button type="submit" title="Envoyer">Envoyer</button>
+        </form>
+    </div>
 </section>

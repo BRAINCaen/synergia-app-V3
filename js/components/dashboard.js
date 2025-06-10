@@ -9,6 +9,7 @@ import { loadStoreComponent } from "./store.js";
 import { loadAnalyticsComponent } from "./analytics.js";
 import { loadWalletComponent } from "./wallet.js";
 import { loadRolesComponent } from "./roles.js";
+import { loadProfileComponent } from "./profile.js";
 
 export async function loadDashboard(containerId, user) {
     const res = await fetch("js/components/dashboard.html");
@@ -30,10 +31,11 @@ export async function loadDashboard(containerId, user) {
     const analyticsBtn = document.getElementById("nav-analytics");
     const walletBtn = document.getElementById("nav-wallet");
     const rolesBtn = document.getElementById("nav-roles");
+    const profileBtn = document.getElementById("nav-profile");
     const content = document.getElementById("dashboard-content");
 
     function clearActive() {
-        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn, analyticsBtn, walletBtn, rolesBtn].forEach(btn => btn?.classList.remove("active"));
+        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn, analyticsBtn, walletBtn, rolesBtn, profileBtn].forEach(btn => btn?.classList.remove("active"));
     }
 
     function showHome() {
@@ -107,6 +109,13 @@ export async function loadDashboard(containerId, user) {
         rolesBtn.classList.add("active");
     }
 
+    async function showProfile() {
+        content.innerHTML = "";
+        await loadProfileComponent("dashboard-content", user);
+        clearActive();
+        profileBtn.classList.add("active");
+    }
+
     homeBtn.onclick = showHome;
     teamBtn.onclick = showTeam;
     planningBtn.onclick = showPlanning;
@@ -117,6 +126,7 @@ export async function loadDashboard(containerId, user) {
     analyticsBtn.onclick = showAnalytics;
     walletBtn.onclick = showWallet;
     rolesBtn.onclick = showRoles;
+    profileBtn.onclick = showProfile;
 
     const logoutBtn = document.getElementById("nav-logout");
     const manager = new AuthManager(auth);

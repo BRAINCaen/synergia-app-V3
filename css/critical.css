@@ -1041,3 +1041,103 @@ input, select, textarea, button {
     width: auto;
   }
 }
+#dashboard-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  background: rgba(255,255,255,0.13);
+  border-radius: 1.4em;
+  padding: 1.3em 1.7em 1.1em 1.7em;
+  justify-content: flex-start;
+  margin-bottom: 1.5em;
+  max-height: none;
+  overflow-y: visible;
+  box-shadow: 0 3px 24px 0 rgba(80,120,255,0.04);
+  backdrop-filter: blur(7px);
+  transition: background 0.3s;
+}
+#dashboard-menu button {
+  background: none;
+  border: none;
+  font-size: 1.08em;
+  font-weight: 500;
+  color: #6366f1;
+  padding: 0.5em 1.2em 0.5em 0.7em;
+  border-radius: 1.7em;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  transition: background 0.22s, color 0.2s;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+}
+#dashboard-menu button.active,
+#dashboard-menu button:hover {
+  background: linear-gradient(90deg, #7e8fff 0%, #c2a7ff 100%);
+  color: #fff !important;
+}
+#dashboard-menu button i {
+  width: 21px;
+  height: 21px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+}
+.logout-btn {
+  background: linear-gradient(90deg,#fa5252,#e53e3e) !important;
+  color: #fff !important;
+  margin-left: auto;
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  #dashboard-menu {
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-y: auto;
+    gap: 0.7em;
+    padding: 1em 0.7em 7em 0.7em;
+  }
+  .logout-btn {
+    position: fixed;
+    bottom: 17px;
+    right: 17px;
+    z-index: 9999;
+    border-radius: 2em;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.13);
+    margin: 0 !important;
+    width: auto;
+  }
+}
+/* Burger icon animé */
+#dashboard-burger {
+  display: none;
+  background: none;
+  border: none;
+  outline: none;
+  position: absolute;
+  top: 30px; right: 35px;
+  z-index: 10001;
+}
+#dashboard-burger.open span {
+  transition: transform 0.5s cubic-bezier(.23,1.07,.75,1.00);
+}
+@media (max-width: 900px) {
+  #dashboard-burger {
+    display: block;
+  }
+  #dashboard-menu {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(252,253,255,0.96);
+    border-radius: 0 0 2em 2em;
+    z-index: 9998;
+    transform: translateY(-120%);
+    transition: transform 0.38s cubic-bezier(.23,1.07,.75,1.00);
+    box-shadow: 0 2px 32px 0 rgba(50,50,150,0.14);
+  }
+  #dashboard-menu.open {
+    transform: translateY(0%);
+  }
+}

@@ -63,3 +63,20 @@ export async function loadDashboard(containerId, user) {
     // Affiche l'accueil par défaut
     showHome();
 }
+import { loadPlanningComponent } from "./planning.js";
+// ...déjà existant...
+
+export async function loadDashboard(containerId, user) {
+    // ...code existant...
+
+    async function showPlanning() {
+        content.innerHTML = "";
+        await loadPlanningComponent("dashboard-content");
+        homeBtn.classList.remove("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.add("active");
+    }
+    // ...déjà existant...
+    planningBtn.onclick = showPlanning;
+    // ...déjà existant...
+}

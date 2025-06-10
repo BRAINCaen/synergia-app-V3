@@ -1,24 +1,19 @@
-import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { app } from "../core/firebase-manager.js";
 
 const db = getFirestore(app);
-const CHAT_COLLECTION = "chat";
+const CHAT_COLLECTION = "chat-messages";
 
 export class ChatManager {
     subscribeToMessages(callback) {
-        const q = collection(db, CHAT_COLLECTION);
+        const q = query(collection(db, CHAT_COLLECTION), orderBy("timestamp", "asc"));
         return onSnapshot(q, snapshot => {
             const messages = [];
-            snapshot.forEach(doc => {
-                messages.push({ id: doc.id, ...doc.data() });
-            });
-            // Tri par timestamp croissant
-            messages.sort((a, b) => (a.timestamp||0)-(b.timestamp||0));
+            snapshot.forEach(doc => messages.push(doc.data()));
             callback(messages);
         });
     }
-
-    async sendMessage(message) {
-        await addDoc(collection(db, CHAT_COLLECTION), message);
+    async sendMessage(msg) {
+        await addDoc(collection(db, CHAT_COLLECTION), msg);
     }
 }

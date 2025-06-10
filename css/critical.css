@@ -114,3 +114,20 @@ nav#dashboard-menu button:hover {
   padding: 2rem 1.5rem;
   font-size: 1.15rem;
 }
+#analytics-section {
+  max-width: 850px;
+  margin: 0 auto;
+}
+#analytics-charts {
+  display: flex;
+  gap: 2.3rem;
+  flex-wrap: wrap;
+  margin-top: 2.2rem;
+}
+#analytics-charts canvas {
+  background: rgba(255,255,255,0.31);
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 12px #667eea0b;
+  padding: 1.2rem 0.4rem;
+  backdrop-filter: blur(7px);
+}

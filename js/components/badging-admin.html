@@ -5,6 +5,16 @@
     <div style="min-width:300px;max-width:350px;flex:1;">
       <h3>Types de pointage</h3>
       <form id="admin-add-type-form" style="display:flex;gap:0.5em;margin-bottom:0.8em;">
+        <div style="margin-top:1em;">
+  <b>Règles Code du travail (optionnel par type)</b>
+  <div style="color:#7676ac;font-size:0.98em;">
+    - <b>Durée min/jour</b> : heures min pour valider une journée<br>
+    - <b>Durée max/jour</b> : heures max autorisées<br>
+    - <b>Pause min</b> : minutes min de pause toutes les X heures<br>
+    - <b>Heure début/fin</b> : horaires de nuit, etc.
+  </div>
+</div>
+
         <input id="admin-type-name" type="text" placeholder="Nom (clé)" required maxlength="30" style="width:40%">
         <input id="admin-type-label" type="text" placeholder="Label affiché" maxlength="40" style="width:50%">
         <button type="submit">Ajouter</button>

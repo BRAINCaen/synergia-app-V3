@@ -217,3 +217,23 @@ body {
   background: #667eea;
   color: #fff;
 }
+#quests-section {
+  max-width: 700px;
+  margin: 0 auto;
+}
+#quests-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafbff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px #667eea08;
+}
+#quests-table th, #quests-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+}
+#quests-table th {
+  background: #667eea;
+  color: #fff;
+}

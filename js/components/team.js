@@ -1,70 +1,34 @@
-import { TeamManager } from "../managers/team-manager.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { app } from "../core/firebase-manager.js";
 
-// Utilisation de localStorage pour la démo (remplace par Firebase après si tu veux)
-function getTeam() {
-    return JSON.parse(localStorage.getItem("synergia-team") || "[]");
-}
-function saveTeam(team) {
-    localStorage.setItem("synergia-team", JSON.stringify(team));
-}
+const db = getFirestore(app);
+const TEAM_COLLECTION = "team";
 
-export async function loadTeamComponent(containerId) {
-    // Charge le HTML
-    const res = await fetch("js/components/team.html");
-    const html = await res.text();
-    document.getElementById(containerId).innerHTML = html;
-
-    let team = getTeam();
-
-    function renderTable() {
-        const tbody = document.getElementById("team-table-body");
-        tbody.innerHTML = "";
-        team.forEach((member, idx) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${member.name}</td>
-                <td>${member.email}</td>
-                <td>${member.role}</td>
-                <td>
-                    <button class="delete-btn" data-idx="${idx}" style="color:#e53e3e;">Supprimer</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        // Boutons supprimer
-        Array.from(document.getElementsByClassName("delete-btn")).forEach(btn => {
-            btn.onclick = (e) => {
-                const idx = +btn.dataset.idx;
-                team.splice(idx, 1);
-                saveTeam(team);
-                renderTable();
-            };
+export class TeamManager {
+    // Lire en temps réel toute l’équipe
+    subscribeToTeam(callback) {
+        const q = collection(db, TEAM_COLLECTION);
+        return onSnapshot(q, snapshot => {
+            const team = [];
+            snapshot.forEach(doc => {
+                team.push({ id: doc.id, ...doc.data() });
+            });
+            callback(team);
         });
     }
 
-    renderTable();
+    // Ajouter un membre
+    async addMember(member) {
+        await addDoc(collection(db, TEAM_COLLECTION), member);
+    }
 
-    // Gérer modal d'ajout
-    const modal = document.getElementById("team-modal");
-    const addBtn = document.getElementById("add-member-btn");
-    const cancelBtn = document.getElementById("team-cancel-btn");
-    const form = document.getElementById("team-form");
-    addBtn.onclick = () => {
-        form.reset();
-        modal.style.display = "block";
-        document.getElementById("team-form-title").textContent = "Ajouter un membre";
-    };
-    cancelBtn.onclick = () => modal.style.display = "none";
+    // Supprimer un membre
+    async deleteMember(id) {
+        await deleteDoc(doc(db, TEAM_COLLECTION, id));
+    }
 
-    form.onsubmit = (e) => {
-        e.preventDefault();
-        team.push({
-            name: document.getElementById("member-name").value,
-            email: document.getElementById("member-email").value,
-            role: document.getElementById("member-role").value
-        });
-        saveTeam(team);
-        modal.style.display = "none";
-        renderTable();
-    };
+    // Modifier un membre (optionnel)
+    async updateMember(id, data) {
+        await setDoc(doc(db, TEAM_COLLECTION, id), data, { merge: true });
+    }
 }

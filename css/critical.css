@@ -72,3 +72,39 @@ body {
   margin-top: 0.5rem;
   text-align: center;
 }
+#dashboard-section {
+  max-width: 800px;
+  margin: 32px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 32px #667eea15;
+}
+#dashboard-menu {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+#dashboard-menu button {
+  background: #f3f5fa;
+  border: 1px solid #c9d1e0;
+  color: #4c51bf;
+  padding: 0.7rem 1.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s;
+}
+#dashboard-menu button.active,
+#dashboard-menu button:hover {
+  background: #667eea;
+  color: #fff;
+}
+.widget-card {
+  background: #f3f5fa;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 12px #667eea09;
+  font-size: 1.1rem;
+}

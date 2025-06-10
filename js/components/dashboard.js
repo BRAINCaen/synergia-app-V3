@@ -18,6 +18,29 @@ export async function loadDashboard(containerId, user) {
     if (!container) {
         alert("Erreur : container principal non trouvé.");
         return;
+        // --- MENU BURGER ---
+const burgerBtn = document.getElementById('dashboard-burger');
+const dashboardMenu = document.getElementById('dashboard-menu');
+function closeMenu() {
+    dashboardMenu.classList.remove('open');
+    document.body.classList.remove('menu-open');
+}
+if (burgerBtn && dashboardMenu) {
+    burgerBtn.onclick = function() {
+        dashboardMenu.classList.toggle('open');
+        document.body.classList.toggle('menu-open');
+    };
+    // Fermer menu au clic sur un bouton
+    Array.from(dashboardMenu.querySelectorAll('button')).forEach(btn => {
+        btn.onclick = function() {
+            if (window.innerWidth < 900) closeMenu();
+        };
+    });
+    // Fermer menu au scroll ou resize mobile
+    window.addEventListener('resize', closeMenu);
+    window.addEventListener('scroll', closeMenu);
+}
+
     }
     const res = await fetch("js/components/dashboard.html");
     const html = await res.text();

@@ -769,3 +769,11 @@ nav#dashboard-menu button {
     display: block;
   }
 }
+#dashboard-burger {
+  position: fixed;
+  top: 1.1em;
+  left: 1.2em;
+}
+@media (min-width: 901px) {
+  #dashboard-burger { display: none !important; }
+}

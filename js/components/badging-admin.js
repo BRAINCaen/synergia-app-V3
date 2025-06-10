@@ -23,12 +23,23 @@ export async function loadBadgingAdminComponent(containerId) {
                 <button class="admin-type-del" title="Supprimer">🗑️</button>
             `;
             // Edit
-            row.querySelector(".admin-type-edit").onclick = () => {
-                const newLabel = prompt("Nouveau label pour ce type ?", type.label || type.name);
-                if (newLabel !== null && newLabel.trim()) {
-                    badgingManager.editType(type.id, { ...type, label: newLabel.trim() });
-                }
-            };
+// ...dans renderTypes...
+row.querySelector(".admin-type-edit").onclick = () => {
+    const currentRules = type.rules ? JSON.stringify(type.rules, null, 2) : "";
+    const newLabel = prompt("Nouveau label pour ce type ?", type.label || type.name);
+    const newRules = prompt("Règles (JSON, optionnel)", currentRules || '{\n  "minHoursPerDay": 7,\n  "maxHoursPerDay": 10,\n  "minPauseMinutes": 20\n}');
+    let rules = undefined;
+    try {
+        rules = newRules ? JSON.parse(newRules) : undefined;
+    } catch (e) {
+        alert("Format de règles invalide !");
+        return;
+    }
+    if (newLabel !== null && newLabel.trim()) {
+        badgingManager.editType(type.id, { ...type, label: newLabel.trim(), rules });
+    }
+};
+
             // Delete
             row.querySelector(".admin-type-del").onclick = () => {
                 if (confirm("Supprimer ce type de pointage ?")) {

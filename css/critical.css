@@ -738,3 +738,13 @@ input, select, textarea, button {
     overflow: hidden;
   }
 }
+nav#dashboard-menu {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: auto;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+nav#dashboard-menu button {
+  white-space: nowrap;
+}

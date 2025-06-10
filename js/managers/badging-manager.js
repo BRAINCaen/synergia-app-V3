@@ -1,53 +1,26 @@
-import { PlanningManager } from "../managers/planning-manager.js";
-const manager = new PlanningManager();
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { app } from "../core/firebase-manager.js";
 
-export async function loadPlanningComponent(containerId) {
-    const res = await fetch("js/components/planning.html");
-    const html = await res.text();
-    document.getElementById(containerId).innerHTML = html;
+const db = getFirestore(app);
+const BADGING_COLLECTION = "badging";
 
-    function renderTable(planning) {
-        const tbody = document.getElementById("planning-table-body");
-        tbody.innerHTML = "";
-        planning.forEach(shift => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${shift.date}</td>
-                <td>${shift.name}</td>
-                <td>${shift.start}</td>
-                <td>${shift.end}</td>
-                <td>
-                    <button class="delete-btn" data-id="${shift.id}" style="color:#e53e3e;">Supprimer</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        Array.from(document.getElementsByClassName("delete-btn")).forEach(btn => {
-            btn.onclick = async () => {
-                await manager.deleteShift(btn.dataset.id);
-            };
+export class BadgingManager {
+    subscribeToBadges(callback) {
+        const q = collection(db, BADGING_COLLECTION);
+        return onSnapshot(q, snapshot => {
+            const badges = [];
+            snapshot.forEach(doc => {
+                badges.push({ id: doc.id, ...doc.data() });
+            });
+            callback(badges);
         });
     }
 
-    manager.subscribeToPlanning(renderTable);
+    async addBadge(badge) {
+        await addDoc(collection(db, BADGING_COLLECTION), badge);
+    }
 
-    // Ajout shift
-    const modal = document.getElementById("planning-modal");
-    const addBtn = document.getElementById("add-shift-btn");
-    const cancelBtn = document.getElementById("planning-cancel-btn");
-    const form = document.getElementById("planning-form");
-
-    addBtn.onclick = () => { form.reset(); modal.style.display = "block"; };
-    cancelBtn.onclick = () => modal.style.display = "none";
-
-    form.onsubmit = async (e) => {
-        e.preventDefault();
-        await manager.addShift({
-            date: document.getElementById("shift-date").value,
-            name: document.getElementById("shift-name").value,
-            start: document.getElementById("shift-start").value,
-            end: document.getElementById("shift-end").value
-        });
-        modal.style.display = "none";
-    };
+    async deleteBadge(id) {
+        await deleteDoc(doc(db, BADGING_COLLECTION, id));
+    }
 }

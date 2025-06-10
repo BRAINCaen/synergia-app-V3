@@ -1,0 +1,29 @@
+<section id="team-section">
+    <h1>Équipe SYNERGIA</h1>
+    <div id="team-actions">
+        <button id="add-member-btn">Ajouter un membre</button>
+    </div>
+    <table id="team-table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="team-table-body">
+            <!-- Membres chargés dynamiquement -->
+        </tbody>
+    </table>
+    <div id="team-modal" style="display:none;">
+        <form id="team-form">
+            <h3 id="team-form-title">Ajouter un membre</h3>
+            <input type="text" id="member-name" placeholder="Nom" required>
+            <input type="email" id="member-email" placeholder="Email" required>
+            <input type="text" id="member-role" placeholder="Rôle" required>
+            <button type="submit">Enregistrer</button>
+            <button type="button" id="team-cancel-btn">Annuler</button>
+        </form>
+    </div>
+</section>

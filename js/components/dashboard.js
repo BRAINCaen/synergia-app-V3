@@ -1,5 +1,6 @@
 import { AuthManager } from "../managers/auth-manager.js";
 import { auth } from "../core/firebase-manager.js";
+import { loadTeamComponent } from "./team.js";
 
 export async function loadDashboard(containerId, user) {
     // Charge le HTML du dashboard
@@ -13,15 +14,33 @@ export async function loadDashboard(containerId, user) {
         welcome.innerHTML = `Bienvenue <b>${user.email}</b> 👋`;
     }
 
-    // Gère la déconnexion
-    const logoutBtn = document.getElementById("nav-logout");
-    const manager = new AuthManager(auth);
-    if (logoutBtn) {
-        logoutBtn.addEventListener("click", async () => {
-            await manager.signOut();
-            // Le onAuthStateChanged du app-loader.js prendra le relai pour afficher Auth
-        });
+    // Navigation entre sections
+    const homeBtn = document.getElementById("nav-home");
+    const teamBtn = document.getElementById("nav-team");
+    const planningBtn = document.getElementById("nav-planning");
+    const content = document.getElementById("dashboard-content");
+
+    // Par défaut : accueil widgets
+    function showHome() {
+        content.innerHTML = `<div id="dashboard-widgets">
+            <div class="widget-card">Statistiques et widgets à venir…</div>
+        </div>`;
+        homeBtn.classList.add("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.remove("active");
     }
 
-    // Tu pourras ajouter ici d’autres events pour navigation interne
-}
+    async function showTeam() {
+        content.innerHTML = "";
+        await loadTeamComponent("dashboard-content");
+        homeBtn.classList.remove("active");
+        teamBtn.classList.add("active");
+        planningBtn.classList.remove("active");
+    }
+
+    homeBtn.onclick = showHome;
+    teamBtn.onclick = showTeam;
+
+    // Optionnel : planning à venir
+    if (planningBtn) {
+        planningBtn.onclick = () => {

@@ -4,28 +4,26 @@ import { loadTeamComponent } from "./team.js";
 import { loadPlanningComponent } from "./planning.js";
 import { loadBadgingComponent } from "./badging.js";
 import { loadQuestsComponent } from "./quests.js";
+import { loadChatComponent } from "./chat.js";
 
 export async function loadDashboard(containerId, user) {
-    // Charge le HTML du dashboard
     const res = await fetch("js/components/dashboard.html");
     const html = await res.text();
     document.getElementById(containerId).innerHTML = html;
 
-    // Affiche le mail de l'utilisateur (personnalisation possible)
     const welcome = document.getElementById("dashboard-welcome");
     if (user && welcome) {
         welcome.innerHTML = `Bienvenue <b>${user.email}</b> 👋`;
     }
 
-    // Navigation entre sections
     const homeBtn = document.getElementById("nav-home");
     const teamBtn = document.getElementById("nav-team");
     const planningBtn = document.getElementById("nav-planning");
     const badgingBtn = document.getElementById("nav-badging");
     const questsBtn = document.getElementById("nav-quests");
+    const chatBtn = document.getElementById("nav-chat");
     const content = document.getElementById("dashboard-content");
 
-    // Par défaut : accueil widgets
     function showHome() {
         content.innerHTML = `<div id="dashboard-widgets">
             <div class="widget-card">Statistiques et widgets à venir…</div>
@@ -35,6 +33,7 @@ export async function loadDashboard(containerId, user) {
         planningBtn.classList.remove("active");
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
+        chatBtn.classList.remove("active");
     }
 
     async function showTeam() {
@@ -45,6 +44,7 @@ export async function loadDashboard(containerId, user) {
         planningBtn.classList.remove("active");
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
+        chatBtn.classList.remove("active");
     }
 
     async function showPlanning() {
@@ -55,6 +55,7 @@ export async function loadDashboard(containerId, user) {
         planningBtn.classList.add("active");
         badgingBtn.classList.remove("active");
         questsBtn.classList.remove("active");
+        chatBtn.classList.remove("active");
     }
 
     async function showBadging() {
@@ -65,6 +66,7 @@ export async function loadDashboard(containerId, user) {
         planningBtn.classList.remove("active");
         badgingBtn.classList.add("active");
         questsBtn.classList.remove("active");
+        chatBtn.classList.remove("active");
     }
 
     async function showQuests() {
@@ -75,16 +77,27 @@ export async function loadDashboard(containerId, user) {
         planningBtn.classList.remove("active");
         badgingBtn.classList.remove("active");
         questsBtn.classList.add("active");
+        chatBtn.classList.remove("active");
     }
 
-    // Assignation des événements du menu
+    async function showChat() {
+        content.innerHTML = "";
+        await loadChatComponent("dashboard-content", user);
+        homeBtn.classList.remove("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.remove("active");
+        badgingBtn.classList.remove("active");
+        questsBtn.classList.remove("active");
+        chatBtn.classList.add("active");
+    }
+
     homeBtn.onclick = showHome;
     teamBtn.onclick = showTeam;
     planningBtn.onclick = showPlanning;
     badgingBtn.onclick = showBadging;
     questsBtn.onclick = showQuests;
+    chatBtn.onclick = showChat;
 
-    // Déconnexion
     const logoutBtn = document.getElementById("nav-logout");
     const manager = new AuthManager(auth);
     if (logoutBtn) {
@@ -93,6 +106,5 @@ export async function loadDashboard(containerId, user) {
         });
     }
 
-    // Affiche l'accueil par défaut
     showHome();
 }

@@ -25,23 +25,21 @@ export async function loadBadgingAdminComponent(containerId) {
                 <button class="admin-type-del" title="Supprimer">🗑️</button>
             `;
             // Edit
-// ...dans renderTypes...
-row.querySelector(".admin-type-edit").onclick = () => {
-    const currentRules = type.rules ? JSON.stringify(type.rules, null, 2) : "";
-    const newLabel = prompt("Nouveau label pour ce type ?", type.label || type.name);
-    const newRules = prompt("Règles (JSON, optionnel)", currentRules || '{\n  "minHoursPerDay": 7,\n  "maxHoursPerDay": 10,\n  "minPauseMinutes": 20\n}');
-    let rules = undefined;
-    try {
-        rules = newRules ? JSON.parse(newRules) : undefined;
-    } catch (e) {
-        alert("Format de règles invalide !");
-        return;
-    }
-    if (newLabel !== null && newLabel.trim()) {
-        badgingManager.editType(type.id, { ...type, label: newLabel.trim(), rules });
-    }
-};
-
+            row.querySelector(".admin-type-edit").onclick = () => {
+                const currentRules = type.rules ? JSON.stringify(type.rules, null, 2) : "";
+                const newLabel = prompt("Nouveau label pour ce type ?", type.label || type.name);
+                const newRules = prompt("Règles (JSON, optionnel)", currentRules || '{\n  "minHoursPerDay": 7,\n  "maxHoursPerDay": 10,\n  "minPauseMinutes": 20\n}');
+                let rules = undefined;
+                try {
+                    rules = newRules ? JSON.parse(newRules) : undefined;
+                } catch (e) {
+                    alert("Format de règles invalide !");
+                    return;
+                }
+                if (newLabel !== null && newLabel.trim()) {
+                    badgingManager.editType(type.id, { ...type, label: newLabel.trim(), rules });
+                }
+            };
             // Delete
             row.querySelector(".admin-type-del").onclick = () => {
                 if (confirm("Supprimer ce type de pointage ?")) {
@@ -51,6 +49,7 @@ row.querySelector(".admin-type-edit").onclick = () => {
             typesList.appendChild(row);
         });
     }
+
     addTypeForm.onsubmit = async (e) => {
         e.preventDefault();
         const name = nameInput.value.trim();
@@ -66,6 +65,7 @@ row.querySelector(".admin-type-edit").onclick = () => {
     const tableDiv = document.getElementById("admin-presences-table");
     const filterEmail = document.getElementById("filter-email");
     const exportBtn = document.getElementById("export-csv-btn");
+    const exportBtnPdf = document.getElementById("export-pdf-btn");
     let allPresences = [];
 
     function renderTable(presences) {
@@ -132,37 +132,38 @@ row.querySelector(".admin-type-edit").onclick = () => {
         link.download = `pointages_${(new Date()).toISOString().slice(0,10)}.csv`;
         link.click();
     };
+
+    // Export PDF
+    exportBtnPdf.onclick = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(17);
+        doc.text("Tableau de pointage RH - Synergia", 15, 17);
+        doc.setFontSize(12);
+        doc.text("Généré le : " + (new Date()).toLocaleString(), 15, 26);
+
+        // Colonnes
+        const headers = [["Nom", "Email", "Date", "Type", "Commentaire", "Statut"]];
+        const rows = allPresences.map(p => [
+            p.user.split("@")[0],
+            p.user,
+            new Date(p.timestamp).toLocaleString(),
+            p.type,
+            p.comment || "",
+            p.validated ? "Validé" : "En attente"
+        ]);
+        // Affichage
+        doc.autoTable({
+            head: headers,
+            body: rows,
+            startY: 35,
+            theme: "grid",
+            styles: { fontSize: 10 }
+        });
+
+        // Signature/mentions légales
+        doc.text("Signature du salarié : ___________________", 15, doc.lastAutoTable.finalY + 16);
+        doc.text("Signature RH : ___________________", 120, doc.lastAutoTable.finalY + 16);
+
+        doc.save(`pointages_RH_${(new Date()).toISOString().slice(0,10)}.pdf`);
+    };
 }
-
-exportBtnPdf.onclick = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(17);
-    doc.text("Tableau de pointage RH - Synergia", 15, 17);
-    doc.setFontSize(12);
-    doc.text("Généré le : " + (new Date()).toLocaleString(), 15, 26);
-
-    // Colonnes
-    const headers = [["Nom", "Email", "Date", "Type", "Commentaire", "Statut"]];
-    const rows = allPresences.map(p => [
-        p.user.split("@")[0],
-        p.user,
-        new Date(p.timestamp).toLocaleString(),
-        p.type,
-        p.comment || "",
-        p.validated ? "Validé" : "En attente"
-    ]);
-    // Affichage
-    doc.autoTable({
-        head: headers,
-        body: rows,
-        startY: 35,
-        theme: "grid",
-        styles: { fontSize: 10 }
-    });
-
-    // Signature/mentions légales
-    doc.text("Signature du salarié : ___________________", 15, doc.lastAutoTable.finalY + 16);
-    doc.text("Signature RH : ___________________", 120, doc.lastAutoTable.finalY + 16);
-
-    doc.save(`pointages_RH_${(new Date()).toISOString().slice(0,10)}.pdf`);
-};

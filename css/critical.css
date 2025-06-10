@@ -528,3 +528,39 @@ nav#dashboard-menu button:hover {
 
 ::-webkit-scrollbar { width: 8px; background: rgba(127,145,255,0.07);}
 ::-webkit-scrollbar-thumb { background: rgba(127,145,255,0.17); border-radius: 12px;}
+.badges-gallery {
+  margin-top: 1.7em;
+  display: flex;
+  gap: 1.2em;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.profile-badge {
+  background: rgba(255,255,255,0.57);
+  border-radius: 1.2em;
+  box-shadow: 0 1px 8px #9577f814;
+  padding: 0.8em 1.25em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  min-width: 78px;
+  min-height: 75px;
+  border: 1.5px solid #7e8fff22;
+  position: relative;
+}
+.profile-badge .badge-icon {
+  font-size: 2em;
+}
+.profile-badge.classique { border-color: #7e8fff44; }
+.profile-badge.rare {
+  border-color: #f6ad55;
+  box-shadow: 0 2px 13px #f6ad5514;
+  background: linear-gradient(135deg, #ffe3b9 0%, #fff6e5 100%);
+}
+.profile-badge .badge-label {
+  color: #604ae1;
+  font-size: 0.98em;
+  font-weight: 500;
+  text-align: center;
+}

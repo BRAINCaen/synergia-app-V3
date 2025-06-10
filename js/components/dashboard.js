@@ -7,6 +7,7 @@ import { loadQuestsComponent } from "./quests.js";
 import { loadChatComponent } from "./chat.js";
 import { loadStoreComponent } from "./store.js";
 import { loadAnalyticsComponent } from "./analytics.js";
+import { loadWalletComponent } from "./wallet.js";
 
 export async function loadDashboard(containerId, user) {
     const res = await fetch("js/components/dashboard.html");
@@ -26,10 +27,11 @@ export async function loadDashboard(containerId, user) {
     const chatBtn = document.getElementById("nav-chat");
     const storeBtn = document.getElementById("nav-store");
     const analyticsBtn = document.getElementById("nav-analytics");
+    const walletBtn = document.getElementById("nav-wallet");
     const content = document.getElementById("dashboard-content");
 
     function clearActive() {
-        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn, analyticsBtn].forEach(btn => btn?.classList.remove("active"));
+        [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn, analyticsBtn, walletBtn].forEach(btn => btn?.classList.remove("active"));
     }
 
     function showHome() {
@@ -89,6 +91,13 @@ export async function loadDashboard(containerId, user) {
         analyticsBtn.classList.add("active");
     }
 
+    async function showWallet() {
+        content.innerHTML = "";
+        await loadWalletComponent("dashboard-content", user);
+        clearActive();
+        walletBtn.classList.add("active");
+    }
+
     homeBtn.onclick = showHome;
     teamBtn.onclick = showTeam;
     planningBtn.onclick = showPlanning;
@@ -97,6 +106,7 @@ export async function loadDashboard(containerId, user) {
     chatBtn.onclick = showChat;
     storeBtn.onclick = showStore;
     analyticsBtn.onclick = showAnalytics;
+    walletBtn.onclick = showWallet;
 
     const logoutBtn = document.getElementById("nav-logout");
     const manager = new AuthManager(auth);

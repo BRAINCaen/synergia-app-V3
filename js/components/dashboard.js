@@ -94,28 +94,48 @@ export async function loadDashboard(containerId, user) {
     if (leaderboardBtn) leaderboardBtn.onclick = showLeaderboard;
     if (monthlyRecapBtn) monthlyRecapBtn.onclick = showMonthlyRecap;
 
-    // --- MENU BURGER ---
+    // --- MENU BURGER PREMIUM + ICÔNES LUCIDE ---
+    // (Place ce code après container.innerHTML = html;)
+    // 1. Charge toutes les icônes SVG
+    if (window.lucide) lucide.createIcons();
+
+    // 2. Burger animé SVG
     const burgerBtn = document.getElementById('dashboard-burger');
     const dashboardMenu = document.getElementById('dashboard-menu');
-    function closeMenu() {
-        dashboardMenu.classList.remove('open');
-        document.body.classList.remove('menu-open');
-    }
     if (burgerBtn && dashboardMenu) {
+        burgerBtn.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" style="display:block;"><g>
+          <rect y="4" width="24" height="3" rx="1.5" fill="#7e8fff"></rect>
+          <rect y="10.5" width="24" height="3" rx="1.5" fill="#7e8fff"></rect>
+          <rect y="17" width="24" height="3" rx="1.5" fill="#7e8fff"></rect>
+          </g></svg>
+        `;
         burgerBtn.onclick = function() {
             dashboardMenu.classList.toggle('open');
             document.body.classList.toggle('menu-open');
+            burgerBtn.classList.toggle('open');
         };
-        // Ajoute seulement la fermeture, SANS écraser le handler existant
         Array.from(dashboardMenu.querySelectorAll('button')).forEach(btn => {
             btn.addEventListener('click', function() {
                 setTimeout(() => {
-                    if (window.innerWidth < 900) closeMenu();
-                }, 150);
+                    if (window.innerWidth < 900) {
+                      dashboardMenu.classList.remove('open');
+                      document.body.classList.remove('menu-open');
+                      burgerBtn.classList.remove('open');
+                    }
+                }, 130);
             });
         });
-        window.addEventListener('resize', closeMenu);
-        window.addEventListener('scroll', closeMenu);
+        window.addEventListener('resize', () => {
+            dashboardMenu.classList.remove('open');
+            burgerBtn.classList.remove('open');
+            document.body.classList.remove('menu-open');
+        });
+        window.addEventListener('scroll', () => {
+            dashboardMenu.classList.remove('open');
+            burgerBtn.classList.remove('open');
+            document.body.classList.remove('menu-open');
+        });
     }
 
     // --- ADMIN BADGING ---

@@ -131,3 +131,25 @@ nav#dashboard-menu button:hover {
   padding: 1.2rem 0.4rem;
   backdrop-filter: blur(7px);
 }
+#wallet-section {
+  max-width: 540px;
+  margin: 0 auto;
+}
+#wallet-balance {
+  background: rgba(72,187,120,0.09);
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px #48bb7822;
+  padding: 1.1rem 1.2rem;
+  font-size: 1.2rem;
+  margin-bottom: 2.2rem;
+  text-align: left;
+}
+#wallet-history-list {
+  margin: 0; padding: 0 0 0 1.3em;
+}
+#wallet-history-list li {
+  margin-bottom: 0.45em;
+}
+#wallet-form input, #wallet-form select, #wallet-form button {
+  margin: 0;
+}

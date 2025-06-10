@@ -1,21 +1,23 @@
 import { 
     signInWithEmailAndPassword,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 export class AuthManager {
     constructor(firebaseAuth) {
         this.auth = firebaseAuth;
+        this.googleProvider = new GoogleAuthProvider();
     }
 
     async signIn(email, password) {
-        try {
-            const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-            return userCredential.user;
-        } catch (error) {
-            throw error;
-        }
+        return await signInWithEmailAndPassword(this.auth, email, password);
+    }
+
+    async signInWithGoogle() {
+        return await signInWithPopup(this.auth, this.googleProvider);
     }
 
     async signOut() {

@@ -125,3 +125,14 @@ export async function loadDashboard(containerId, user) {
 
     showHome();
 }
+import { loadMonthlyRecapComponent } from "./monthly-recap.js";
+
+const monthlyRecapBtn = document.getElementById("nav-monthly-recap");
+if (monthlyRecapBtn) {
+    monthlyRecapBtn.onclick = () => {
+        content.innerHTML = "";
+        loadMonthlyRecapComponent("dashboard-content", user);
+        clearActive();
+        monthlyRecapBtn.classList.add("active");
+    };
+}

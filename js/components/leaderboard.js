@@ -8,40 +8,37 @@ const RANKS = [
     { xp: 250, label: "Légende", color: "#f6ad55" }
 ];
 
+// Même logique d’XP que dans tes quêtes/missions
+function getXP(member, quests) {
+    return quests.filter(p => p.user === member.email).reduce((acc, q) => {
+        // Adapter si tu ajoutes d’autres quêtes :
+        if (q.questId == 1) acc += 10;
+        if (q.questId == 2) acc += 20;
+        if (q.questId == 3) acc += 15;
+        if (q.questId == 4) acc += 5;
+        return acc;
+    }, 0);
+}
+function getRank(xp) {
+    let current = RANKS[0];
+    for (const r of RANKS) if (xp >= r.xp) current = r;
+    return current;
+}
+
 export async function loadLeaderboardComponent(containerId) {
     const res = await fetch("js/components/leaderboard.html");
     const html = await res.text();
     document.getElementById(containerId).innerHTML = html;
 
-    // Managers déjà existants (en Firebase)
     const teamManager = new TeamManager();
     const questsManager = new QuestsManager();
 
     let team = [];
     let progress = [];
 
-    function getRank(xp) {
-        let current = RANKS[0];
-        for (const r of RANKS) if (xp >= r.xp) current = r;
-        return current;
-    }
-
-    function getXP(member) {
-        // Calcule le XP total d’un membre en croisant team/email et progress Firebase
-        return progress.filter(p => p.user === member.email).reduce((acc, q) => {
-            if (q.questId == 1) acc += 10;
-            if (q.questId == 2) acc += 20;
-            if (q.questId == 3) acc += 15;
-            if (q.questId == 4) acc += 5;
-            // Ajoute ici les XP si missions saisonnières, etc.
-            return acc;
-        }, 0);
-    }
-
     function renderLeaderboard() {
-        // Trie les membres par XP décroissant
         const users = team.map(m => {
-            const xp = getXP(m);
+            const xp = getXP(m, progress);
             const rank = getRank(xp);
             return { ...m, xp, rank };
         }).sort((a, b) => b.xp - a.xp);
@@ -53,7 +50,7 @@ export async function loadLeaderboardComponent(containerId) {
                 <tr>
                   <td><span style="font-weight:600;">#${idx+1}</span></td>
                   <td>
-                    <span class="leaderboard-avatar">${user.name?.[0] || "?"}</span>
+                    <span class="leaderboard-avatar">${user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "?"}</span>
                   </td>
                   <td>${user.name || user.email}</td>
                   <td><span class="leaderboard-rank" style="background:${user.rank.color};">${user.rank.label}</span></td>

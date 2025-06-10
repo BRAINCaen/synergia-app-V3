@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="icon" href="data:,">
-<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGIA v3.0 - Refonte</title>
-    <link rel="stylesheet" href="css/critical.css">
+  <meta charset="UTF-8" />
+  <title>Synergia App</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Ajoute ici tes styles et fonts -->
+  <link rel="stylesheet" href="critical.css" />
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="loading-screen">
-        <div class="spinner"></div>
-        <p>Chargement de l'application...</p>
-    </div>
-    <div id="app-root" style="display:none;"></div>
-    <script type="module" src="js/core/app-loader.js"></script>
+  <div id="app"></div>
+  <script type="module" src="js/app-loader.js"></script>
 </body>
 </html>

@@ -12,6 +12,37 @@ import { loadRolesComponent } from "./roles.js";
 import { loadProfileComponent } from "./profile.js";
 import { loadSettingsComponent } from "./settings.js";
 import { loadLeaderboardComponent } from "./leaderboard.js";
+import { AuthManager } from "../managers/auth-manager.js";
+import { auth } from "../core/firebase-manager.js";
+import { isAdmin } from "../managers/user-manager.js";
+import { loadBadgingAdminComponent } from "./badging-admin.js";
+// ...autres imports...
+
+// ...autres fonctions...
+
+export async function loadDashboard(containerId, user) {
+    // ...chargement du dashboard HTML...
+    const badgingAdminBtn = document.getElementById("nav-badging-admin");
+    const content = document.getElementById("dashboard-content");
+
+    // (Affichage conditionnel du menu admin)
+    if (badgingAdminBtn) {
+        badgingAdminBtn.style.display = "none"; // caché par défaut
+        isAdmin(user.email).then(admin => {
+            if (admin) {
+                badgingAdminBtn.style.display = "";
+                badgingAdminBtn.onclick = () => {
+                    content.innerHTML = "";
+                    loadBadgingAdminComponent("dashboard-content");
+                    clearActive();
+                    badgingAdminBtn.classList.add("active");
+                };
+            }
+        });
+    }
+
+    // ...reste du code dashboard.js...
+}
 
 export async function loadDashboard(containerId, user) {
     const container = document.getElementById(containerId);

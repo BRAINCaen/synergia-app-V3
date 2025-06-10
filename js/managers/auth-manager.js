@@ -6,10 +6,8 @@ export class AuthManager {
     async signIn(email, password) {
         try {
             const userCredential = await this.auth.signInWithEmailAndPassword(email, password);
-            console.log("Utilisateur connecté :", userCredential.user);
             return userCredential.user;
         } catch (error) {
-            console.error("Erreur de connexion :", error.message);
             throw error;
         }
     }
@@ -17,7 +15,6 @@ export class AuthManager {
     async signOut() {
         try {
             await this.auth.signOut();
-            console.log("Utilisateur déconnecté");
         } catch (error) {
             console.error("Erreur de déconnexion :", error.message);
         }

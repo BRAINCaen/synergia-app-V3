@@ -131,3 +131,37 @@ row.querySelector(".admin-type-edit").onclick = () => {
         link.click();
     };
 }
+import { jsPDF } from "jspdf";
+
+exportBtnPdf.onclick = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(17);
+    doc.text("Tableau de pointage RH - Synergia", 15, 17);
+    doc.setFontSize(12);
+    doc.text("Généré le : " + (new Date()).toLocaleString(), 15, 26);
+
+    // Colonnes
+    const headers = [["Nom", "Email", "Date", "Type", "Commentaire", "Statut"]];
+    const rows = allPresences.map(p => [
+        p.user.split("@")[0],
+        p.user,
+        new Date(p.timestamp).toLocaleString(),
+        p.type,
+        p.comment || "",
+        p.validated ? "Validé" : "En attente"
+    ]);
+    // Affichage
+    doc.autoTable({
+        head: headers,
+        body: rows,
+        startY: 35,
+        theme: "grid",
+        styles: { fontSize: 10 }
+    });
+
+    // Signature/mentions légales
+    doc.text("Signature du salarié : ___________________", 15, doc.lastAutoTable.finalY + 16);
+    doc.text("Signature RH : ___________________", 120, doc.lastAutoTable.finalY + 16);
+
+    doc.save(`pointages_RH_${(new Date()).toISOString().slice(0,10)}.pdf`);
+};

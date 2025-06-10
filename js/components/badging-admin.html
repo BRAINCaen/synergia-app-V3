@@ -1,0 +1,24 @@
+<section id="badging-admin-section">
+  <h2>Administration du pointage</h2>
+  <div class="admin-row" style="gap:2.5em;flex-wrap:wrap;">
+    <!-- Gestion des types -->
+    <div style="min-width:300px;max-width:350px;flex:1;">
+      <h3>Types de pointage</h3>
+      <form id="admin-add-type-form" style="display:flex;gap:0.5em;margin-bottom:0.8em;">
+        <input id="admin-type-name" type="text" placeholder="Nom (clé)" required maxlength="30" style="width:40%">
+        <input id="admin-type-label" type="text" placeholder="Label affiché" maxlength="40" style="width:50%">
+        <button type="submit">Ajouter</button>
+      </form>
+      <div id="admin-types-list"></div>
+    </div>
+    <!-- Validation & historique -->
+    <div style="flex:2;min-width:330px;">
+      <h3>Pointages de tous les salariés</h3>
+      <div id="admin-presence-filters" style="margin-bottom:0.5em;">
+        <input id="filter-email" type="text" placeholder="Filtrer par email">
+        <button id="export-csv-btn">Exporter CSV</button>
+      </div>
+      <div id="admin-presences-table"></div>
+    </div>
+  </div>
+</section>

@@ -103,10 +103,13 @@ export async function loadDashboard(containerId, user) {
             dashboardMenu.classList.toggle('open');
             document.body.classList.toggle('menu-open');
         };
+        // Ajoute seulement la fermeture, SANS écraser le handler existant
         Array.from(dashboardMenu.querySelectorAll('button')).forEach(btn => {
-            btn.onclick = function() {
-                if (window.innerWidth < 900) closeMenu();
-            };
+            btn.addEventListener('click', function() {
+                setTimeout(() => {
+                    if (window.innerWidth < 900) closeMenu();
+                }, 150);
+            });
         });
         window.addEventListener('resize', closeMenu);
         window.addEventListener('scroll', closeMenu);

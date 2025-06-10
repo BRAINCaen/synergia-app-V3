@@ -2,7 +2,6 @@ import { ChatManager } from "../managers/chat-manager.js";
 const chatManager = new ChatManager();
 
 export async function loadChatComponent(containerId, user) {
-    // Charge le HTML du chat multi-salons
     const res = await fetch("js/components/chat.html");
     const html = await res.text();
     document.getElementById(containerId).innerHTML = html;
@@ -13,19 +12,34 @@ export async function loadChatComponent(containerId, user) {
     const messagesDiv = document.getElementById("chat-messages");
     const chatForm = document.getElementById("chat-form");
     const chatInput = document.getElementById("chat-input");
+    const currentRoomElem = document.getElementById("chat-current-room");
+    const actionsElem = document.getElementById("chat-room-actions");
+    const editRoomBtn = document.getElementById("edit-room-btn");
+    const deleteRoomBtn = document.getElementById("delete-room-btn");
+    const editModal = document.getElementById("chat-edit-modal");
+    const editForm = document.getElementById("chat-edit-form");
+    const editInput = document.getElementById("edit-room-input");
+    const cancelEditBtn = document.getElementById("cancel-edit-room");
 
     let currentRoomId = null;
+    let currentRoomName = "";
     let roomUnsub = null;
+    let roomsState = [];
 
-    // Affiche la liste des salons
+    // Affiche la liste des salons à gauche
     function renderRooms(rooms) {
         roomsList.innerHTML = "";
+        roomsState = rooms;
         rooms.forEach(room => {
-            const btn = document.createElement("button");
-            btn.className = "chat-room-btn";
-            btn.textContent = `#${room.name}`;
+            const div = document.createElement("div");
+            div.className = "chat-room-row";
+            // Salon cliquable + actions si sélectionné
+            div.innerHTML = `
+                <button class="chat-room-btn${currentRoomId === room.id ? " active" : ""}">#${room.name}</button>
+            `;
+            const btn = div.querySelector(".chat-room-btn");
             btn.onclick = () => switchRoom(room.id, room.name);
-            roomsList.appendChild(btn);
+            roomsList.appendChild(div);
         });
     }
 
@@ -33,9 +47,13 @@ export async function loadChatComponent(containerId, user) {
     function switchRoom(roomId, roomName) {
         if (roomUnsub) { roomUnsub(); }
         currentRoomId = roomId;
-        document.getElementById("chat-current-room").textContent = "#" + roomName;
+        currentRoomName = roomName;
+        currentRoomElem.textContent = "#" + roomName;
+        actionsElem.style.display = "inline-block";
         messagesDiv.innerHTML = "<em>Chargement…</em>";
         roomUnsub = chatManager.subscribeToMessages(roomId, renderMessages);
+        // met à jour la liste pour highlight
+        renderRooms(roomsState);
     }
 
     // Affiche messages d'un salon
@@ -82,12 +100,38 @@ export async function loadChatComponent(containerId, user) {
         createRoomInput.value = "";
     };
 
+    // --- MODAL ÉDITION/SUPPRESSION ---
+    editRoomBtn.onclick = () => {
+        editInput.value = currentRoomName;
+        editModal.style.display = "flex";
+        editInput.focus();
+    };
+    cancelEditBtn.onclick = () => editModal.style.display = "none";
+    editForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const newName = editInput.value.trim();
+        if (!newName || !currentRoomId) return;
+        await chatManager.editRoom(currentRoomId, newName);
+        editModal.style.display = "none";
+    };
+
+    deleteRoomBtn.onclick = async () => {
+        if (!currentRoomId) return;
+        if (confirm("Supprimer ce salon et tous ses messages ?")) {
+            await chatManager.deleteRoom(currentRoomId);
+            actionsElem.style.display = "none";
+        }
+    };
+
     // Affiche les salons en live
     chatManager.subscribeToRooms(rooms => {
         renderRooms(rooms);
         // Par défaut, sélectionne le 1er salon s’il y en a
         if (!currentRoomId && rooms.length) {
             switchRoom(rooms[0].id, rooms[0].name);
+        } else if (currentRoomId) {
+            const found = rooms.find(r => r.id === currentRoomId);
+            if (!found && rooms.length) switchRoom(rooms[0].id, rooms[0].name);
         }
     });
 }

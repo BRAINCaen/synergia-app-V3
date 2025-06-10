@@ -3,6 +3,7 @@ import { auth } from "../core/firebase-manager.js";
 import { loadTeamComponent } from "./team.js";
 import { loadPlanningComponent } from "./planning.js";
 import { loadBadgingComponent } from "./badging.js";
+import { loadQuestsComponent } from "./quests.js";
 
 export async function loadDashboard(containerId, user) {
     // Charge le HTML du dashboard
@@ -21,6 +22,7 @@ export async function loadDashboard(containerId, user) {
     const teamBtn = document.getElementById("nav-team");
     const planningBtn = document.getElementById("nav-planning");
     const badgingBtn = document.getElementById("nav-badging");
+    const questsBtn = document.getElementById("nav-quests");
     const content = document.getElementById("dashboard-content");
 
     // Par défaut : accueil widgets
@@ -32,6 +34,7 @@ export async function loadDashboard(containerId, user) {
         teamBtn.classList.remove("active");
         planningBtn.classList.remove("active");
         badgingBtn.classList.remove("active");
+        questsBtn.classList.remove("active");
     }
 
     async function showTeam() {
@@ -41,6 +44,7 @@ export async function loadDashboard(containerId, user) {
         teamBtn.classList.add("active");
         planningBtn.classList.remove("active");
         badgingBtn.classList.remove("active");
+        questsBtn.classList.remove("active");
     }
 
     async function showPlanning() {
@@ -50,6 +54,7 @@ export async function loadDashboard(containerId, user) {
         teamBtn.classList.remove("active");
         planningBtn.classList.add("active");
         badgingBtn.classList.remove("active");
+        questsBtn.classList.remove("active");
     }
 
     async function showBadging() {
@@ -59,6 +64,17 @@ export async function loadDashboard(containerId, user) {
         teamBtn.classList.remove("active");
         planningBtn.classList.remove("active");
         badgingBtn.classList.add("active");
+        questsBtn.classList.remove("active");
+    }
+
+    async function showQuests() {
+        content.innerHTML = "";
+        await loadQuestsComponent("dashboard-content");
+        homeBtn.classList.remove("active");
+        teamBtn.classList.remove("active");
+        planningBtn.classList.remove("active");
+        badgingBtn.classList.remove("active");
+        questsBtn.classList.add("active");
     }
 
     // Assignation des événements du menu
@@ -66,6 +82,7 @@ export async function loadDashboard(containerId, user) {
     teamBtn.onclick = showTeam;
     planningBtn.onclick = showPlanning;
     badgingBtn.onclick = showBadging;
+    questsBtn.onclick = showQuests;
 
     // Déconnexion
     const logoutBtn = document.getElementById("nav-logout");

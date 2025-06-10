@@ -956,3 +956,9 @@ input, select, textarea, button {
     padding: 0.6em 0.5em 1em 0.5em;
   }
 }
+#badging-section form { gap: 1.2em; margin: 2em 0 1em 0;}
+#badging-section select, #badging-section input { font-size: 1.07em; }
+#badge-history table { width: 100%; margin-top: 1em;}
+#badge-history th, #badge-history td { text-align: left; }
+#badge-history th { background: #7e8fff17;}
+#badge-history td { background: rgba(255,255,255,0.62);}

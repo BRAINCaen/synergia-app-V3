@@ -1,5 +1,5 @@
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { app } from "../core/firebase-manager.js";
+import { app } from "./core/firebase-manager.js";
 
 // Change "user_profiles" si besoin (ex : "users" ou autre collection source)
 const SOURCE_COLLECTION = "user_profiles";

@@ -3,7 +3,7 @@ import { auth } from "../core/firebase-manager.js";
 import { isAdmin } from "../managers/user-manager.js";
 import { loadTeamComponent } from "./team.js";
 import { loadPlanningComponent } from "./planning.js";
-import { loadBadgingComponent } from "./badging.js";
+import { loadBadgingAllComponent } from "./badging-all.js"; // unique page pointage !
 import { loadQuestsComponent } from "./quests.js";
 import { loadChatComponent } from "./chat.js";
 import { loadStoreComponent } from "./store.js";
@@ -13,8 +13,6 @@ import { loadRolesComponent } from "./roles.js";
 import { loadProfileComponent } from "./profile.js";
 import { loadSettingsComponent } from "./settings.js";
 import { loadLeaderboardComponent } from "./leaderboard.js";
-import { loadBadgingAdminComponent } from "./badging-admin.js";
-import { loadMonthlyRecapComponent } from "./monthly-recap.js";
 
 export async function loadDashboard(containerId, user) {
     const container = document.getElementById(containerId);
@@ -40,8 +38,6 @@ export async function loadDashboard(containerId, user) {
     const profileBtn = document.getElementById("nav-profile");
     const settingsBtn = document.getElementById("nav-settings");
     const leaderboardBtn = document.getElementById("nav-leaderboard");
-    const badgingAdminBtn = document.getElementById("nav-badging-admin");
-    const monthlyRecapBtn = document.getElementById("nav-monthly-recap");
     const logoutBtn = document.getElementById("nav-logout");
     const content = document.getElementById("dashboard-content");
     const welcome = document.getElementById("dashboard-welcome");
@@ -52,7 +48,7 @@ export async function loadDashboard(containerId, user) {
 
     function clearActive() {
         [homeBtn, teamBtn, planningBtn, badgingBtn, questsBtn, chatBtn, storeBtn,
-        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn, badgingAdminBtn, monthlyRecapBtn]
+        analyticsBtn, walletBtn, rolesBtn, profileBtn, settingsBtn, leaderboardBtn]
         .forEach(btn => btn?.classList.remove("active"));
     }
 
@@ -65,7 +61,7 @@ export async function loadDashboard(containerId, user) {
     }
     async function showTeam() { content.innerHTML = ""; await loadTeamComponent("dashboard-content"); clearActive(); teamBtn?.classList.add("active"); }
     async function showPlanning() { content.innerHTML = ""; await loadPlanningComponent("dashboard-content"); clearActive(); planningBtn?.classList.add("active"); }
-    async function showBadging() { content.innerHTML = ""; await loadBadgingComponent("dashboard-content", user); clearActive(); badgingBtn?.classList.add("active"); }
+    async function showBadging() { content.innerHTML = ""; await loadBadgingAllComponent("dashboard-content", user); clearActive(); badgingBtn?.classList.add("active"); }
     async function showQuests() { content.innerHTML = ""; await loadQuestsComponent("dashboard-content"); clearActive(); questsBtn?.classList.add("active"); }
     async function showChat() { content.innerHTML = ""; await loadChatComponent("dashboard-content", user); clearActive(); chatBtn?.classList.add("active"); }
     async function showStore() { content.innerHTML = ""; await loadStoreComponent("dashboard-content", user); clearActive(); storeBtn?.classList.add("active"); }
@@ -75,8 +71,6 @@ export async function loadDashboard(containerId, user) {
     async function showProfile() { content.innerHTML = ""; await loadProfileComponent("dashboard-content", user); clearActive(); profileBtn?.classList.add("active"); }
     async function showSettings() { content.innerHTML = ""; await loadSettingsComponent("dashboard-content", user); clearActive(); settingsBtn?.classList.add("active"); }
     async function showLeaderboard() { content.innerHTML = ""; await loadLeaderboardComponent("dashboard-content"); clearActive(); leaderboardBtn?.classList.add("active"); }
-    async function showBadgingAdmin() { content.innerHTML = ""; await loadBadgingAdminComponent("dashboard-content"); clearActive(); badgingAdminBtn?.classList.add("active"); }
-    async function showMonthlyRecap() { content.innerHTML = ""; await loadMonthlyRecapComponent("dashboard-content", user); clearActive(); monthlyRecapBtn?.classList.add("active"); }
 
     // Affecte chaque bouton à la bonne fonction
     if (homeBtn) homeBtn.onclick = showHome;
@@ -92,14 +86,9 @@ export async function loadDashboard(containerId, user) {
     if (profileBtn) profileBtn.onclick = showProfile;
     if (settingsBtn) settingsBtn.onclick = showSettings;
     if (leaderboardBtn) leaderboardBtn.onclick = showLeaderboard;
-    if (monthlyRecapBtn) monthlyRecapBtn.onclick = showMonthlyRecap;
 
-    // --- MENU BURGER PREMIUM + ICÔNES LUCIDE ---
-    // (Place ce code après container.innerHTML = html;)
-    // 1. Charge toutes les icônes SVG
+    // BURGER & ICÔNES (premium) — code identique à plus haut
     if (window.lucide) lucide.createIcons();
-
-    // 2. Burger animé SVG
     const burgerBtn = document.getElementById('dashboard-burger');
     const dashboardMenu = document.getElementById('dashboard-menu');
     if (burgerBtn && dashboardMenu) {
@@ -138,21 +127,10 @@ export async function loadDashboard(containerId, user) {
         });
     }
 
-    // --- ADMIN BADGING ---
-    if (badgingAdminBtn) {
-        badgingAdminBtn.style.display = "none"; // caché par défaut
-        isAdmin(user.email).then(admin => {
-            if (admin) {
-                badgingAdminBtn.style.display = "";
-                badgingAdminBtn.onclick = showBadgingAdmin;
-            }
-        });
-    }
-
     // Accueil par défaut
     showHome();
 
-    // --- Déconnexion ---
+    // Déconnexion
     const manager = new AuthManager(auth);
     if (logoutBtn) {
         logoutBtn.addEventListener("click", async () => {

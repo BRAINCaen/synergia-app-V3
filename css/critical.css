@@ -1144,3 +1144,61 @@ input, select, textarea, button {
 #private-chat-popup .private-chat { padding:1em; }
 #private-chat-popup input { border-radius:1em; border:1px solid #bbb; padding:0.5em; }
 #private-chat-popup button { border-radius:1em; border:none; background:#6c63ff;color:#fff;padding:0.4em 1.2em;margin-left:0.4em;cursor:pointer;}
+/* Popin générale */
+#private-chat-popup {
+  font-family: 'Inter', Arial, sans-serif;
+  box-shadow: 0 8px 32px #282b4b20;
+  border-radius: 1.5em;
+  background: #fff;
+  border: 1.5px solid #eceffe;
+  overflow: hidden;
+  max-width: 380px;
+  min-width: 290px;
+  z-index: 5001;
+  animation: fadeInUp 0.45s;
+}
+
+/* Anim popin */
+@keyframes fadeInUp {
+  from { transform: translateY(40px); opacity:0; }
+  to   { transform: translateY(0); opacity:1; }
+}
+
+.private-chat h4 {
+  margin: 0 0 10px 0;
+  padding: 14px 8px 10px 12px;
+  font-size: 1.18em;
+  background: linear-gradient(90deg, #7e8fff 30%, #d0e6ff 100%);
+  color: #fff;
+  letter-spacing: 0.02em;
+  border-bottom: 1.5px solid #eceffe;
+}
+
+.private-chat {
+  padding: 0;
+}
+
+#private-messages {
+  background: #f8faff;
+  min-height: 120px;
+  max-height: 270px;
+  overflow-y: auto;
+  border-radius: 1.2em;
+  margin: 0 8px 10px 8px;
+  border: none;
+  box-shadow: 0 1px 6px #eee3;
+  padding: 10px 8px 8px 8px;
+}
+
+.private-chat input[type="text"], #private-msg-input {
+  border-radius: 1em;
+  border: 1.5px solid #bbc6ef;
+  padding: 0.55em 1.2em;
+  margin-left: 8px;
+  outline: none;
+  font-size: 1em;
+  background: #f7faff;
+  width: 65%;
+  transition: border .19s;
+}
+.private-chat

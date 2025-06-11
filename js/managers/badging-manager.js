@@ -63,3 +63,32 @@ export class BadgingManager {
         return pres;
     }
 }
+import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { app } from "../core/firebase-manager.js";
+
+const db = getFirestore(app);
+
+// ...dans ta classe BadgingManager...
+
+export class BadgingManager {
+    // ...tes autres méthodes...
+
+    /**
+     * Récupère le dernier pointage (présence) d’un utilisateur à partir d’une date (timestamp min)
+     * @param {string} email - Email utilisateur
+     * @param {number} minTimestamp - Timestamp minimal (ex : début de journée)
+     * @returns {Promise<object|null>}
+     */
+    async getLastPresenceOfUser(email, minTimestamp = 0) {
+        const q = query(
+            collection(db, "presences"),
+            where("user", "==", email),
+            where("timestamp", ">=", minTimestamp),
+            orderBy("timestamp", "desc"),
+            limit(1)
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) return null;
+        return snap.docs[0].data();
+    }
+}

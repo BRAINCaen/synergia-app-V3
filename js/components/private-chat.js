@@ -16,10 +16,10 @@ export function openPrivateChat(parentDivId, currentUser, otherUser) {
     chatDiv.innerHTML = `
       <div class="private-chat">
         <h4>Message privé avec ${otherUser.name || otherUser.email}</h4>
-        <div id="private-messages" style="height:210px;overflow-y:auto;border:1px solid #ccc;padding:10px 10px 6px 10px;margin-bottom:0.8em;background:#fafaff;border-radius:0.7em;"></div>
-        <input id="private-msg-input" placeholder="Votre message..." style="width:75%;border-radius:1em;border:1px solid #bbb;padding:0.5em;">
-        <button id="private-send-btn" style="border-radius:1em;background:#6366f1;color:#fff;padding:0.4em 1.1em;border:none;margin-left:0.5em;">Envoyer</button>
-        <button id="close-chat-btn" style="float:right;border-radius:1em;background:#aaa;color:#fff;padding:0.4em 1.1em;border:none;">Fermer</button>
+        <div id="private-messages" style="height:210px;overflow-y:auto;"></div>
+        <input id="private-msg-input" placeholder="Votre message..." type="text">
+        <button id="private-send-btn">Envoyer</button>
+        <button id="close-chat-btn">Fermer</button>
       </div>
     `;
 
@@ -38,14 +38,14 @@ export function openPrivateChat(parentDivId, currentUser, otherUser) {
         messagesDiv.innerHTML = "";
         snap.forEach(doc => {
             const msg = doc.data();
-            const align = msg.sender === currentUser.email ? "right" : "left";
+            const mine = msg.sender === currentUser.email;
             messagesDiv.innerHTML += `
-              <div style="text-align:${align};margin-bottom:0.7em;">
-                <span style="display:inline-block;background:${align==='right'?'#d0e6ff':'#eee'};border-radius:1em;padding:0.6em 1.1em;">
-                  <b>${msg.sender === currentUser.email ? "Moi" : (otherUser.name || otherUser.email)}</b> :
-                  ${escapeHTML(msg.content)}
-                </span>
-                <div style="font-size:0.9em;color:#aaa;margin-top:2px;">${msg.timestamp && msg.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+              <div class="private-msg-${mine ? "me" : "other"}">
+                <div class="msg-bubble">${escapeHTML(msg.content)}</div>
+                <div class="msg-meta">
+                  ${mine ? "Moi" : (otherUser.name || otherUser.email)}
+                  • ${msg.timestamp && msg.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+                </div>
               </div>
             `;
         });

@@ -2,7 +2,7 @@ import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.c
 import { app } from "./core/firebase-manager.js";
 
 // Change "user_profiles" si besoin (ex : "users" ou autre collection source)
-const SOURCE_COLLECTION = "user_profiles";
+const SOURCE_COLLECTION = "users";
 const DEST_COLLECTION = "team";
 
 const db = getFirestore(app);

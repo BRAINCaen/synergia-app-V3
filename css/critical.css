@@ -1210,3 +1210,38 @@ input, select, textarea, button {
   height: auto;
   filter: drop-shadow(0 4px 24px #2222);
 }
+@media (max-width: 800px) {
+  .team-table, .team-table thead, .team-table tbody, .team-table th, .team-table td, .team-table tr {
+    display: block;
+    width: 100% !important;
+  }
+  .team-table thead {
+    display: none;
+  }
+  .team-table tr {
+    margin-bottom: 1.7em;
+    box-shadow: 0 4px 14px #c2d1ff12;
+    border-radius: 1.3em;
+    background: #f7f8ffcc;
+    padding: 1em 0.7em;
+  }
+  .team-table td {
+    border: none;
+    padding: 7px 0 7px 12px;
+    position: relative;
+    text-align: left;
+    font-size: 1.09em;
+    min-width: 0;
+  }
+  .team-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+    color: #6366f1;
+    display: inline-block;
+    min-width: 85px;
+  }
+  .team-table td:last-child {
+    text-align: center;
+    padding-bottom: 13px;
+  }
+}

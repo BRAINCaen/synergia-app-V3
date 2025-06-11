@@ -1141,3 +1141,6 @@ input, select, textarea, button {
     transform: translateY(0%);
   }
 }
+#private-chat-popup .private-chat { padding:1em; }
+#private-chat-popup input { border-radius:1em; border:1px solid #bbb; padding:0.5em; }
+#private-chat-popup button { border-radius:1em; border:none; background:#6c63ff;color:#fff;padding:0.4em 1.2em;margin-left:0.4em;cursor:pointer;}

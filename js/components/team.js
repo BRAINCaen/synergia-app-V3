@@ -1,6 +1,8 @@
 import { TeamManager } from "../managers/team-manager.js";
 import { BadgingManager } from "../managers/badging-manager.js";
 import { isAdmin } from "../managers/user-manager.js";
+import { openPrivateChat } from "./private-chat.js"; // À créer selon message précédent
+
 const teamManager = new TeamManager();
 const badgingManager = new BadgingManager();
 
@@ -12,8 +14,6 @@ export async function loadTeamComponent(containerId, user) {
     const teamTableDiv = document.getElementById("team-table-div");
     const modal = document.getElementById("member-modal");
     const modalContent = document.getElementById("member-modal-content");
-
-    let currentTeam = [];
 
     // Affichage principal
     function renderTable(team) {
@@ -49,7 +49,7 @@ export async function loadTeamComponent(containerId, user) {
         });
     }
 
-    // Statut live = récupère le dernier pointage du jour
+    // Statut live (dernier pointage du jour)
     async function syncTeamStatus(team) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -67,16 +67,13 @@ export async function loadTeamComponent(containerId, user) {
         return updated;
     }
 
-    // Vue modale fiche membre
+    // Modale fiche membre
     async function openMemberModal(member) {
         // Dernier pointage
         const today = new Date();
         today.setHours(0,0,0,0);
         const lastPresence = await badgingManager.getLastPresenceOfUser(member.email, today.getTime());
-        // Quêtes en cours (exemple)
-        // A adapter si tu utilises une autre collection ou une logique différente
         const currentQuests = member.currentQuests || [];
-        // Badges
         const badges = (member.badges || []);
         // Statut live
         let status = "Absent";
@@ -124,21 +121,36 @@ export async function loadTeamComponent(containerId, user) {
                     modal.style.display = "none";
                 }
             };
-            // Idem pour gestion des badges...
+            // Pour gérer badges : à compléter selon ton système
         }
 
         document.querySelector(".close-modal-btn").onclick = () => { modal.style.display = "none"; };
+
         document.querySelector(".send-msg-btn").onclick = () => {
-            // Ouvre le chat privé avec ce membre (module à implémenter ensuite)
-            alert(`Module chat privé à intégrer ici pour ${member.email}`);
+            // Affiche le chat dans une popin (voir private-chat.js)
+            if (!document.getElementById("private-chat-popup")) {
+                const chatPopup = document.createElement("div");
+                chatPopup.id = "private-chat-popup";
+                chatPopup.style.position = "fixed";
+                chatPopup.style.bottom = "10px";
+                chatPopup.style.right = "10px";
+                chatPopup.style.width = "350px";
+                chatPopup.style.zIndex = "5000";
+                chatPopup.style.background = "#fff";
+                chatPopup.style.boxShadow = "0 4px 20px #4442";
+                chatPopup.style.borderRadius = "1.2em";
+                document.body.appendChild(chatPopup);
+            }
+            openPrivateChat("private-chat-popup", user, member);
         };
+
         modal.style.display = "block";
     }
 
     // Live sync équipe
     teamManager.subscribeToTeam(async team => {
-        currentTeam = await syncTeamStatus(team);
-        renderTable(currentTeam);
+        const teamWithStatus = await syncTeamStatus(team);
+        renderTable(teamWithStatus);
     });
 
     // Fermer modale si clic en dehors

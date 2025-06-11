@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, setDoc, doc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, setDoc, doc, getDocs, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { app } from "../core/firebase-manager.js";
 
 const db = getFirestore(app);
@@ -22,7 +22,7 @@ export class BadgingManager {
         await deleteDoc(doc(db, "pointage-types", id));
     }
 
-    // Pointages (presences)
+    // Pointages (présences)
     subscribeToUserPresences(email, callback) {
         const q = query(collection(db, "presences"), where("user", "==", email), orderBy("timestamp", "desc"));
         return onSnapshot(q, snapshot => {
@@ -42,7 +42,7 @@ export class BadgingManager {
     async addPresence(data) {
         await addDoc(collection(db, "presences"), data);
     }
-    async validatePresence(id, validated=true) {
+    async validatePresence(id, validated = true) {
         await setDoc(doc(db, "presences", id), { validated }, { merge: true });
     }
     async deletePresence(id) {
@@ -62,23 +62,8 @@ export class BadgingManager {
         snapshot.forEach(doc => pres.push({ id: doc.id, ...doc.data() }));
         return pres;
     }
-}
-import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { app } from "../core/firebase-manager.js";
 
-const db = getFirestore(app);
-
-// ...dans ta classe BadgingManager...
-
-export class BadgingManager {
-    // ...tes autres méthodes...
-
-    /**
-     * Récupère le dernier pointage (présence) d’un utilisateur à partir d’une date (timestamp min)
-     * @param {string} email - Email utilisateur
-     * @param {number} minTimestamp - Timestamp minimal (ex : début de journée)
-     * @returns {Promise<object|null>}
-     */
+    // ✅ Fonction demandée : dernier pointage de l'utilisateur à partir d'une date (typiquement début de journée)
     async getLastPresenceOfUser(email, minTimestamp = 0) {
         const q = query(
             collection(db, "presences"),
@@ -89,6 +74,6 @@ export class BadgingManager {
         );
         const snap = await getDocs(q);
         if (snap.empty) return null;
-        return snap.docs[0].data();
+        return { id: snap.docs[0].id, ...snap.docs[0].data() };
     }
 }

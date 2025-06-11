@@ -1202,3 +1202,11 @@ input, select, textarea, button {
   transition: border .19s;
 }
 .private-chat
+#dashboard-section img[alt*="SYNERGIA"] {
+  display: block;
+  margin: 0 auto 1.2rem auto;
+  max-width: 340px;
+  width: 92%;
+  height: auto;
+  filter: drop-shadow(0 4px 24px #2222);
+}

@@ -1,6 +1,5 @@
 import { loadDashboard } from './components/dashboard.js';
 import { auth } from './core/firebase-manager.js';
-import "./migrate-team.js"
 
 // Affiche le dashboard si connecté, sinon la page de connexion
 function startApp(user) {

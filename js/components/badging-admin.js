@@ -7,6 +7,20 @@ export async function loadBadgingAdminComponent(containerId) {
     const res = await fetch("js/components/badging-admin.html");
     const html = await res.text();
     document.getElementById(containerId).innerHTML = html;
+if (isAdmin) {
+  document.getElementById("submit-type-btn").onclick = async () => {
+    const label = document.getElementById("new-type-label").value.trim();
+    if (label.length < 2) return showToast("❌ Nom invalide");
+
+    try {
+      await addBadgingType(label);
+      showToast("✅ Type ajouté !");
+      await populateTypes(user);
+    } catch (err) {
+      showToast("❌ Erreur : " + err.message);
+    }
+  };
+}
 
     // Gestion des types
     const typesList = document.getElementById("admin-types-list");

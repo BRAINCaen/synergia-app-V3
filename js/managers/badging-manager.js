@@ -1,14 +1,19 @@
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, Timestamp } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  Timestamp
+} from "firebase/firestore";
 
 const db = getFirestore();
 
 /**
- * Récupère la liste des types de badging disponibles.
- * Exemple : Retard, Absence, Mission, etc.
+ * Récupère tous les types de badging depuis Firestore
  */
 export async function getBadgingTypes() {
-  const ref = collection(db, "badging-types");
-  const snapshot = await getDocs(ref);
+  const colRef = collection(db, "badging-types");
+  const snapshot = await getDocs(colRef);
   const types = [];
 
   snapshot.forEach(doc => {
@@ -23,14 +28,14 @@ export async function getBadgingTypes() {
 }
 
 /**
- * Récupère l’historique des badgings d’un utilisateur donné.
- * @param {string} userId - ID Firestore du user (dans "team")
+ * Récupère l’historique de badging d’un utilisateur depuis Firestore
+ * @param {string} userId - ID Firestore de l'utilisateur
  */
 export async function getBadgeHistory(userId) {
   if (!userId) return [];
 
-  const ref = collection(db, `badging/${userId}/history`);
-  const snapshot = await getDocs(ref);
+  const historyRef = collection(db, `badging/${userId}/history`);
+  const snapshot = await getDocs(historyRef);
   const history = [];
 
   snapshot.forEach(doc => {
@@ -47,10 +52,10 @@ export async function getBadgeHistory(userId) {
 }
 
 /**
- * Enregistre un badging dans Firestore pour un user donné.
- * @param {string} userId - ID Firestore de l'utilisateur
- * @param {string} typeId - Type de badging (ex : "retard")
- * @param {string} authorEmail - Email de l’émetteur
+ * Soumet un nouvel événement de badging dans Firestore
+ * @param {string} userId
+ * @param {string} typeId
+ * @param {string} authorEmail
  */
 export async function submitBadging(userId, typeId, authorEmail) {
   if (!userId || !typeId || !authorEmail) {
@@ -64,16 +69,15 @@ export async function submitBadging(userId, typeId, authorEmail) {
     author: authorEmail
   });
 }
-import { collection, addDoc } from "firebase/firestore";
-import { getFirestore } from "firebase/firestore";
 
-const db = getFirestore();
-
+/**
+ * Ajoute un nouveau type de badging dans Firestore
+ * @param {string} label
+ */
 export async function addBadgingType(label) {
-  const newType = {
+  const colRef = collection(db, "badging-types");
+  await addDoc(colRef, {
     label: label,
-    createdAt: new Date()
-  };
-
-  await addDoc(collection(db, "badging-types"), newType);
+    createdAt: Timestamp.now()
+  });
 }

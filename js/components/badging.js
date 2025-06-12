@@ -5,33 +5,60 @@ export async function loadBadgingComponent(containerId, user) {
   await delayUntilElementExists(`#${containerId}`);
 
   const container = document.getElementById(containerId);
-  if (!container) return;
+  if (!container || !user) return;
 
   container.innerHTML = `
-    <div>
-      <h2>Badging</h2>
+    <section class="badging">
+      <h2>Historique de badging de ${user.name || user.email}</h2>
       <div id="badge-types"></div>
       <div id="badge-history"></div>
-    </div>
+    </section>
   `;
 
-  populateTypes();
-  renderHistory();
+  try {
+    await populateTypes(user);
+    await renderHistory(user);
+  } catch (err) {
+    console.error("Erreur de chargement des badges :", err);
+    document.getElementById("badge-history").innerHTML = `<p style="color:red;">Erreur : ${err.message}</p>`;
+  }
 }
 
-function populateTypes() {
+async function populateTypes(user) {
   const typesContainer = document.getElementById("badge-types");
   if (!typesContainer) return;
 
-  const types = getBadgingTypes();
-  typesContainer.innerHTML = types.map(type => `<p>${type.label}</p>`).join("");
+  const types = await getBadgingTypes();
+  typesContainer.innerHTML = types.map(type => `
+    <button class="badge-type-btn" data-type="${type.id}">
+      ${type.label}
+    </button>
+  `).join("");
+
+  // Ajouter les événements onclick
+  document.querySelectorAll(".badge-type-btn").forEach(btn => {
+    btn.onclick = () => handleTypeClick(btn.dataset.type, user);
+  });
 }
 
-function renderHistory() {
+async function renderHistory(user) {
   const historyContainer = document.getElementById("badge-history");
   if (!historyContainer) return;
 
-  getBadgeHistory().then(history => {
-    historyContainer.innerHTML = history.map(h => `<p>${h.date} - ${h.type}</p>`).join("");
-  });
+  const history = await getBadgeHistory(user.id);
+  if (!history.length) {
+    historyContainer.innerHTML = `<p>Aucun badging enregistré.</p>`;
+    return;
+  }
+
+  historyContainer.innerHTML = history.map(entry => `
+    <div class="badge-entry">
+      <strong>${entry.type}</strong> — ${new Date(entry.timestamp).toLocaleString()}
+    </div>
+  `).join("");
+}
+
+function handleTypeClick(typeId, user) {
+  alert(`Action de badging pour ${user.name || user.email} avec le type ${typeId}`);
+  // TODO: Implémenter appel vers le manager pour enregistrer le badging
 }

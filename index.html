@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <script type="module" src="js/core/firebase-init.js"></script>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/toast.css" />
+  <link rel="stylesheet" href="css/admin-users.css" />
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+  <link rel="stylesheet" href="css/admin.css" />
+<script type="module">
+  import { handleAdminElements } from "./js/core/admin.js";
+  window.addEventListener("DOMContentLoaded", handleAdminElements);
+</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="UTF-8" />
+  <title>Synergia App</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Ajoute ici tes styles et fonts -->
+  <link rel="stylesheet" href="css/critical.css" />
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="js/app-loader.js"></script>
+</body>
+</html>

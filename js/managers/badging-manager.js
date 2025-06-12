@@ -64,3 +64,16 @@ export async function submitBadging(userId, typeId, authorEmail) {
     author: authorEmail
   });
 }
+import { collection, addDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+
+const db = getFirestore();
+
+export async function addBadgingType(label) {
+  const newType = {
+    label: label,
+    createdAt: new Date()
+  };
+
+  await addDoc(collection(db, "badging-types"), newType);
+}

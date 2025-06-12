@@ -12,3 +12,12 @@ export function delayUntilElementExists(selector, timeout = 3000) {
     }, timeout);
   });
 }
+export function showToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.innerText = message;
+  toast.style.display = "block";
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}

@@ -36,20 +36,19 @@ export async function loadBadgingComponent(containerId, user) {
       `<p style="color:red;">Erreur : ${err.message}</p>`;
   }
 
-  if (isAdmin) {
-    const addBtn = document.getElementById("add-type-btn");
-    addBtn.onclick = async () => {
-      const newLabel = prompt("Nom du nouveau type de badging :");
-      if (!newLabel || newLabel.trim().length < 2) return alert("Type invalide.");
-      try {
-        await addBadgingType(newLabel.trim());
-        alert("✅ Type ajouté !");
-        await populateTypes(user);
-      } catch (err) {
-        alert("❌ Erreur : " + err.message);
-      }
-    };
-  }
+if (isAdmin) {
+  document.getElementById("submit-type-btn").onclick = async () => {
+    const label = document.getElementById("new-type-label").value.trim();
+    if (label.length < 2) return showToast("❌ Nom invalide");
+
+    try {
+      await addBadgingType(label);
+      showToast("✅ Type ajouté !");
+      await populateTypes(user);
+    } catch (err) {
+      showToast("❌ Erreur : " + err.message);
+    }
+  };
 }
 
 async function populateTypes(user) {

@@ -1,0 +1,19 @@
+<section id="badging-section">
+  <h2>Pointage & Présence</h2>
+  <form id="badge-form" style="display:flex;gap:1em;align-items:center;">
+    <label for="badge-type-select">Type :</label>
+    <select id="badge-type-select"></select>
+    <input id="badge-comment" type="text" maxlength="80" placeholder="Commentaire (optionnel)">
+    <button id="badge-btn" type="button">Pointer</button>
+  </form>
+  <div style="margin:1.4em 0 1em 0;font-weight:500;">Mon historique</div>
+  <div id="badge-history"></div>
+  <!-- Formulaire d'ajout de type (admin uniquement) -->
+<div class="add-type-form" style="margin-top: 20px;">
+  <input id="new-type-label" placeholder="Nom du type" />
+  <button id="submit-type-btn">Ajouter</button>
+</div>
+<!-- Toast visuel -->
+<div id="toast" class="toast"></div>
+
+</section>

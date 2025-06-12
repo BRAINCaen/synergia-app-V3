@@ -1,0 +1,35 @@
+<section id="chat-section">
+  <aside class="chat-sidebar">
+    <h3>Salons</h3>
+    <div id="chat-rooms-list"></div>
+    <form id="chat-create-room-form" style="margin-top:1em;">
+      <input id="chat-new-room" type="text" maxlength="40" placeholder="Nouveau salon (ex: jeux)" required>
+      <button type="submit" style="margin-top:0.3em;">Créer</button>
+    </form>
+  </aside>
+  <div class="chat-main">
+    <div class="chat-room-header">
+      <span id="chat-current-room" style="font-weight:600;">#Salon</span>
+      <span id="chat-room-actions" style="margin-left:1em;display:none;">
+        <button id="edit-room-btn" title="Renommer">✏️</button>
+        <button id="delete-room-btn" title="Supprimer">🗑️</button>
+      </span>
+    </div>
+    <div id="chat-messages"></div>
+    <form id="chat-form" autocomplete="off">
+      <input id="chat-input" type="text" maxlength="300" placeholder="Écrire un message..." autocomplete="off" required>
+      <button type="submit" title="Envoyer">Envoyer</button>
+    </form>
+    <!-- Modal édition -->
+    <div id="chat-edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(30,35,70,0.13);z-index:9999;align-items:center;justify-content:center;">
+      <form id="chat-edit-form" style="background:#fff;padding:1.3em 2em;border-radius:1em;box-shadow:0 3px 20px #7e8fff15;display:flex;flex-direction:column;gap:1em;">
+        <label>Renommer le salon :</label>
+        <input id="edit-room-input" type="text" maxlength="40" required>
+        <div style="display:flex;gap:1em;justify-content:flex-end;">
+          <button type="submit">Enregistrer</button>
+          <button type="button" id="cancel-edit-room">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion Synergia</title>
+  <script type="module" src="js/core/firebase-init.js"></script>
+  <script type="module" src="js/core/auth-guard.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 400px; margin: auto; }
+    input { display: block; margin: 10px 0; padding: 8px; width: 100%; }
+    button { padding: 10px; margin-top: 10px; width: 100%; }
+  </style>
+</head>
+<body>
+  <h2>Connexion à Synergia</h2>
+  <input id="email" type="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Mot de passe" />
+  <button id="login-btn">Se connecter</button>
+  <hr>
+  <button id="google-btn">Connexion Google</button>
+</body>
+</html>

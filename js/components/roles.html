@@ -1,0 +1,29 @@
+<section id="roles-section">
+    <h1>Gestion des rôles</h1>
+    <div id="roles-actions">
+        <button id="add-role-btn">Ajouter un rôle</button>
+    </div>
+    <table id="roles-table">
+        <thead>
+            <tr>
+                <th>Nom du rôle</th>
+                <th>Couleur</th>
+                <th>Droits</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="roles-table-body">
+            <!-- Rôles chargés dynamiquement -->
+        </tbody>
+    </table>
+    <div id="roles-modal" style="display:none;">
+        <form id="roles-form">
+            <h3 id="roles-form-title">Ajouter un rôle</h3>
+            <input type="text" id="role-name" placeholder="Nom du rôle" required>
+            <input type="color" id="role-color" value="#667eea" required>
+            <input type="text" id="role-perms" placeholder="Droits (séparés par des virgules)">
+            <button type="submit">Enregistrer</button>
+            <button type="button" id="roles-cancel-btn">Annuler</button>
+        </form>
+    </div>
+</section>

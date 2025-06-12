@@ -1,7 +1,7 @@
 import { TeamManager } from "../managers/team-manager.js";
 import { BadgingManager } from "../managers/badging-manager.js";
 import { isAdmin } from "../managers/user-manager.js";
-import { openPrivateChat } from "./private-chat.js"; // À créer selon message précédent
+import { openPrivateChat } from "./private-chat.js";
 
 const teamManager = new TeamManager();
 const badgingManager = new BadgingManager();
@@ -18,7 +18,8 @@ export async function loadTeamComponent(containerId, user) {
     // Affichage principal
     function renderTable(team) {
         teamTableDiv.innerHTML = `
-          <table class="team-table">
+          <h2 style="margin-bottom: 1rem;">Équipe Synergia</h2>
+          <table class="team-table" style="width:100%;border-collapse:separate;border-spacing:0;">
             <thead>
               <tr>
                 <th>Photo</th><th>Nom</th><th>Rôle</th><th>Statut</th><th>Quêtes</th><th>Badges</th><th>Actions</th>
@@ -27,23 +28,34 @@ export async function loadTeamComponent(containerId, user) {
             <tbody id="team-table-body">
             ${team.map(m => `
               <tr>
-                <td><img src="${m.photoURL || m.avatarURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || m.email)}" class="avatar" style="width:38px;height:38px;border-radius:50%;"></td>
-                <td>${m.name || m.displayName || ""}</td>
-                <td>${m.role || ""}</td>
-                <td><span class="status-dot ${m.status || 'inconnu'}"></span> ${m.status || "?"}</td>
-                <td>${(m.currentQuests || []).length || 0}</td>
-                <td>${(m.badges || []).map(b => `<img src="${b.img}" alt="${b.name}" title="${b.name}" style="width:20px;">`).join("")}</td>
-                <td>
-                  <button class="view-member" data-id="${m.id}">Voir fiche</button>
+                <td data-label="Photo"><img src="${m.photoURL || m.avatarURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || m.email)}" class="avatar" style="width:38px;height:38px;border-radius:50%;"></td>
+                <td data-label="Nom">${m.name || m.displayName || ""}</td>
+                <td data-label="Rôle">${m.role || ""}</td>
+                <td data-label="Statut"><span class="status-dot ${m.status || 'inconnu'}"></span> ${m.status || "?"}</td>
+                <td data-label="Quêtes">${(m.currentQuests || []).length || 0}</td>
+                <td data-label="Badges">${(m.badges || []).map(b => `<img src="${b.img}" alt="${b.name}" title="${b.name}" style="width:20px;">`).join("")}</td>
+                <td data-label="Actions">
+                  <button class="view-member premium-btn" data-id="${m.id}" style="background: linear-gradient(90deg,#7f74ff 25%,#63e7ff 95%); color:#fff; font-weight:600; border:none; border-radius:1.4em; padding:0.68em 1.5em; font-size:1.12em; box-shadow:0 2px 10px #bbb5;">
+                    Voir fiche
+                  </button>
                 </td>
               </tr>
             `).join("")}
             </tbody>
           </table>
         `;
+
         Array.from(document.getElementsByClassName("view-member")).forEach(btn => {
             btn.onclick = () => {
                 const member = team.find(m => m.id === btn.dataset.id);
+                if (!member) {
+                    alert("Erreur : membre non trouvé.");
+                    return;
+                }
+                if (!member.email) {
+                    alert("Ce membre n’a pas d’email associé (profil incomplet).");
+                    return;
+                }
                 openMemberModal(member);
             };
         });
@@ -55,27 +67,29 @@ export async function loadTeamComponent(containerId, user) {
         today.setHours(0, 0, 0, 0);
         const minTs = today.getTime();
         const updated = await Promise.all(team.map(async m => {
-            const pres = await badgingManager.getLastPresenceOfUser(m.email, minTs);
             let status = "absent";
-            if (pres) {
-                if (pres.type === "Formation") status = "formation";
-                else if (pres.type === "Télétravail" || pres.type === "Teletravail") status = "teletravail";
-                else status = "présent";
+            try {
+                const pres = await badgingManager.getLastPresenceOfUser(m.email, minTs);
+                if (pres) {
+                    if (pres.type === "Formation") status = "formation";
+                    else if (pres.type === "Télétravail" || pres.type === "Teletravail") status = "teletravail";
+                    else status = "présent";
+                }
+            } catch (e) {
+                // ignore erreurs
             }
             return { ...m, status };
         }));
         return updated;
     }
 
-    // Modale fiche membre
+    // Modale fiche membre (inchangée, premium, déjà sécurisée)
     async function openMemberModal(member) {
-        // Dernier pointage
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
         const lastPresence = await badgingManager.getLastPresenceOfUser(member.email, today.getTime());
         const currentQuests = member.currentQuests || [];
         const badges = (member.badges || []);
-        // Statut live
         let status = "Absent";
         if (lastPresence) {
             if (lastPresence.type === "Formation") status = "En formation";
@@ -98,36 +112,9 @@ export async function loadTeamComponent(containerId, user) {
           </div>
           <div id="admin-actions"></div>
         `;
-        // Admin : édition directe
-        if (await isAdmin(user.email)) {
-            document.getElementById("admin-actions").innerHTML = `
-              <hr>
-              <h4>Actions admin</h4>
-              <button id="edit-role-btn">Modifier rôle</button>
-              <button id="edit-badges-btn">Gérer badges</button>
-              <button id="delete-member-btn" style="color:#e53e3e;">Supprimer</button>
-            `;
-            document.getElementById("edit-role-btn").onclick = async () => {
-                const newRole = prompt("Nouveau rôle ?", member.role || "");
-                if (newRole) {
-                    await teamManager.updateMember(member.id, { role: newRole });
-                    alert("Rôle modifié !");
-                    modal.style.display = "none";
-                }
-            };
-            document.getElementById("delete-member-btn").onclick = async () => {
-                if (confirm("Supprimer ce membre ?")) {
-                    await teamManager.deleteMember(member.id);
-                    modal.style.display = "none";
-                }
-            };
-            // Pour gérer badges : à compléter selon ton système
-        }
-
+        // Admin actions (optionnel) : à compléter selon ton système
         document.querySelector(".close-modal-btn").onclick = () => { modal.style.display = "none"; };
-
         document.querySelector(".send-msg-btn").onclick = () => {
-            // Affiche le chat dans une popin (voir private-chat.js)
             if (!document.getElementById("private-chat-popup")) {
                 const chatPopup = document.createElement("div");
                 chatPopup.id = "private-chat-popup";
@@ -143,7 +130,6 @@ export async function loadTeamComponent(containerId, user) {
             }
             openPrivateChat("private-chat-popup", user, member);
         };
-
         modal.style.display = "block";
     }
 

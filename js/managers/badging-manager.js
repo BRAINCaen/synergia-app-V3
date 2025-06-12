@@ -1,79 +1,66 @@
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, setDoc, doc, getDocs, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { app } from "../core/firebase-manager.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, Timestamp } from "firebase/firestore";
 
-const db = getFirestore(app);
+const db = getFirestore();
 
-export class BadgingManager {
-    // Types de pointages & règles
-    subscribeToTypes(callback) {
-        return onSnapshot(collection(db, "pointage-types"), snapshot => {
-            const types = [];
-            snapshot.forEach(doc => types.push({ id: doc.id, ...doc.data() }));
-            callback(types);
-        });
-    }
-    async addType(type) {
-        await addDoc(collection(db, "pointage-types"), type);
-    }
-    async editType(id, type) {
-        await setDoc(doc(db, "pointage-types", id), type, { merge: true });
-    }
-    async deleteType(id) {
-        await deleteDoc(doc(db, "pointage-types", id));
-    }
+/**
+ * Récupère la liste des types de badging disponibles.
+ * Exemple : Retard, Absence, Mission, etc.
+ */
+export async function getBadgingTypes() {
+  const ref = collection(db, "badging-types");
+  const snapshot = await getDocs(ref);
+  const types = [];
 
-    // Pointages (présences)
-    subscribeToUserPresences(email, callback) {
-        const q = query(collection(db, "presences"), where("user", "==", email), orderBy("timestamp", "desc"));
-        return onSnapshot(q, snapshot => {
-            const pres = [];
-            snapshot.forEach(doc => pres.push({ id: doc.id, ...doc.data() }));
-            callback(pres);
-        });
-    }
-    subscribeToAllPresences(callback) {
-        const q = query(collection(db, "presences"), orderBy("timestamp", "desc"));
-        return onSnapshot(q, snapshot => {
-            const pres = [];
-            snapshot.forEach(doc => pres.push({ id: doc.id, ...doc.data() }));
-            callback(pres);
-        });
-    }
-    async addPresence(data) {
-        await addDoc(collection(db, "presences"), data);
-    }
-    async validatePresence(id, validated = true) {
-        await setDoc(doc(db, "presences", id), { validated }, { merge: true });
-    }
-    async deletePresence(id) {
-        await deleteDoc(doc(db, "presences", id));
-    }
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    types.push({
+      id: doc.id,
+      label: data.label || doc.id
+    });
+  });
 
-    // Récupérer toutes les présences sur une plage (pour calculs)
-    async getPresencesByUserAndDate(email, dateMin, dateMax) {
-        const q = query(
-            collection(db, "presences"),
-            where("user", "==", email),
-            where("timestamp", ">=", dateMin),
-            where("timestamp", "<=", dateMax)
-        );
-        const snapshot = await getDocs(q);
-        const pres = [];
-        snapshot.forEach(doc => pres.push({ id: doc.id, ...doc.data() }));
-        return pres;
-    }
+  return types;
+}
 
-    // ✅ Fonction demandée : dernier pointage de l'utilisateur à partir d'une date (typiquement début de journée)
-    async getLastPresenceOfUser(email, minTimestamp = 0) {
-        const q = query(
-            collection(db, "presences"),
-            where("user", "==", email),
-            where("timestamp", ">=", minTimestamp),
-            orderBy("timestamp", "desc"),
-            limit(1)
-        );
-        const snap = await getDocs(q);
-        if (snap.empty) return null;
-        return { id: snap.docs[0].id, ...snap.docs[0].data() };
-    }
+/**
+ * Récupère l’historique des badgings d’un utilisateur donné.
+ * @param {string} userId - ID Firestore du user (dans "team")
+ */
+export async function getBadgeHistory(userId) {
+  if (!userId) return [];
+
+  const ref = collection(db, `badging/${userId}/history`);
+  const snapshot = await getDocs(ref);
+  const history = [];
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    history.push({
+      id: doc.id,
+      type: data.type,
+      timestamp: data.timestamp?.toDate() || new Date(),
+      author: data.author || "Inconnu"
+    });
+  });
+
+  return history.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+/**
+ * Enregistre un badging dans Firestore pour un user donné.
+ * @param {string} userId - ID Firestore de l'utilisateur
+ * @param {string} typeId - Type de badging (ex : "retard")
+ * @param {string} authorEmail - Email de l’émetteur
+ */
+export async function submitBadging(userId, typeId, authorEmail) {
+  if (!userId || !typeId || !authorEmail) {
+    throw new Error("Champs requis manquants pour enregistrer un badging.");
+  }
+
+  const ref = collection(db, `badging/${userId}/history`);
+  await addDoc(ref, {
+    type: typeId,
+    timestamp: Timestamp.now(),
+    author: authorEmail
+  });
 }

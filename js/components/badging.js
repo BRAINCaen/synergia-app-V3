@@ -1,7 +1,8 @@
 import {
   getBadgingTypes,
   getBadgeHistory,
-  submitBadging
+  submitBadging,
+  addBadgingType
 } from "../managers/badging-manager.js";
 
 import { delayUntilElementExists } from "../core/utils.js";
@@ -12,10 +13,14 @@ export async function loadBadgingComponent(containerId, user) {
   const container = document.getElementById(containerId);
   if (!container || !user) return;
 
+  const currentUser = JSON.parse(localStorage.getItem("synergia-user"));
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superadmin";
+
   container.innerHTML = `
     <section class="badging">
       <h2>Historique de badging de ${user.name || user.email}</h2>
       <div id="badge-types" class="badge-types"></div>
+      ${isAdmin ? `<button id="add-type-btn" class="add-type-btn">+ Ajouter un type</button>` : ""}
       <div id="badge-history" class="badge-history"></div>
     </section>
   `;
@@ -27,6 +32,21 @@ export async function loadBadgingComponent(containerId, user) {
     console.error("Erreur de chargement des badges :", err);
     document.getElementById("badge-history").innerHTML =
       `<p style="color:red;">Erreur : ${err.message}</p>`;
+  }
+
+  if (isAdmin) {
+    const addBtn = document.getElementById("add-type-btn");
+    addBtn.onclick = async () => {
+      const newLabel = prompt("Nom du nouveau type de badging :");
+      if (!newLabel || newLabel.trim().length < 2) return alert("Type invalide.");
+      try {
+        await addBadgingType(newLabel.trim());
+        alert("✅ Type ajouté !");
+        await populateTypes(user);
+      } catch (err) {
+        alert("❌ Erreur : " + err.message);
+      }
+    };
   }
 }
 

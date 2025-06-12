@@ -1,0 +1,28 @@
+.badge-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.badge-type-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.badge-type-btn:hover {
+  background: #5a67d8;
+}
+
+.badge-entry {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #667eea;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}

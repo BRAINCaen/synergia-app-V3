@@ -10,8 +10,21 @@ const db = getFirestore(app);
  * @param {object} otherUser   - { email, name, ... }
  */
 export function openPrivateChat(parentDivId, currentUser, otherUser) {
+    // Vérification défensive pour éviter tout plantage
+    if (!currentUser || !currentUser.email) {
+        alert("Utilisateur courant non trouvé (connexion expirée ou bug). Merci de vous reconnecter.");
+        return;
+    }
+    if (!otherUser || !otherUser.email) {
+        alert("Impossible d’ouvrir la messagerie : membre cible sans email.");
+        return;
+    }
+
     const chatDiv = document.getElementById(parentDivId);
-    if (!chatDiv) return;
+    if (!chatDiv) {
+        alert("Div cible pour le chat introuvable.");
+        return;
+    }
 
     chatDiv.innerHTML = `
       <div class="private-chat">

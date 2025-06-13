@@ -18,3 +18,13 @@ function App() {
     </div>
   )
 }
+import TimetrackingAdmin from './shared/components/TimetrackingAdmin'
+
+function AdminDashboard() {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-center mt-4">Admin Pointage</h1>
+      <TimetrackingAdmin />
+    </div>
+  )
+}

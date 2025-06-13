@@ -29,3 +29,20 @@ const Login = () => {
 };
 
 export default Login;
+import { loginWithGoogle } from '../../modules/auth/AuthService';
+
+...
+
+<button
+  onClick={async () => {
+    try {
+      await loginWithGoogle();
+      navigate('/register');
+    } catch (error) {
+      alert("Erreur avec Google");
+    }
+  }}
+  className="w-full bg-red-600 text-white p-2 rounded font-semibold mt-2"
+>
+  Se connecter avec Google
+</button>

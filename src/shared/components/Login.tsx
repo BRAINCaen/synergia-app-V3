@@ -15,16 +15,15 @@ const Login = () => {
       navigate('/register');
     } catch (error) {
       alert("Erreur de connexion");
-      console.error(error);
     }
   };
 
   return (
-    <form onSubmit={handleLogin} className="max-w-md mx-auto mt-10 p-4 border rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Connexion</h2>
-      <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="w-full mb-2 p-2 border rounded" />
-      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mot de passe" className="w-full mb-2 p-2 border rounded" />
-      <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">Se connecter</button>
+    <form onSubmit={handleLogin} className="bg-white text-black max-w-md w-full p-8 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-center mb-6">Connexion GameHub Pro</h2>
+      <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="w-full mb-3 p-2 border rounded" />
+      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mot de passe" className="w-full mb-3 p-2 border rounded" />
+      <button type="submit" className="w-full bg-blue-700 text-white p-2 rounded font-semibold">Se connecter</button>
     </form>
   );
 };

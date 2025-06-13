@@ -1,0 +1,1 @@
+export default function TimetrackingAdmin() { return <div>Admin Pointage</div>; }

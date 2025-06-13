@@ -1,0 +1,1 @@
+export default function Timetracking() { return <div>Pointage</div>; }

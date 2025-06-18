@@ -5,3 +5,5 @@
 
 [context.production.environment]
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+[build.environment]
+  NODE_VERSION = "18"

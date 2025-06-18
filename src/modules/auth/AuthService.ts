@@ -8,7 +8,6 @@ import {
   GoogleAuthProvider
 } from 'firebase/auth';
 
-// Utilisation des variables d'environnement Vite
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -22,18 +21,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-export const register = (email: string, password: string) => {
-  return createUserWithEmailAndPassword(auth, email, password);
-};
-
-export const login = (email: string, password: string) => {
-  return signInWithEmailAndPassword(auth, email, password);
-};
-
-export const logout = () => {
-  return signOut(auth);
-};
-
+export const register = (email: string, password: string) => createUserWithEmailAndPassword(auth, email, password);
+export const login = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
+export const logout = () => signOut(auth);
 export const loginWithGoogle = () => {
   const provider = new GoogleAuthProvider();
   return signInWithPopup(auth, provider);

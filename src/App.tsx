@@ -1,5 +1,6 @@
+export default App;
 import React from "react";
-import { auth } from "./firebase"; // <-- on importe l'auth déjà initialisé
+// NE PAS réimporter initializeApp ni refaire une config ici !
 
 function App() {
   return (
@@ -12,5 +13,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

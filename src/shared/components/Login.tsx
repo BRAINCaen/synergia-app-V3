@@ -13,8 +13,9 @@ const Login = () => {
       await login(email, password);
       navigate('/register');
     } catch (error) {
-      alert("Erreur de connexion");
-    }
+  console.error(error);
+  alert("Erreur de connexion : " + error.message);
+}
   };
 
   const handleGoogleLogin = async () => {

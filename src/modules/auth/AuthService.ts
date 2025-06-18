@@ -8,6 +8,9 @@ import {
   GoogleAuthProvider
 } from 'firebase/auth';
 
+// Affiche toutes les variables d'env Vite disponibles (important pour debug Netlify)
+console.log("VITE ENV VARS:", import.meta.env);
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,

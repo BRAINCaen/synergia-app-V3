@@ -14,3 +14,6 @@ function App() {
 }
 
 export default App;
+<pre>
+  {JSON.stringify(import.meta.env, null, 2)}
+</pre>

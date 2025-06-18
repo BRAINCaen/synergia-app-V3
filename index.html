@@ -1,0 +1,3366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!-- ... autres meta ... -->
+    <title>SYNERGIA - Gestion d'équipe gamifiée</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS modulaire -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/synergia-style.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    
+    <!-- Image error handlers -->
+    <script>
+        // Handle missing images
+        function handleMissingImage(event) {
+            const img = event.target;
+            if (img.src.includes('default-avatar.jpg')) {
+                img.src = 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png';
+            } else if (img.src.includes('avatar-')) {
+                img.src = 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png';
+            } else if (img.src.includes('synergia-logo')) {
+                img.src = 'https://img.icons8.com/color/96/000000/s-key.png';
+            }
+        }
+
+        // Add event listener once DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix for all images
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', handleMissingImage);
+            });
+        });
+    </script>
+
+    <link rel="icon" href="https://img.icons8.com/color/32/000000/s-key.png" type="image/png">
+    <link rel="stylesheet" href="css/responsive.css"></head>
+
+<body>
+    <!-- Écran de chargement -->
+    <div id="loading-screen">
+        <div class="loading-container">
+            <img src="https://img.icons8.com/color/96/000000/s-key.png" alt="SYNERGIA Logo" class="pulse">
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p>Chargement de l'aventure...</p>
+        </div>
+    </div>
+
+    <!-- Écran de connexion -->
+    <div id="login-screen">
+        <div class="login-container">
+            <img src="https://img.icons8.com/color/96/000000/s-key.png" alt="SYNERGIA Logo">
+            <h1>SYNERGIA</h1>
+            <p>L'aventure commence ici</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Mot de passe" required>
+                </div>
+                <button type="submit" class="btn-primary">Se connecter</button>
+            </form>
+            <p class="login-help">Problème de connexion ? Contacte Allan !</p>
+        </div>
+    </div>
+
+    <!-- Interface principale -->
+    <div id="app" class="hidden">
+        <!-- En-tête -->
+        <header>
+            <div class="user-info">
+                <img id="user-avatar" src="https://img.icons8.com/color/96/000000/user-male-circle--v1.png" alt="Avatar">
+                <div>
+                    <h2 id="current-user-name">Chargement...</h2>
+                    <div class="xp-bar">
+                        <div id="xp-progress" style="width: 60%;"></div>
+                        <span id="xp-text">0 XP</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main id="main-content">
+            <!-- Sera rempli dynamiquement par JavaScript -->
+        </main>
+
+        <!-- Navigation du bas -->
+        <nav>
+            <button class="nav-btn active" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </button>
+            <button class="nav-btn" data-page="quests">
+                <i class="fas fa-tasks"></i>
+                <span>Quêtes</span>
+            </button>
+            <button class="nav-btn" data-page="team">
+                <i class="fas fa-users"></i>
+                <span>Équipe</span>
+            </button>
+            <button class="nav-btn" data-page="calendar">
+                <i class="fas fa-calendar"></i>
+                <span>Planning</span>
+            </button>
+            <button class="nav-btn" data-page="chat">
+                <i class="fas fa-comments"></i>
+                <span>Chat</span>
+                <span id="chat-badge" class="badge hidden">0</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Templates pour les pages -->
+    <template id="dashboard-template">
+        <div class="dashboard">
+            <section class="welcome-card">
+                <h2>Bienvenue, <span id="welcome-name">Coéquipier</span> !</h2>
+                <p class="stat-highlight"><span id="quests-today">2</span> quêtes aujourd'hui</p>
+            </section>
+            
+            <section class="stats-card">
+                <h3>Ton niveau</h3>
+                <div class="level-display">
+                    <div id="level-badge">4</div>
+                    <div class="level-info">
+                        <h4 id="level-title">Expert</h4>
+                        <div class="level-progress">
+                            <div id="level-bar" style="width: 60%;"></div>
+                            <span id="level-text">240/400 XP</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="role-card">
+                <h3>Ton rôle principal</h3>
+                <div id="main-role">
+                    <div class="role-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <div class="role-info">
+                        <h4 id="role-name">Entretien & Maintenance</h4>
+                        <div class="mastery-progress">
+                            <div id="mastery-bar" style="width: 80%;"></div>
+                            <span id="mastery-text">Expert</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="quests-preview">
+                <div class="section-header">
+                    <h3>Quêtes du jour</h3>
+                    <button class="btn-text" onclick="navigateToPage('quests')">Voir tout</button>
+                </div>
+                <div id="daily-quests">
+                    <div class="quest-item">
+                                                <div class="quest-icon-default"><i class="fas fa-calendar-day"></i></div>
+
+                        <div class="quest-info">
+                            <h4 class="quest-title">Vérifier l'accueil</h4>
+                            <p class="quest-description">S'assurer que l'espace d'accueil est propre et accueillant</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 10 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> 18h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(1)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    <div class="quest-item">
+                                                <div class="quest-icon-default"><i class="fas fa-calendar-day"></i></div>
+
+                        <div class="quest-info">
+                            <h4 class="quest-title">Contrôle équipements</h4>
+                            <p class="quest-description">Vérifier le bon fonctionnement des jeux</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 15 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> 20h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(2)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="team-activity">
+                <h3>Activité de l'équipe</h3>
+                <div id="team-feed">
+                    <div class="no-activity">Aucune activité récente</div>
+                </div>
+            </section>
+        </div>
+    </template>
+
+    <template id="quests-template">
+        <div class="quests-page">
+            <div class="tabs">
+                <button class="tab active" data-tab="daily">Quotidiennes</button>
+                <button class="tab" data-tab="weekly">Hebdomadaires</button>
+                <button class="tab" data-tab="special">Spéciales</button>
+            </div>
+            
+            <div class="tab-content active" id="daily-tab">
+                <div class="quests-list" id="daily-quests-list">
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-home"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Vérifier l'accueil</h4>
+                            <p class="quest-description">S'assurer que l'espace d'accueil est propre et accueillant</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 10 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Aujourd'hui 18h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(1)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-tools"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Contrôle équipements</h4>
+                            <p class="quest-description">Vérifier le bon fonctionnement des jeux</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 15 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Aujourd'hui 20h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(2)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-broom"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Nettoyage rapide</h4>
+                            <p class="quest-description">Nettoyage des zones communes</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 8 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Aujourd'hui 22h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(3)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="weekly-tab">
+                <div class="quests-list" id="weekly-quests-list">
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-calendar-week"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Nettoyage complet</h4>
+                            <p class="quest-description">Nettoyage approfondi de toutes les zones de jeu</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 50 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Vendredi 18h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(4)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-wrench"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Maintenance préventive</h4>
+                            <p class="quest-description">Vérification complète de tous les équipements</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 75 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Samedi 16h00</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(5)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="special-tab">
+                <div class="quests-list" id="special-quests-list">
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-star"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Animation événement</h4>
+                            <p class="quest-description">Organiser une animation spéciale pour les clients</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 100 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Fin du mois</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(7)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                    <div class="quest-item">
+                        <div class="quest-icon-default"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="quest-info">
+                            <h4 class="quest-title">Formation équipe</h4>
+                            <p class="quest-description">Animer une session de formation pour l'équipe</p>
+                            <div class="quest-meta">
+                                <span class="quest-xp"><i class="fas fa-star"></i> 150 XP</span>
+                                <span class="quest-deadline"><i class="fas fa-clock"></i> Selon planning</span>
+                            </div>
+                        </div>
+                        <button class="btn-complete" onclick="completeQuest(8)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Panneau d'administration -->
+    <div id="admin-panel" class="modal hidden">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h3>Administration SYNERGIA</h3>
+                <button id="close-admin" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-tabs">
+                    <button class="tab active" data-tab="users">Utilisateurs</button>
+                    <button class="tab" data-tab="quests">Quêtes</button>
+                    <button class="tab" data-tab="badges">Badges</button>
+                    <button class="tab" data-tab="roles">Rôles</button>
+                    <button class="tab" data-tab="settings">Paramètres</button>
+                </div>
+                
+                <!-- Onglet Utilisateurs -->
+                <div class="tab-content active" id="users-tab">
+                    <div class="admin-section">
+                        <h4>Gestion des utilisateurs</h4>
+                        <button class="btn-secondary" onclick="addUser()">
+                            <i class="fas fa-plus"></i> Ajouter un utilisateur
+                        </button>
+                        <div id="users-list" class="admin-list">
+                            <!-- Sera rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Onglet Quêtes -->
+                <div class="tab-content" id="quests-tab">
+                    <div class="admin-section">
+                        <h4>Gestion des quêtes</h4>
+                        <button class="btn-secondary" onclick="addQuest()">
+                            <i class="fas fa-plus"></i> Créer une quête
+                        </button>
+                        <div id="quests-admin-list" class="admin-list">
+                            <!-- Sera rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Onglet Badges -->
+                <div class="tab-content" id="badges-tab">
+                    <div class="admin-section">
+                        <h4>Gestion des badges</h4>
+                        <button class="btn-secondary" onclick="addBadge()">
+                            <i class="fas fa-plus"></i> Créer un badge
+                        </button>
+                        <div id="badges-admin-list" class="admin-list">
+                            <!-- Sera rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Onglet Rôles -->
+                <div class="tab-content" id="roles-tab">
+                    <div class="admin-section">
+                        <h4>Gestion des rôles</h4>
+                        <button class="btn-secondary" onclick="addRole()">
+                            <i class="fas fa-plus"></i> Créer un rôle
+                        </button>
+                        <div id="roles-admin-list" class="admin-list">
+                            <!-- Sera rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Onglet Paramètres -->
+                <div class="tab-content" id="settings-tab">
+                    <div class="admin-section">
+                        <h4>Paramètres de l'application</h4>
+                        <div class="form-group">
+                            <label>Nom de l'application</label>
+                            <input type="text" id="app-name" value="SYNERGIA">
+                        </div>
+                        <div class="form-group">
+                            <label>XP par niveau</label>
+                            <input type="number" id="xp-per-level" value="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Thème</label>
+                            <select id="app-theme">
+                                <option value="default">Par défaut</option>
+                                <option value="dark">Sombre</option>
+                                <option value="light">Clair</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="saveSettings()">
+                            <i class="fas fa-save"></i> Sauvegarder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de création de quête -->
+    <div id="quest-creation-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Créer une nouvelle quête</h3>
+                <button onclick="closeQuestModal()" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="quest-creation-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Titre de la quête</label>
+                            <input type="text" id="quest-title" placeholder="Ex: Vérifier l'accueil" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Type de quête</label>
+                            <select id="quest-type" required>
+                                <option value="daily">Quotidienne</option>
+                                <option value="weekly">Hebdomadaire</option>
+                                <option value="monthly">Mensuelle</option>
+                                <option value="special">Spéciale</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="quest-description" placeholder="Décrivez ce qu'il faut faire..." rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+    <label>Icône de la quête</label>
+    <div class="image-upload-container">
+        <input type="file" id="quest-icon" accept="image/*" style="display: none;">
+        <div class="image-preview" id="image-preview" onclick="document.getElementById('quest-icon').click()">
+            <div class="upload-placeholder">
+                <i class="fas fa-image fa-2x"></i>
+                <p>Cliquez pour ajouter une icône</p>
+                <span class="upload-hint">PNG, JPG, SVG - Max 2MB</span>
+            </div>
+        </div>
+        <button type="button" class="btn-secondary btn-small" onclick="removeQuestIcon()" id="remove-icon-btn" style="display: none;">
+            <i class="fas fa-trash"></i> Supprimer l'icône
+        </button>
+    </div>
+</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>XP à gagner</label>
+                            <input type="number" id="quest-xp" min="1" max="500" value="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Durée estimée (min)</label>
+                            <input type="number" id="quest-duration" min="1" max="480" value="15">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Rôle assigné</label>
+                            <select id="quest-role">
+                                <option value="all">Tous les rôles</option>
+                                <option value="entretien">Entretien & Maintenance</option>
+                                <option value="accueil">Accueil Client</option>
+                                <option value="animation">Animation</option>
+                                <option value="securite">Sécurité</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priorité</label>
+                            <select id="quest-priority">
+                                <option value="low">Faible</option>
+                                <option value="normal">Normale</option>
+                                <option value="high">Élevée</option>
+                                <option value="urgent">Urgente</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="quest-photo-required"> 
+                            Validation par photo requise
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="quest-recurring"> 
+                            Quête récurrente
+                        </label>
+                    </div>
+                    
+                    <div id="recurring-options" class="form-group hidden">
+                        <label>Fréquence de récurrence</label>
+                        <select id="quest-frequency">
+                            <option value="daily">Chaque jour</option>
+                            <option value="weekly">Chaque semaine</option>
+                            <option value="monthly">Chaque mois</option>
+                        </select>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeQuestModal()" class="btn-secondary">Annuler</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-plus"></i> Créer la quête
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton d'administration flottant -->
+    <button id="admin-btn" class="admin-fab hidden">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-storage-compat.js"></script>
+
+    <!-- Scripts de l'application -->
+    
+<!-- Scripts de l'application -->
+<script>
+    // ... (garde tout le JavaScript Firebase et l'app existante)
+</script>
+
+
+
+    
+    <script>
+        // Fallback pour le logo
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'IMG' && e.target.src.includes('synergia-logo.png')) {
+                e.target.src = 'https://img.icons8.com/color/96/000000/s-key.png';
+                e.preventDefault();
+            }
+        }, true);
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7uBuAQaOhZ02owkZEuMKC5Vji6PrB2f8",
+            authDomain: "synergia-app-f27e7.firebaseapp.com",
+            projectId: "synergia-app-f27e7",
+            storageBucket: "synergia-app-f27e7.firebasestorage.app",
+            messagingSenderId: "201912738922",
+            appId: "1:201912738922:web:2fcc1e49293bb632899613",
+            measurementId: "G-EGJ79SCMWX"
+        };
+
+        // Initialisation Firebase
+        let firebaseApp;
+        let auth;
+        let db;
+        let storage;
+        let currentUser = null;
+        let userProfile = {};
+
+        try {
+            if (firebase.apps.length) {
+                firebaseApp = firebase.app();
+            } else {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                console.log("Firebase initialisé avec succès");
+            }
+            
+            auth = firebase.auth();
+            db = firebase.firestore();
+            storage = firebase.storage();
+            
+        } catch (e) {
+            console.error("Erreur d'initialisation Firebase:", e);
+            auth = { onAuthStateChanged: (callback) => callback(null) };
+            db = { collection: () => ({ doc: () => ({ get: () => Promise.resolve({ exists: false }) }) }) };
+            storage = {};
+        }
+
+        // Variables globales pour la navigation
+        let currentPage = 'dashboard';
+        let questsDatabase = JSON.parse(localStorage.getItem('synergiaQuests')) || [];
+
+        // Gestion de l'authentification
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                document.querySelector('.loading-progress').style.width = '50%';
+                await auth.signInWithEmailAndPassword(email, password);
+                console.log('Connexion réussie');
+            } catch (error) {
+                console.error('Erreur de connexion:', error);
+                alert('Erreur de connexion: ' + error.message);
+                document.querySelector('.loading-progress').style.width = '0%';
+            }
+        });
+
+        // Observer les changements d'état d'authentification
+        auth.onAuthStateChanged(async user => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const loginScreen = document.getElementById('login-screen');
+            const app = document.getElementById('app');
+            
+            if (user) {
+                currentUser = user;
+                
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    
+                    if (!userDoc.exists) {
+                        console.log('Création du profil utilisateur...');
+                        userProfile = await createUserProfile(user);
+                    } else {
+                        userProfile = userDoc.data();
+                        console.log('Profil utilisateur chargé:', userProfile);
+                    }
+                    
+                    loginScreen.classList.add('hidden');
+                    loadingScreen.classList.add('hidden');
+                    app.classList.remove('hidden');
+                    
+                    updateUserInterface();
+                    loadPage('dashboard');
+                    
+                    console.log('Connexion réussie pour:', user.email);
+                    
+                } catch (error) {
+                    console.error('Erreur lors du chargement:', error);
+                    handleMissingProfile(user);
+                }
+            } else {
+                currentUser = null;
+                userProfile = {};
+                
+                app.classList.add('hidden');
+                loadingScreen.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+            }
+        });
+
+        // Fonction pour créer un profil utilisateur automatiquement
+        async function createUserProfile(user) {
+            const defaultProfile = {
+                displayName: user.displayName || user.email.split('@')[0],
+                email: user.email,
+                photoURL: user.photoURL || '',
+                xp: 240,
+                level: 4,
+                roles: ['entretien'],
+                badges: [],
+                completedQuests: [],
+                joinedAt: new Date(),
+                lastActive: new Date(),
+                preferences: {
+                    notifications: true,
+                    theme: 'default'
+                }
+            };
+            
+            try {
+                await db.collection('users').doc(user.uid).set(defaultProfile);
+                console.log('Profil créé avec succès pour:', user.email);
+                return defaultProfile;
+            } catch (error) {
+                console.error('Erreur création profil:', error);
+                return defaultProfile;
+            }
+        }
+
+        // Fonction de secours si le profil pose problème
+        function handleMissingProfile(user) {
+            console.log('Mode dégradé activé');
+            userProfile = {
+                displayName: user.email.split('@')[0],
+                email: user.email,
+                xp: 240,
+                level: 4,
+                roles: ['entretien']
+            };
+            
+            const loginScreen = document.getElementById('login-screen');
+            const loadingScreen = document.getElementById('loading-screen');
+            const app = document.getElementById('app');
+            
+            loginScreen.classList.add('hidden');
+            loadingScreen.classList.add('hidden');
+            app.classList.remove('hidden');
+            
+            updateUserInterface();
+            loadPage('dashboard');
+        }
+
+        // Mettre à jour l'interface utilisateur
+        function updateUserInterface() {
+            if (!currentUser || !userProfile) return;
+            
+            try {
+                const userAvatar = document.getElementById('user-avatar');
+                const userName = document.getElementById('user-name');
+                const welcomeName = document.getElementById('welcome-name');
+                
+                if (userAvatar) {
+                    userAvatar.src = userProfile.photoURL || 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png';
+                }
+                
+                if (userName) {
+                    userName.textContent = userProfile.displayName || currentUser.email;
+                }
+                
+                if (welcomeName) {
+                    welcomeName.textContent = userProfile.displayName || currentUser.email.split('@')[0];
+                }
+                
+                updateXP(userProfile.xp || 240, userProfile.level || 4);
+                
+                // Vérifier et afficher le bouton admin
+                if (currentUser.email === 'alan.boehme61@gmail.com') {
+                    const adminBtn = document.getElementById('admin-btn');
+                    if (adminBtn) {
+                        adminBtn.classList.remove('hidden');
+                        console.log('Bouton admin activé pour Allan');
+                    }
+                }
+                
+                console.log('Interface utilisateur mise à jour');
+                 } catch (error) {
+                console.error('Erreur mise à jour interface:', error);
+            }
+        }
+
+        // Mise à jour de l'XP et du niveau
+        function updateXP(xp, level) {
+            try {
+                const xpProgress = document.getElementById('xp-progress');
+                const xpText = document.getElementById('xp-text');
+                const levelBadge = document.getElementById('level-badge');
+                
+                const xpForCurrentLevel = 100 * level;
+                const xpInCurrentLevel = xp - (100 * (level - 1));
+                const progressPercent = Math.max(0, Math.min(100, (xpInCurrentLevel / 100) * 100));
+                
+                if (xpProgress) {
+                    xpProgress.style.width = `${progressPercent}%`;
+                }
+                
+                if (xpText) {
+                    xpText.textContent = `${xp} XP`;
+                }
+                
+                if (levelBadge) {
+                    levelBadge.textContent = level;
+                }
+                
+            } catch (error) {
+                console.error('Erreur mise à jour XP:', error);
+            }
+        }
+
+        // Navigation entre les pages
+        function navigateToPage(page) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            
+            loadPage(page);
+            currentPage = page;
+            
+            console.log('Navigation vers:', page);
+        }
+
+        // Charger une page spécifique
+        function loadPage(page) {
+            const mainContent = document.getElementById('main-content');
+
+            mainContent.innerHTML = ''; // ← VIDER D'ABORD
+            
+            switch(page) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'quests':
+                    loadQuests();
+                    break;
+                case 'team':
+                    loadTeam();
+                    break;
+                case 'calendar':
+                    loadCalendar();
+                    break;
+                case 'chat':
+                    loadChat();
+                    break;
+                default:
+                    loadDashboard();
+            }
+        }
+
+        // Charger le tableau de bord
+        function loadDashboard() {
+            const template = document.getElementById('dashboard-template');
+            if (!template) {
+                console.error('Template dashboard non trouvé');
+                return;
+            }
+            
+            const content = template.content.cloneNode(true);
+            const mainContent = document.getElementById('main-content');
+            
+            mainContent.innerHTML = '';
+            mainContent.appendChild(content);
+            
+            console.log('Dashboard chargé');
+        }
+
+        // Charger les quêtes
+        function loadQuests() {
+            const template = document.getElementById('quests-template');
+            if (!template) {
+                console.error('Template quests non trouvé');
+                return;
+            }
+            
+            const content = template.content.cloneNode(true);
+            const mainContent = document.getElementById('main-content');
+            
+            mainContent.innerHTML = '';
+            mainContent.appendChild(content);
+            
+            initQuestTabs();
+            
+            console.log('Quêtes chargées');
+        }
+
+        // Initialiser les onglets des quêtes
+        function initQuestTabs() {
+            const tabs = document.querySelectorAll('.quests-page .tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.quests-page .tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    const targetContent = document.getElementById(`${tabName}-tab`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                    
+                    console.log('Onglet quête activé:', tabName);
+                });
+            });
+        }
+
+// Charger la page équipe
+function loadTeam() {
+    const template = document.getElementById('team-template');
+    if (!template) {
+        // Fallback si pas de template
+        document.getElementById('main-content').innerHTML = `
+            <div class="team-page">
+                <div class="tabs">
+                    <button class="tab active" data-tab="members">Membres</button>
+                    <button class="tab" data-tab="assignments">Attributions</button>
+                    <button class="tab" data-tab="performance">Performances</button>
+                    <button class="tab" data-tab="schedule">Planning</button>
+                </div>
+                
+                <div class="tab-content active" id="members-tab">
+                    <div class="team-section">
+                        <div class="section-header">
+                            <h3>Membres de l'équipe</h3>
+                            <button class="btn-secondary" onclick="addTeamMember()">
+                                <i class="fas fa-plus"></i> Ajouter un membre
+                            </button>
+                        </div>
+                        <div id="team-members-list" class="team-grid">
+                            <!-- Sera rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="assignments-tab">
+                    <div class="team-section">
+                        <h3>Attribution des quêtes</h3>
+                        <div id="quest-assignments">
+                            <p class="placeholder">Fonctionnalité en développement</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="performance-tab">
+                    <div class="team-section">
+                        <h3>Performances de l'équipe</h3>
+                        <div id="team-performance">
+                            <p class="placeholder">Statistiques à venir</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="schedule-tab">
+                    <div class="team-section">
+                        <h3>Planning d'équipe</h3>
+                        <div id="team-schedule">
+                            <p class="placeholder">Planning en cours de développement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Initialiser les onglets
+        initTeamTabs();
+        
+        // Charger les membres
+        loadTeamMembers();
+        return;
+    }
+    
+    const content = template.content.cloneNode(true);
+    const mainContent = document.getElementById('main-content');
+    
+    mainContent.innerHTML = '';
+    mainContent.appendChild(content);
+    
+    initTeamTabs();
+    loadTeamMembers();
+    
+    console.log('Page équipe chargée');
+}
+
+
+        function loadCalendar() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="calendar-page">
+                    <h2>Planning</h2>
+                    <p>Calendrier et planification - En cours de développement</p>
+                </div>
+            `;
+        }
+
+        function loadChat() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="chat-page">
+                    <h2>Chat</h2>
+                    <p>Messagerie d'équipe - En cours de développement</p>
+                </div>
+            `;
+        }
+
+        // Fonction pour compléter une quête
+        function completeQuest(questId) {
+            showQuestCompletionModal(questId);
+            
+            if (userProfile) {
+                const xpGain = questId <= 3 ? 10 : questId <= 6 ? 50 : 100;
+                userProfile.xp = (userProfile.xp || 240) + xpGain;
+                updateUserInterface();
+            }
+        }
+
+        // Afficher un modal de réussite
+        function showQuestCompletionModal(questId) {
+            const xpGain = questId <= 3 ? 10 : questId <= 6 ? 50 : 100;
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="success-header">
+                        <i class="fas fa-trophy"></i>
+                        <h3>Quête terminée !</h3>
+                    </div>
+                    <div class="success-body">
+                        <h4>Excellent travail !</h4>
+                        <p class="xp-gained">+${xpGain} XP gagné !</p>
+                        <button class="btn-primary" onclick="this.closest('.modal').remove()">Continuer</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+            }, 3000);
+        }
+        // === GESTION DES IMAGES POUR LES QUÊTES ===
+
+        let questIconBase64 = null;
+
+        // Gérer l'upload de l'icône de quête
+        function handleQuestIconUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Vérifier le type de fichier
+            if (!file.type.startsWith('image/')) {
+                showNotification('Veuillez sélectionner un fichier image', 'error');
+                return;
+            }
+            
+            // Vérifier la taille (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('L\'image ne doit pas dépasser 2MB', 'error');
+                return;
+            }
+            
+            // Redimensionner et compresser l'image
+            resizeAndCompressImage(file, 64, 64, 0.8).then(compressedBase64 => {
+                questIconBase64 = compressedBase64;
+                displayImagePreview(compressedBase64);
+                showNotification('Icône ajoutée avec succès !', 'success');
+            }).catch(error => {
+                console.error('Erreur compression image:', error);
+                showNotification('Erreur lors du traitement de l\'image', 'error');
+            });
+        }
+
+        // Redimensionner et compresser une image
+        function resizeAndCompressImage(file, maxWidth, maxHeight, quality) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    // Calculer les nouvelles dimensions en gardant le ratio
+                    let { width, height } = img;
+                    
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    
+                    // Redimensionner le canvas
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Dessiner l'image redimensionnée
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convertir en base64 avec compression
+                    const base64 = canvas.toDataURL('image/jpeg', quality);
+                    resolve(base64);
+                };
+                
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Afficher l'aperçu de l'image
+        function displayImagePreview(base64) {
+            const preview = document.getElementById('image-preview');
+            const removeBtn = document.getElementById('remove-icon-btn');
+            
+            preview.innerHTML = `<img src="${base64}" alt="Aperçu icône" class="preview-image">`;
+            preview.classList.add('has-image');
+            removeBtn.style.display = 'inline-block';
+        }
+
+        // Supprimer l'icône de la quête
+        function removeQuestIcon() {
+            questIconBase64 = null;
+            const preview = document.getElementById('image-preview');
+            const removeBtn = document.getElementById('remove-icon-btn');
+            
+            preview.innerHTML = `
+                <div class="upload-placeholder">
+                    <i class="fas fa-image fa-2x"></i>
+                    <p>Cliquez pour ajouter une icône</p>
+                    <span class="upload-hint">PNG, JPG, SVG - Max 2MB</span>
+                </div>
+            `;
+            preview.classList.remove('has-image');
+            removeBtn.style.display = 'none';
+            
+            // Réinitialiser l'input file
+            document.getElementById('quest-icon').value = '';
+        }
+
+        // Obtenir une icône par défaut selon le type de quête
+        function getDefaultQuestIcon(questType, priority) {
+            const icons = {
+                daily: priority === 'urgent' ? 'fa-exclamation-triangle' : 'fa-calendar-day',
+                weekly: 'fa-calendar-week',
+                monthly: 'fa-calendar-alt',
+                special: 'fa-star'
+            };
+            return icons[questType] || 'fa-tasks';
+        }
+        
+        // === GESTION DE L'ÉQUIPE ===
+
+        let teamMembers = JSON.parse(localStorage.getItem('synergiaTeam')) || [
+            {
+                id: 'member_1',
+                name: 'Allan Boehme',
+                email: 'alan.boehme61@gmail.com',
+                role: 'Manager',
+                avatar: 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png',
+                level: 4,
+                xp: 240,
+                completedQuests: 28,
+                totalQuests: 35,
+                status: 'online',
+                joinedAt: '2024-01-15',
+                lastActive: new Date(),
+                skills: ['Management', 'Entretien', 'Formation'],
+                schedule: {
+                    monday: { start: '08:00', end: '18:00' },
+                    tuesday: { start: '08:00', end: '18:00' },
+                    wednesday: { start: '08:00', end: '18:00' },
+                    thursday: { start: '08:00', end: '18:00' },
+                    friday: { start: '08:00', end: '17:00' },
+                    saturday: { start: '09:00', end: '16:00' },
+                    sunday: 'off'
+                }
+            },
+            {
+                id: 'member_2',
+                name: 'Emma Martin',
+                email: 'emma.martin@brain-caen.fr',
+                role: 'Accueil',
+                avatar: 'https://img.icons8.com/color/96/000000/user-female-circle--v1.png',
+                level: 3,
+                xp: 180,
+                completedQuests: 22,
+                totalQuests: 28,
+                status: 'online',
+                joinedAt: '2024-02-01',
+                lastActive: new Date(),
+                skills: ['Accueil', 'Communication', 'Vente'],
+                schedule: {
+                    monday: { start: '09:00', end: '17:00' },
+                    tuesday: { start: '09:00', end: '17:00' },
+                    wednesday: { start: '09:00', end: '17:00' },
+                    thursday: { start: '09:00', end: '17:00' },
+                    friday: { start: '09:00', end: '17:00' },
+                    saturday: { start: '10:00', end: '18:00' },
+                    sunday: 'off'
+                }
+            },
+            {
+                id: 'member_3',
+                name: 'Lucas Dubois',
+                email: 'lucas.dubois@brain-caen.fr',
+                role: 'Entretien',
+                avatar: 'https://img.icons8.com/color/96/000000/user-male-circle--v2.png',
+                level: 2,
+                xp: 95,
+                completedQuests: 15,
+                totalQuests: 20,
+                status: 'busy',
+                joinedAt: '2024-03-10',
+                lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000), // Il y a 2h
+                skills: ['Entretien', 'Réparation', 'Nettoyage'],
+                schedule: {
+                    monday: { start: '08:00', end: '16:00' },
+                    tuesday: { start: '08:00', end: '16:00' },
+                    wednesday: { start: '08:00', end: '16:00' },
+                    thursday: { start: '08:00', end: '16:00' },
+                    friday: { start: '08:00', end: '16:00' },
+                    saturday: 'off',
+                    sunday: 'off'
+                }
+            }
+        ];
+
+        // Initialiser les onglets de l'équipe
+        function initTeamTabs() {
+            const teamTabs = document.querySelectorAll('.team-page .tab');
+            teamTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    
+                    teamTabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.team-page .tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    const targetContent = document.getElementById(`${tabName}-tab`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                    
+                    // Charger les données pour l'onglet
+                    loadTeamTabData(tabName);
+                    
+                    console.log('Onglet équipe activé:', tabName);
+                });
+            });
+        }
+
+        // Charger les données pour un onglet spécifique
+        function loadTeamTabData(tabName) {
+            switch(tabName) {
+                case 'members':
+                    loadTeamMembers();
+                    break;
+                case 'assignments':
+                    loadQuestAssignments();
+                    break;
+                case 'performance':
+                    loadTeamPerformance();
+                    break;
+                case 'schedule':
+                    loadTeamSchedule();
+                    break;
+            }
+        }
+
+        // Charger les membres de l'équipe
+        function loadTeamMembers() {
+            const container = document.getElementById('team-members-list');
+            if (!container) return;
+            
+            container.innerHTML = teamMembers.map(member => {
+                const completionRate = Math.round((member.completedQuests / member.totalQuests) * 100);
+                const statusClass = `status-${member.status}`;
+                const statusText = {
+                    'online': 'En ligne',
+                    'offline': 'Hors ligne',
+                    'busy': 'Occupé'
+                }[member.status];
+                
+                return `
+                    <div class="team-member-card">
+                        <img src="${member.avatar}" alt="${member.name}" class="member-avatar">
+                        <div class="member-info">
+                            <h4>${member.name}</h4>
+                            <div class="member-role">${member.role}</div>
+                            <div class="member-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">${member.level}</span>
+                                    <span class="stat-label">Niveau</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">${member.xp}</span>
+                                    <span class="stat-label">XP</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">${completionRate}%</span>
+                                    <span class="stat-label">Réussite</span>
+                                </div>
+                            </div>
+                            <div class="member-status ${statusClass}">${statusText}</div>
+                            <div class="member-actions">
+                                <button class="btn-icon btn-message" onclick="messageTeamMember('${member.id}')" title="Envoyer un message">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                                <button class="btn-icon btn-assign" onclick="assignQuestToMember('${member.id}')" title="Assigner une quête">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                                <button class="btn-icon btn-stats" onclick="viewMemberStats('${member.id}')" title="Voir les statistiques">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fonctions d'actions sur les membres (placeholders pour l'instant)
+// Ajouter un nouvel utilisateur
+function addTeamMember() {
+    showUserCreationModal();
+}
+
+// Afficher le modal de création d'utilisateur
+function showUserCreationModal(editUser = null) {
+    const isEdit = editUser !== null;
+    const modalTitle = isEdit ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur';
+    const buttonText = isEdit ? 'Sauvegarder' : 'Créer l\'utilisateur';
+    const buttonIcon = isEdit ? 'fa-save' : 'fa-plus';
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'user-creation-modal';
+    modal.innerHTML = `
+        <div class="modal-content user-modal">
+            <div class="modal-header">
+                <h3><i class="fas ${isEdit ? 'fa-edit' : 'fa-user-plus'}"></i> ${modalTitle}</h3>
+                <button onclick="closeUserModal()" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="user-creation-form">
+                    <div class="user-form-sections">
+                        <!-- Section Informations personnelles -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-user"></i> Informations personnelles</h4>
+                            
+                            <div class="avatar-upload-section">
+                                <div class="avatar-preview" id="user-avatar-preview" onclick="document.getElementById('user-avatar-input').click()">
+                                    <img src="${editUser?.avatar || 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png'}" alt="Avatar" id="preview-avatar">
+                                    <div class="avatar-overlay">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
+                                </div>
+                                <input type="file" id="user-avatar-input" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                                <button type="button" class="btn-secondary btn-small" onclick="removeUserAvatar()">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nom complet *</label>
+                                    <input type="text" id="user-name" placeholder="Ex: Allan Boehme" value="${editUser?.name || ''}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="user-email" placeholder="allan@brain-caen.fr" value="${editUser?.email || ''}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Téléphone</label>
+                                    <input type="tel" id="user-phone" placeholder="06 12 34 56 78" value="${editUser?.phone || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Date d'embauche</label>
+                                    <input type="date" id="user-hire-date" value="${editUser?.joinedAt || new Date().toISOString().split('T')[0]}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section Rôle et permissions -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-user-tag"></i> Rôle et permissions</h4>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Rôle principal *</label>
+                                    <select id="user-role" required>
+                                        <option value="">Sélectionner un rôle</option>
+                                        <option value="Manager" ${editUser?.role === 'Manager' ? 'selected' : ''}>Manager</option>
+                                        <option value="Accueil" ${editUser?.role === 'Accueil' ? 'selected' : ''}>Accueil Client</option>
+                                        <option value="Entretien" ${editUser?.role === 'Entretien' ? 'selected' : ''}>Entretien & Maintenance</option>
+                                        <option value="Animation" ${editUser?.role === 'Animation' ? 'selected' : ''}>Animation</option>
+                                        <option value="Sécurité" ${editUser?.role === 'Sécurité' ? 'selected' : ''}>Sécurité</option>
+                                        <option value="Équipe" ${editUser?.role === 'Équipe' ? 'selected' : ''}>Membre d'équipe</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Type de contrat</label>
+                                    <select id="user-contract">
+                                        <option value="CDI" ${editUser?.contract === 'CDI' ? 'selected' : ''}>CDI</option>
+                                        <option value="CDD" ${editUser?.contract === 'CDD' ? 'selected' : ''}>CDD</option>
+                                        <option value="Stage" ${editUser?.contract === 'Stage' ? 'selected' : ''}>Stage</option>
+                                        <option value="Freelance" ${editUser?.contract === 'Freelance' ? 'selected' : ''}>Freelance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Permissions</label>
+                                <div class="permissions-grid">
+                                    <label class="permission-item">
+                                        <input type="checkbox" id="perm-admin" ${editUser?.permissions?.admin ? 'checked' : ''}>
+                                        <span>Accès administration</span>
+                                    </label>
+                                    <label class="permission-item">
+                                        <input type="checkbox" id="perm-manage-team" ${editUser?.permissions?.manageTeam ? 'checked' : ''}>
+                                        <span>Gérer l'équipe</span>
+                                    </label>
+                                    <label class="permission-item">
+                                        <input type="checkbox" id="perm-create-quests" ${editUser?.permissions?.createQuests ? 'checked' : ''}>
+                                        <span>Créer des quêtes</span>
+                                    </label>
+                                    <label class="permission-item">
+                                        <input type="checkbox" id="perm-view-reports" ${editUser?.permissions?.viewReports ? 'checked' : ''}>
+                                        <span>Voir les rapports</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section Compétences et formation -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-graduation-cap"></i> Compétences et formation</h4>
+                            
+                            <div class="form-group">
+                                <label>Compétences</label>
+                                <div class="skills-input">
+                                    <input type="text" id="skills-input" placeholder="Tapez une compétence et appuyez sur Entrée">
+                                    <div class="skills-list" id="skills-list">
+                                        ${editUser?.skills ? editUser.skills.map(skill => `
+                                            <span class="skill-tag">
+                                                ${skill}
+                                                <button type="button" onclick="removeSkill('${skill}')" class="remove-skill">×</button>
+                                            </span>
+                                        `).join('') : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Niveau d'expérience</label>
+                                    <select id="user-experience">
+                                        <option value="Débutant" ${editUser?.experience === 'Débutant' ? 'selected' : ''}>Débutant</option>
+                                        <option value="Intermédiaire" ${editUser?.experience === 'Intermédiaire' ? 'selected' : ''}>Intermédiaire</option>
+                                        <option value="Expérimenté" ${editUser?.experience === 'Expérimenté' ? 'selected' : ''}>Expérimenté</option>
+                                        <option value="Expert" ${editUser?.experience === 'Expert' ? 'selected' : ''}>Expert</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Formations suivies</label>
+                                    <input type="number" id="user-trainings" min="0" value="${editUser?.trainings || 0}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section Gamification -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-gamepad"></i> Gamification</h4>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Niveau initial</label>
+                                    <input type="number" id="user-level" min="1" max="10" value="${editUser?.level || 1}">
+                                </div>
+                                <div class="form-group">
+                                    <label>XP initial</label>
+                                    <input type="number" id="user-xp" min="0" value="${editUser?.xp || 0}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Objectif mensuel (quêtes)</label>
+                                <input type="number" id="user-monthly-goal" min="0" value="${editUser?.monthlyGoal || 10}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" onclick="closeUserModal()" class="btn-secondary">Annuler</button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas ${buttonIcon}"></i> ${buttonText}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Initialiser les événements
+    initUserFormEvents(editUser);
+}
+
+// Variables pour l'avatar utilisateur
+let userAvatarBase64 = null;
+
+// Initialiser les événements du formulaire utilisateur
+function initUserFormEvents(editUser) {
+    // Gestion des compétences
+    const skillsInput = document.getElementById('skills-input');
+    skillsInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSkill(this.value.trim());
+            this.value = '';
+        }
+    });
+    
+    // Gestion du formulaire
+    document.getElementById('user-creation-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveUser(editUser?.id);
+    });
+    
+    // Si mode édition, charger l'avatar existant
+    if (editUser && editUser.avatar) {
+        userAvatarBase64 = editUser.avatar;
+    }
+}
+
+// Fermer le modal utilisateur
+function closeUserModal() {
+    const modal = document.getElementById('user-creation-modal');
+    if (modal) {
+        modal.remove();
+    }
+    userAvatarBase64 = null;
+}
+
+// Gestion de l'upload d'avatar
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            userAvatarBase64 = e.target.result;
+            document.getElementById('preview-avatar').src = userAvatarBase64;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Supprimer l'avatar utilisateur
+function removeUserAvatar() {
+    userAvatarBase64 = null;
+    document.getElementById('preview-avatar').src = 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png';
+}
+
+// Ajouter une compétence
+function addSkill(skillName) {
+    if (skillName && skillName.length > 0) {
+        const skillsList = document.getElementById('skills-list');
+        if (skillsList) {
+            // Vérifier si la compétence existe déjà
+            const existingSkills = Array.from(skillsList.querySelectorAll('.skill-tag')).map(tag => 
+                tag.textContent.trim().replace('×', '').trim()
+            );
+            
+            if (existingSkills.includes(skillName)) {
+                showNotification('Cette compétence existe déjà !', 'error');
+                return;
+            }
+            
+            const skillTag = document.createElement('span');
+            skillTag.className = 'skill-tag';
+            skillTag.innerHTML = `
+                ${skillName}
+                <button type="button" onclick="removeSkill('${skillName}')" class="remove-skill">×</button>
+            `;
+            skillsList.appendChild(skillTag);
+        }
+    }
+}
+
+
+// Supprimer une compétence
+function removeSkill(skillName) {
+    const skillsList = document.getElementById('skills-list');
+    const skillTags = skillsList.querySelectorAll('.skill-tag');
+    skillTags.forEach(tag => {
+        if (tag.textContent.trim().startsWith(skillName)) {
+            tag.remove();
+        }
+    });
+}
+
+
+// Sauvegarder l'utilisateur - VERSION DEBUG
+function saveUser(userId = null) {
+    console.log('=== DEBUG SAVEUSER ===');
+    
+    // Debug des éléments
+    const nameElement = document.getElementById('user-name');
+    const emailElement = document.getElementById('user-email');
+    const roleElement = document.getElementById('user-role');
+    
+    console.log('Nom element:', nameElement);
+    console.log('Email element:', emailElement);
+    console.log('Rôle element:', roleElement);
+    
+    if (nameElement) console.log('Nom value:', nameElement.value);
+    if (emailElement) console.log('Email value:', emailElement.value);
+    if (roleElement) console.log('Rôle value:', roleElement.value);
+    
+    const formData = {
+        id: userId || Date.now(),
+        name: (nameElement && nameElement.value) ? nameElement.value.trim() : '',
+        email: (emailElement && emailElement.value) ? emailElement.value.trim() : '',
+        phone: document.getElementById('user-phone')?.value || '',
+        joinedAt: document.getElementById('user-hire-date')?.value || new Date().toISOString().split('T')[0],
+        role: (roleElement && roleElement.value) ? roleElement.value.trim() : '',
+        contract: document.getElementById('user-contract')?.value || 'CDI',
+        experience: document.getElementById('user-experience')?.value || 'Débutant',
+        trainings: parseInt(document.getElementById('user-trainings')?.value) || 0,
+        level: parseInt(document.getElementById('user-level')?.value) || 1,
+        xp: parseInt(document.getElementById('user-xp')?.value) || 0,
+        monthlyGoal: parseInt(document.getElementById('user-monthly-goal')?.value) || 10,
+        avatar: userAvatarBase64 || 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png',
+        permissions: {
+            admin: document.getElementById('perm-admin')?.checked || false,
+            manageTeam: document.getElementById('perm-manage-team')?.checked || false,
+            createQuests: document.getElementById('perm-create-quests')?.checked || false,
+            viewReports: document.getElementById('perm-view-reports')?.checked || false
+        },
+        skills: Array.from(document.querySelectorAll('#skills-list .skill-tag')).map(tag => 
+            tag.textContent.trim().replace('×', '').trim()
+        ),
+        // Ajout des champs manquants pour compatibilité
+        status: 'online',
+        completedQuests: 0,
+        activeQuests: Math.floor(Math.random() * 5) + 1,
+        streak: Math.floor(Math.random() * 30),
+        mastery: Math.floor(Math.random() * 100)
+    };
+    
+    console.log('FormData créé:', formData);
+    console.log('Nom check:', !!formData.name);
+    console.log('Email check:', !!formData.email);
+    console.log('Rôle check:', !!formData.role);
+    
+    // Validation avec debug
+    if (!formData.name || !formData.email || !formData.role) {
+        console.log('ERREUR: Champs manquants!');
+        console.log('Nom manquant:', !formData.name);
+        console.log('Email manquant:', !formData.email);
+        console.log('Rôle manquant:', !formData.role);
+        
+        showNotification('DEBUG: Nom=' + !!formData.name + ', Email=' + !!formData.email + ', Rôle=' + !!formData.role, 'error');
+        return;
+    }
+    
+    // Si on arrive ici, tout est OK
+    console.log('Validation OK, sauvegarde...');
+    
+    // CORRECTION : Utiliser la même clé que l'affichage
+    let users = JSON.parse(localStorage.getItem('synergiaTeam')) || [];
+    
+    // Vérifier les doublons d'email
+    const existingUser = users.find(u => u.email === formData.email && u.id !== userId);
+    if (existingUser) {
+        showNotification('Cet email est déjà utilisé !', 'error');
+        return;
+    }
+    
+    if (userId) {
+        // Mode édition
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+            users[userIndex] = formData;
+        }
+    } else {
+        // Mode création
+        users.push(formData);
+    }
+    
+    // Sauvegarder
+    localStorage.setItem('synergiaTeam', JSON.stringify(users));
+    teamMembers = users;
+    
+    // Fermer le modal et rafraîchir l'affichage
+    closeUserModal();
+    showNotification('Utilisateur ' + (userId ? 'modifié' : 'créé') + ' avec succès !', 'success');
+    
+    // Rafraîchir la liste des utilisateurs
+    if (typeof loadTeamMembers === 'function') {
+        loadTeamMembers();
+    }
+}
+
+
+    
+// Fermer le modal
+closeAssignmentModal();
+
+// Notification de succès
+showNotification('Quête assignée avec succès !', 'success');
+
+console.log('Attribution terminée');
+
+
+
+
+// Fermer le modal d'attribution
+function closeAssignmentModal() {
+    const modal = document.getElementById('quest-assignment-modal');
+    if (modal) {
+        modal.remove();
+    }
+    selectedQuestId = null;
+}
+
+
+        function viewMemberStats(memberId) {
+            const member = teamMembers.find(m => m.id === memberId);
+            if (member) {
+                alert(`Statistiques de ${member.name}:\n\n- Niveau: ${member.level}\n- XP: ${member.xp}\n- Quêtes réussies: ${member.completedQuests}/${member.totalQuests}\n- Membre depuis: ${member.joinedAt}`);
+            }
+        }
+
+        // Fonctions pour les autres onglets (placeholders)
+// Charger les attributions de quêtes
+function loadQuestAssignments() {
+    const container = document.getElementById('quest-assignments');
+    if (!container) return;
+    
+    const assignments = JSON.parse(localStorage.getItem('synergiaAssignments')) || [];
+    
+    if (assignments.length === 0) {
+        container.innerHTML = `
+            <div class="placeholder">
+                <i class="fas fa-clipboard-list fa-3x" style="color: var(--light-gray); margin-bottom: 16px;"></i>
+                <p>Aucune attribution de quête pour le moment</p>
+                <p style="font-size: 0.9rem; margin-top: 8px;">Assignez des quêtes aux membres depuis l'onglet "Membres"</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Regrouper par statut
+    const assignmentsByStatus = {
+        assigned: assignments.filter(a => a.status === 'assigned'),
+        in_progress: assignments.filter(a => a.status === 'in_progress'),
+        completed: assignments.filter(a => a.status === 'completed'),
+        overdue: assignments.filter(a => a.status === 'overdue')
+    };
+    
+    container.innerHTML = `
+        <div class="assignments-overview">
+            <div class="assignment-stats">
+                <div class="stat-card">
+                    <div class="stat-number">${assignments.length}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card assigned">
+                    <div class="stat-number">${assignmentsByStatus.assigned.length}</div>
+                    <div class="stat-label">Assignées</div>
+                </div>
+                <div class="stat-card progress">
+                    <div class="stat-number">${assignmentsByStatus.in_progress.length}</div>
+                    <div class="stat-label">En cours</div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="stat-number">${assignmentsByStatus.completed.length}</div>
+                    <div class="stat-label">Terminées</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="assignments-filters" style="margin: 20px 0;">
+            <button class="filter-btn active" onclick="filterAssignments('all')">Toutes</button>
+            <button class="filter-btn" onclick="filterAssignments('assigned')">Assignées</button>
+            <button class="filter-btn" onclick="filterAssignments('in_progress')">En cours</button>
+            <button class="filter-btn" onclick="filterAssignments('completed')">Terminées</button>
+        </div>
+        
+        <div class="assignments-list" id="assignments-list">
+            ${assignments.map(assignment => {
+                const member = teamMembers.find(m => m.id === assignment.memberId);
+                const quest = questsDatabase.find(q => q.id === assignment.questId);
+                
+                if (!member || !quest) return '';
+                
+                const statusColors = {
+                    assigned: 'var(--info)',
+                    in_progress: 'var(--warning)',
+                    completed: 'var(--success)',
+                    overdue: 'var(--danger)'
+                };
+                
+                const statusLabels = {
+                    assigned: 'Assignée',
+                    in_progress: 'En cours',
+                    completed: 'Terminée',
+                    overdue: 'En retard'
+                };
+                
+                const iconHtml = quest.icon 
+                    ? `<img src="${quest.icon}" alt="Icône" class="assignment-quest-icon">`
+                    : `<div class="quest-icon-default" style="width: 40px; height: 40px;"><i class="fas ${getDefaultQuestIcon(quest.type, quest.priority)}"></i></div>`;
+                
+                return `
+                    <div class="assignment-item" data-status="${assignment.status}">
+                        <div class="assignment-content">
+                            <div class="assignment-quest">
+                                ${iconHtml}
+                                <div class="assignment-details">
+                                    <h4>${quest.title}</h4>
+                                    <p>${quest.description}</p>
+                                    <div class="assignment-meta">
+                                        <span><i class="fas fa-star"></i> ${quest.xp} XP</span>
+                                        <span><i class="fas fa-clock"></i> ${quest.duration} min</span>
+                                        ${assignment.deadline ? `<span><i class="fas fa-calendar"></i> ${new Date(assignment.deadline).toLocaleDateString()}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="assignment-member">
+                                <img src="${member.avatar}" alt="${member.name}" class="assignment-avatar">
+                                <div>
+                                    <strong>${member.name}</strong>
+                                    <div>${member.role}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="assignment-status">
+                                <span class="status-badge" style="background-color: ${statusColors[assignment.status]};">${statusLabels[assignment.status]}</span>
+                                <div class="assignment-date">Assigné le ${new Date(assignment.assignedAt).toLocaleDateString()}</div>
+                                ${assignment.note ? `<div class="assignment-note"><i class="fas fa-sticky-note"></i> ${assignment.note}</div>` : ''}
+                            </div>
+                            
+                            <div class="assignment-actions">
+                                ${assignment.status === 'assigned' ? `
+                                    <button class="btn-icon btn-start" onclick="startAssignment('${assignment.id}')" title="Démarrer">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                ` : ''}
+                                ${assignment.status === 'in_progress' ? `
+                                    <button class="btn-icon btn-complete" onclick="completeAssignment('${assignment.id}')" title="Terminer">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                ` : ''}
+                                <button class="btn-icon btn-info" onclick="viewAssignmentDetails('${assignment.id}')" title="Détails">
+                                    <i class="fas fa-info"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" onclick="deleteAssignment('${assignment.id}')" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+// Filtrer les attributions
+function filterAssignments(status) {
+    // Mettre à jour les boutons actifs
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Filtrer les éléments
+    const items = document.querySelectorAll('.assignment-item');
+    items.forEach(item => {
+        if (status === 'all' || item.dataset.status === status) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Actions sur les attributions
+function startAssignment(assignmentId) {
+    const assignments = JSON.parse(localStorage.getItem('synergiaAssignments')) || [];
+    const assignment = assignments.find(a => a.id === assignmentId);
+    
+    if (assignment) {
+        assignment.status = 'in_progress';
+        assignment.startedAt = new Date();
+        localStorage.setItem('synergiaAssignments', JSON.stringify(assignments));
+        
+        showNotification('Quête démarrée !', 'success');
+        loadQuestAssignments();
+    }
+}
+
+function completeAssignment(assignmentId) {
+    const assignments = JSON.parse(localStorage.getItem('synergiaAssignments')) || [];
+    const assignment = assignments.find(a => a.id === assignmentId);
+    
+    if (assignment) {
+        assignment.status = 'completed';
+        assignment.completedAt = new Date();
+        
+        // Donner l'XP au membre
+        const member = teamMembers.find(m => m.id === assignment.memberId);
+        const quest = questsDatabase.find(q => q.id === assignment.questId);
+        
+        if (member && quest) {
+            member.xp += quest.xp;
+            member.completedQuests += 1;
+            saveTeamToStorage();
+        }
+        
+        localStorage.setItem('synergiaAssignments', JSON.stringify(assignments));
+        
+        showNotification('Quête terminée ! XP ajouté au membre.', 'success');
+        loadQuestAssignments();
+        loadTeamMembers(); // Recharger pour mettre à jour les stats
+    }
+}
+
+function deleteAssignment(assignmentId) {
+    if (confirm('Supprimer cette attribution ?')) {
+        let assignments = JSON.parse(localStorage.getItem('synergiaAssignments')) || [];
+        assignments = assignments.filter(a => a.id !== assignmentId);
+        localStorage.setItem('synergiaAssignments', JSON.stringify(assignments));
+        
+        showNotification('Attribution supprimée', 'success');
+        loadQuestAssignments();
+    }
+}
+
+function viewAssignmentDetails(assignmentId) {
+    const assignments = JSON.parse(localStorage.getItem('synergiaAssignments')) || [];
+    const assignment = assignments.find(a => a.id === assignmentId);
+    
+    if (assignment) {
+        const member = teamMembers.find(m => m.id === assignment.memberId);
+        const quest = questsDatabase.find(q => q.id === assignment.questId);
+        
+        alert(`Détails de l'attribution:\n\n- Quête: ${quest?.title}\n- Membre: ${member?.name}\n- Assigné le: ${new Date(assignment.assignedAt).toLocaleString()}\n- Statut: ${assignment.status}\n${assignment.note ? `- Note: ${assignment.note}` : ''}`);
+    }
+}
+
+
+// Charger les performances de l'équipe
+function loadTeamPerformance() {
+    const container = document.getElementById('team-performance');
+    if (!container) return;
+    
+    // Calculer les statistiques globales
+    const totalMembers = teamMembers.length;
+    const totalXP = teamMembers.reduce((sum, member) => sum + member.xp, 0);
+    const totalQuests = teamMembers.reduce((sum, member) => sum + member.completedQuests, 0);
+    const avgLevel = Math.round(teamMembers.reduce((sum, member) => sum + member.level, 0) / totalMembers);
+    
+    // Calculer les performances individuelles
+    const memberPerformances = teamMembers.map(member => {
+        const completionRate = member.totalQuests > 0 ? Math.round((member.completedQuests / member.totalQuests) * 100) : 0;
+        const xpPerQuest = member.completedQuests > 0 ? Math.round(member.xp / member.completedQuests) : 0;
+        
+        return {
+            ...member,
+            completionRate,
+            xpPerQuest,
+            rank: 0 // Sera calculé après tri
+        };
+    }).sort((a, b) => b.xp - a.xp); // Trier par XP décroissant
+    
+    // Assigner les rangs
+    memberPerformances.forEach((member, index) => {
+        member.rank = index + 1;
+    });
+    
+    // Membre du mois (le plus d'XP ce mois-ci)
+    const topPerformer = memberPerformances[0];
+    
+    container.innerHTML = `
+        <div class="performance-overview">
+            <div class="performance-stats">
+                <div class="perf-stat-card">
+                    <div class="perf-stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="perf-stat-content">
+                        <div class="perf-stat-number">${totalMembers}</div>
+                        <div class="perf-stat-label">Membres actifs</div>
+                    </div>
+                </div>
+                
+                <div class="perf-stat-card">
+                    <div class="perf-stat-icon"><i class="fas fa-star"></i></div>
+                    <div class="perf-stat-content">
+                        <div class="perf-stat-number">${totalXP.toLocaleString()}</div>
+                        <div class="perf-stat-label">XP total équipe</div>
+                    </div>
+                </div>
+                
+                <div class="perf-stat-card">
+                    <div class="perf-stat-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="perf-stat-content">
+                        <div class="perf-stat-number">${totalQuests}</div>
+                        <div class="perf-stat-label">Quêtes réalisées</div>
+                    </div>
+                </div>
+                
+                <div class="perf-stat-card">
+                    <div class="perf-stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="perf-stat-content">
+                        <div class="perf-stat-number">${avgLevel}</div>
+                        <div class="perf-stat-label">Niveau moyen</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="performance-sections">
+            <div class="performance-section">
+                <h3><i class="fas fa-trophy"></i> Membre du mois</h3>
+                <div class="top-performer-card">
+                    <img src="${topPerformer.avatar}" alt="${topPerformer.name}" class="top-performer-avatar">
+                    <div class="top-performer-info">
+                        <h4>${topPerformer.name}</h4>
+                        <div class="top-performer-role">${topPerformer.role}</div>
+                        <div class="top-performer-stats">
+                            <div class="top-stat">
+                                <span class="top-stat-value">${topPerformer.xp}</span>
+                                <span class="top-stat-label">XP</span>
+                            </div>
+                            <div class="top-stat">
+                                <span class="top-stat-value">${topPerformer.completedQuests}</span>
+                                <span class="top-stat-label">Quêtes</span>
+                            </div>
+                            <div class="top-stat">
+                                <span class="top-stat-value">${topPerformer.completionRate}%</span>
+                                <span class="top-stat-label">Réussite</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="crown-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="performance-section">
+                <h3><i class="fas fa-chart-bar"></i> Classement de l'équipe</h3>
+                <div class="team-ranking">
+                    ${memberPerformances.map(member => `
+                        <div class="ranking-item">
+                            <div class="rank-number ${member.rank <= 3 ? 'top-rank' : ''}">${member.rank}</div>
+                            <img src="${member.avatar}" alt="${member.name}" class="ranking-avatar">
+                            <div class="ranking-info">
+                                <div class="ranking-name">${member.name}</div>
+                                <div class="ranking-role">${member.role}</div>
+                            </div>
+                            <div class="ranking-stats">
+                                <div class="ranking-stat">
+                                    <span class="ranking-stat-value">${member.xp}</span>
+                                    <span class="ranking-stat-label">XP</span>
+                                </div>
+                                <div class="ranking-stat">
+                                    <span class="ranking-stat-value">${member.completionRate}%</span>
+                                    <span class="ranking-stat-label">Réussite</span>
+                                </div>
+                            </div>
+                            <div class="ranking-badge level-${member.level}">
+                                Niv. ${member.level}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div class="performance-section">
+                <h3><i class="fas fa-calendar-week"></i> Activité de la semaine</h3>
+                <div class="weekly-activity">
+                    <div class="activity-chart">
+                        <div class="chart-header">
+                            <h4>Quêtes complétées cette semaine</h4>
+                        </div>
+                        <div class="chart-bars">
+                            ${['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, index) => {
+                                const height = Math.random() * 80 + 20; // Données fictives pour la démo
+                                return `
+                                    <div class="chart-bar">
+                                        <div class="bar" style="height: ${height}%" data-value="${Math.floor(height/20)}"></div>
+                                        <div class="bar-label">${day}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="performance-actions">
+            <button class="btn-secondary" onclick="exportPerformanceReport()">
+                <i class="fas fa-download"></i> Exporter le rapport
+            </button>
+            <button class="btn-secondary" onclick="sendTeamFeedback()">
+                <i class="fas fa-comments"></i> Envoyer feedback équipe
+            </button>
+        </div>
+    `;
+}
+
+// Actions pour les performances
+function exportPerformanceReport() {
+    alert('Export du rapport de performance - Fonctionnalité en développement');
+}
+
+function sendTeamFeedback() {
+    alert('Envoi de feedback à l\'équipe - Fonctionnalité en développement');
+}
+
+// Charger le planning de l'équipe
+function loadTeamSchedule() {
+    const container = document.getElementById('team-schedule');
+    if (!container) return;
+    
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayLabels = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    
+    container.innerHTML = `
+        <div class="schedule-header">
+            <div class="schedule-controls">
+                <button class="btn-secondary" onclick="addScheduleEntry()">
+                    <i class="fas fa-plus"></i> Ajouter un horaire
+                </button>
+                <button class="btn-secondary" onclick="exportSchedule()">
+                    <i class="fas fa-download"></i> Exporter planning
+                </button>
+            </div>
+        </div>
+        
+        <div class="schedule-grid">
+            <div class="schedule-header-row">
+                <div class="member-header">Membre</div>
+                ${dayLabels.map(day => `<div class="day-header">${day}</div>`).join('')}
+            </div>
+            
+            ${teamMembers.map(member => `
+                <div class="schedule-row" data-member="${member.id}">
+                    <div class="member-cell">
+                        <img src="${member.avatar}" alt="${member.name}" class="schedule-avatar">
+                        <div class="member-schedule-info">
+                            <div class="schedule-member-name">${member.name}</div>
+                            <div class="schedule-member-role">${member.role}</div>
+                        </div>
+                    </div>
+                    
+                    ${days.map(day => {
+                        const schedule = member.schedule[day];
+                        let cellContent = '';
+                        
+                        if (schedule === 'off') {
+                            cellContent = '<div class="schedule-off">Repos</div>';
+                        } else if (schedule && schedule.start && schedule.end) {
+                            const duration = calculateHours(schedule.start, schedule.end);
+                            cellContent = `
+                                <div class="schedule-time">
+                                    <div class="time-slot">${schedule.start} - ${schedule.end}</div>
+                                    <div class="duration">${duration}h</div>
+                                </div>
+                            `;
+                        } else {
+                            cellContent = '<div class="schedule-empty">Non défini</div>';
+                        }
+                        
+                        return `
+                            <div class="schedule-cell" onclick="editScheduleCell('${member.id}', '${day}')">
+                                ${cellContent}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `).join('')}
+        </div>
+        
+        <div class="schedule-summary">
+            <h3><i class="fas fa-chart-pie"></i> Résumé de la semaine</h3>
+            <div class="schedule-stats">
+                ${teamMembers.map(member => {
+                    const weeklyHours = calculateWeeklyHours(member.schedule);
+                    const workDays = countWorkDays(member.schedule);
+                    
+                    return `
+                        <div class="member-summary">
+                            <img src="${member.avatar}" alt="${member.name}" class="summary-avatar">
+                            <div class="summary-info">
+                                <div class="summary-name">${member.name}</div>
+                                <div class="summary-stats">
+                                    <span class="summary-stat">
+                                        <i class="fas fa-clock"></i> ${weeklyHours}h/semaine
+                                    </span>
+                                    <span class="summary-stat">
+                                        <i class="fas fa-calendar-day"></i> ${workDays} jours
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// Calculer les heures entre deux créneaux
+function calculateHours(startTime, endTime) {
+    const start = new Date(`2000-01-01 ${startTime}`);
+    const end = new Date(`2000-01-01 ${endTime}`);
+    const diff = (end - start) / (1000 * 60 * 60);
+    return diff.toFixed(1);
+}
+
+// Calculer les heures hebdomadaires
+function calculateWeeklyHours(schedule) {
+    let totalHours = 0;
+    Object.values(schedule).forEach(day => {
+        if (day !== 'off' && day.start && day.end) {
+            totalHours += parseFloat(calculateHours(day.start, day.end));
+        }
+    });
+    return totalHours.toFixed(1);
+}
+
+// Compter les jours de travail
+function countWorkDays(schedule) {
+    return Object.values(schedule).filter(day => day !== 'off').length;
+}
+
+// Éditer un créneau horaire
+function editScheduleCell(memberId, day) {
+    const member = teamMembers.find(m => m.id === memberId);
+    if (!member) return;
+    
+    const currentSchedule = member.schedule[day];
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'schedule-edit-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Modifier horaire - ${member.name}</h3>
+                <button onclick="closeScheduleModal()" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>${getDayLabel(day)}</h4>
+                
+                <div class="schedule-options">
+                    <label>
+                        <input type="radio" name="schedule-type" value="work" ${currentSchedule !== 'off' ? 'checked' : ''} onchange="toggleScheduleInputs(true)">
+                        Jour de travail
+                    </label>
+                    <label>
+                        <input type="radio" name="schedule-type" value="off" ${currentSchedule === 'off' ? 'checked' : ''} onchange="toggleScheduleInputs(false)">
+                        Jour de repos
+                    </label>
+                </div>
+                
+                <div id="time-inputs" ${currentSchedule === 'off' ? 'style="display: none;"' : ''}>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Heure de début</label>
+                            <input type="time" id="start-time" value="${currentSchedule !== 'off' ? currentSchedule.start || '09:00' : '09:00'}">
+                        </div>
+                        <div class="form-group">
+                            <label>Heure de fin</label>
+                            <input type="time" id="end-time" value="${currentSchedule !== 'off' ? currentSchedule.end || '17:00' : '17:00'}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button onclick="closeScheduleModal()" class="btn-secondary">Annuler</button>
+                    <button onclick="saveSchedule('${memberId}', '${day}')" class="btn-primary">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Basculer les inputs d'horaires
+function toggleScheduleInputs(show) {
+    const timeInputs = document.getElementById('time-inputs');
+    if (timeInputs) {
+        timeInputs.style.display = show ? 'block' : 'none';
+    }
+}
+
+// Obtenir le libellé du jour
+function getDayLabel(day) {
+    const labels = {
+        'monday': 'Lundi',
+        'tuesday': 'Mardi', 
+        'wednesday': 'Mercredi',
+        'thursday': 'Jeudi',
+        'friday': 'Vendredi',
+        'saturday': 'Samedi',
+        'sunday': 'Dimanche'
+    };
+    return labels[day] || day;
+}
+
+// Sauvegarder les horaires
+function saveSchedule(memberId, day) {
+    const member = teamMembers.find(m => m.id === memberId);
+    if (!member) return;
+    
+    const scheduleType = document.querySelector('input[name="schedule-type"]:checked').value;
+    
+    if (scheduleType === 'off') {
+        member.schedule[day] = 'off';
+    } else {
+        const startTime = document.getElementById('start-time').value;
+        const endTime = document.getElementById('end-time').value;
+        
+        if (!startTime || !endTime) {
+            showNotification('Veuillez renseigner les heures de début et de fin', 'error');
+            return;
+        }
+        
+        if (startTime >= endTime) {
+            showNotification('L\'heure de fin doit être après l\'heure de début', 'error');
+            return;
+        }
+        
+        member.schedule[day] = {
+            start: startTime,
+            end: endTime
+        };
+    }
+    
+    // Sauvegarder en localStorage
+    saveTeamToStorage();
+    
+    // Fermer le modal
+    closeScheduleModal();
+    
+    // Recharger le planning
+    loadTeamSchedule();
+    
+    showNotification('Horaire mis à jour !', 'success');
+}
+
+// Fermer le modal de planning
+function closeScheduleModal() {
+    const modal = document.getElementById('schedule-edit-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Actions du planning
+// Importer un planning depuis un fichier
+function addScheduleEntry() {
+    showImportModal();
+}
+
+// Afficher le modal d'import
+function showImportModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'import-schedule-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-upload"></i> Importer un planning</h3>
+                <button onclick="closeImportModal()" class="icon-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="import-options">
+                    <div class="import-method active" data-method="csv" onclick="selectImportMethod('csv')">
+                        <div class="method-icon"><i class="fas fa-file-csv"></i></div>
+                        <div class="method-info">
+                            <h4>Fichier CSV/Excel</h4>
+                            <p>Format : Nom, Lundi_Début, Lundi_Fin, Mardi_Début, etc.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="import-method" data-method="json" onclick="selectImportMethod('json')">
+                        <div class="method-icon"><i class="fas fa-code"></i></div>
+                        <div class="method-info">
+                            <h4>Fichier JSON</h4>
+                            <p>Format structuré avec horaires par membre</p>
+                        </div>
+                    </div>
+                    
+                    <div class="import-method" data-method="manual" onclick="selectImportMethod('manual')">
+                        <div class="method-icon"><i class="fas fa-keyboard"></i></div>
+                        <div class="method-info">
+                            <h4>Saisie manuelle</h4>
+                            <p>Copier-coller depuis un autre logiciel</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="import-content">
+                    <!-- Contenu dynamique selon la méthode -->
+                </div>
+                
+                <div class="modal-actions">
+                    <button onclick="closeImportModal()" class="btn-secondary">Annuler</button>
+                    <button onclick="processImport()" class="btn-primary" id="import-btn">
+                        <i class="fas fa-upload"></i> Importer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    selectImportMethod('csv'); // Par défaut
+}
+
+// Variables pour l'import
+let selectedImportMethod = 'csv';
+let importedData = null;
+
+// Sélectionner la méthode d'import
+function selectImportMethod(method) {
+    selectedImportMethod = method;
+    
+    // Mettre à jour l'interface
+    document.querySelectorAll('.import-method').forEach(el => el.classList.remove('active'));
+    document.querySelector(`[data-method="${method}"]`).classList.add('active');
+    
+    // Charger le contenu approprié
+    const content = document.getElementById('import-content');
+    
+    switch(method) {
+        case 'csv':
+            content.innerHTML = `
+                <div class="import-section">
+                    <h4>Importer un fichier CSV ou Excel</h4>
+                    <div class="file-upload-zone" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                        <p>Cliquez pour sélectionner un fichier</p>
+                        <p class="file-hint">Formats acceptés: .csv, .xlsx, .xls</p>
+                    </div>
+                    <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display: none;" onchange="handleFileUpload(event)">
+                    
+                    <div class="format-example">
+                        <h5>Format attendu :</h5>
+                        <pre>Nom,Lundi_Début,Lundi_Fin,Mardi_Début,Mardi_Fin,...
+Allan Boehme,08:00,18:00,08:00,18:00,...
+Emma Martin,09:00,17:00,09:00,17:00,...</pre>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'json':
+            content.innerHTML = `
+                <div class="import-section">
+                    <h4>Importer un fichier JSON</h4>
+                    <div class="file-upload-zone" onclick="document.getElementById('json-file-input').click()">
+                        <i class="fas fa-file-code fa-2x"></i>
+                        <p>Cliquez pour sélectionner un fichier JSON</p>
+                        <p class="file-hint">Format: .json</p>
+                    </div>
+                    <input type="file" id="json-file-input" accept=".json" style="display: none;" onchange="handleJSONUpload(event)">
+                    
+                    <div class="format-example">
+                        <h5>Format JSON attendu :</h5>
+                        <pre>{
+  "Allan Boehme": {
+    "monday": {"start": "08:00", "end": "18:00"},
+    "tuesday": {"start": "08:00", "end": "18:00"},
+    "sunday": "off"
+  }
+}</pre>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'manual':
+            content.innerHTML = `
+                <div class="import-section">
+                    <h4>Saisie manuelle</h4>
+                    <p>Copiez votre planning depuis Excel, Google Sheets ou tout autre logiciel :</p>
+                    <textarea id="manual-input" placeholder="Collez votre planning ici...
+Format attendu:
+Nom	Lundi Début	Lundi Fin	Mardi Début	Mardi Fin...
+Allan Boehme	08:00	18:00	08:00	18:00...
+Emma Martin	09:00	17:00	09:00	17:00..." rows="8"></textarea>
+                    
+                    <div class="manual-options">
+                        <label>
+                            <input type="radio" name="separator" value="tab" checked> Séparateur: Tabulation
+                        </label>
+                        <label>
+                            <input type="radio" name="separator" value="comma"> Séparateur: Virgule
+                        </label>
+                        <label>
+                            <input type="radio" name="separator" value="semicolon"> Séparateur: Point-virgule
+                        </label>
+                    </div>
+                </div>
+            `;
+            break;
+    }
+}
+
+// Gérer l'upload de fichier CSV/Excel
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        parseCSVContent(content);
+    };
+    reader.readAsText(file);
+}
+
+// Gérer l'upload de fichier JSON
+function handleJSONUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const jsonData = JSON.parse(e.target.result);
+            importedData = convertJSONToSchedule(jsonData);
+            showNotification('Fichier JSON analysé avec succès !', 'success');
+        } catch (error) {
+            showNotification('Erreur de format JSON', 'error');
+            console.error('Erreur JSON:', error);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Parser le contenu CSV
+function parseCSVContent(content) {
+    try {
+        const lines = content.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        
+        importedData = {};
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            const name = values[0];
+            
+            if (name) {
+                importedData[name] = parseScheduleRow(headers, values);
+            }
+        }
+        
+        showNotification(`${Object.keys(importedData).length} membres trouvés dans le fichier`, 'success');
+    } catch (error) {
+        showNotification('Erreur lors de l\'analyse du fichier', 'error');
+        console.error('Erreur CSV:', error);
+    }
+}
+
+// Parser une ligne d'horaires
+function parseScheduleRow(headers, values) {
+    const schedule = {};
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayNames = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    
+    days.forEach((day, dayIndex) => {
+        const dayName = dayNames[dayIndex];
+        
+        // Chercher les colonnes de début et fin pour ce jour
+        const startCol = headers.findIndex(h => 
+            h.toLowerCase().includes(dayName) && h.toLowerCase().includes('début')
+        );
+        const endCol = headers.findIndex(h => 
+            h.toLowerCase().includes(dayName) && h.toLowerCase().includes('fin')
+        );
+        
+        if (startCol !== -1 && endCol !== -1 && values[startCol] && values[endCol]) {
+            const start = values[startCol];
+            const end = values[endCol];
+            
+            if (start.toLowerCase() === 'repos' || end.toLowerCase() === 'repos') {
+                schedule[day] = 'off';
+            } else {
+                schedule[day] = { start, end };
+            }
+        } else {
+            schedule[day] = 'off';
+        }
+    });
+    
+    return schedule;
+}
+
+// Convertir JSON en format planning
+function convertJSONToSchedule(jsonData) {
+    const converted = {};
+    
+    Object.keys(jsonData).forEach(memberName => {
+        converted[memberName] = jsonData[memberName];
+    });
+    
+    return converted;
+}
+
+// Traiter l'import manuel
+function processManualImport() {
+    const content = document.getElementById('manual-input').value.trim();
+    const separator = document.querySelector('input[name="separator"]:checked').value;
+    
+    if (!content) {
+        showNotification('Veuillez saisir des données', 'error');
+        return;
+    }
+    
+    try {
+        const separatorChar = {
+            'tab': '\t',
+            'comma': ',',
+            'semicolon': ';'
+        }[separator];
+        
+        const lines = content.split('\n');
+        const headers = lines[0].split(separatorChar).map(h => h.trim());
+        
+        importedData = {};
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(separatorChar).map(v => v.trim());
+            const name = values[0];
+            
+            if (name) {
+                importedData[name] = parseScheduleRow(headers, values);
+            }
+        }
+        
+        showNotification(`${Object.keys(importedData).length} membres traités`, 'success');
+    } catch (error) {
+        showNotification('Erreur lors du traitement des données', 'error');
+        console.error('Erreur import manuel:', error);
+    }
+}
+
+// Traiter l'import final
+function processImport() {
+    if (selectedImportMethod === 'manual') {
+        processManualImport();
+    }
+    
+    if (!importedData || Object.keys(importedData).length === 0) {
+        showNotification('Aucune donnée à importer', 'error');
+        return;
+    }
+    
+    // Appliquer les données importées
+    let updatedCount = 0;
+    let newMembersCount = 0;
+    
+    Object.keys(importedData).forEach(memberName => {
+        const existingMember = teamMembers.find(m => 
+            m.name.toLowerCase() === memberName.toLowerCase()
+        );
+        
+        if (existingMember) {
+            // Mettre à jour le membre existant
+            existingMember.schedule = importedData[memberName];
+            updatedCount++;
+        } else {
+            // Créer un nouveau membre
+            const newMember = {
+                id: 'imported_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                name: memberName,
+                email: memberName.toLowerCase().replace(' ', '.') + '@brain-caen.fr',
+                role: 'Équipe',
+                avatar: 'https://img.icons8.com/color/96/000000/user-male-circle--v1.png',
+                level: 1,
+                xp: 0,
+                completedQuests: 0,
+                totalQuests: 0,
+                status: 'offline',
+                joinedAt: new Date().toISOString().split('T')[0],
+                lastActive: new Date(),
+                skills: [],
+                schedule: importedData[memberName]
+            };
+            
+            teamMembers.push(newMember);
+            newMembersCount++;
+        }
+    });
+    
+    // Sauvegarder
+    saveTeamToStorage();
+    
+    // Fermer le modal
+    closeImportModal();
+    
+    // Recharger le planning
+    loadTeamSchedule();
+    loadTeamMembers(); // Recharger aussi l'onglet membres
+    
+    // Message de succès
+    let message = '';
+    if (updatedCount > 0) message += `${updatedCount} membre(s) mis à jour. `;
+    if (newMembersCount > 0) message += `${newMembersCount} nouveau(x) membre(s) ajouté(s).`;
+    
+    showNotification(message || 'Import terminé !', 'success');
+}
+
+// Fermer le modal d'import
+function closeImportModal() {
+    const modal = document.getElementById('import-schedule-modal');
+    if (modal) {
+        modal.remove();
+    }
+    importedData = null;
+}
+
+// Export du planning (amélioré)
+function exportSchedule() {
+    const csvContent = generateScheduleCSV();
+    downloadCSV(csvContent, 'planning_synergia.csv');
+    showNotification('Planning exporté !', 'success');
+}
+
+// Générer le CSV du planning
+function generateScheduleCSV() {
+    const headers = ['Nom', 'Rôle', 'Lundi_Début', 'Lundi_Fin', 'Mardi_Début', 'Mardi_Fin', 
+                    'Mercredi_Début', 'Mercredi_Fin', 'Jeudi_Début', 'Jeudi_Fin', 
+                    'Vendredi_Début', 'Vendredi_Fin', 'Samedi_Début', 'Samedi_Fin', 
+                    'Dimanche_Début', 'Dimanche_Fin'];
+    
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    let csvContent = headers.join(',') + '\n';
+    
+    teamMembers.forEach(member => {
+        let row = [member.name, member.role];
+        
+        days.forEach(day => {
+            const schedule = member.schedule[day];
+            if (schedule === 'off') {
+                row.push('Repos', 'Repos');
+            } else if (schedule && schedule.start && schedule.end) {
+                row.push(schedule.start, schedule.end);
+            } else {
+                row.push('', '');
+            }
+        });
+        
+        csvContent += row.join(',') + '\n';
+    });
+    
+    return csvContent;
+}
+
+// Télécharger un fichier CSV
+function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+
+
+        // Sauvegarder l'équipe dans le localStorage
+        function saveTeamToStorage() {
+            localStorage.setItem('synergiaTeam', JSON.stringify(teamMembers));
+        }
+
+
+        // === GESTION DE L'ADMINISTRATION ===
+
+        // Initialisation de l'administration
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Application SYNERGIA initialisée');
+                        // Initialiser l'upload d'images
+            const questIconInput = document.getElementById('quest-icon');
+            if (questIconInput) {
+                questIconInput.addEventListener('change', handleQuestIconUpload);
+            }
+
+            // Initialiser la navigation
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const page = this.dataset.page;
+                    navigateToPage(page);
+                });
+            });
+
+            // Gestionnaire pour ouvrir l'admin
+            document.getElementById('admin-btn').addEventListener('click', openAdminPanel);
+            
+            // Gestionnaire pour fermer l'admin
+            document.getElementById('close-admin').addEventListener('click', closeAdminPanel);
+            
+            // Gestionnaires pour les onglets admin
+            initAdminTabs();
+
+            // Gestion de la récurrence dans le formulaire de création de quête
+            const recurringCheckbox = document.getElementById('quest-recurring');
+            const recurringOptions = document.getElementById('recurring-options');
+            
+            if (recurringCheckbox) {
+                recurringCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        recurringOptions.classList.remove('hidden');
+                    } else {
+                        recurringOptions.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Gestionnaire pour le formulaire de création de quête
+            const questForm = document.getElementById('quest-creation-form');
+            if (questForm) {
+                questForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    createNewQuest();
+                });
+            }
+        });
+
+        // Ouvrir le panneau d'administration
+        function openAdminPanel() {
+            document.getElementById('admin-panel').classList.remove('hidden');
+            loadAdminData();
+        }
+
+        // Fermer le panneau d'administration
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        // Initialiser les onglets d'administration
+        function initAdminTabs() {
+            const adminTabs = document.querySelectorAll('.admin-tabs .tab');
+            adminTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    
+                    adminTabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('#admin-panel .tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    const targetContent = document.getElementById(`${tabName}-tab`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                    
+                    loadAdminTabData(tabName);
+                });
+            });
+        }
+
+        // Charger les données d'administration
+        function loadAdminData() {
+            loadAdminTabData('users');
+        }
+
+        // Charger les données pour un onglet spécifique
+        function loadAdminTabData(tabName) {
+            switch(tabName) {
+                case 'users':
+                    loadAdminUsers();
+                    break;
+                case 'quests':
+                    loadAdminQuests();
+                    break;
+                case 'badges':
+                    loadAdminBadges();
+                    break;
+                case 'roles':
+                    loadAdminRoles();
+                    break;
+                case 'settings':
+                    loadAdminSettings();
+                    break;
+            }
+        }
+
+        // Charger la liste des utilisateurs
+        function loadAdminUsers() {
+            const usersList = document.getElementById('users-list');
+            
+            const users = [
+                {
+                    id: '1',
+                    name: 'Allan Boehme',
+                    email: 'alan.boehme61@gmail.com',
+                    level: 4,
+                    xp: 240,
+                    role: 'Admin',
+                    active: true
+                },
+                {
+                    id: '2',
+                    name: 'Utilisateur Test',
+                    email: 'test@example.com',
+                    level: 2,
+                    xp: 120,
+                    role: 'Entretien',
+                    active: true
+                }
+            ];
+            
+            usersList.innerHTML = users.map(user => `
+                <div class="admin-item">
+                    <div class="admin-item-info">
+                        <h5>${user.name}</h5>
+                        <p>${user.email} • Niveau ${user.level} • ${user.xp} XP • ${user.role}</p>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="icon-btn edit-btn" onclick="editUser('${user.id}')" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn toggle-btn" onclick="toggleUser('${user.id}')" title="${user.active ? 'Désactiver' : 'Activer'}">
+                            <i class="fas fa-${user.active ? 'user-slash' : 'user-check'}"></i>
+                        </button>
+                        <button class="icon-btn delete-btn" onclick="deleteUser('${user.id}')" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+       // Charger la liste des quêtes admin
+function loadAdminQuests() {
+    const questsList = document.getElementById('quests-admin-list');
+    
+    if (questsDatabase.length === 0) {
+        questsList.innerHTML = '<div class="no-quests">Aucune quête créée. Créez votre première quête !</div>';
+        return;
+    }
+    
+    questsList.innerHTML = questsDatabase.map(quest => {
+        const iconHtml = quest.icon 
+            ? `<img src="${quest.icon}" alt="Icône" class="admin-quest-icon">`
+            : `<div class="quest-icon-default"><i class="fas ${getDefaultQuestIcon(quest.type, quest.priority)}"></i></div>`;
+            
+        return `
+            <div class="admin-item ${quest.active ? '' : 'inactive'}">
+                <div class="admin-item-info">
+                    ${iconHtml}
+                    <div class="admin-item-content">
+                        <h5>
+                            ${quest.title}
+                            <span class="quest-priority priority-${quest.priority}">${getPriorityLabel(quest.priority)}</span>
+                            ${quest.recurring ? '<span class="quest-recurring"><i class="fas fa-repeat"></i></span>' : ''}
+                            ${quest.photoRequired ? '<span class="quest-photo"><i class="fas fa-camera"></i></span>' : ''}
+                        </h5>
+                        <p>${quest.description}</p>
+                        <div class="quest-meta">
+                            <span><i class="fas fa-star"></i> ${quest.xp} XP</span>
+                            <span><i class="fas fa-clock"></i> ${quest.duration} min</span>
+                            <span><i class="fas fa-users"></i> ${getRoleLabel(quest.role)}</span>
+                            <span><i class="fas fa-calendar"></i> ${quest.type}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-actions">
+                    <button class="icon-btn edit-btn" onclick="editQuest('${quest.id}')" title="Modifier">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="icon-btn ${quest.active ? 'toggle-btn' : 'success-btn'}" onclick="toggleQuest('${quest.id}')" title="${quest.active ? 'Désactiver' : 'Activer'}">
+                        <i class="fas fa-${quest.active ? 'eye-slash' : 'eye'}"></i>
+                    </button>
+                    <button class="icon-btn info-btn" onclick="viewQuestStats('${quest.id}')" title="Statistiques">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button class="icon-btn delete-btn" onclick="deleteQuest('${quest.id}')" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+
+        // Charger la liste des badges
+        function loadAdminBadges() {
+            const badgesList = document.getElementById('badges-admin-list');
+            
+            const badges = [
+                {
+                    id: '1',
+                    name: 'Premier pas',
+                    description: 'Première connexion',
+                    icon: 'fa-star',
+                    active: true
+                },
+                {
+                    id: '2',
+                    name: 'Travailleur assidu',
+                    description: '10 quêtes complétées',
+                    icon: 'fa-trophy',
+                    active: true
+                }
+            ];
+            
+            badgesList.innerHTML = badges.map(badge => `
+                <div class="admin-item">
+                    <div class="admin-item-info">
+                        <h5><i class="fas ${badge.icon}"></i> ${badge.name}</h5>
+                        <p>${badge.description}</p>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="icon-btn edit-btn" onclick="editBadge('${badge.id}')" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn toggle-btn" onclick="toggleBadge('${badge.id}')" title="${badge.active ? 'Désactiver' : 'Activer'}">
+                            <i class="fas fa-${badge.active ? 'eye-slash' : 'eye'}"></i>
+                        </button>
+                        <button class="icon-btn delete-btn" onclick="deleteBadge('${badge.id}')" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Charger la liste des rôles
+        function loadAdminRoles() {
+            const rolesList = document.getElementById('roles-admin-list');
+            
+            const roles = [
+                {
+                    id: 'entretien',
+                    name: 'Entretien & Maintenance',
+                    description: 'Responsable de l\'entretien des équipements',
+                    color: '#2ecc71',
+                    active: true
+                },
+                {
+                    id: 'accueil',
+                    name: 'Accueil Client',
+                    description: 'Gestion de l\'accueil et relation client',
+                    color: '#3498db',
+                    active: true
+                }
+            ];
+            
+            rolesList.innerHTML = roles.map(role => `
+                <div class="admin-item">
+                    <div class="admin-item-info">
+                        <h5><span style="color: ${role.color};">●</span> ${role.name}</h5>
+                        <p>${role.description}</p>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="icon-btn edit-btn" onclick="editRole('${role.id}')" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn toggle-btn" onclick="toggleRole('${role.id}')" title="${role.active ? 'Désactiver' : 'Activer'}">
+                            <i class="fas fa-${role.active ? 'eye-slash' : 'eye'}"></i>
+                        </button>
+                        <button class="icon-btn delete-btn" onclick="deleteRole('${role.id}')" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Charger les paramètres
+        function loadAdminSettings() {
+            document.getElementById('app-name').value = 'SYNERGIA';
+            document.getElementById('xp-per-level').value = '100';
+            document.getElementById('app-theme').value = 'default';
+        }
+
+        // === GESTION DES QUÊTES PERSONNALISÉES ===
+
+        // Ouvrir le modal de création de quête
+        function addQuest() {
+            document.getElementById('quest-creation-modal').classList.remove('hidden');
+        }
+
+        // Fermer le modal
+        function closeQuestModal() {
+            document.getElementById('quest-creation-modal').classList.add('hidden');
+            document.getElementById('quest-creation-form').reset();
+            document.querySelector('#quest-creation-modal h3').textContent = 'Créer une nouvelle quête';
+            document.querySelector('#quest-creation-form button[type="submit"]').innerHTML = '<i class="fas fa-plus"></i> Créer la quête';
+            document.getElementById('quest-creation-form').removeAttribute('data-edit-id');
+                
+    // Réinitialiser l'icône
+    removeQuestIcon();
+
+        }
+
+        // Créer une nouvelle quête
+        function createNewQuest() {
+            const form = document.getElementById('quest-creation-form');
+            const editId = form.dataset.editId;
+            
+            const questData = {
+                id: editId || generateQuestId(),
+                title: document.getElementById('quest-title').value,
+                description: document.getElementById('quest-description').value,
+                type: document.getElementById('quest-type').value,
+                xp: parseInt(document.getElementById('quest-xp').value),
+                duration: parseInt(document.getElementById('quest-duration').value),
+                role: document.getElementById('quest-role').value,
+                priority: document.getElementById('quest-priority').value,
+                photoRequired: document.getElementById('quest-photo-required').checked,
+                recurring: document.getElementById('quest-recurring').checked,
+                frequency: document.getElementById('quest-frequency').value,
+                        icon: questIconBase64, // NOUVELLE PROPRIÉTÉ
+
+                active: true,
+                createdAt: editId ? questsDatabase.find(q => q.id === editId)?.createdAt || new Date() : new Date(),
+                createdBy: currentUser.email,
+                completions: editId ? questsDatabase.find(q => q.id === editId)?.completions || [] : []
+            };
+            
+            if (editId) {
+                // Modifier la quête existante
+                const index = questsDatabase.findIndex(q => q.id === editId);
+                if (index !== -1) {
+                    questsDatabase[index] = questData;
+                    showNotification('Quête modifiée avec succès !', 'success');
+                }
+            } else {
+                // Ajouter nouvelle quête
+                questsDatabase.push(questData);
+                showNotification('Quête créée avec succès !', 'success');
+            }
+            
+            saveQuestsToStorage();
+            closeQuestModal();
+            loadAdminQuests();
+            
+            console.log('Quête sauvegardée:', questData);
+        }
+
+        // Générer un ID unique pour la quête
+        function generateQuestId() {
+            return 'quest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Sauvegarder dans le localStorage
+        function saveQuestsToStorage() {
+            localStorage.setItem('synergiaQuests', JSON.stringify(questsDatabase));
+        }
+
+        // Fonctions utilitaires
+        function getPriorityLabel(priority) {
+            const labels = {
+                'low': 'Faible',
+                'normal': 'Normale',
+                'high': 'Élevée',
+                'urgent': 'Urgente'
+            };
+            return labels[priority] || priority;
+        }
+
+        function getRoleLabel(role) {
+            const labels = {
+                'all': 'Tous',
+                'entretien': 'Entretien',
+                'accueil': 'Accueil',
+                'animation': 'Animation',
+                'securite': 'Sécurité'
+            };
+            return labels[role] || role;
+        }
+
+        // Système de notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Actions sur les quêtes
+        function editQuest(questId) {
+            const quest = questsDatabase.find(q => q.id === questId);
+            if (quest) {
+                document.getElementById('quest-title').value = quest.title;
+                document.getElementById('quest-description').value = quest.description;
+                document.getElementById('quest-type').value = quest.type;
+                document.getElementById('quest-xp').value = quest.xp;
+                document.getElementById('quest-duration').value = quest.duration;
+                document.getElementById('quest-role').value = quest.role;
+                document.getElementById('quest-priority').value = quest.priority;
+                document.getElementById('quest-photo-required').checked = quest.photoRequired;
+                document.getElementById('quest-recurring').checked = quest.recurring;
+                document.getElementById('quest-frequency').value = quest.frequency;
+                        
+        // Charger l'icône existante
+        if (quest.icon) {
+            questIconBase64 = quest.icon;
+            displayImagePreview(quest.icon);
+        } else {
+            removeQuestIcon();
+        }
+
+                
+                if (quest.recurring) {
+                    document.getElementById('recurring-options').classList.remove('hidden');
+                }
+                
+                document.getElementById('quest-creation-modal').classList.remove('hidden');
+                document.querySelector('#quest-creation-modal h3').textContent = 'Modifier la quête';
+                document.querySelector('#quest-creation-form button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Sauvegarder';
+                document.getElementById('quest-creation-form').dataset.editId = questId;
+            }
+        }
+
+        function toggleQuest(questId) {
+            const quest = questsDatabase.find(q => q.id === questId);
+            if (quest) {
+                quest.active = !quest.active;
+                saveQuestsToStorage();
+                loadAdminQuests();
+                showNotification(`Quête ${quest.active ? 'activée' : 'désactivée'}`, 'success');
+            }
+        }
+
+        function deleteQuest(questId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette quête ? Cette action est irréversible.')) {
+                questsDatabase = questsDatabase.filter(q => q.id !== questId);
+                saveQuestsToStorage();
+                loadAdminQuests();
+                showNotification('Quête supprimée', 'success');
+            }
+        }
+
+        function viewQuestStats(questId) {
+            const quest = questsDatabase.find(q => q.id === questId);
+            if (quest) {
+                alert(`Statistiques pour "${quest.title}":\n\n- Complétions: ${quest.completions.length}\n- Créée le: ${new Date(quest.createdAt).toLocaleDateString()}\n- Par: ${quest.createdBy}`);
+            }
+        }
+
+        // Actions d'administration (placeholders)
+        function addUser() { alert('Fonction d\'ajout d\'utilisateur - En développement'); }
+        function editUser(id) { alert(`Modification utilisateur ${id} - En développement`); }
+        function toggleUser(id) { alert(`Activation/Désactivation utilisateur ${id} - En développement`); }
+        function deleteUser(id) { if(confirm('Supprimer cet utilisateur ?')) alert(`Suppression utilisateur ${id} - En développement`); }
+
+        function addBadge() { alert('Fonction d\'ajout de badge - En développement'); }
+        function editBadge(id) { alert(`Modification badge ${id} - En développement`); }
+        function toggleBadge(id) { alert(`Activation/Désactivation badge ${id} - En développement`); }
+        function deleteBadge(id) { if(confirm('Supprimer ce badge ?')) alert(`Suppression badge ${id} - En développement`); }
+
+        function addRole() { alert('Fonction d\'ajout de rôle - En développement'); }
+        function editRole(id) { alert(`Modification rôle ${id} - En développement`); }
+        function toggleRole(id) { alert(`Activation/Désactivation rôle ${id} - En développement`); }
+        function deleteRole(id) { if(confirm('Supprimer ce rôle ?')) alert(`Suppression rôle ${id} - En développement`); }
+
+        function saveSettings() { alert('Sauvegarde des paramètres - En développement'); }
+
+        // Déconnexion
+        function logout() {
+            auth.signOut();
+        }
+        // Fonction pour mettre à jour les barres de progression
+function updateProgressBars(userData) {
+    // Barre de niveau (Expert)
+    const levelProgress = document.querySelector('.level-progress .xp-progress');
+    const currentXP = userData.currentXP || 0;
+    const requiredXP = userData.requiredXP || 100;
+    const percentage = Math.min((currentXP / requiredXP) * 100, 100);
+    
+    if (levelProgress) {
+        levelProgress.style.width = `${percentage}%`;
+        levelProgress.setAttribute('data-progress', `${currentXP}/${requiredXP} XP`);
+    }
+}
+// Barre de progression du rôle
+function updateRoleProgress(roleData) {
+    const roleProgress = document.querySelector('.role-card .xp-progress');
+    const roleMastery = roleData.mastery || 0; // Pourcentage de 0 à 100
+    
+    if (roleProgress) {
+        roleProgress.style.width = `${roleMastery}%`;
+    }
+}
+// Vérifier si tu as bien cette fonction qui charge le profil
+async function loadUserProfile() {
+    try {
+        const response = await fetch('/api/user/profile');
+        const userData = await response.json();
+        
+        // Remplacer "Chargement..." par le vrai nom
+        document.querySelector('.user-name').textContent = userData.name;
+        document.querySelector('.user-level').textContent = userData.level;
+    } catch (error) {
+        console.error('Erreur chargement profil:', error);
+        // Fallback si ça échoue
+        document.querySelector('.user-name').textContent = 'Utilisateur';
+    }
+}
+
+   // Ajoute ça dans ton JS inline (vers ligne 1300)
+function messageTeamMember(memberId) {
+    showNotification('Message envoyé à ' + memberId, 'info');
+}
+
+function assignQuestToMember(questId, memberId) {
+    showNotification('Quête assignée à ' + memberId, 'success');
+}
+
+    
+    </script>
+
+<!-- Scripts modulaires -->
+<script src="js/utils/notifications.js"></script>
+<script src="js/core/data-manager.js"></script>
+<script src="js/core/ui-manager.js"></script>
+<script src="js/app.js"></script>
+
+
+</body>
+</html>

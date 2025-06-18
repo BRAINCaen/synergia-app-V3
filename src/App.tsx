@@ -1,6 +1,4 @@
-export default App;
 import React from "react";
-// NE PAS réimporter initializeApp ni refaire une config ici !
 
 function App() {
   return (
@@ -13,4 +11,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
